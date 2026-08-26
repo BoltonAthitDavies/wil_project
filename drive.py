@@ -60,7 +60,7 @@ THROTTLE_ACCEL = 0.75       # m/s^2 while throttle held. Kept just under the mod
                            # together (launch arg max_accel) for a punchier car.
 BRAKE_DECEL = 6.0          # m/s^2 while brake held
 DRAG_DECEL = 0.8           # m/s^2 when neither is held, i.e. coasting
-TOP_SPEED = 4.0            # m/s. Independent of the launch arg max_speed, which
+TOP_SPEED = 1.5            # m/s. Independent of the launch arg max_speed, which
                            # clamps at the plugin; this is what the pedal can reach.
 REVERSE_SPEED = 1.5        # m/s cap when going backwards
 

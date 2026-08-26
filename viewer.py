@@ -335,7 +335,12 @@ LATEST = QoSProfile(history=HistoryPolicy.KEEP_LAST, depth=1,
 # Where each estimator's odometry is looked for when its topic is 'auto', in order.
 EST_PREFER = {
     'vins': ('/vins_estimator/odometry', '/odometry'),
-    'orb': ('/orbslam3_node/odometry',),
+    # orbslam3_node.cpp publishes the relative "~/odometry", so the topic is
+    # /<NODE NAME>/odometry -- and the node name is not the one in the source. All
+    # three launch files in orbslam3_ros2/launch pass name='orbslam3', which
+    # overrides Node("orbslam3_node"), so the launched node gives /orbslam3/odometry
+    # and only a bare `ros2 run` gives /orbslam3_node/odometry. Both are probed.
+    'orb': ('/orbslam3/odometry', '/orbslam3_node/odometry'),
 }
 
 # /map is latched and published once. VOLATILE here means no map, ever.
@@ -1441,7 +1446,8 @@ class MapView(QWidget):
             rows = [(t, m.hz(), m.expected) for t, m in sorted(st.rates.items())]
             gt = st.gt
             est_rows = [(e.key, e.label, e.err, e.align_mode, e.show,
-                         e.align is not None, e.topic) for e in st.estimators]
+                         e.align is not None, e.topic, e.raw is not None)
+                        for e in st.estimators]
             nav_state, nav_msg = st.nav_state, st.nav_msg
             n_route, route_msg = len(st.route), st.route_msg
             warns = list(st.warnings)
@@ -1506,19 +1512,23 @@ class MapView(QWidget):
             p.drawText(16, y, 'pose  waiting for %s' % self.args.gt_topic)
             y += lh
         y += lh
-        for key, label, err, mode, shown, aligned, topic in est_rows:
+        for key, label, err, mode, shown, aligned, topic, has_data in est_rows:
             if not topic:
                 continue                  # nothing publishing; do not clutter
             colour = EST_STYLE.get(key, (C_VINS, None))[0]
             p.setPen(QPen(colour if shown else QColor(110, 116, 128)))
             if topic == 'auto':
                 txt = '%-5s searching for a topic' % label
+            elif not has_data:
+                # subscribed but nothing arriving -- the rate row above names the
+                # topic, and this says plainly that alignment is not the holdup
+                txt = '%-5s no data' % label
             elif err is not None:
                 txt = '%-5s err %.3f m  (%s)' % (label, err, mode)
             elif aligned:
                 txt = '%-5s aligned, no GT to compare' % label
             else:
-                txt = '%-5s waiting to align' % label
+                txt = '%-5s waiting to move 0.5 m' % label
             p.drawText(16, y, txt + ('' if shown else '  [hidden]'))
             y += lh
         p.setPen(QPen(QColor(210, 215, 225)))
@@ -1948,10 +1958,11 @@ def parse_args(argv):
     ap.add_argument('--vins-topic', default='auto',
                     help="'auto' probes /vins_estimator/odometry then /odometry then "
                          'any other Odometry publisher. "" disables the overlay.')
-    ap.add_argument('--orb-topic', default='/orbslam3_node/odometry',
-                    help="ORB-SLAM3 odometry. orbslam3_node.cpp publishes '~/odometry' "
-                         'from Node(\'orbslam3_node\'), so this is the default; '
-                         "'auto' probes for it, \"\" disables the overlay.")
+    ap.add_argument('--orb-topic', default='auto',
+                    help="ORB-SLAM3 odometry. 'auto' probes /orbslam3/odometry (what "
+                         "the launch files produce, they set name='orbslam3') then "
+                         '/orbslam3_node/odometry (a bare `ros2 run`). "" disables '
+                         'the overlay.')
     ap.add_argument('--cmd-vel-topic', default='/cmd_vel')
     ap.add_argument('--imu-topic', default='/imu')
     ap.add_argument('--cam-info-topics', default='/cam0/camera_info,/cam1/camera_info')

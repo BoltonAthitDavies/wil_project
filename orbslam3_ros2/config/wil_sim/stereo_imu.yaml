@@ -1,0 +1,161 @@
+%YAML:1.0
+
+# ORB-SLAM3 STEREO-INERTIAL -- simulated WiL rig, Gazebo Fortress.
+#
+# The ORB-SLAM3 twin of vins_fusion_ros2/config/wil_sim/stereo_imu.yaml. Every
+# number here is derived from the same source of truth, the sensor definitions in
+#   aws-robomaker-small-warehouse-world/models/ackermann_robot/model.sdf
+# so the two systems are genuinely being fed the same rig and a difference in
+# their trajectories is a difference in the algorithms, not the calibration.
+#
+# Bring the sim up with
+#   ros2 launch aws_robomaker_small_warehouse_world small_warehouse.launch.py
+# or replay
+#   ros2 bag play dataset/sim --clock
+#
+# NOTE ON KEY NAMES. ORB-SLAM3 counts cameras from 1 and VINS from 0, so
+# ORB-SLAM3's "Camera1" is VINS's cam0 and its "IMU.T_b_c1" is VINS's
+# body_T_cam0. Same quantities, same directions, different spelling.
+
+File.version: "1.0"
+
+#--------------------------------------------------------------------------------------------
+# Cameras
+#--------------------------------------------------------------------------------------------
+# An ideal gz camera is a perfect pinhole with square pixels and the principal
+# point exactly at the image centre, so the intrinsics follow from <image> and
+# <horizontal_fov> alone and there is nothing to calibrate:
+#   fx = fy = (width/2) / tan(hfov/2) = 640 / tan(45 deg) = 640
+#   cx, cy = 640, 360
+#   all distortion = 0
+# Valid only while model.sdf says 1280x720 at horizontal_fov 1.5707963268.
+Camera.type: "PinHole"
+
+# Camera1 == cam0 == the LEFT camera.
+Camera1.fx: 640.0
+Camera1.fy: 640.0
+Camera1.cx: 640.0
+Camera1.cy: 360.0
+
+Camera1.k1: 0.0
+Camera1.k2: 0.0
+Camera1.p1: 0.0
+Camera1.p2: 0.0
+
+# Camera2 == cam1 == the RIGHT camera. Identical to cam0, and legitimately so:
+# both sensors are declared with the same <image> and <horizontal_fov>, and a
+# simulated pinhole has no manufacturing spread to distinguish them.
+Camera2.fx: 640.0
+Camera2.fy: 640.0
+Camera2.cx: 640.0
+Camera2.cy: 360.0
+
+Camera2.k1: 0.0
+Camera2.k2: 0.0
+Camera2.p1: 0.0
+Camera2.p2: 0.0
+
+Camera.width: 1280
+Camera.height: 720
+
+# model.sdf <update_rate>30</update_rate>. The recorded bag averages ~24 Hz
+# because Gazebo runs below real time; fps only feeds ORB-SLAM3's keyframe
+# spacing heuristic, so the nominal rate is the right thing to declare.
+Camera.fps: 30
+
+# Ignored: the node converts to mono8 before handing frames over, precisely so
+# this setting cannot silently differ between the sim (rgb8) and the real rig.
+Camera.RGB: 1
+
+#--------------------------------------------------------------------------------------------
+# Stereo geometry
+#--------------------------------------------------------------------------------------------
+# Close/far threshold, in units of the stereo baseline. EuRoC ships 60, but its
+# baseline is 0.11 m; ours is 0.0936 m, so 60 would put the split at only 5.6 m.
+# 90 gives ~8.4 m, which suits warehouse aisle depths.
+Stereo.ThDepth: 90.0
+
+# cam0 -> cam1, computed as inv(body_T_cam0) @ body_T_cam1 from the VINS config.
+# Both cameras carry the identical body->optical rotation, so the relative
+# rotation cancels exactly and what remains is a pure baseline translation on
+# cam0's optical +X -- which is the formal statement of "cam1 is the RIGHT
+# camera". If a run ever looks inverted, this sign is the first thing to check;
+# script/check_stereo_side.py settles it empirically from a bag.
+#
+# The images need no rectification: identical intrinsics, zero distortion and a
+# pure-X translation mean the pair is already rectified by construction.
+Stereo.T_c1_c2: !!opencv-matrix
+  rows: 4
+  cols: 4
+  dt: f
+  data: [1.0, 0.0, 0.0, 0.0936,
+         0.0, 1.0, 0.0, 0.0,
+         0.0, 0.0, 1.0, 0.0,
+         0.0, 0.0, 0.0, 1.0]
+
+#--------------------------------------------------------------------------------------------
+# IMU
+#--------------------------------------------------------------------------------------------
+# body(imu) <- cam0. Identical to VINS's body_T_cam0, copied verbatim.
+#
+# The rotation block [[0,0,1],[-1,0,0],[0,-1,0]] is the fixed REP-103 body
+# (x-forward, y-left, z-up) to REP-104 optical (x-right, y-down, z-forward)
+# transform. The translation is the camera origin minus the IMU origin in the
+# body frame, from the model.sdf base_footprint poses:
+#   imu_link (0.338, 0,      0.192 )
+#   cam0     (0.496, 0.0936, 0.4395)
+# giving a real 0.25 m lever arm -- unlike the real rig, where this is still a
+# zeroed placeholder. These are exact model geometry, not a calibration result.
+IMU.T_b_c1: !!opencv-matrix
+  rows: 4
+  cols: 4
+  dt: f
+  data: [ 0.0,  0.0,  1.0,  0.158,
+         -1.0,  0.0,  0.0,  0.0936,
+          0.0, -1.0,  0.0,  0.2475,
+          0.0,  0.0,  0.0,  1.0]
+
+# Mapped 1:1 from the VINS config -- ORB-SLAM3 and VINS use the same
+# continuous-density convention, so NoiseGyro==gyr_n, NoiseAcc==acc_n,
+# GyroWalk==gyr_w, AccWalk==acc_w with no unit conversion.
+#
+# These are ~5x looser than the ADIS16448 ground truth in model.sdf
+# (gyro 0.0003394, accel 0.004), deliberately, and that slack is carried over
+# from the VINS tuning so the two estimators trust the IMU equally.
+IMU.NoiseGyro: 0.002     # rad/s/sqrt(Hz)
+IMU.NoiseAcc: 0.02       # m/s^2/sqrt(Hz)
+IMU.GyroWalk: 0.0001     # rad/s^2/sqrt(Hz)
+IMU.AccWalk: 0.001       # m/s^3/sqrt(Hz)
+IMU.Frequency: 200.0
+
+# Simulated gravity is exactly 9.8 (<gravity>0 0 -9.8</gravity>) against
+# ORB-SLAM3's hardcoded 9.81 -- a 0.1% discrepancy, far below the noise floor
+# and not worth correcting. Contrast the real rig, which is off by 5.6%.
+
+#--------------------------------------------------------------------------------------------
+# ORB extractor
+#--------------------------------------------------------------------------------------------
+# 1200 is the EuRoC stereo-inertial default at 752x480. These frames are 2.5x
+# larger in area, so 1500 keeps a similar feature density without making
+# extraction the bottleneck at 30 Hz.
+ORBextractor.nFeatures: 1500
+ORBextractor.scaleFactor: 1.2
+ORBextractor.nLevels: 8
+ORBextractor.iniThFAST: 20
+ORBextractor.minThFAST: 7
+
+#--------------------------------------------------------------------------------------------
+# Viewer
+#--------------------------------------------------------------------------------------------
+Viewer.KeyFrameSize: 0.05
+Viewer.KeyFrameLineWidth: 1.0
+Viewer.GraphLineWidth: 0.9
+Viewer.PointSize: 2.0
+Viewer.CameraSize: 0.08
+Viewer.CameraLineWidth: 3.0
+Viewer.ViewpointX: 0.0
+Viewer.ViewpointY: -0.7
+Viewer.ViewpointZ: -1.8
+Viewer.ViewpointF: 500.0
+# 1280x720 side by side with the map would not fit a laptop screen.
+Viewer.imageViewScale: 0.5

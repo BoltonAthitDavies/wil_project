@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>realsense_imu</name>
+  <version>0.1.0</version>
+  <description>
+    Publishes united accelerometer + gyroscope data from an Intel RealSense
+    camera as a single sensor_msgs/Imu topic, suitable for VINS-Fusion.
+  </description>
+  <maintainer email="ambushee@todo.todo">ambushee</maintainer>
+  <license>MIT</license>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+
+  <!--
+    pyrealsense2 is deliberately NOT listed as a dependency: it has no rosdep
+    key and is not an apt package here. It comes from the hand-built
+    librealsense 2.54.2 in ~/src/librealsense (2.55+ dropped L515 support), and
+    is picked up via PYTHONPATH. See README.md.
+  -->
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

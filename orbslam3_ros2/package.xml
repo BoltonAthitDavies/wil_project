@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>orbslam3_ros2</name>
+  <version>0.0.0</version>
+  <description>
+    ROS 2 Humble node wrapping ORB-SLAM3 stereo and stereo-inertial, for the WiL
+    sim car and the real RealSense fisheye rig. Writes trajectories in the same
+    CSV format VINS-Fusion does, so script/plot_vio_vs_gt.py scores both.
+  </description>
+  <maintainer email="claude.kyogre@gmail.com">ambushee</maintainer>
+  <license>GPL-3.0-only</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>tf2</depend>
+  <depend>tf2_ros</depend>
+  <depend>tf2_geometry_msgs</depend>
+  <depend>cv_bridge</depend>
+  <depend>image_transport</depend>
+  <depend>message_filters</depend>
+
+  <!-- Not declared as rosdep keys, matching vins_fusion_ros2: OpenCV and Eigen
+       come from the system, and ORB-SLAM3 + Pangolin are built out of tree by
+       ../build_orbslam3.sh into ../thirdparty/. There are no rosdep keys for
+       those, and inventing them would just break `rosdep install`. -->
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

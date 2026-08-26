@@ -1,0 +1,8 @@
+[submodule "vins_fusion_ros2"]
+	path = vins_fusion_ros2
+	url = https://github.com/BoltonAthitDavies/vins_fusion_ros2.git
+	branch = wil
+[submodule "aws-robomaker-small-warehouse-world"]
+	path = aws-robomaker-small-warehouse-world
+	url = https://github.com/BoltonAthitDavies/aws-robomaker-small-warehouse-world.git
+	branch = gz-sim-fortress

@@ -1,0 +1,19 @@
+# --- colcon build artifacts ---
+build/
+install/
+log/
+
+# --- third-party sources, reproducible via ./build_orbslam3.sh ---
+# ORB-SLAM3 @ 4452a3c (patched by the script) and Pangolin @ v0.9.1,
+# plus their local install prefix. ~1.7 GB, none of it ours.
+thirdparty/
+
+# --- recorded rosbags (~8 GB), kept outside the repo ---
+dataset/*/
+
+# --- python ---
+__pycache__/
+*.py[cod]
+
+# --- redundant archive of realsense/ ---
+realsense.zip

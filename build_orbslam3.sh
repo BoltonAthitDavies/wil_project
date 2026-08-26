@@ -37,9 +37,12 @@ PANGOLIN_SRC="$TP/Pangolin"
 ORB_SRC="$TP/ORB_SLAM3"
 
 PANGOLIN_TAG="v0.9.1"
-# Pinned rather than tracking master, so a rebuild months from now reproduces
-# these patches. This is the master commit as of writing.
-ORB_COMMIT="4452a3c4ab75b1cde34e5505a36ec3f9edcdc4c4"
+# Our own fork, on a branch that already carries the four patches below. Pinned
+# to a commit rather than tracking the branch, so a rebuild months from now is
+# byte-identical. Forked from UZ-SLAMLab/ORB_SLAM3 @ 4452a3c, so that upstream
+# disappearing or force-pushing cannot break this build.
+ORB_REPO="https://github.com/BoltonAthitDavies/ORB_SLAM3.git"
+ORB_COMMIT="5c2b00f732775f78836751dba13db25463a0aaa1"
 
 NPROC="$(nproc)"
 JOBS="$(( NPROC > 8 ? 8 : NPROC ))"   # -j16 with -O3 on this codebase OOMs a 15 GB box
@@ -117,6 +120,12 @@ stage_pangolin() {
 # ----------------------------------------------------------------- orbslam3 ---
 patch_orbslam3() {
     local f
+
+    # As of the ORB_COMMIT pin above these four patches are already committed on
+    # the fork's `wil` branch, so every one of them is a no-op here. They are kept
+    # rather than deleted: each is guarded by its own grep, so this doubles as an
+    # assertion that the checkout really is the patched tree, and it still does the
+    # right thing if ORB_SRC is ever pointed at a pristine upstream clone.
 
     # (1) `++` on a bool was deprecated in C++11 and REMOVED in C++17, and we are
     #     on C++17 because Pangolin 0.9's headers require it. Three sites.
@@ -196,7 +205,7 @@ stage_orbslam3() {
         rm -rf "$ORB_SRC"
         # Full clone: --depth 1 cannot check out a specific commit, and we want the
         # build pinned. It is ~90 MB, most of it the vocabulary tarball.
-        git clone https://github.com/UZ-SLAMLab/ORB_SLAM3.git "$ORB_SRC"
+        git clone "$ORB_REPO" "$ORB_SRC"
         git -C "$ORB_SRC" checkout --quiet "$ORB_COMMIT"
     fi
 

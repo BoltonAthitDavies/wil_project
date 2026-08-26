@@ -17,7 +17,7 @@ scripts can put them on one axis against the simulator's ground truth.
 | [`realsense/realsense_imu/`](realsense/realsense_imu/) | IMU publisher for the real D435i rig |
 | [`script/`](script/) | trajectory extraction, plotting and comparison tools |
 | [`output/`](output/) | committed results — `vio.csv` per run, plus comparison plots |
-| `thirdparty/` | *not committed* — ORB-SLAM3 and Pangolin sources, built by `build_orbslam3.sh` |
+| `thirdparty/` | *not committed* — ORB-SLAM3 (our fork, `wil`) and Pangolin sources, built by `build_orbslam3.sh` |
 | `dataset/` | *not committed* — recorded rosbags, see [Data](#data) |
 
 Root tools:
@@ -39,9 +39,11 @@ cd wil_project
 
 Already cloned without them? `git submodule update --init --recursive`
 
-Build the ORB-SLAM3 core first. It is not a colcon package; it is fetched, patched
-and built out of tree into `thirdparty/` by a script that pins ORB-SLAM3 to commit
-`4452a3c` and Pangolin to `v0.9.1`, so the build reproduces months from now:
+Build the ORB-SLAM3 core first. It is not a colcon package; it is fetched and built
+out of tree into `thirdparty/` by a script that pins ORB-SLAM3 to commit `5c2b00f` of
+[our fork's `wil` branch](https://github.com/BoltonAthitDavies/ORB_SLAM3/tree/wil) --
+which carries the C++17 / Pangolin-0.9 build patches -- and Pangolin to `v0.9.1`, so
+the build reproduces months from now and does not depend on upstream:
 
 ```bash
 ./build_orbslam3.sh          # ~1 GB, needs 1.5 GB free; ./build_progress.sh -w to watch

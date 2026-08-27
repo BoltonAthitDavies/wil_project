@@ -49,7 +49,16 @@ THEMES = {
 
 
 def load(path):
-    """VINS-format CSV -> (t_sec, position, quaternion_wxyz). None if absent/empty."""
+    """VINS-format CSV -> (t_sec, position, quaternion_wxyz, velocity).
+
+    Velocity is columns 9-11 where the writer emitted them, zeros otherwise.
+    NOTE the frames differ by source and are reconciled below, not here:
+    both estimators write velocity in their own WORLD frame, while the ground
+    truth comes from a nav_msgs/Odometry twist, which REP-145 puts in the BODY
+    frame of child_frame_id. Plotting the raw columns against each other would
+    compare forward/lateral speed against east/north speed.
+    None if absent/empty.
+    """
     if not os.path.exists(path) or os.path.getsize(path) == 0:
         return None
     d = np.loadtxt(path, delimiter=",")
@@ -57,7 +66,34 @@ def load(path):
         d = d.reshape(1, -1)
     if len(d) < 2:
         return None
-    return d[:, 0] / 1e9, d[:, 1:4], d[:, 4:8]
+    v = d[:, 8:11] if d.shape[1] >= 11 else np.zeros((len(d), 3))
+    return d[:, 0] / 1e9, d[:, 1:4], d[:, 4:8], v
+
+
+def quat_to_R(q):
+    """(N,4) quaternions wxyz -> (N,3,3) rotation matrices."""
+    q = q / np.maximum(np.linalg.norm(q, axis=1, keepdims=True), 1e-12)
+    w, x, y, z = q.T
+    return np.stack([
+        np.stack([1 - 2 * (y * y + z * z), 2 * (x * y - w * z), 2 * (x * z + w * y)], -1),
+        np.stack([2 * (x * y + w * z), 1 - 2 * (x * x + z * z), 2 * (y * z - w * x)], -1),
+        np.stack([2 * (x * z - w * y), 2 * (y * z + w * x), 1 - 2 * (x * x + y * y)], -1),
+    ], -2)
+
+
+def euler_zyx(R):
+    """(N,3,3) -> (yaw, pitch, roll) in degrees, wrapped to (-180, 180].
+
+    Deliberately NOT unwrapped. Unwrapping picks a branch from each series'
+    own first sample, so two systems holding the SAME heading across a loop end
+    up hundreds of degrees apart on the plot -- one wound to +270, the other to
+    -90 -- and the panel shows a disagreement that does not exist. Wrapped, they
+    overlay; the cost is a sawtooth at the wrap, which plot_wrapped() hides.
+    """
+    yaw = np.arctan2(R[:, 1, 0], R[:, 0, 0])
+    pitch = np.arcsin(np.clip(-R[:, 2, 0], -1.0, 1.0))
+    roll = np.arctan2(R[:, 2, 1], R[:, 2, 2])
+    return np.degrees(np.stack([yaw, pitch, roll], axis=1))
 
 
 def umeyama(src, dst):
@@ -92,6 +128,15 @@ def resample(t_src, p_src, t_dst):
     return np.stack([np.interp(t_dst, t_src, p_src[:, i]) for i in range(3)], axis=1)
 
 
+def resample_deg(t_src, a_src, t_dst):
+    """Resample wrapped angles. Interpolating straight across the +-180 seam would
+    invent a full-range ramp between two samples that are actually 1 deg apart, so
+    unwrap first and re-wrap after."""
+    a = np.stack([np.unwrap(np.radians(a_src[:, i])) for i in range(3)], axis=1)
+    out = resample(t_src, a, t_dst)
+    return np.degrees((out + np.pi) % (2 * np.pi) - np.pi)
+
+
 # --- load --------------------------------------------------------------------
 runs = []
 for name, path in SOURCES:
@@ -118,18 +163,35 @@ else:
     ref_name, ref_t, ref_p = runs[0][0], runs[0][1], runs[0][2]
     print(f"  no ground truth; using {ref_name} as the reference frame")
 
+# Reference velocity and attitude, expressed in the reference frame itself.
+# Ground truth arrives as a body-frame twist (see load()), so it needs its own
+# orientation applied to become the world-frame velocity the estimators report.
+if gt is not None:
+    ref_q, ref_v_body = gt[2], gt[3]
+    ref_R = quat_to_R(ref_q)
+    ref_v = np.einsum("nij,nj->ni", ref_R, ref_v_body)
+    ref_eul = euler_zyx(ref_R)
+else:
+    ref_v = ref_eul = None
+
 # --- align every trajectory to the reference over their common window --------
 rows, aligned = [], []
-for name, t, p, q in runs:
+for name, t, p, q, v in runs:
     lo, hi = max(t[0], ref_t[0]), min(t[-1], ref_t[-1])
     m = (t >= lo) & (t <= hi)
     if m.sum() < 10:
         print(f"  [skip] {name}: only {m.sum()} samples overlap the reference")
         continue
-    tc, pc = t[m], p[m]
+    tc, pc, qc, vc = t[m], p[m], q[m], v[m]
     rp = resample(ref_t, ref_p, tc)
     R, tr = umeyama(pc, rp)
     pa = (R @ pc.T).T + tr
+    # The same R that puts positions in the reference frame puts velocities and
+    # orientations there too -- without it, "yaw" is measured from whichever
+    # direction each estimator happened to be facing when it initialised, and the
+    # attitude panel compares nothing.
+    va = (R @ vc.T).T
+    eul = euler_zyx(R @ quat_to_R(qc))
     err = np.linalg.norm(pa - rp, axis=1)
     path_len = np.linalg.norm(np.diff(pc, axis=0), axis=1).sum()
     ref_len = np.linalg.norm(np.diff(rp, axis=0), axis=1).sum()
@@ -146,7 +208,9 @@ for name, t, p, q in runs:
         seg = (b - a, tc[b - 1] - tc[a], np.sqrt((ec**2).mean()))
     else:
         seg = None
-    aligned.append((name, tc - tc[0], pa, rp, err))
+    aligned.append(dict(name=name, t=tc - tc[0], p=pa, ref=rp, err=err, v=va, eul=eul,
+                        refv=None if ref_v is None else resample(ref_t, ref_v, tc),
+                        refeul=None if ref_eul is None else resample_deg(ref_t, ref_eul, tc)))
     biggest = steps[jumps].max() if len(jumps) else 0.0
     rows.append((name, len(tc), tc[-1] - tc[0], path_len, ref_len,
                  np.sqrt((err**2).mean()), err.max(), err[-1], jumps, clean_len, seg,
@@ -198,9 +262,11 @@ os.makedirs(OUTDIR, exist_ok=True)
 
 def render(theme_name):
     th = THEMES[theme_name]
-    fig = plt.figure(figsize=(14, 7.5), facecolor=th["surface"])
-    gs = GridSpec(2, 2, figure=fig, width_ratios=[1.25, 1], hspace=0.32, wspace=0.22,
-                  left=0.06, right=0.98, top=0.90, bottom=0.09)
+    fig = plt.figure(figsize=(14, 11.5), facecolor=th["surface"])
+    outer = GridSpec(2, 1, figure=fig, height_ratios=[1.55, 1], hspace=0.28,
+                     left=0.06, right=0.98, top=0.935, bottom=0.06)
+    gs = outer[0].subgridspec(2, 2, width_ratios=[1.25, 1], hspace=0.32, wspace=0.22)
+    bottom = outer[1].subgridspec(1, 3, wspace=0.26)
 
     def style(ax, xl, yl, title):
         ax.set_facecolor(th["surface"])
@@ -217,12 +283,10 @@ def render(theme_name):
     # diverged, plotting both on shared axes shrinks the good one to a dot. So give
     # each its own panel, each self-centred and auto-scaled.
     if gt is None and len(aligned) > 1:
-        sub = GridSpec(2, 2, figure=fig, width_ratios=[1.25, 1], hspace=0.32, wspace=0.22,
-                       left=0.06, right=0.98, top=0.90, bottom=0.09)[:, 0].subgridspec(
-                           len(runs), 1, hspace=0.38)
-        for i, (name, _, pa, _, _) in enumerate(aligned):
+        sub = gs[:, 0].subgridspec(len(runs), 1, hspace=0.38)
+        for i, a in enumerate(aligned):
+            name, praw = a["name"], a["p"]
             axi = fig.add_subplot(sub[i])
-            _, _, praw, _, _ = aligned[i]
             pc = praw - praw[0]
             axi.plot(pc[:, 0], pc[:, 1], color=th["series"][i + 1], lw=1.5)
             axi.plot(0, 0, "o", color=th["series"][i + 1], ms=5)
@@ -233,23 +297,43 @@ def render(theme_name):
     else:
         ax = fig.add_subplot(gs[:, 0])
     if ax is not None and aligned:
-        _, _, _, rp0, _ = aligned[0]
+        rp0 = aligned[0]["ref"]
         ax.plot(rp0[:, 0], rp0[:, 1], color=th["series"][0], lw=3.0, alpha=0.55,
                 label=ref_name, zorder=1)
     if ax is not None:
-        for i, (name, _, pa, _, _) in enumerate(aligned):
+        for i, a in enumerate(aligned):
+            name, pa = a["name"], a["p"]
             ax.plot(pa[:, 0], pa[:, 1], color=th["series"][i + 1], lw=1.6,
                     label=name, zorder=3 + i)
             ax.plot(pa[0, 0], pa[0, 1], "o", color=th["series"][i + 1], ms=5, zorder=6)
+        # A run that has diverged by hundreds of metres would set the axes for
+        # everyone, shrinking ground truth and the healthy estimator to a single dot.
+        # The reference's own extent is the interesting region, so pin the view there
+        # and let the diverged trace walk off the plot -- the error panel and the
+        # table already quantify how far off it went.
+        lo, hi = rp0[:, :2].min(0), rp0[:, :2].max(0)
+        pad = 0.35 * max(hi - lo).max() if (hi - lo).max() > 0 else 1.0
+        lo, hi = lo - pad, hi + pad
+        off = [a["name"] for a in aligned
+               if (a["p"][:, :2] < lo).any() or (a["p"][:, :2] > hi).any()]
         ax.set_aspect("equal", adjustable="datalim")
+        if off:
+            # adjustable="datalim" only ever WIDENS these to satisfy the aspect
+            # ratio, so the clamp holds and the panel still fills its slot.
+            ax.set_xlim(lo[0], hi[0])
+            ax.set_ylim(lo[1], hi[1])
         style(ax, "x [m]", "y [m]", "Trajectory, top-down (SE(3)-aligned, scale fixed)")
+        if off:
+            ax.text(0.99, 0.01, f"{', '.join(off)} runs off the plot",
+                    transform=ax.transAxes, ha="right", va="bottom",
+                    color=th["ink3"], fontsize=9, zorder=7)
         ax.legend(facecolor=th["surface"], edgecolor=th["grid"], labelcolor=th["ink2"],
                   fontsize=9, loc="best")
 
     # error against the reference
     ax2 = fig.add_subplot(gs[0, 1])
-    for i, (name, tt, _, _, err) in enumerate(aligned):
-        ax2.plot(tt, err, color=th["series"][i + 1], lw=1.4, label=name)
+    for i, a in enumerate(aligned):
+        ax2.plot(a["t"], a["err"], color=th["series"][i + 1], lw=1.4, label=a["name"])
     style(ax2, "t [s]", "error [m]",
           f"Position error vs {ref_name}" if gt is not None else f"Difference from {ref_name}")
     ax2.legend(facecolor=th["surface"], edgecolor=th["grid"], labelcolor=th["ink2"],
@@ -258,14 +342,71 @@ def render(theme_name):
     # z, which is where frame-convention problems announce themselves
     ax3 = fig.add_subplot(gs[1, 1])
     if aligned:
-        _, tt0, _, rp0, _ = aligned[0]
+        tt0, rp0 = aligned[0]["t"], aligned[0]["ref"]
         ax3.plot(tt0, rp0[:, 2], color=th["series"][0], lw=2.4, alpha=0.55, label=ref_name)
-    for i, (name, tt, pa, _, _) in enumerate(aligned):
-        ax3.plot(tt, pa[:, 2], color=th["series"][i + 1], lw=1.4, label=name)
+    for i, a in enumerate(aligned):
+        ax3.plot(a["t"], a["p"][:, 2], color=th["series"][i + 1], lw=1.4, label=a["name"])
     style(ax3, "t [s]", "z [m]", "Height")
 
+    # --- per-component breakdown: position, velocity, attitude ---------------
+    # Everything here is in the reference frame (see the alignment loop), so the
+    # components are directly comparable across systems. Colour carries the SYSTEM,
+    # matching every other panel; line style carries the COMPONENT. Two legends,
+    # because one combined legend would be nine entries of mostly noise.
+    COMPONENTS = (("x", "-"), ("y", "--"), ("z", ":"))
+    ATTITUDE = (("yaw", "-"), ("pitch", "--"), ("roll", ":"))
+
+    def masked(a, wrapped):
+        """Break the line where a wrapped angle crosses +-180, so the wrap does not
+        draw as a spurious full-height vertical stroke."""
+        if not wrapped:
+            return a
+        a = a.astype(float).copy()
+        a[:-1][np.abs(np.diff(a)) > 180.0] = np.nan
+        return a
+
+    def breakdown(slot, title, ylabel, key, labels, wrapped=False):
+        axb = fig.add_subplot(bottom[slot])
+        if gt is not None and aligned and aligned[0].get(f"ref{key}" if key != "p" else "ref") is not None:
+            ref_arr = aligned[0]["ref" if key == "p" else f"ref{key}"]
+            for c, (lab, ls) in enumerate(labels):
+                axb.plot(aligned[0]["t"], masked(ref_arr[:, c], wrapped),
+                         color=th["series"][0], lw=2.4, ls=ls, alpha=0.55, zorder=1)
+        for i, a in enumerate(aligned):
+            for c, (lab, ls) in enumerate(labels):
+                axb.plot(a["t"], masked(a[key][:, c], wrapped),
+                         color=th["series"][i + 1], lw=1.3, ls=ls, zorder=3 + i)
+        style(axb, "t [s]", ylabel, title)
+        # component key, drawn in a neutral ink so it reads as "line style", not
+        # as a fourth system
+        handles = [plt.Line2D([], [], color=th["ink3"], lw=1.4, ls=ls, label=lab)
+                   for lab, ls in labels]
+        axb.legend(handles=handles, facecolor=th["surface"], edgecolor=th["grid"],
+                   labelcolor=th["ink2"], fontsize=8, loc="best", ncol=3,
+                   handlelength=2.4, columnspacing=1.1)
+        return axb
+
+    breakdown(0, "Position", "[m]", "p", COMPONENTS)
+    axv = breakdown(1, "Velocity  (reference frame)", "[m/s]", "v", COMPONENTS)
+    axa = breakdown(2, "Attitude", "[deg]", "eul", ATTITUDE, wrapped=True)
+    axa.set_yticks(np.arange(-180, 181, 90))
+
+    # A relocalisation jump shows up in velocity as a spike orders of magnitude past
+    # anything a ground robot does, and autoscaling to it flattens the real signal
+    # into a flat line at zero. Scale to the bulk of the samples instead -- a high
+    # percentile, not a fixed plausible-speed threshold, so the panel stays right for
+    # a fast run as well as a slow one -- and label the panel when that hides a peak.
+    vs = np.abs(np.concatenate([a["v"].ravel() for a in aligned])) if aligned else None
+    if vs is not None and len(vs):
+        m = max(np.percentile(vs, 99.0) * 1.6, 1e-3)
+        if vs.max() > m:
+            axv.set_ylim(-m, m)
+            axv.text(0.99, 0.02, f"clipped; peak |v| {vs.max():.1f} m/s",
+                     transform=axv.transAxes, ha="right", va="bottom",
+                     color=th["ink3"], fontsize=8)
+
     fig.suptitle(f"VINS-Fusion vs ORB-SLAM3  --  {DATASET}",
-                 color=th["ink"], fontsize=13, x=0.06, ha="left", y=0.965)
+                 color=th["ink"], fontsize=13, x=0.06, ha="left", y=0.978)
     out = os.path.join(OUTDIR, f"compare_{theme_name}.png")
     fig.savefig(out, dpi=160, facecolor=th["surface"])
     plt.close(fig)

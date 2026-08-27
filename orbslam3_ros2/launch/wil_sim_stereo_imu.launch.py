@@ -50,6 +50,14 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'use_viewer', default_value='true',
             description='Pangolin map/feature window. Set false for headless runs.'),
+        DeclareLaunchArgument(
+            'image_transport', default_value='raw',
+            description='"raw" for the stock sim, which bridges plain '
+                        'sensor_msgs/Image. Set "compressed" when the sim was '
+                        'launched with compressed_images:=True, which adds '
+                        '/camN/image_raw/compressed -- that is the transport the '
+                        'REAL rig uses (see wil_stereo_imu.launch.py), so this is '
+                        'how you exercise the identical path in sim.'),
     ]
 
     node = Node(
@@ -75,11 +83,13 @@ def generate_launch_description():
             # (The real rig is off by 5.6% and does need one.)
             'imu_accel_scale': 1.0,
 
-            # gz bridges raw sensor_msgs/Image, so plain "raw" transport.
+            # The base topics, WITHOUT any /compressed suffix: image_transport
+            # appends the suffix for the transport it is asked for, so these are
+            # correct for both settings of the image_transport argument.
             'image0_topic': '/cam0/image_raw',
             'image1_topic': '/cam1/image_raw',
             'imu_topic': '/imu',
-            'image_transport': 'raw',
+            'image_transport': LaunchConfiguration('image_transport'),
 
             # ORB-SLAM3's world origin is its first keyframe, gravity-aligned
             # after IMU init -- NOT the sim's `odom`. Naming it distinctly keeps

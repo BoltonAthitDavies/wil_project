@@ -64,8 +64,16 @@ TOP_SPEED = 1.5            # m/s. Independent of the launch arg max_speed, which
                            # clamps at the plugin; this is what the pedal can reach.
 REVERSE_SPEED = 1.5        # m/s cap when going backwards
 
-STEER_RATE = 0.6           # rad/s while a steer key is held
-CENTER_RATE = 2.4          # rad/s of self-centring when it is not
+# Both in deg/s, against STEER_LIMIT's 35 deg, so the times below are readable
+# straight off the numbers: the wheel reaches full lock in 35/35 = 1.0 s and unwinds
+# from it in 35/70 = 0.5 s. The RATIO is what decides whether the car steers at all.
+# At 10 deg/s against a 2.4 rad/s (138 deg/s) self-centring, centring was 13.8x the
+# winding rate: full lock took 3.5 s to build and 0.25 s to lose, so anything short
+# of a multi-second hold produced no visible turn -- and drive.py cannot hold that
+# long anyway, since auto-repeat drops a second key after HOLD_WINDOW (0.40 s),
+# capping the angle at 0.40*10 = 4 deg. Keep centring within ~2x the steer rate.
+STEER_RATE = 35 * math.pi / 180   # rad/s while a steer key is held -> 1.0 s to lock
+CENTER_RATE = 70 * math.pi / 180  # rad/s of self-centring when it is not -> 0.5 s
 
 HOLD_WINDOW = 0.40         # s; see KEY-HOLD CAVEAT above
 TICK = 0.02                # s, 50 Hz output

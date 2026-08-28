@@ -34,6 +34,7 @@ CONTROLS
     Esc             cancel the goal (or the drag in progress)
     middle-drag     pan          wheel  zoom          f  fit to window
     g grid   o obstacles   m map overlay   t trails   c camera thumbnail
+    l                floor markings (bay outlines + walkway lines)
     v VINS overlay   b ORB-SLAM3 overlay
     [ ]             rotate the view by 90 deg (see --rotate)
     r  re-align every estimator to ground truth     q / Ctrl-C  quit
@@ -100,13 +101,29 @@ PKG = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                    'aws-robomaker-small-warehouse-world')
 
 # Floor extent and texture mapping, fitted from the top face of the GroundB visual
-# DAE (residual 8.9e-16, i.e. exact):  u = y/TILE + U0,  v = x/TILE + V0.
-FLOOR_X0, FLOOR_X1 = -6.990235, 6.990235
-FLOOR_Y0, FLOOR_Y1 = -10.453333, 10.453333
-TILE_M = 6.090153
-U0, V0 = 2.938774, 3.719847
+# DAE:  u = y/TILE_U + U0,  v = x/TILE_V + V0  (refit residual 6.7e-07).
+#
+# The tile is ANISOTROPIC since scale_warehouse.py squared the building: geometry
+# went x3.0105741651 in x and x2 in y, while the concrete UVs went x2 uniformly.
+# So y keeps the stock 6.090153 m tile and x is stretched by 3.0105741651/2 =
+# 1.5052871.  Re-run the fit if you rescale again -- these are not derived at
+# runtime. Stock values were FLOOR_X +-6.990235, FLOOR_Y +-10.453333,
+# TILE 6.090153 both axes, U0/V0 2.938774/3.719847.
+FLOOR_X0, FLOOR_X1 = -21.044621, 21.044621
+FLOOR_Y0, FLOOR_Y1 = -20.906665, 20.906665
+TILE_U = 6.090153                 # metres per tile along y
+TILE_V = 9.167420                 # metres per tile along x (= TILE_U * 1.5052871)
+U0, V0 = 5.877548, 7.439694
 TEXTURE = os.path.join(PKG, 'models', 'aws_robomaker_warehouse_GroundB_01',
                        'materials', 'textures', 'aws_robomaker_warehouse_GroundB_01.png')
+# The painted floor markings (bay outlines, walkway lines) are a SECOND material on
+# the GroundB visual mesh, texture-mapped into a 4-band colour atlas. They are real
+# geometry, not part of the concrete tile, so they have to be rasterised separately.
+GROUND_DAE = os.path.join(PKG, 'models', 'aws_robomaker_warehouse_GroundB_01', 'meshes',
+                          'aws_robomaker_warehouse_GroundB_01_visual.DAE')
+ATLAS_TEX = os.path.join(PKG, 'models', 'aws_robomaker_warehouse_GroundB_01',
+                         'materials', 'textures', 'aws_robomaker_warehouse_GroundB_02.png')
+MARK_MATERIAL = 'Material #946569'
 WORLD = os.path.join(PKG, 'worlds', 'small_warehouse', 'small_warehouse.world')
 MODELS = os.path.join(PKG, 'models')
 
@@ -931,8 +948,84 @@ C_GRID = QColor(255, 255, 255, 26)
 C_OK, C_WARN, C_BAD = QColor('#66bb6a'), QColor('#ffa726'), QColor('#ef5350')
 
 
-def build_floor_pixmap(path, ppm, flip):
-    """Tile the GroundB texture across the floor rect, once, in world orientation.
+def _marking_faces(dae_path, material):
+    """[(xy 3x2 metres, uv 3x2), ...] for one material's triangles."""
+    import xml.etree.ElementTree as ET
+    ns = '{http://www.collada.org/2005/11/COLLADASchema}'
+    root = ET.parse(dae_path).getroot()
+    unit = root.find('.//%sunit' % ns)
+    m_per = float(unit.get('meter')) if unit is not None else 1.0
+    arr = {fa.get('id'): [float(x) for x in fa.text.split()]
+           for fa in root.iter(ns + 'float_array')}
+    pos = next(v for k, v in arr.items() if k.endswith('POSITION-array'))
+    uvs = next(v for k, v in arr.items() if k.endswith('UV0-array'))
+    out = []
+    for tri in root.iter(ns + 'triangles'):
+        if tri.get('material') != material:
+            continue
+        inp = {i.get('semantic'): int(i.get('offset')) for i in tri.findall(ns + 'input')}
+        idx = [int(x) for x in tri.find(ns + 'p').text.split()]
+        st = max(inp.values()) + 1
+        for i in range(0, len(idx), st * 3):
+            xy, uv = [], []
+            for k in range(3):
+                vi = idx[i + k * st + inp['VERTEX']]
+                ti = idx[i + k * st + inp['TEXCOORD']]
+                xy.append((pos[vi * 3] * m_per, pos[vi * 3 + 1] * m_per))
+                uv.append((uvs[ti * 2], uvs[ti * 2 + 1]))
+            out.append((np.array(xy), np.array(uv)))
+    return out
+
+
+def paint_markings(img, ppm, flip, dae_path=None, atlas_path=None):
+    """Texture-map the floor markings into an already-tiled floor array, in place.
+
+    Barycentric scan-convert per triangle: the strips are thin (0.145 m -> ~6 px at
+    the default ppm 40) and there are only ~150 of them, so a per-face bounding-box
+    rasteriser is far simpler than anything clever and still runs in milliseconds.
+
+    u is the atlas's band axis -- 0.000-0.342 hazard stripes, 0.342-0.590 green,
+    0.590-0.820 blue, 0.820-1.000 yellow -- so sampling with wrap reproduces the
+    real paint colours rather than approximating them.
+    """
+    from PIL import Image as PILImage
+    tex = np.asarray(PILImage.open(atlas_path or ATLAS_TEX).convert('RGB'))
+    th, tw = tex.shape[:2]
+    h, w = img.shape[:2]
+    n = 0
+    for xy, uv in _marking_faces(dae_path or GROUND_DAE, MARK_MATERIAL):
+        cx = (xy[:, 0] - FLOOR_X0) * ppm - 0.5
+        ry = (FLOOR_Y1 - xy[:, 1]) * ppm - 0.5
+        c0, c1 = max(0, int(np.floor(cx.min()))), min(w - 1, int(np.ceil(cx.max())))
+        r0, r1 = max(0, int(np.floor(ry.min()))), min(h - 1, int(np.ceil(ry.max())))
+        if c1 < c0 or r1 < r0:
+            continue
+        cc, rr = np.meshgrid(np.arange(c0, c1 + 1), np.arange(r0, r1 + 1))
+        (x1, y1), (x2, y2), (x3, y3) = zip(cx, ry)
+        den = (y2 - y3) * (x1 - x3) + (x3 - x2) * (y1 - y3)
+        if abs(den) < 1e-9:
+            continue
+        b1 = ((y2 - y3) * (cc - x3) + (x3 - x2) * (rr - y3)) / den
+        b2 = ((y3 - y1) * (cc - x3) + (x1 - x3) * (rr - y3)) / den
+        b3 = 1.0 - b1 - b2
+        m = (b1 >= -1e-6) & (b2 >= -1e-6) & (b3 >= -1e-6)
+        if not m.any():
+            continue
+        u = b1 * uv[0, 0] + b2 * uv[1, 0] + b3 * uv[2, 0]
+        v = b1 * uv[0, 1] + b2 * uv[1, 1] + b3 * uv[2, 1]
+        if flip in ('u', 'uv'):
+            u = -u
+        if flip in ('v', 'uv'):
+            v = -v
+        uc = (np.mod(u, 1.0) * tw).astype(np.int64) % tw
+        vr = (np.mod(v, 1.0) * th).astype(np.int64) % th
+        img[rr[m], cc[m]] = tex[vr[m], uc[m]]
+        n += 1
+    return n
+
+
+def build_floor_array(path, ppm, flip):
+    """Tile the GroundB concrete texture across the floor rect, in world orientation.
 
     The UV fit says u depends on y and v depends on x, so the texture is effectively
     TRANSPOSED relative to the image as stored -- hence the np.ix_ + transpose rather
@@ -953,8 +1046,8 @@ def build_floor_pixmap(path, ppm, flip):
     xs = FLOOR_X0 + (np.arange(w) + 0.5) / ppm
     ys = FLOOR_Y1 - (np.arange(h) + 0.5) / ppm          # row 0 = max y
 
-    u = ys / TILE_M + U0
-    v = xs / TILE_M + V0
+    u = ys / TILE_U + U0
+    v = xs / TILE_V + V0
     if flip in ('u', 'uv'):
         u = -u
     if flip in ('v', 'uv'):
@@ -963,6 +1056,14 @@ def build_floor_pixmap(path, ppm, flip):
     vrow = (np.mod(v, 1.0) * th).astype(np.int64) % th   # -> texture row,    per COL
 
     img = tex[np.ix_(vrow, ucol)].transpose(1, 0, 2)     # (h, w, 3)
+    return np.ascontiguousarray(img)
+
+
+def build_floor_pixmap(path, ppm, flip, markings=False):
+    img = build_floor_array(path, ppm, flip)
+    if markings:
+        paint_markings(img, ppm, flip)
+    h, w = img.shape[:2]
     img = np.ascontiguousarray(img)
     qim = QImage(img.data, w, h, 3 * w, QImage.Format_RGB888).copy()
     return QPixmap.fromImage(qim)
@@ -1077,12 +1178,29 @@ class MapView(QWidget):
             state.warn('could not parse world (%s); obstacles hidden' % e)
 
         self.floor_pm = None
+        self.floor_marked_pm = None
+        self.show_marks = not args.no_markings
         if not args.no_floor:
             try:
                 self.floor_pm = build_floor_pixmap(args.texture, args.floor_ppm,
                                                    args.floor_flip)
             except Exception as e:
                 state.warn('floor texture unavailable (%s); flat fill' % e)
+            if self.floor_pm is not None and not args.no_markings:
+                # Painted markings are baked into a SECOND pixmap rather than drawn
+                # per frame: they are static, and blitting one image costs nothing
+                # while scan-converting 150 triangles every repaint would not.
+                try:
+                    img = build_floor_array(args.texture, args.floor_ppm, args.floor_flip)
+                    n = paint_markings(img, args.floor_ppm, args.floor_flip)
+                    h, w = img.shape[:2]
+                    img = np.ascontiguousarray(img)
+                    self.floor_marked_pm = QPixmap.fromImage(
+                        QImage(img.data, w, h, 3 * w, QImage.Format_RGB888).copy())
+                    print('[viewer] %d floor-marking triangles rasterised' % n)
+                except Exception as e:
+                    state.warn('floor markings unavailable (%s)' % e)
+                    self.show_marks = False
 
         self.static_pm = None
         self.dirty = True
@@ -1145,11 +1263,14 @@ class MapView(QWidget):
         p.save()
         self._rotate_painter(p)
 
-        if self.floor_pm is not None:
+        floor_pm = (self.floor_marked_pm
+                    if self.show_marks and self.floor_marked_pm is not None
+                    else self.floor_pm)
+        if floor_pm is not None:
             tl = v.to_screen(FLOOR_X0, FLOOR_Y1)
             br = v.to_screen(FLOOR_X1, FLOOR_Y0)
             p.drawPixmap(QRectF(tl[0], tl[1], br[0] - tl[0], br[1] - tl[1]),
-                         self.floor_pm, QRectF(self.floor_pm.rect()))
+                         floor_pm, QRectF(floor_pm.rect()))
         else:
             p.fillRect(v.poly([(FLOOR_X0, FLOOR_Y0), (FLOOR_X1, FLOOR_Y0),
                                (FLOOR_X1, FLOOR_Y1), (FLOOR_X0, FLOOR_Y1)]
@@ -1578,6 +1699,13 @@ class MapView(QWidget):
             self.repeat_seen.add(act)
             self.last_evt[act] = time.monotonic()
             return
+        # A keyboard repeats the newest key and only that one, and it never RESUMES
+        # repeating an older one -- releasing d does not restart w's repeat stream.
+        # So every key already down has just lost its repeats permanently, and their
+        # silence stops being evidence of anything. Drop them from repeat_seen, which
+        # is what the watchdog gates on, or releasing d kills the throttle the
+        # instant the held count falls back to one.
+        self.repeat_seen.difference_update(self.held)
         self.held.add(act)
         self.last_evt[act] = time.monotonic()
         self._arm()
@@ -1652,6 +1780,13 @@ class MapView(QWidget):
             self.view.fit(self.width(), self.height())
             self.dirty = True
             self.state.warn('view rotated to %d deg' % self.view.rot)
+        elif k == Qt.Key_L:
+            if self.floor_marked_pm is None:
+                self.state.warn('no floor markings (--no-markings, or none parsed)')
+            else:
+                self.show_marks = not self.show_marks
+                self.dirty = True
+                self.state.warn('floor markings %s' % ('on' if self.show_marks else 'off'))
         elif k == Qt.Key_T:
             self.show_trails = not self.show_trails
         elif k == Qt.Key_V:
@@ -1767,9 +1902,21 @@ class MapView(QWidget):
         # arrived for 0.6 s, we lost the release (window manager grab, etc.).
         # Only trust this when repeat has actually been observed -- with `xset r
         # off` silence proves nothing.
-        for act in list(self.held):
-            if act in self.repeat_seen and now - self.last_evt.get(act, now) > 0.6:
-                self.held.discard(act)
+        #
+        # And only when ONE key is held. A keyboard repeats the most recently
+        # pressed key and only that one, so pressing d while holding w stops w's
+        # repeats immediately. With several keys down, silence on one of them means
+        # "the keyboard is busy repeating another", not "this key came up" -- and
+        # expiring it here dropped the throttle 0.6 s into every turn, coasted the
+        # speed to zero, and with v=0 the yaw rate v*tan(steer)/L is zero however
+        # hard the wheel is turned. That is why w+d could not drive a circle.
+        #
+        # Multi-key therefore relies on Qt's real releases, plus the focus-out and
+        # window-deactivate panics below, which is what those exist for.
+        if len(self.held) == 1:
+            for act in list(self.held):
+                if act in self.repeat_seen and now - self.last_evt.get(act, now) > 0.6:
+                    self.held.discard(act)
 
         held = {k: (k in self.held) for k in ('throttle', 'brake', 'left', 'right')}
         if held['throttle']:
@@ -1864,9 +2011,17 @@ class MapView(QWidget):
         if dragged:
             yaw = math.atan2(dy, dx)
         else:
+            # Bearing from the robot TO the goal, not the robot's current heading.
+            # The planner is Dubins and has to ARRIVE on whatever yaw you send, and
+            # the current heading is arbitrary with respect to where you clicked.
+            # MEASURED from one pose: a goal whose yaw matched the approach bearing
+            # SUCCEEDED in ~3 s and 5 replans; the identical goal 180 deg round never
+            # converged in 75 s and 74 replans, because a Dubins path can only shed
+            # that much heading with a loop and the aisle has no room for one.
+            # Same rule as _resolve_route uses for click-placed waypoints.
             with self.state.lock:
                 gt = self.state.gt
-            yaw = gt[2] if gt else 0.0
+            yaw = math.atan2(y0 - gt[1], x0 - gt[0]) if gt else 0.0
         with self.state.lock:
             self.state.goal = (x0, y0, yaw)
         self.ros.request_goal(x0, y0, yaw)
@@ -1999,6 +2154,8 @@ def parse_args(argv):
     ap.add_argument('--floor-ppm', type=float, default=100.0)
     ap.add_argument('--floor-flip', choices=('none', 'u', 'v', 'uv'), default='none')
     ap.add_argument('--no-floor', action='store_true')
+    ap.add_argument('--no-markings', action='store_true',
+                    help='skip the painted bay/walkway markings on the floor')
     ap.add_argument('--rotate', type=int, choices=(0, 90, 180, 270), default=0,
                     help='rotate the map view by this many degrees. Only the world '
                          'layers turn -- the panel, scale bar and thumbnail stay '

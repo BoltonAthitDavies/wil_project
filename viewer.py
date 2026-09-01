@@ -2127,7 +2127,7 @@ def parse_args(argv):
                          'bridge_model_poses:=True. Measured ~57 Hz at RTF 0.98, so '
                          'about 13%% of a core; off by default because nothing in '
                          'the stock world moves.')
-    ap.add_argument('--pose-topic', default='/world/default/dynamic_pose/info',
+    ap.add_argument('--pose-topic', default='/world/default/pose/info',
                     help='bridged gz dynamic pose feed (tf2_msgs/TFMessage) used by '
                          '--live-poses')
     ap.add_argument('--plan-topic', default='/plan')

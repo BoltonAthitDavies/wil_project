@@ -6,3 +6,7 @@
 	path = aws-robomaker-small-warehouse-world
 	url = https://github.com/BoltonAthitDavies/aws-robomaker-small-warehouse-world.git
 	branch = gz-sim-fortress
+[submodule "rtabmap_ros"]
+	path = rtabmap_ros
+	url = https://github.com/BoltonAthitDavies/rtabmap_ros.git
+	branch = ros2

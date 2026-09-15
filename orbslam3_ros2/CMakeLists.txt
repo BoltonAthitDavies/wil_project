@@ -60,6 +60,7 @@ find_package(tf2_geometry_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(image_transport REQUIRED)
 find_package(message_filters REQUIRED)
+find_package(vision_msgs REQUIRED)
 find_package(OpenCV 4 REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(Pangolin REQUIRED)
@@ -101,7 +102,7 @@ target_link_options(orbslam3_node PRIVATE "-Wl,--disable-new-dtags")
 ament_target_dependencies(orbslam3_node
   rclcpp sensor_msgs nav_msgs geometry_msgs
   tf2 tf2_ros tf2_geometry_msgs
-  cv_bridge image_transport message_filters)
+  cv_bridge image_transport message_filters vision_msgs)
 
 install(
   DIRECTORY launch config
@@ -109,6 +110,12 @@ install(
 
 install(
   TARGETS orbslam3_node
+  DESTINATION lib/${PROJECT_NAME})
+
+# The YOLO detector is Python because the weights are a PyTorch .pt; see the
+# module docstring. PROGRAMS, not TARGETS -- it is a script, not a build product.
+install(
+  PROGRAMS scripts/dynamic_detector_node.py
   DESTINATION lib/${PROJECT_NAME})
 
 ament_package()

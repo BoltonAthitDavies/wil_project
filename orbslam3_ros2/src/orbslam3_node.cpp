@@ -25,7 +25,16 @@
 #include <sensor_msgs/msg/imu.hpp>
 #include <string>
 #include <tf2_ros/transform_broadcaster.h>
+#include <algorithm>
+#include <cmath>
+#include <fstream>
+#include <iomanip>
+#include <deque>
+#include <mutex>
 #include <utility>
+#include <vector>
+#include <vision_msgs/msg/detection2_d_array.hpp>
+#include <opencv2/imgproc.hpp>
 
 #include "orbslam3_ros2/slam_wrapper.hpp"
 #include "orbslam3_ros2/trajectory_writer.hpp"
@@ -58,6 +67,33 @@ public:
     // lets one binary serve both rigs -- VINS needs two extra republish
     // processes for the same job (see config/wil/stereo_imu.yaml:32-38).
     const auto transport = declare_parameter<std::string>("image_transport", "raw");
+
+    // --- dynamic object detection (RY-SLAM) ---------------------------------
+    // OFF BY DEFAULT. With filter=false no detection subscription is created and
+    // an empty mask travels all the way down, where ORBextractor short-circuits
+    // on it -- so a default run is the stock tracker, bit for bit, and the
+    // recorded sim baseline stays reproducible.
+    filter_ = declare_parameter<bool>("filter", false);
+    const auto dets_topic =
+      declare_parameter<std::string>("dynamic_dets_topic", "/orbslam3/dynamic_dets");
+    // Detection boxes clip their objects slightly, and a feature ON the silhouette
+    // of a moving crate is exactly the one that corrupts the map. Grow them.
+    mask_dilate_px_ = declare_parameter<int>("mask_dilate_px", 8);
+    // Older than this and the object has moved on; masking with it would blank a
+    // static region and leave the real one uncovered.
+    det_max_age_ = declare_parameter<double>("det_max_age", 0.15);
+    // Safety valve. One false positive spanning the frame would starve the tracker
+    // of features and lose the map, which is far worse than not filtering.
+    //
+    // 0.8 is measured, not guessed. Over all 791 frames of dataset/dynamic_dataset
+    // the dilated boxes cover mean 43.5% of the frame, p90 61%, max 72.8% -- the
+    // warehouse is FULL of bins and boxes, most of them scenery. A 0.6 limit
+    // therefore fires on 12% of frames during entirely normal operation, which is
+    // the worst of both worlds: those frames get no filtering while their
+    // neighbours do, so the dynamic points leak into the map anyway. 0.8 sits
+    // above the observed maximum, so it only catches a genuinely runaway
+    // detection while leaving normal operation consistently filtered.
+    max_mask_fraction_ = declare_parameter<double>("max_mask_fraction", 0.8);
 
     world_frame_ = declare_parameter<std::string>("world_frame_id", "orbslam3_world");
     body_frame_ = declare_parameter<std::string>("body_frame_id", "base_footprint");
@@ -95,6 +131,21 @@ public:
     if (!output_path.empty()) {
       writer_ = std::make_unique<TrajectoryWriter>(output_path + "/vio.csv");
       RCLCPP_INFO(get_logger(), "trajectory : %s", writer_->path().c_str());
+      // What the filter ACTUALLY did this run, one row per frame, keyed by the
+      // same timestamp vio.csv uses so the two join on column 0. Not the same
+      // thing as scoring the detector offline with script/yolo_eval.py: this
+      // records the masks the tracker really saw, including the frames where no
+      // detection was recent enough and the ones whose mask was rejected.
+      if (filter_) {
+        mask_log_.open(output_path + "/yolo_mask.csv");
+        if (mask_log_) {
+          mask_log_ << "timestamp_ns,n_boxes,mask_coverage,matched,det_age_ms,rejected\n";
+          RCLCPP_INFO(get_logger(), "mask log   : %s/yolo_mask.csv", output_path.c_str());
+        } else {
+          RCLCPP_WARN(get_logger(), "could not open %s/yolo_mask.csv",
+                      output_path.c_str());
+        }
+      }
     }
 
     // --- publishers ---------------------------------------------------------
@@ -147,9 +198,37 @@ public:
         std::bind(&Orbslam3Node::onStereo, this, std::placeholders::_1, std::placeholders::_2));
     }
 
+    if (filter_) {
+      dets_sub_ = create_subscription<vision_msgs::msg::Detection2DArray>(
+        dets_topic, rclcpp::SensorDataQoS(),
+        std::bind(&Orbslam3Node::onDetections, this, std::placeholders::_1));
+      RCLCPP_INFO(
+        get_logger(), "filter     : ON -- masking dynamic objects from %s "
+        "(dilate %d px, max age %.0f ms)",
+        dets_topic.c_str(), mask_dilate_px_, det_max_age_ * 1e3);
+    } else {
+      RCLCPP_INFO(get_logger(), "filter     : off (stock ORB-SLAM3 feature extraction)");
+    }
+
     if (use_imu_) {
+      // RELIABLE with a deep queue, NOT SensorDataQoS.
+      //
+      // SensorDataQoS is BEST_EFFORT with depth 5 -- about 25 ms of buffer at
+      // 200 Hz, which a single 60 ms TrackStereo call overruns, so IMU samples
+      // were being dropped exactly when the node was busiest. That matters more
+      // than it sounds: ORB-SLAM3's PreintegrateIMU() dies (SIGSEGV) when only
+      // ONE sample falls between consecutive frames, and dataset_real_000 has
+      // three frame intervals holding exactly two -- one dropped message from
+      // the cliff edge.
+      //
+      // Safe here because every producer offers RELIABLE: `ros2 bag play`
+      // replays the recorded profile (all three topics in that bag are
+      // RELIABLE/VOLATILE) and realsense_imu/imu_node.py publishes RELIABLE
+      // deliberately, for this same reason. If you ever point this at a
+      // BEST_EFFORT publisher the subscription will match nothing and go
+      // silent -- that is the QoS trap viewer.py's docstring warns about.
       imu_sub_ = create_subscription<sensor_msgs::msg::Imu>(
-        imu_topic, rclcpp::SensorDataQoS(),
+        imu_topic, rclcpp::QoS(rclcpp::KeepLast(2000)),
         std::bind(&Orbslam3Node::onImu, this, std::placeholders::_1));
     }
 
@@ -182,6 +261,23 @@ public:
         "normal; many means the IMU topic is lagging or absent.",
         slam_->starvedFrames());
     }
+    if (filter_) {
+      RCLCPP_INFO(
+        get_logger(), "dynamic filter: %zu frames masked, %zu with no recent detection",
+        det_matched_, det_missed_);
+      if (det_matched_ == 0) {
+        RCLCPP_WARN(
+          get_logger(),
+          "filter was ON but NOT ONE frame matched a detection. Is the detector node "
+          "running, and is det_max_age (%.0f ms) long enough for its inference time?",
+          det_max_age_ * 1e3);
+      }
+      if (mask_rejected_ > 0) {
+        RCLCPP_WARN(
+          get_logger(), "discarded %zu masks for exceeding max_mask_fraction",
+          mask_rejected_);
+      }
+    }
     if (slam_ && slam_->droppedFrames() > 0) {
       RCLCPP_WARN(
         get_logger(),
@@ -202,6 +298,127 @@ private:
   static double stampSeconds(const builtin_interfaces::msg::Time & t)
   {
     return static_cast<double>(t.sec) + static_cast<double>(t.nanosec) * 1e-9;
+  }
+
+  /// Buffers detections by their SOURCE IMAGE stamp, which the detector copies
+  /// verbatim. Deliberately NOT part of the stereo message_filters sync: a 3-way
+  /// ApproximateTime would drop stereo pairs whenever inference falls behind the
+  /// camera, and losing frames hurts tracking far more than an unfiltered frame
+  /// does. Nearest-stamp lookup with a max-age bound degrades gracefully instead.
+  void onDetections(const vision_msgs::msg::Detection2DArray::ConstSharedPtr msg)
+  {
+    std::vector<cv::Rect2f> boxes;
+    boxes.reserve(msg->detections.size());
+    for (const auto & det : msg->detections) {
+      const float w = static_cast<float>(det.bbox.size_x);
+      const float h = static_cast<float>(det.bbox.size_y);
+      if (w <= 0.0f || h <= 0.0f) {
+        continue;
+      }
+      boxes.emplace_back(
+        static_cast<float>(det.bbox.center.position.x) - 0.5f * w,
+        static_cast<float>(det.bbox.center.position.y) - 0.5f * h, w, h);
+    }
+    std::lock_guard<std::mutex> lk(dets_mu_);
+    dets_.emplace_back(stampSeconds(msg->header.stamp), std::move(boxes));
+    // A couple of seconds of history at camera rate. Anything older than
+    // det_max_age is unusable anyway, so the cap only bounds memory.
+    while (dets_.size() > 60) {
+      dets_.pop_front();
+    }
+  }
+
+  /// Builds the CV_8UC1 mask for a frame: 255 = static/keep, 0 = dynamic.
+  /// Returns an empty Mat when filtering is off, when no detection is recent
+  /// enough, or when the result would blank too much of the image.
+  cv::Mat maskFor(double t, const cv::Size & size)
+  {
+    if (!filter_) {
+      return cv::Mat();
+    }
+
+    std::vector<cv::Rect2f> boxes;
+    {
+      std::lock_guard<std::mutex> lk(dets_mu_);
+      double best = det_max_age_;
+      const std::vector<cv::Rect2f> * pick = nullptr;
+      for (const auto & [t_det, b] : dets_) {
+        const double age = std::fabs(t_det - t);
+        if (age <= best) {
+          best = age;
+          pick = &b;
+        }
+      }
+      if (!pick) {
+        ++det_missed_;
+        last_ = LogRow{0, 0.0, false, -1.0, false};
+        return cv::Mat();
+      }
+      boxes = *pick;
+      last_age_ = best;
+    }
+    ++det_matched_;
+
+    if (boxes.empty()) {
+      // A real "nothing dynamic in this frame" answer. Returning an empty Mat is
+      // both correct and cheaper than an all-255 one -- ORBextractor skips the
+      // per-keypoint test entirely.
+      last_ = LogRow{0, 0.0, true, last_age_, false};
+      return cv::Mat();
+    }
+
+    cv::Mat mask(size, CV_8UC1, cv::Scalar(255));
+    const int d = std::max(0, mask_dilate_px_);
+    double dynamic_area = 0.0;
+    for (const auto & b : boxes) {
+      cv::Rect r(
+        static_cast<int>(std::floor(b.x)) - d, static_cast<int>(std::floor(b.y)) - d,
+        static_cast<int>(std::ceil(b.width)) + 2 * d,
+        static_cast<int>(std::ceil(b.height)) + 2 * d);
+      r &= cv::Rect(0, 0, size.width, size.height);
+      if (r.area() <= 0) {
+        continue;
+      }
+      // Count before painting so overlapping boxes are not double-counted.
+      dynamic_area += cv::countNonZero(mask(r));
+      mask(r).setTo(0);
+    }
+
+    const double fraction = dynamic_area / static_cast<double>(size.area());
+    if (fraction > max_mask_fraction_) {
+      ++mask_rejected_;
+      last_ = LogRow{boxes.size(), fraction, true, last_age_, true};
+      RCLCPP_WARN_THROTTLE(
+        get_logger(), *get_clock(), 2000,
+        "dynamic mask would cover %.0f%% of the frame (limit %.0f%%) -- ignoring it "
+        "for this frame rather than starving the tracker",
+        fraction * 100.0, max_mask_fraction_ * 100.0);
+      return cv::Mat();
+    }
+    last_ = LogRow{boxes.size(), fraction, true, last_age_, false};
+    return mask;
+  }
+
+  /// One row per frame into yolo_mask.csv. Timestamp is written as integer
+  /// nanoseconds, exactly as TrajectoryWriter does for vio.csv, so a join on
+  /// column 0 lines the two files up with no tolerance fudging.
+  void logMask(const builtin_interfaces::msg::Time & stamp)
+  {
+    if (!mask_log_) {
+      return;
+    }
+    const int64_t ns = static_cast<int64_t>(stamp.sec) * 1000000000LL +
+      static_cast<int64_t>(stamp.nanosec);
+    mask_log_ << ns << ',' << last_.n_boxes << ','
+              << std::fixed << std::setprecision(4) << last_.coverage << ','
+              << (last_.matched ? 1 : 0) << ','
+              << std::setprecision(1) << (last_.age_s < 0 ? -1.0 : last_.age_s * 1e3)
+              << ',' << (last_.rejected ? 1 : 0) << '\n';
+    // Flush every row. A run is normally ended with Ctrl+C or a kill, neither of
+    // which is guaranteed to run this object's destructor, and an unflushed
+    // stream loses its tail -- which showed up as a half-written final line that
+    // broke CSV parsing. One flush per frame at camera rate costs nothing.
+    mask_log_.flush();
   }
 
   void onImu(const sensor_msgs::msg::Imu::ConstSharedPtr msg)
@@ -230,7 +447,10 @@ private:
     // The LEFT stamp is the frame time, and it is the same clock
     // script/extract_gt.py samples for ground_truth.csv, so no time alignment
     // is needed when comparing the two.
-    slam_->pushStereo(stampSeconds(left->header.stamp), l->image, r->image);
+    const double t = stampSeconds(left->header.stamp);
+    const cv::Mat mask = maskFor(t, l->image.size());
+    logMask(left->header.stamp);
+    slam_->pushStereo(t, l->image, r->image, mask);
   }
 
   void onStereoCompressed(
@@ -245,7 +465,10 @@ private:
         "could not decode a compressed frame (format \"%s\")", left->format.c_str());
       return;
     }
-    slam_->pushStereo(stampSeconds(left->header.stamp), l, r);
+    const double t = stampSeconds(left->header.stamp);
+    const cv::Mat mask = maskFor(t, l.size());
+    logMask(left->header.stamp);
+    slam_->pushStereo(t, l, r, mask);
   }
 
   void onTrackResult(const TrackResult & r)
@@ -312,6 +535,10 @@ private:
 
   bool use_imu_{true};
   bool publish_tf_{true};
+  bool filter_{false};
+  int mask_dilate_px_{8};
+  double det_max_age_{0.15};
+  double max_mask_fraction_{0.8};
   bool finished_{false};
   bool first_pose_seen_{false};
   std::string world_frame_, body_frame_;
@@ -324,6 +551,26 @@ private:
   message_filters::Subscriber<sensor_msgs::msg::CompressedImage> cleft_sub_, cright_sub_;
   std::unique_ptr<CompressedSync> csync_;
   rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_sub_;
+
+  rclcpp::Subscription<vision_msgs::msg::Detection2DArray>::SharedPtr dets_sub_;
+  std::mutex dets_mu_;
+  std::deque<std::pair<double, std::vector<cv::Rect2f>>> dets_;
+  /// What maskFor() decided about the frame currently being pushed.
+  struct LogRow
+  {
+    std::size_t n_boxes{0};
+    double coverage{0.0};
+    bool matched{false};
+    double age_s{-1.0};
+    bool rejected{false};
+  };
+  LogRow last_;
+  double last_age_{-1.0};
+  std::ofstream mask_log_;
+
+  std::size_t det_matched_{0};
+  std::size_t det_missed_{0};
+  std::size_t mask_rejected_{0};
 
   rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_pub_;
   rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr pose_pub_;

@@ -190,6 +190,41 @@ patch_orbslam3() {
         grep -q 'GetTracker' "$f" || die "System.h GetTracker patch did not take"
         echo "    patched System.h       (added GetTracker accessor)"
     fi
+
+    # (5) UPSTREAM BUG -> SIGSEGV. Tracking::PreintegrateIMU() has three early
+    #     returns; the first two call mCurrentFrame.setIntegrated() before
+    #     bailing, the third does not:
+    #
+    #         const int n = mvImuFromLastFrame.size()-1;
+    #         if(n==0){ cout << "Empty IMU measurements vector!!!\n"; return; }
+    #
+    #     The frame is then left un-preintegrated, the caller reports
+    #     "Not preintegrated measurement", and a null preintegration is
+    #     dereferenced -- exit code -11.
+    #
+    #     Note the message lies: n is size-1, so it fires when there is exactly
+    #     ONE IMU sample between consecutive frames, not zero. Guarding the
+    #     node against an EMPTY vector (which we also do) is therefore not
+    #     enough to avoid it.
+    #
+    #     Hit on dataset/dataset_real_000: images 30 Hz and IMU 200 Hz give a
+    #     median of 7 samples per frame interval, but three intervals in that
+    #     bag hold exactly 2 -- one dropped IMU message away from the bug.
+    f="$ORB_SRC/src/Tracking.cc"
+    if grep -q 'Empty IMU measurements vector' "$f" && \
+       ! grep -q 'orbslam3_ros2 patch: mark the frame integrated' "$f"; then
+        python3 - "$f" <<'PYEOF'
+import pathlib, sys
+p = pathlib.Path(sys.argv[1]); s = p.read_text()
+old = '        cout << "Empty IMU measurements vector!!!\\n";\n        return;'
+new = ('        cout << "Empty IMU measurements vector!!!\\n";\n'
+       '        // orbslam3_ros2 patch: mark the frame integrated before bailing out.\n'
+       '        mCurrentFrame.setIntegrated();\n        return;')
+assert old in s, "Tracking.cc n==0 branch not found"
+p.write_text(s.replace(old, new, 1))
+PYEOF
+        echo "    patched Tracking.cc    (setIntegrated on the n==0 early return)"
+    fi
 }
 
 stage_orbslam3() {

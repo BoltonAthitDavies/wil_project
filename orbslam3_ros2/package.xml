@@ -23,6 +23,14 @@
   <depend>cv_bridge</depend>
   <depend>image_transport</depend>
   <depend>message_filters</depend>
+  <depend>vision_msgs</depend>
+
+  <!-- For scripts/dynamic_detector_node.py. exec_depend only: the node is a
+       Python script, so nothing about it is needed at build time. ultralytics
+       itself has no rosdep key and is installed with pip; see the docstring. -->
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>python3-opencv</exec_depend>
+  <exec_depend>python3-numpy</exec_depend>
 
   <!-- Not declared as rosdep keys, matching vins_fusion_ros2: OpenCV and Eigen
        come from the system, and ORB-SLAM3 + Pangolin are built out of tree by

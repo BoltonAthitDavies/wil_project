@@ -28,6 +28,18 @@
 //   <speed>       m/s along the path            (default 1.0)
 //   <loop>        true = ping-pong forever      (default true)
 //   <dwell>       seconds paused at each end    (default 0)
+//   <dwell_far>   seconds paused at the FAR end  (defaults to <dwell>)
+//   <dwell_home>  seconds paused at the HOME end (defaults to <dwell>)
+//
+//   Asymmetric dwell is what makes a staggered convoy possible. Two groups that
+//   share a corridor and start at different times must ALSO turn round at
+//   different times, or the leader drives home through the follower. With one
+//   symmetric dwell that needs unequal periods, so the pattern drifts and
+//   eventually collides. Splitting the wait lets both keep the SAME period
+//   (2T + far + home) while turning at different moments.
+//   <phase>       seconds to offset this model's cycle (default 0). Two groups
+//                 sharing a route can be staggered so one departs after the
+//                 other, instead of moving in lockstep.
 // Orientation and z are taken from the model's spawn pose and never changed.
 
 #include <ignition/plugin/Register.hh>
@@ -69,6 +81,13 @@ class KinematicTrajectory
       this->loop = sdf->Get<bool>("loop");
     if (sdf->HasElement("dwell"))
       this->dwell = sdf->Get<double>("dwell");
+    if (sdf->HasElement("phase"))
+      this->phase = sdf->Get<double>("phase");
+    this->dwellFar = this->dwellHome = this->dwell;
+    if (sdf->HasElement("dwell_far"))
+      this->dwellFar = sdf->Get<double>("dwell_far");
+    if (sdf->HasElement("dwell_home"))
+      this->dwellHome = sdf->Get<double>("dwell_home");
 
     if (this->wps.size() < 2)
     {
@@ -105,23 +124,26 @@ class KinematicTrajectory
       this->init = true;
     }
 
-    const double t = std::chrono::duration<double>(_info.simTime).count();
+    // Shift the clock, not the path: a phase offset makes this model start its
+    // cycle later (or earlier) without changing where it goes.
+    const double t =
+        std::chrono::duration<double>(_info.simTime).count() - this->phase;
 
     // Time to traverse the path once, plus a dwell at each end.
     const double travel = this->total / this->speed;
     double u;                                   // arc length along the path
     if (this->loop)
     {
-      const double period = 2.0 * (travel + this->dwell);
+      const double period = 2.0 * travel + this->dwellFar + this->dwellHome;
       double phase = std::fmod(t, period);
       if (phase < 0) phase += period;
-      if (phase < travel)                       // outbound
+      if (phase < travel)                            // outbound
         u = phase * this->speed;
-      else if (phase < travel + this->dwell)    // waiting at the far end
+      else if (phase < travel + this->dwellFar)      // waiting at the far end
         u = this->total;
-      else if (phase < 2.0 * travel + this->dwell)  // return leg
-        u = this->total - (phase - travel - this->dwell) * this->speed;
-      else                                      // waiting at the start
+      else if (phase < 2.0 * travel + this->dwellFar)  // return leg
+        u = this->total - (phase - travel - this->dwellFar) * this->speed;
+      else                                           // waiting at home
         u = 0.0;
     }
     else
@@ -165,6 +187,9 @@ class KinematicTrajectory
   private: double total{0.0};
   private: double speed{1.0};
   private: double dwell{0.0};
+  private: double phase{0.0};
+  private: double dwellFar{0.0};
+  private: double dwellHome{0.0};
   private: bool loop{true};
   private: bool init{false};
   private: ignition::math::Pose3d pose0;

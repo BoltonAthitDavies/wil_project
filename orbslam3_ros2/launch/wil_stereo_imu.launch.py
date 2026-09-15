@@ -25,6 +25,7 @@ import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
+from launch.conditions import IfCondition
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
@@ -35,6 +36,10 @@ DEFAULT_OUTPUT = os.path.expanduser('~/output/wil_orbslam3_stereo_imu')
 # 9.81 / 9.2642. Set back to 1.0 once the accelerometer is recalibrated
 # (rs-imu-calibration.py) -- leaving it on after a fix would double-correct.
 ACCEL_SCALE = 9.81 / 9.2642
+
+# YOLO weights for dynamic-object detection. Classes are bin/box/bucket -- these
+# are warehouse-prop weights, so on real-rig bags expect fewer hits than in sim.
+DEFAULT_WEIGHTS = os.path.join(WORKSPACE, 'weight', 'best.pt')
 
 
 def generate_launch_description():
@@ -49,6 +54,14 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'imu_accel_scale', default_value=str(ACCEL_SCALE),
             description='Accelerometer correction; 1.0 once the IMU is recalibrated.'),
+        DeclareLaunchArgument(
+            'filter', default_value='false',
+            description='RY-SLAM dynamic-object filtering. When true, also starts '
+                        'the YOLO detector node. Default false = stock tracker.'),
+        DeclareLaunchArgument('weights_path', default_value=DEFAULT_WEIGHTS),
+        DeclareLaunchArgument(
+            'dynamic_classes', default_value="['bin', 'box', 'bucket']"),
+        DeclareLaunchArgument('publish_debug_image', default_value='false'),
     ]
 
     node = Node(
@@ -83,7 +96,29 @@ def generate_launch_description():
             'publish_tf': True,
 
             'sync_slop': 0.02,
+
+            'filter': LaunchConfiguration('filter'),
         }],
     )
 
-    return LaunchDescription(args + [node])
+    detector = Node(
+        package='orbslam3_ros2',
+        executable='dynamic_detector_node.py',
+        name='dynamic_detector',
+        output='screen',
+        emulate_tty=True,
+        condition=IfCondition(LaunchConfiguration('filter')),
+        parameters=[{
+            'use_sim_time': False,
+            'weights_path': LaunchConfiguration('weights_path'),
+            'dynamic_classes': LaunchConfiguration('dynamic_classes'),
+            'image_topic': '/cam0/image_raw',
+            # These bags carry ONLY /camN/image_raw/compressed, so the detector
+            # decodes JPEG itself -- to COLOUR, unlike the tracker, which wants
+            # grayscale. Same blobs, different decode.
+            'image_transport': 'compressed',
+            'publish_debug_image': LaunchConfiguration('publish_debug_image'),
+        }],
+    )
+
+    return LaunchDescription(args + [node, detector])

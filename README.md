@@ -15,18 +15,18 @@ scripts can put them on one axis against the simulator's ground truth.
 | [`vins_fusion_ros2/`](vins_fusion_ros2/) | **submodule** (`wil`) — VINS-Fusion port to ROS 2, with `wil` / `wil_sim` configs |
 | [`orbslam3_ros2/`](orbslam3_ros2/) | ORB-SLAM3 stereo + stereo-inertial node, written for this workspace. See its [README](orbslam3_ros2/README.md) |
 | [`realsense/realsense_imu/`](realsense/realsense_imu/) | IMU publisher for the real D435i rig |
-| [`script/`](script/) | trajectory extraction, plotting and comparison tools |
+| [`script/`](script/) | world authoring, trajectory extraction, plotting and comparison tools |
 | [`output/`](output/) | committed results — `vio.csv` per run, plus comparison plots |
 | `thirdparty/` | *not committed* — ORB-SLAM3 (our fork, `wil`) and Pangolin sources, built by `build_orbslam3.sh` |
 | `dataset/` | *not committed* — recorded rosbags, see [Data](#data) |
 
-Root tools:
+Tools:
 
 - [`build_orbslam3.sh`](build_orbslam3.sh) — build the ORB-SLAM3 core and Pangolin out of tree
 - [`build_progress.sh`](build_progress.sh) — read-only progress check on that build
-- [`viewer.py`](viewer.py) — 2D top-down viewer for the warehouse sim; also drives
-- [`drive.py`](drive.py) — car-style keyboard driving for the ackermann robot
-- [`bake_map.py`](bake_map.py) — bake a nav2 occupancy map from the world's collision meshes
+- [`script/viewer.py`](script/viewer.py) — 2D top-down viewer for the warehouse sim; also drives
+- [`script/drive.py`](script/drive.py) — car-style keyboard driving for the ackermann robot
+- [`script/bake_map.py`](script/bake_map.py) — bake a nav2 occupancy map from the world's collision meshes
 
 ## First-time setup
 
@@ -74,7 +74,7 @@ Against the live simulator instead of a bag:
 
 ```bash
 ros2 launch aws_robomaker_small_warehouse_world small_warehouse.launch.py headless:=True
-python3 viewer.py            # watch and drive
+python3 script/viewer.py     # watch and drive
 ```
 
 Then compare the two estimators on a finished run:

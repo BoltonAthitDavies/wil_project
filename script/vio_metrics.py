@@ -33,15 +33,62 @@ DIVERGED_ERROR = 50.0         # m
 # which is what makes it usable on the bags that have no ground truth.
 PLAUSIBLE_MEAN_SPEED = 3.0    # m/s
 
+# (display label, output tree) for every system a dataset might carry. SYSTEMS is the
+# default pair every script uses unless told otherwise. SYSTEMS_YOLO adds the
+# YOLO-masked variants -- run separately, on a handful of datasets, to test whether
+# masking out detected dynamic objects before tracking recovers what plain VINS/ORB
+# lose on those scenes. Any caller can pass its own `systems` list; nothing below
+# assumes there are exactly two.
+SYSTEMS = [("VINS-Fusion", "output_vins"), ("ORB-SLAM3", "output_orb")]
+SYSTEMS_YOLO = SYSTEMS + [("VINS-Fusion+YOLO", "output_vins_yolo"),
+                          ("ORB-SLAM3+YOLO", "output_orb_yolo")]
 
-def sources(dataset):
-    return [("VINS-Fusion", os.path.join(ROOT, "output/output_vins", dataset, "vio.csv")),
-            ("ORB-SLAM3", os.path.join(ROOT, "output/output_orb", dataset, "vio.csv"))]
+
+def sources(dataset, systems=SYSTEMS):
+    return [(label, os.path.join(ROOT, "output", tree, dataset, "vio.csv"))
+            for label, tree in systems]
 
 
-def gt_candidates(dataset):
-    return [os.path.join(ROOT, "output/output_vins", dataset, "ground_truth.csv"),
-            os.path.join(ROOT, "output/output_orb", dataset, "ground_truth.csv")]
+def gt_candidates(dataset, systems=SYSTEMS):
+    # Order matters: the first tree that has ground_truth.csv wins. YOLO trees are
+    # never the extraction target (extract_gt.py always writes under output_vins/),
+    # so for SYSTEMS_YOLO this just checks the same two trees SYSTEMS would, plus two
+    # that in practice never hold a copy -- harmless, and keeps this generic rather
+    # than special-casing YOLO trees out.
+    seen = dict.fromkeys(tree for _, tree in systems)
+    return [os.path.join(ROOT, "output", tree, dataset, "ground_truth.csv")
+            for tree in seen]
+
+
+def discover(prefix="", contains=None, exclude=None, systems=SYSTEMS):
+    """Every dataset with at least one vio.csv, as 'group/name'.
+
+    Discovery beats a hand-kept list: a run shows up in every report as soon as it is
+    processed, and one that is deleted stops being reported instead of erroring.
+
+    `prefix` matches from the start of 'group/name' (e.g. "simulation/" for one tree).
+    `contains` matches a substring anywhere in the name -- for pulling out one family
+    of runs (e.g. "nofloortexture") regardless of which group they fall under.
+    `exclude` is the converse: drop anything containing this substring, for keeping a
+    family that is being reported separately out of the combined view.
+    `systems` controls which output trees are scanned -- pass SYSTEMS_YOLO to also
+    find datasets that only have a YOLO-masked run.
+    """
+    found = set()
+    for tree in dict.fromkeys(tree for _, tree in systems):
+        base = os.path.join(ROOT, "output", tree)
+        if not os.path.isdir(base):
+            continue
+        for group in sorted(os.listdir(base)):
+            gdir = os.path.join(base, group)
+            if not os.path.isdir(gdir):
+                continue
+            for name in sorted(os.listdir(gdir)):
+                if os.path.exists(os.path.join(gdir, name, "vio.csv")):
+                    found.add(f"{group}/{name}")
+    return sorted(d for d in found
+                  if d.startswith(prefix) and (contains is None or contains in d)
+                  and (exclude is None or exclude not in d))
 
 
 def load(path):
@@ -126,6 +173,37 @@ def resample_deg(t_src, a_src, t_dst):
     return np.degrees((out + np.pi) % (2 * np.pi) - np.pi)
 
 
+def resample_quat(t_src, q_src, t_dst):
+    """Resample orientation onto t_dst by nlerp (linear interpolation + renormalise).
+
+    Quaternions need one more step than resample_deg: q and -q represent the SAME
+    rotation, so if the writer's sign convention flips between adjacent samples, linear
+    interpolation swings the short way through the wrong hemisphere. Fix continuity
+    first -- flip each sample so it lands in the same hemisphere as its predecessor --
+    then interpolate. nlerp is not the constant-angular-velocity slerp, but at pose
+    rates of 10+ Hz against inter-frame rotations of a few degrees the difference is
+    far below the geodesic error this feeds into.
+    """
+    q = q_src.copy()
+    flip = np.cumsum(np.sum(q[1:] * q[:-1], axis=1) < 0) % 2
+    q[1:][flip.astype(bool)] *= -1
+    out = np.stack([np.interp(t_dst, t_src, q[:, i]) for i in range(4)], axis=1)
+    return out / np.maximum(np.linalg.norm(out, axis=1, keepdims=True), 1e-12)
+
+
+def geodesic_deg(Ra, Rb):
+    """(N,3,3), (N,3,3) -> (N,) angle in degrees between corresponding rotations.
+
+    The rotational counterpart of ATE's position error: not a per-axis (yaw/pitch/roll)
+    difference, which breaks down near gimbal singularities and double-counts a single
+    tilt as error on two axes, but the single angle of the rotation that takes one
+    orientation to the other -- via the standard trace formula on R_a^T @ R_b.
+    """
+    Rd = np.einsum("nji,njk->nik", Ra, Rb)
+    tr = Rd[:, 0, 0] + Rd[:, 1, 1] + Rd[:, 2, 2]
+    return np.degrees(np.arccos(np.clip((tr - 1) / 2, -1.0, 1.0)))
+
+
 def num(x, w=10, prec=2):
     """Number in at most w characters. A fully diverged run reports distances of 1e13 m;
     plain %f then blows the column apart and welds the whole row into one token. Keep the
@@ -136,15 +214,30 @@ def num(x, w=10, prec=2):
     return f"{t:>{w}}"
 
 
-def analyse(dataset, log=lambda *_: None):
+def analyse(dataset, log=lambda *_: None, trim_start=0.0, systems=SYSTEMS):
     """Load a dataset and align every estimate to the reference.
 
-    Returns (rows, aligned, info) or None when nothing loads. `rows` is the per-system
-    metric tuple the reports print; `aligned` carries the resampled series the plots
-    draw; `info` holds the reference identity and the ground-truth arrays.
+    trim_start: seconds to discard from the FRONT of each estimate's own overlap with
+    the reference, before any metric is computed -- position, rotation, jumps, path
+    length, all of it. This is a per-estimator cut, not a per-dataset one: VINS and
+    ORB-SLAM3 initialise at different wall-clock offsets and take different lengths of
+    time to settle, so "the first 5 seconds" means the first 5 seconds each estimator
+    had data, not 5 seconds of the bag. The point is to separate "this run is bad at
+    steady state" from "this run needed a few seconds to initialise" -- the two look
+    identical in headline ATE but call for different fixes.
+
+    Returns (rows, aligned, info) or None when nothing loads. `rows` is a list of
+    per-system metric dicts (one per system that had usable, overlapping data) --
+    a dict rather than a positional tuple so a field can be added here without every
+    caller's unpacking breaking. `aligned` carries the resampled series the plots draw.
+    `info` holds the reference identity and the ground-truth arrays.
+
+    Each row dict has: name, poses, secs, path, ref, rms, max, final, jumps (array of
+    jump indices), clean_len, seg (longest-clean-segment summary or None), biggest
+    (largest single jump, metres), rot_rms, rot_max (rotational error in degrees).
     """
     runs = []
-    for name, path in sources(dataset):
+    for name, path in sources(dataset, systems):
         r = load(path)
         if r is None:
             log(f"  [skip] {name}: no usable data at {path}")
@@ -154,7 +247,7 @@ def analyse(dataset, log=lambda *_: None):
         return None
 
     gt = None
-    for c in gt_candidates(dataset):
+    for c in gt_candidates(dataset, systems):
         gt = load(c)
         if gt is not None:
             log(f"  ground truth: {c}")
@@ -169,9 +262,15 @@ def analyse(dataset, log=lambda *_: None):
         # orientation applied to become the world-frame velocity the estimators report.
         ref_v = np.einsum("nij,nj->ni", ref_R, gt[3])
         ref_eul = euler_zyx(ref_R)
+        ref_q = gt[2]
     else:
         ref_name, ref_t, ref_p = runs[0][0], runs[0][1], runs[0][2]
         ref_v = ref_eul = None
+        # Rotational error follows the same "no GT -> compare against the first
+        # estimator" convention translational error already uses (the console's
+        # "dev rms" label): with nothing to call truth, the two systems' mutual
+        # orientation agreement is the only rotational signal available.
+        ref_q = runs[0][3]
         log(f"  no ground truth; using {ref_name} as the reference frame")
 
     rows, aligned = [], []
@@ -182,6 +281,16 @@ def analyse(dataset, log=lambda *_: None):
             log(f"  [skip] {name}: only {m.sum()} samples overlap the reference")
             continue
         tc, pc, qc, vc = t[m], p[m], q[m], v[m]
+        if trim_start > 0:
+            # Cut from THIS run's own first overlapping sample, not from the bag's
+            # t=0 -- an estimator that only starts publishing at t=8s has no "first
+            # 5 seconds" before that to discard.
+            keep = tc >= tc[0] + trim_start
+            if keep.sum() < 10:
+                log(f"  [skip] {name}: only {keep.sum()} samples remain after "
+                    f"trimming the first {trim_start:.1f}s")
+                continue
+            tc, pc, qc, vc = tc[keep], pc[keep], qc[keep], vc[keep]
         rp = resample(ref_t, ref_p, tc)
         R, tr = umeyama(pc, rp)
         pa = (R @ pc.T).T + tr
@@ -189,7 +298,14 @@ def analyse(dataset, log=lambda *_: None):
         # orientations there too -- without it, "yaw" is measured from whichever
         # direction each estimator happened to be facing when it initialised.
         va = (R @ vc.T).T
-        eul = euler_zyx(R @ quat_to_R(qc))
+        Ra = R @ quat_to_R(qc)
+        eul = euler_zyx(Ra)
+        # Rotational error: the geodesic angle between this estimate's orientation
+        # (aligned into the reference frame) and the reference's own orientation at
+        # the same instant -- see geodesic_deg(). Bounded to [0, 180] regardless of
+        # how badly position has diverged, which is what lets it stay meaningful even
+        # on a run whose translational ATE has blown up to nonsense.
+        rot_err = geodesic_deg(Ra, quat_to_R(resample_quat(ref_t, ref_q, tc)))
         err = np.linalg.norm(pa - rp, axis=1)
         path_len = np.linalg.norm(np.diff(pc, axis=0), axis=1).sum()
         ref_len = np.linalg.norm(np.diff(rp, axis=0), axis=1).sum()
@@ -211,13 +327,15 @@ def analyse(dataset, log=lambda *_: None):
         # is large for the healthy run -- blaming it would be exactly backwards.
         aligned.append(dict(
             name=name, t=tc - tc[0], p=pa, ref=rp, err=err, v=va, eul=eul,
-            diverged=gt is not None and err.max() > DIVERGED_ERROR,
+            roterr=rot_err, diverged=gt is not None and err.max() > DIVERGED_ERROR,
             refv=None if ref_v is None else resample(ref_t, ref_v, tc),
             refeul=None if ref_eul is None else resample_deg(ref_t, ref_eul, tc)))
         biggest = steps[jumps].max() if len(jumps) else 0.0
-        rows.append((name, len(tc), tc[-1] - tc[0], path_len, ref_len,
-                     np.sqrt((err**2).mean()), err.max(), err[-1], jumps, clean_len, seg,
-                     biggest))
+        rows.append(dict(
+            name=name, poses=len(tc), secs=tc[-1] - tc[0], path=path_len, ref=ref_len,
+            rms=np.sqrt((err**2).mean()), max=err.max(), final=err[-1], jumps=jumps,
+            clean_len=clean_len, seg=seg, biggest=biggest,
+            rot_rms=np.sqrt((rot_err**2).mean()), rot_max=rot_err.max()))
 
     info = dict(gt=gt, ref_name=ref_name, ref_t=ref_t, ref_p=ref_p,
                 lbl="ATE rms" if gt is not None else "dev rms")

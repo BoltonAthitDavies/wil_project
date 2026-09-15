@@ -119,7 +119,9 @@ SlamWrapper::drainImuUpTo(double t)
   return out;
 }
 
-void SlamWrapper::pushStereo(double t, const cv::Mat & left, const cv::Mat & right)
+void SlamWrapper::pushStereo(
+  double t, const cv::Mat & left, const cv::Mat & right,
+  const cv::Mat & mask_left, const cv::Mat & mask_right)
 {
   {
     std::lock_guard<std::mutex> lk(frame_mu_);
@@ -133,7 +135,7 @@ void SlamWrapper::pushStereo(double t, const cv::Mat & left, const cv::Mat & rig
       frame_q_.pop_front();
       ++dropped_;
     }
-    frame_q_.push_back(PendingFrame{t, left, right});
+    frame_q_.push_back(PendingFrame{t, left, right, mask_left, mask_right});
   }
   frame_cv_.notify_one();
 }
@@ -161,17 +163,23 @@ void SlamWrapper::workerLoop()
       }
     }
 
-    // NEVER hand ORB-SLAM3 an empty IMU vector in inertial mode. Tracking's
-    // PreintegrateIMU() prints "Empty IMU measurements vector!!!", leaves the
-    // frame un-preintegrated, and then SEGFAULTS on it -- which is exactly how
-    // the first real-rig run died. Skipping the frame costs one image; passing
-    // it costs the process.
-    if (cfg_.use_imu && imu.empty()) {
+    // ORB-SLAM3 needs at least TWO IMU samples spanning the interval, not one.
+    // PreintegrateIMU() computes n = mvImuFromLastFrame.size()-1 and bails when
+    // n==0 -- so a single sample is as fatal as none, despite the message
+    // reading "Empty IMU measurements vector!!!". Upstream forgets to call
+    // setIntegrated() on that path, so the frame stays un-preintegrated and the
+    // caller dereferences a null preintegration (patch (5) in
+    // ../build_orbslam3.sh fixes that end of it). Guard both ends: skipping a
+    // frame costs one image, passing a thin vector costs the process.
+    if (cfg_.use_imu && imu.size() < 2) {
       ++imu_starved_;
       continue;
     }
 
-    const Sophus::SE3f Tcw = slam_->TrackStereo(frame.left, frame.right, frame.t, imu);
+    // The empty filename is upstream's own default; the masks follow it because
+    // they were appended last, so every unpatched call site still compiles.
+    const Sophus::SE3f Tcw = slam_->TrackStereo(
+      frame.left, frame.right, frame.t, imu, "", frame.mask_left, frame.mask_right);
 
     TrackResult r;
     r.stamp = frame.t;

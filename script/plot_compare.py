@@ -3,10 +3,19 @@
 
     python3 script/plot_compare.py simulation/sim
     python3 script/plot_compare.py real/rosbag_realsense_imu_cambaseline95mm
+    python3 script/plot_compare.py simulation/dataset_dynamic_nofloortexture_000 --yolo
 
 The argument is a dataset path relative to output/output_vins and output/output_orb,
 which are parallel trees. Ground truth is picked up from either side if present.
-Figures land in output/compare/<dataset>/.
+Figures land in output/compare/<dataset>/, as compare_{light,dark}.png -- or, with
+--yolo, compare_{light,dark}_yolo.png, so the two-system and four-system views of the
+same dataset sit side by side rather than one overwriting the other.
+
+--yolo adds VINS-Fusion+YOLO and ORB-SLAM3+YOLO (see vio_metrics.SYSTEMS_YOLO) --
+YOLO-masked variants run on a handful of datasets to test whether masking out detected
+dynamic objects before tracking recovers what plain VINS/ORB lose on those scenes. A
+system with no vio.csv for this dataset is silently absent, same as always -- most
+datasets only have the plain pair even when --yolo is passed.
 
 The metrics themselves live in vio_metrics.py, shared with plot_summary.py -- see that
 module for why the alignment is a full SE(3) fit and why the numbers are computed once.
@@ -22,34 +31,50 @@ import numpy as np
 from matplotlib.gridspec import GridSpec
 
 from vio_metrics import (DIVERGED_ERROR, JUMP_SPEED, PLAUSIBLE_MEAN_SPEED, ROOT,
-                         analyse, num)
+                         SYSTEMS, SYSTEMS_YOLO, analyse, num)
 
-DATASET = sys.argv[1] if len(sys.argv) > 1 else "simulation/sim"
+args = sys.argv[1:]
+YOLO = "--yolo" in args
+if YOLO:
+    args.remove("--yolo")
+DATASET = args[0] if args else "simulation/sim"
+SUFFIX = "_yolo" if YOLO else ""
 OUTDIR = os.path.join(ROOT, "output", "compare", DATASET)
 
+# Colours for the first two systems are unchanged from before --yolo existed, so a
+# plain two-system figure renders identically to always. The two YOLO colours are
+# appended, never inserted, so they only ever get used when a dataset actually has
+# that data -- the index a system's colour comes from is its position in `aligned`,
+# which just doesn't grow past 2 for every other dataset.
 THEMES = {
     "light": dict(surface="#fcfcfb", ink="#0b0b0b", ink2="#52514e", ink3="#8a8983",
-                  grid="#e3e2dd", series=("#1baf7a", "#2a78d6", "#eb6834")),
+                  grid="#e3e2dd",
+                  series=("#1baf7a", "#2a78d6", "#eb6834", "#7c5cd6", "#c23b7a")),
     "dark":  dict(surface="#1a1a19", ink="#ffffff", ink2="#c3c2b7", ink3="#87867d",
-                  grid="#33332f", series=("#199e70", "#3987e5", "#d95926")),
+                  grid="#33332f",
+                  series=("#199e70", "#3987e5", "#d95926", "#9678e8", "#e0568f")),
 }
 
-result = analyse(DATASET, print)
+result = analyse(DATASET, print, systems=SYSTEMS_YOLO if YOLO else SYSTEMS)
 if result is None:
     sys.exit(f"no trajectories found for '{DATASET}'")
 rows, aligned, info = result
 gt, ref_name, lbl = info["gt"], info["ref_name"], info["lbl"]
+# Name column width: fixed at 14 (the old constant) unless a longer name is actually
+# present, so every existing two-system dataset renders byte-identical to before this
+# was added, and only a run that actually has e.g. "VINS-Fusion+YOLO" widens the table.
+NAME_W = max(14, max((len(r["name"]) for r in rows), default=14) + 1)
 
 # --- report ------------------------------------------------------------------
 print(f"\n  {DATASET}   reference: {ref_name}\n")
-print(f"  {'system':<14}{'poses':>7}{'secs':>8}{'path m':>10}{'ref m':>10}"
+print(f"  {'system':<{NAME_W}}{'poses':>7}{'secs':>8}{'path m':>10}{'ref m':>10}"
       f"{lbl:>11}{'max':>10}{'final':>10}")
-for n, c, sec, pl, rl, rms, mx, fin, jm, cl, seg, bg in rows:
-    self_ref = (gt is None and n == ref_name)
+for r in rows:
+    self_ref = (gt is None and r["name"] == ref_name)
     cols = (f"{'--':>11}{'--':>10}{'--':>10}" if self_ref
-            else f"{num(rms, 11, 3)}{num(mx, 10, 3)}{num(fin, 10, 3)}")
-    print(f"  {n:<14}{c:>7}{sec:>8.1f}{num(pl)}{num(rl)}{cols}"
-          + ("   (reference)" if self_ref else ""))
+            else f"{num(r['rms'], 11, 3)}{num(r['max'], 10, 3)}{num(r['final'], 10, 3)}")
+    print(f"  {r['name']:<{NAME_W}}{r['poses']:>7}{r['secs']:>8.1f}{num(r['path'])}"
+          f"{num(r['ref'])}{cols}" + ("   (reference)" if self_ref else ""))
 
 # Plausibility first, and WITHOUT reference to the other system. On the real bags
 # there is no ground truth, so the reference is just whichever estimator came first --
@@ -57,45 +82,47 @@ for n, c, sec, pl, rl, rms, mx, fin, jm, cl, seg, bg in rows:
 # the healthy run. Implied mean speed needs no reference and no common frame: a ground
 # robot indoors does not average tens of m/s, whoever says otherwise is the broken one.
 print()
-for n, c, sec, pl, rl, rms, mx, fin, jm, cl, seg, bg in rows:
-    v = pl / sec if sec > 0 else 0
+for r in rows:
+    v = r["path"] / r["secs"] if r["secs"] > 0 else 0
     flag = "  <-- IMPLAUSIBLE" if v > PLAUSIBLE_MEAN_SPEED else ""
-    print(f"  {n:<14} implied mean speed {num(v, 7)} m/s over {sec:.0f}s{flag}")
+    print(f"  {r['name']:<{NAME_W}} implied mean speed {num(v, 7)} m/s over {r['secs']:.0f}s{flag}")
 
 # Distinguish the two ways a run goes wrong. A few impossible-speed steps are
 # tracking JUMPS, and the numbers above understate a run that was otherwise fine.
 # A long path with no jumps is genuine DIVERGENCE, and the numbers are real.
-for n, c, sec, pl, rl, rms, mx, fin, jm, cl, seg, bg in rows:
+for r in rows:
+    n, jm, seg = r["name"], r["jumps"], r["seg"]
     if len(jm):
         print(f"\n  [{n}] {len(jm)} tracking jump(s) >{JUMP_SPEED:.0f} m/s "
-              f"(largest {num(bg, 8, 1).strip()} m).")
-        print(f"        path excluding jumps: {num(cl, 9).strip()} m   "
-              f"vs reference {num(rl, 9).strip()} m")
+              f"(largest {num(r['biggest'], 8, 1).strip()} m).")
+        print(f"        path excluding jumps: {num(r['clean_len'], 9).strip()} m   "
+              f"vs reference {num(r['ref'], 9).strip()} m")
         if seg:
             print(f"        longest clean segment: {seg[0]} poses / {seg[1]:.1f}s, "
                   f"{lbl} {seg[2]:.3f} m")
         print(f"        The table's {lbl} is set by the jump, not by tracking quality.")
-    elif gt is not None and rl > 0 and (pl / rl > 3 or rl / pl > 3):
-        print(f"\n  [warn] {n} path is {pl:.0f} m against {rl:.0f} m of GROUND TRUTH "
-              f"({pl/rl:.1f}x) with no jumps -- genuine divergence.")
+    elif gt is not None and r["ref"] > 0 and (r["path"] / r["ref"] > 3 or r["ref"] / r["path"] > 3):
+        print(f"\n  [warn] {n} path is {r['path']:.0f} m against {r['ref']:.0f} m of "
+              f"GROUND TRUTH ({r['path']/r['ref']:.1f}x) with no jumps -- genuine "
+              f"divergence.")
 
 # --- summary table, shared by the console report and the figures --------------
 # Built once here rather than per-theme: the numbers do not depend on the theme,
 # and the console and the PNG must not be able to disagree.
-HDR = (f"  {'system':<13}{'poses':>7}{'secs':>7}{'path m':>10}"
+HDR = (f"  {'system':<{NAME_W - 1}}{'poses':>7}{'secs':>7}{'path m':>10}"
        f"{'GT m' if gt is not None else 'ref m':>9}{lbl:>10}{'max':>9}{'final':>9}"
        f"{'jumps':>7}{'clean':>9}")
 
 
 def table_row(r):
-    n, c, sec, pl, rl, rms, mx, fin, jm, cl, seg, bg = r
+    n, seg = r["name"], r["seg"]
     self_ref = (gt is None and n == ref_name)
     err_cols = (f"{'--':>10}{'--':>9}{'--':>9}" if self_ref
-                else f"{num(rms, 10, 3)}{num(mx, 9, 3)}{num(fin, 9, 3)}")
+                else f"{num(r['rms'], 10, 3)}{num(r['max'], 9, 3)}{num(r['final'], 9, 3)}")
     clean = "--" if (self_ref or seg is None) else f"{seg[2]:.3f}"
     flag = "   DIVERGED" if diverged.get(n) else ""
-    return (f"  {n:<13}{c:>7}{sec:>7.1f}{num(pl, 10)}{num(rl, 9)}{err_cols}"
-            f"{len(jm):>7}{clean:>9}{flag}")
+    return (f"  {n:<{NAME_W - 1}}{r['poses']:>7}{r['secs']:>7.1f}{num(r['path'], 10)}"
+            f"{num(r['ref'], 9)}{err_cols}{len(r['jumps']):>7}{clean:>9}{flag}")
 
 
 # Footnotes: the two ways a run goes wrong, and the reference-free plausibility
@@ -105,10 +132,11 @@ diverged = {a["name"]: a["diverged"] for a in aligned}
 notes = []
 if gt is None:
     notes.append(f"  reference: {ref_name} (no ground truth for this dataset)")
-for n, c, sec, pl, rl, rms, mx, fin, jm, cl, seg, bg in rows:
-    v = pl / sec if sec > 0 else 0
+for r in rows:
+    n, jm = r["name"], r["jumps"]
+    v = r["path"] / r["secs"] if r["secs"] > 0 else 0
     if diverged.get(n):
-        notes.append(f"  [{n}] DIVERGED -- peak error {num(mx, 1).strip()} m against "
+        notes.append(f"  [{n}] DIVERGED -- peak error {num(r['max'], 1).strip()} m against "
                      f"ground truth; shown in the trajectory panel, "
                      f"omitted from the time-series panels")
     elif v > PLAUSIBLE_MEAN_SPEED:
@@ -116,11 +144,12 @@ for n, c, sec, pl, rl, rms, mx, fin, jm, cl, seg, bg in rows:
                      f" for a ground robot; the run has broken down")
     elif len(jm):
         notes.append(f"  [{n}] {len(jm)} tracking jump(s) >{JUMP_SPEED:.0f} m/s, largest "
-                     f"{num(bg, 8, 1).strip()} m -- '{lbl}' is set by the jump, "
+                     f"{num(r['biggest'], 8, 1).strip()} m -- '{lbl}' is set by the jump, "
                      f"'clean' is the longest jump-free segment")
-    elif gt is not None and rl > 0 and (pl / rl > 3 or rl / pl > 3):
-        notes.append(f"  [{n}] path {num(pl, 1).strip()} m vs {num(rl, 1).strip()} m of "
-                     f"ground truth with no jumps -- genuine divergence")
+    elif gt is not None and r["ref"] > 0 and (r["path"] / r["ref"] > 3 or r["ref"] / r["path"] > 3):
+        notes.append(f"  [{n}] path {num(r['path'], 1).strip()} m vs "
+                     f"{num(r['ref'], 1).strip()} m of ground truth with no jumps -- "
+                     f"genuine divergence")
 
 # --- plot --------------------------------------------------------------------
 os.makedirs(OUTDIR, exist_ok=True)
@@ -228,8 +257,11 @@ def render(theme_name):
           f"Position error vs {ref_name}" if gt is not None else f"Difference from {ref_name}")
     if live and gone:
         ax2.set_ylim(0, max(a["err"].max() for a in live) * 1.15 + 1e-6)
-        ax2.text(0.99, 0.94, f"{', '.join(a['name'] for a in gone)} diverged, off scale",
-                 transform=ax2.transAxes, ha="right", va="top", color=th["ink3"],
+        # Bottom, not top: a legend placed with loc="best" tends to land top-right on
+        # exactly this shape of curve (low near t=0, climbing later), which is the one
+        # other spot a note here could land -- put this where "best" is unlikely to.
+        ax2.text(0.99, 0.03, f"{', '.join(a['name'] for a in gone)} diverged, off scale",
+                 transform=ax2.transAxes, ha="right", va="bottom", color=th["ink3"],
                  fontsize=8)
     ax2.legend(facecolor=th["surface"], edgecolor=th["grid"], labelcolor=th["ink2"],
                fontsize=9, loc="best")
@@ -330,8 +362,13 @@ def render(theme_name):
 
 
             if gone and c == 0:
-                axb.text(0.99, 0.96, f"{', '.join(a['name'] for a in gone)} diverged, "
-                         "not shown", transform=axb.transAxes, ha="right", va="top",
+                # Bottom-right in the Position column specifically: that column never
+                # gets a "clipped; peak" note (only velocity/attitude do), so the slot
+                # is free, and it is also where this column's legend (below) is NOT --
+                # legend for the whole block only ever appears here too, via loc="best".
+                y, va = (0.03, "bottom") if key == "p" else (0.96, "top")
+                axb.text(0.99, y, f"{', '.join(a['name'] for a in gone)} diverged, "
+                         "not shown", transform=axb.transAxes, ha="right", va=va,
                          color=th["ink3"], fontsize=8)
 
             # one legend for the whole block, in its first subplot
@@ -339,9 +376,10 @@ def render(theme_name):
                 axb.legend(facecolor=th["surface"], edgecolor=th["grid"],
                            labelcolor=th["ink2"], fontsize=8, loc="best")
 
-    fig.suptitle(f"VINS-Fusion vs ORB-SLAM3  --  {DATASET}",
+    title = "VINS-Fusion vs ORB-SLAM3" + (" (+YOLO)" if YOLO else "")
+    fig.suptitle(f"{title}  --  {DATASET}",
                  color=th["ink"], fontsize=13, x=0.06, ha="left", y=0.985)
-    out = os.path.join(OUTDIR, f"compare_{theme_name}.png")
+    out = os.path.join(OUTDIR, f"compare_{theme_name}{SUFFIX}.png")
     fig.savefig(out, dpi=160, facecolor=th["surface"])
     plt.close(fig)
     return out

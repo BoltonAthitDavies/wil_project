@@ -5,8 +5,8 @@ Requires librealsense <= 2.54.2 with python bindings -- L515 support was
 removed from the SDK in 2.55.x, so newer builds report "No device detected".
 
 Usage:
-    python3 imu.py --list     # show the motion profiles the device advertises
-    python3 imu.py            # stream accel + gyro
+    python3 script/imu.py --list     # show the motion profiles the device advertises
+    python3 script/imu.py            # stream accel + gyro
 """
 
 import argparse

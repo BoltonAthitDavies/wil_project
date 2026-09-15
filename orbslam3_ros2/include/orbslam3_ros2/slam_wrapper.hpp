@@ -118,7 +118,15 @@ public:
   void pushImu(double t, const Eigen::Vector3d & accel, const Eigen::Vector3d & gyro);
 
   /// Called from the stereo sync callback. Never blocks; may drop (see above).
-  void pushStereo(double t, const cv::Mat & left, const cv::Mat & right);
+  ///
+  /// mask_left / mask_right are OPTIONAL dynamic-object masks (RY-SLAM style):
+  /// CV_8UC1, same size as the image, 255 = static/keep, 0 = dynamic. They reach
+  /// ORB-SLAM3's ORBextractor, which drops the keypoints landing on dynamic
+  /// regions. Empty (the default) means no filtering at all -- not "filter
+  /// nothing", but the stock upstream code path, bit for bit.
+  void pushStereo(
+    double t, const cv::Mat & left, const cv::Mat & right,
+    const cv::Mat & mask_left = cv::Mat(), const cv::Mat & mask_right = cv::Mat());
 
   /// Invoked on the worker thread once per tracked frame. Set before starting.
   void setResultCallback(ResultCallback cb) {callback_ = std::move(cb);}
@@ -151,6 +159,10 @@ private:
   {
     double t{0.0};
     cv::Mat left, right;
+    /// Dynamic-object masks; empty when filtering is off or no detection matched
+    /// this frame. cv::Mat copies are refcounted headers, so carrying them
+    /// through the queue costs nothing even when a frame is dropped.
+    cv::Mat mask_left, mask_right;
   };
 
   std::mutex imu_mu_;

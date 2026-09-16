@@ -18,6 +18,8 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <atomic>
+#include <chrono>
 #include <condition_variable>
 #include <deque>
 #include <functional>
@@ -101,6 +103,13 @@ struct TrackResult
   /// modes; finite-differenced from position otherwise. See slam_wrapper.cpp.
   Eigen::Vector3f velocity{Eigen::Vector3f::Zero()};
   bool velocity_is_estimated{false};
+  /// Wall-clock instrumentation. queue_wait_ms measures time waiting behind the
+  /// current frame, tracking_ms is the TrackStereo call alone, and processing_ms
+  /// includes the bounded IMU wait plus tracking and result conversion.
+  double queue_wait_ms{0.0};
+  double tracking_ms{0.0};
+  double processing_ms{0.0};
+  std::size_t imu_samples{0};
 };
 
 class SlamWrapper
@@ -134,9 +143,9 @@ public:
   /// Joins the worker and calls ORB_SLAM3::System::Shutdown(). Idempotent.
   void shutdown();
 
-  std::size_t droppedFrames() const {return dropped_;}
+  std::size_t droppedFrames() const {return dropped_.load();}
   /// Frames skipped because no IMU data covered them (inertial mode only).
-  std::size_t starvedFrames() const {return imu_starved_;}
+  std::size_t starvedFrames() const {return imu_starved_.load();}
 
   /// body <- cam0, parsed from the settings file's IMU.T_b_c1. Identity for
   /// non-inertial configs, where cam0 IS the body frame.
@@ -163,6 +172,7 @@ private:
     /// this frame. cv::Mat copies are refcounted headers, so carrying them
     /// through the queue costs nothing even when a frame is dropped.
     cv::Mat mask_left, mask_right;
+    std::chrono::steady_clock::time_point enqueued_at;
   };
 
   std::mutex imu_mu_;
@@ -172,8 +182,8 @@ private:
   std::mutex frame_mu_;
   std::condition_variable frame_cv_;
   std::deque<PendingFrame> frame_q_;
-  std::size_t dropped_{0};
-  std::size_t imu_starved_{0};
+  std::atomic<std::size_t> dropped_{0};
+  std::atomic<std::size_t> imu_starved_{0};
 
   std::thread worker_;
   bool running_{false};

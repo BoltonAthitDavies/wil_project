@@ -135,7 +135,8 @@ void SlamWrapper::pushStereo(
       frame_q_.pop_front();
       ++dropped_;
     }
-    frame_q_.push_back(PendingFrame{t, left, right, mask_left, mask_right});
+    frame_q_.push_back(
+      PendingFrame{t, left, right, mask_left, mask_right, std::chrono::steady_clock::now()});
   }
   frame_cv_.notify_one();
 }
@@ -153,6 +154,12 @@ void SlamWrapper::workerLoop()
       frame = std::move(frame_q_.front());
       frame_q_.pop_front();
     }
+
+    const auto processing_start = std::chrono::steady_clock::now();
+    TrackResult r;
+    r.stamp = frame.t;
+    r.queue_wait_ms = std::chrono::duration<double, std::milli>(
+      processing_start - frame.enqueued_at).count();
 
     std::vector<ORB_SLAM3::IMU::Point> imu;
     if (cfg_.use_imu) {
@@ -173,16 +180,26 @@ void SlamWrapper::workerLoop()
     // frame costs one image, passing a thin vector costs the process.
     if (cfg_.use_imu && imu.size() < 2) {
       ++imu_starved_;
+      r.state = -3;  // insufficient IMU coverage; distinct from SLAM states
+      r.imu_samples = imu.size();
+      r.processing_ms = std::chrono::duration<double, std::milli>(
+        std::chrono::steady_clock::now() - processing_start).count();
+      if (callback_) {
+        callback_(r);
+      }
       continue;
     }
 
     // The empty filename is upstream's own default; the masks follow it because
     // they were appended last, so every unpatched call site still compiles.
+    const auto tracking_start = std::chrono::steady_clock::now();
     const Sophus::SE3f Tcw = slam_->TrackStereo(
       frame.left, frame.right, frame.t, imu, "", frame.mask_left, frame.mask_right);
+    const auto tracking_end = std::chrono::steady_clock::now();
 
-    TrackResult r;
-    r.stamp = frame.t;
+    r.imu_samples = imu.size();
+    r.tracking_ms = std::chrono::duration<double, std::milli>(
+      tracking_end - tracking_start).count();
     r.state = slam_->GetTrackingState();
     // 2 == Tracking::OK. Anything else (NOT_INITIALIZED, RECENTLY_LOST, LOST)
     // carries a pose that is either meaningless or about to be revised, and
@@ -254,6 +271,8 @@ void SlamWrapper::workerLoop()
     }
 
     if (callback_) {
+      r.processing_ms = std::chrono::duration<double, std::milli>(
+        std::chrono::steady_clock::now() - processing_start).count();
       callback_(r);
     }
   }

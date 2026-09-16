@@ -26,11 +26,16 @@
 #include <string>
 #include <tf2_ros/transform_broadcaster.h>
 #include <algorithm>
+#include <atomic>
+#include <chrono>
 #include <cmath>
 #include <fstream>
 #include <iomanip>
 #include <deque>
 #include <mutex>
+#include <sstream>
+#include <sys/resource.h>
+#include <unistd.h>
 #include <utility>
 #include <vector>
 #include <vision_msgs/msg/detection2_d_array.hpp>
@@ -55,6 +60,7 @@ public:
     const auto config_file = declare_parameter<std::string>("config_file", "");
     const auto voc_file = declare_parameter<std::string>("vocabulary_file", "");
     const auto output_path = declare_parameter<std::string>("output_path", "");
+    output_path_ = output_path;
     use_imu_ = declare_parameter<bool>("use_imu", true);
     const auto use_viewer = declare_parameter<bool>("use_viewer", true);
     const auto accel_scale = declare_parameter<double>("imu_accel_scale", 1.0);
@@ -99,6 +105,12 @@ public:
     body_frame_ = declare_parameter<std::string>("body_frame_id", "base_footprint");
     publish_tf_ = declare_parameter<bool>("publish_tf", true);
     const auto sync_slop = declare_parameter<double>("sync_slop", 0.02);
+    const auto experiment_id = declare_parameter<std::string>("experiment_id", "");
+    const auto dataset_path = declare_parameter<std::string>("dataset_path", "");
+    const auto world_path = declare_parameter<std::string>("world_path", "");
+    const auto replay_rate = declare_parameter<double>("replay_rate", 1.0);
+    const auto run_command = declare_parameter<std::string>("run_command", "");
+    const auto run_notes = declare_parameter<std::string>("run_notes", "");
 
     if (config_file.empty()) {
       throw std::runtime_error("parameter 'config_file' is required");
@@ -146,6 +158,37 @@ public:
                       output_path.c_str());
         }
       }
+      performance_log_.open(output_path + "/performance.csv");
+      if (!performance_log_) {
+        throw std::runtime_error("cannot open performance log in " + output_path);
+      }
+      performance_log_ <<
+        "timestamp_ns,tracking_state,tracking_ok,velocity_estimated,queue_wait_ms,"
+        "tracking_ms,processing_ms,imu_samples,stereo_received,stereo_processed,"
+        "queue_dropped,imu_received,imu_starved,poses_written,state_changed,"
+        "wall_elapsed_ms,process_cpu_ms,resident_memory_kb\n";
+      performance_log_.flush();
+
+      writeMetadata({
+        {"pipeline", "orbslam3_ros2"}, {"experiment_id", experiment_id},
+        {"dataset_path", dataset_path}, {"world_path", world_path},
+        {"run_command", run_command}, {"run_notes", run_notes},
+        {"config_file", config_file}, {"vocabulary_file", voc_file},
+        {"output_path", output_path}, {"image0_topic", image0_topic},
+        {"image1_topic", image1_topic}, {"imu_topic", imu_topic},
+        {"image_transport", transport}, {"world_frame_id", world_frame_},
+        {"body_frame_id", body_frame_}, {"use_imu", use_imu_ ? "true" : "false"},
+        {"filter", filter_ ? "true" : "false"},
+        {"publish_tf", publish_tf_ ? "true" : "false"},
+        {"replay_rate", std::to_string(replay_rate)},
+        {"sync_slop_s", std::to_string(sync_slop)},
+        {"det_max_age_s", std::to_string(det_max_age_)},
+        {"mask_dilate_px", std::to_string(mask_dilate_px_)},
+        {"max_mask_fraction", std::to_string(max_mask_fraction_)},
+        {"start_wall_time_unix_ns", std::to_string(
+          std::chrono::duration_cast<std::chrono::nanoseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count())}
+      });
     }
 
     // --- publishers ---------------------------------------------------------
@@ -285,6 +328,7 @@ public:
         "Replay with `ros2 bag play --rate 0.5` for a clean run.",
         slam_->droppedFrames());
     }
+    writeSummary();
   }
 
 private:
@@ -298,6 +342,139 @@ private:
   static double stampSeconds(const builtin_interfaces::msg::Time & t)
   {
     return static_cast<double>(t.sec) + static_cast<double>(t.nanosec) * 1e-9;
+  }
+
+  static std::string csvEscape(const std::string & value)
+  {
+    if (value.find_first_of(",\"\n\r") == std::string::npos) {
+      return value;
+    }
+    std::string escaped = "\"";
+    for (const char c : value) {
+      escaped += c;
+      if (c == '"') {
+        escaped += '"';
+      }
+    }
+    escaped += '"';
+    return escaped;
+  }
+
+  static double processCpuMs()
+  {
+    struct rusage usage {};
+    if (getrusage(RUSAGE_SELF, &usage) != 0) {
+      return -1.0;
+    }
+    const double user_ms = usage.ru_utime.tv_sec * 1e3 + usage.ru_utime.tv_usec * 1e-3;
+    const double system_ms = usage.ru_stime.tv_sec * 1e3 + usage.ru_stime.tv_usec * 1e-3;
+    return user_ms + system_ms;
+  }
+
+  static long residentMemoryKb()
+  {
+    std::ifstream statm("/proc/self/statm");
+    long total_pages = 0;
+    long resident_pages = 0;
+    if (!(statm >> total_pages >> resident_pages)) {
+      return -1;
+    }
+    (void)total_pages;
+    return resident_pages * sysconf(_SC_PAGESIZE) / 1024;
+  }
+
+  void writeMetadata(const std::vector<std::pair<std::string, std::string>> & rows)
+  {
+    std::ofstream out(output_path_ + "/run_metadata.csv");
+    if (!out) {
+      throw std::runtime_error("cannot open run_metadata.csv in " + output_path_);
+    }
+    out << "key,value\n";
+    for (const auto & row : rows) {
+      out << csvEscape(row.first) << ',' << csvEscape(row.second) << '\n';
+    }
+  }
+
+  void writeSummary()
+  {
+    if (output_path_.empty()) {
+      return;
+    }
+    if (loss_active_ && last_frame_stamp_ >= loss_start_stamp_) {
+      lost_duration_s_ += last_frame_stamp_ - loss_start_stamp_;
+      loss_active_ = false;
+    }
+    std::ofstream out(output_path_ + "/run_summary.csv");
+    if (!out) {
+      RCLCPP_ERROR(get_logger(), "could not open %s/run_summary.csv", output_path_.c_str());
+      return;
+    }
+    const double init_s = first_pose_seen_ ? first_pose_stamp_ - first_frame_stamp_ : -1.0;
+    out << "key,value\n"
+        << "shutdown_status,graceful\n"
+        << "stereo_pairs_received," << stereo_received_.load() << '\n'
+        << "stereo_pairs_processed," << processed_results_ << '\n'
+        << "decode_failures," << decode_failures_.load() << '\n'
+        << "imu_messages_received," << imu_received_.load() << '\n'
+        << "queue_dropped_frames," << (slam_ ? slam_->droppedFrames() : 0) << '\n'
+        << "imu_starved_frames," << (slam_ ? slam_->starvedFrames() : 0) << '\n'
+        << "poses_written," << (writer_ ? writer_->rows() : 0) << '\n'
+        << "tracking_state_changes," << state_changes_ << '\n'
+        << "tracking_loss_events," << tracking_loss_events_ << '\n'
+        << "tracking_loss_duration_s," << std::fixed << std::setprecision(6)
+        << lost_duration_s_ << '\n'
+        << "initialization_time_s," << init_s << '\n'
+        << "detection_frames_matched," << det_matched_ << '\n'
+        << "detection_frames_missed," << det_missed_ << '\n'
+        << "masks_rejected," << mask_rejected_ << '\n';
+  }
+
+  void updateTrackingStats(const TrackResult & r)
+  {
+    ++processed_results_;
+    if (!have_frame_stamp_) {
+      first_frame_stamp_ = r.stamp;
+      have_frame_stamp_ = true;
+    }
+    last_frame_stamp_ = r.stamp;
+    const bool state_changed = !have_tracking_state_ || r.state != last_tracking_state_;
+    last_state_changed_ = state_changed;
+    if (state_changed) {
+      ++state_changes_;
+      last_tracking_state_ = r.state;
+      have_tracking_state_ = true;
+    }
+    if (first_pose_seen_ && previous_tracking_ok_ && !r.tracking_ok && !loss_active_) {
+      ++tracking_loss_events_;
+      loss_active_ = true;
+      loss_start_stamp_ = r.stamp;
+    } else if (loss_active_ && r.tracking_ok) {
+      if (r.stamp >= loss_start_stamp_) {
+        lost_duration_s_ += r.stamp - loss_start_stamp_;
+      }
+      loss_active_ = false;
+    }
+    previous_tracking_ok_ = r.tracking_ok;
+  }
+
+  void logPerformance(const TrackResult & r)
+  {
+    if (!performance_log_) {
+      return;
+    }
+    performance_log_ << std::fixed << std::setprecision(0) << r.stamp * 1e9 << ','
+      << r.state << ',' << (r.tracking_ok ? 1 : 0) << ','
+      << (r.velocity_is_estimated ? 1 : 0) << ',' << std::setprecision(3)
+      << r.queue_wait_ms << ',' << r.tracking_ms << ',' << r.processing_ms << ','
+      << r.imu_samples << ',' << stereo_received_.load() << ',' << processed_results_ << ','
+      << (slam_ ? slam_->droppedFrames() : 0) << ',' << imu_received_.load() << ','
+      << (slam_ ? slam_->starvedFrames() : 0) << ','
+      << (writer_ ? writer_->rows() : 0) << ',' << (last_state_changed_ ? 1 : 0) << ','
+      << std::chrono::duration<double, std::milli>(
+        std::chrono::steady_clock::now() - process_start_).count() << ','
+      << std::setprecision(3) << processCpuMs() << ','
+      << residentMemoryKb() << '\n';
+    performance_log_.flush();
   }
 
   /// Buffers detections by their SOURCE IMAGE stamp, which the detector copies
@@ -423,6 +600,7 @@ private:
 
   void onImu(const sensor_msgs::msg::Imu::ConstSharedPtr msg)
   {
+    ++imu_received_;
     slam_->pushImu(
       stampSeconds(msg->header.stamp),
       {msg->linear_acceleration.x, msg->linear_acceleration.y, msg->linear_acceleration.z},
@@ -433,6 +611,7 @@ private:
     const sensor_msgs::msg::Image::ConstSharedPtr left,
     const sensor_msgs::msg::Image::ConstSharedPtr right)
   {
+    ++stereo_received_;
     cv_bridge::CvImageConstPtr l, r;
     try {
       // Convert to grayscale here rather than letting ORB-SLAM3 do it. That
@@ -441,6 +620,7 @@ private:
       l = cv_bridge::toCvShare(left, sensor_msgs::image_encodings::MONO8);
       r = cv_bridge::toCvShare(right, sensor_msgs::image_encodings::MONO8);
     } catch (const cv_bridge::Exception & e) {
+      ++decode_failures_;
       RCLCPP_ERROR(get_logger(), "cv_bridge: %s", e.what());
       return;
     }
@@ -457,9 +637,11 @@ private:
     const sensor_msgs::msg::CompressedImage::ConstSharedPtr left,
     const sensor_msgs::msg::CompressedImage::ConstSharedPtr right)
   {
+    ++stereo_received_;
     const cv::Mat l = cv::imdecode(cv::Mat(left->data), cv::IMREAD_GRAYSCALE);
     const cv::Mat r = cv::imdecode(cv::Mat(right->data), cv::IMREAD_GRAYSCALE);
     if (l.empty() || r.empty()) {
+      ++decode_failures_;
       RCLCPP_ERROR_THROTTLE(
         get_logger(), *get_clock(), 2000,
         "could not decode a compressed frame (format \"%s\")", left->format.c_str());
@@ -473,6 +655,7 @@ private:
 
   void onTrackResult(const TrackResult & r)
   {
+    updateTrackingStats(r);
     if (!r.tracking_ok) {
       // Throttled, because NOT_INITIALIZED fires every frame for the first few
       // seconds of every inertial run and would otherwise bury the log.
@@ -484,10 +667,12 @@ private:
         RCLCPP_INFO_THROTTLE(
           get_logger(), *get_clock(), 2000, "tracking state %d (no pose published)", r.state);
       }
+      logPerformance(r);
       return;
     }
     if (!first_pose_seen_) {
       first_pose_seen_ = true;
+      first_pose_stamp_ = r.stamp;
       RCLCPP_INFO(get_logger(), "tracking OK -- publishing poses");
     }
 
@@ -531,6 +716,7 @@ private:
     if (writer_) {
       writer_->write(r.stamp, r.position, r.orientation, r.velocity);
     }
+    logPerformance(r);
   }
 
   bool use_imu_{true};
@@ -541,6 +727,7 @@ private:
   double max_mask_fraction_{0.8};
   bool finished_{false};
   bool first_pose_seen_{false};
+  std::string output_path_;
   std::string world_frame_, body_frame_;
 
   std::unique_ptr<SlamWrapper> slam_;
@@ -567,6 +754,27 @@ private:
   LogRow last_;
   double last_age_{-1.0};
   std::ofstream mask_log_;
+  std::ofstream performance_log_;
+
+  std::atomic<std::size_t> stereo_received_{0};
+  std::atomic<std::size_t> decode_failures_{0};
+  std::atomic<std::size_t> imu_received_{0};
+  std::size_t processed_results_{0};
+  bool have_frame_stamp_{false};
+  double first_frame_stamp_{0.0};
+  double last_frame_stamp_{0.0};
+  double first_pose_stamp_{0.0};
+  bool have_tracking_state_{false};
+  int last_tracking_state_{-999};
+  bool last_state_changed_{false};
+  bool previous_tracking_ok_{false};
+  bool loss_active_{false};
+  double loss_start_stamp_{0.0};
+  double lost_duration_s_{0.0};
+  std::size_t state_changes_{0};
+  std::size_t tracking_loss_events_{0};
+  const std::chrono::steady_clock::time_point process_start_{
+    std::chrono::steady_clock::now()};
 
   std::size_t det_matched_{0};
   std::size_t det_missed_{0};

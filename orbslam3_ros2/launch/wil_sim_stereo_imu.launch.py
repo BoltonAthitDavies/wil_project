@@ -52,6 +52,12 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'output_path', default_value=DEFAULT_OUTPUT,
             description='Directory for vio.csv. Created if absent.'),
+        DeclareLaunchArgument('experiment_id', default_value=''),
+        DeclareLaunchArgument('dataset_path', default_value=''),
+        DeclareLaunchArgument('world_path', default_value=''),
+        DeclareLaunchArgument('replay_rate', default_value='1.0'),
+        DeclareLaunchArgument('run_command', default_value=''),
+        DeclareLaunchArgument('run_notes', default_value=''),
         DeclareLaunchArgument(
             'align_first_pose', default_value='false',
             description="Latch the inverse of the first tracked body pose so the "
@@ -109,6 +115,12 @@ def generate_launch_description():
             'config_file': config_file,
             'vocabulary_file': LaunchConfiguration('vocabulary_file'),
             'output_path': LaunchConfiguration('output_path'),
+            'experiment_id': LaunchConfiguration('experiment_id'),
+            'dataset_path': LaunchConfiguration('dataset_path'),
+            'world_path': LaunchConfiguration('world_path'),
+            'replay_rate': LaunchConfiguration('replay_rate'),
+            'run_command': LaunchConfiguration('run_command'),
+            'run_notes': LaunchConfiguration('run_notes'),
             'use_viewer': LaunchConfiguration('use_viewer'),
             'align_first_pose': LaunchConfiguration('align_first_pose'),
 

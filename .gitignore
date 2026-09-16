@@ -7,6 +7,8 @@ log/
 # ORB-SLAM3 @ 4452a3c (patched by the script) and Pangolin @ v0.9.1,
 # plus their local install prefix. ~1.7 GB, none of it ours.
 thirdparty/
+trash/
+output/docs
 
 # --- recorded rosbags (~8 GB), kept outside the repo ---
 dataset/*/

@@ -38,6 +38,7 @@ struct SlamConfig
 {
   std::string vocabulary_path;
   std::string settings_path;
+  std::string evaluation_output_path;
   bool use_imu{true};
   bool use_viewer{true};
   /// Multiplies linear acceleration before it reaches ORB-SLAM3. Exists for the
@@ -110,6 +111,31 @@ struct TrackResult
   double tracking_ms{0.0};
   double processing_ms{0.0};
   std::size_t imu_samples{0};
+  bool imu_initialized{false};
+  bool inertial_ba1{false};
+  bool inertial_ba2{false};
+  bool local_mapping_initializing{false};
+  bool local_mapping_accepting_keyframes{false};
+  bool global_ba_running{false};
+  std::size_t map_id{0};
+  std::size_t maps{0};
+  std::size_t keyframes_in_map{0};
+  std::size_t map_points_in_map{0};
+  std::size_t keyframes_created{0};
+  std::size_t local_mapping_queue{0};
+  std::size_t local_mapping_keyframes{0};
+  std::size_t local_ba_executions{0};
+  std::size_t local_ba_aborts{0};
+  std::size_t place_recognition_checks{0};
+  std::size_t loop_closures{0};
+  std::size_t map_merges{0};
+  std::size_t global_ba_executions{0};
+  std::size_t global_ba_aborts{0};
+  std::size_t active_map_reset_requests{0};
+  int map_change_index{0};
+  int frame_features{0};
+  int map_matches_inliers{0};
+  std::string last_reset_reason{"none"};
 };
 
 class SlamWrapper
@@ -146,6 +172,7 @@ public:
   std::size_t droppedFrames() const {return dropped_.load();}
   /// Frames skipped because no IMU data covered them (inertial mode only).
   std::size_t starvedFrames() const {return imu_starved_.load();}
+  TrackResult evaluationSnapshot() const;
 
   /// body <- cam0, parsed from the settings file's IMU.T_b_c1. Identity for
   /// non-inertial configs, where cam0 IS the body frame.

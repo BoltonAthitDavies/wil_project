@@ -30,6 +30,7 @@
 #include <chrono>
 #include <cmath>
 #include <fstream>
+#include <filesystem>
 #include <iomanip>
 #include <deque>
 #include <mutex>
@@ -61,6 +62,14 @@ public:
     const auto voc_file = declare_parameter<std::string>("vocabulary_file", "");
     const auto output_path = declare_parameter<std::string>("output_path", "");
     output_path_ = output_path;
+    if (!output_path.empty()) {
+      std::error_code ec;
+      std::filesystem::create_directories(output_path, ec);
+      if (ec) {
+        throw std::runtime_error(
+          "cannot create output directory " + output_path + ": " + ec.message());
+      }
+    }
     use_imu_ = declare_parameter<bool>("use_imu", true);
     const auto use_viewer = declare_parameter<bool>("use_viewer", true);
     const auto accel_scale = declare_parameter<double>("imu_accel_scale", 1.0);
@@ -132,6 +141,7 @@ public:
     SlamConfig cfg;
     cfg.vocabulary_path = voc_file;
     cfg.settings_path = config_file;
+    cfg.evaluation_output_path = output_path;
     cfg.use_imu = use_imu_;
     cfg.use_viewer = use_viewer;
     cfg.accel_scale = accel_scale;
@@ -166,7 +176,14 @@ public:
         "timestamp_ns,tracking_state,tracking_ok,velocity_estimated,queue_wait_ms,"
         "tracking_ms,processing_ms,imu_samples,stereo_received,stereo_processed,"
         "queue_dropped,imu_received,imu_starved,poses_written,state_changed,"
-        "wall_elapsed_ms,process_cpu_ms,resident_memory_kb\n";
+        "wall_elapsed_ms,process_cpu_ms,resident_memory_kb,frame_features,"
+        "map_matches_inliers,imu_initialized,inertial_ba1,inertial_ba2,map_id,maps,"
+        "keyframes_in_map,map_points_in_map,keyframes_created,local_mapping_queue,"
+        "local_mapping_initializing,local_mapping_accepting_keyframes,"
+        "local_mapping_keyframes,local_ba_executions,local_ba_aborts,"
+        "place_recognition_checks,loop_closures,map_merges,global_ba_running,"
+        "global_ba_executions,global_ba_aborts,active_map_reset_requests,"
+        "map_change_index,last_reset_reason\n";
       performance_log_.flush();
 
       writeMetadata({
@@ -291,6 +308,7 @@ public:
     finished_ = true;
     if (slam_) {
       slam_->shutdown();
+      last_result_ = slam_->evaluationSnapshot();
     }
     if (writer_) {
       writer_->flush();
@@ -409,7 +427,8 @@ private:
       RCLCPP_ERROR(get_logger(), "could not open %s/run_summary.csv", output_path_.c_str());
       return;
     }
-    const double init_s = first_pose_seen_ ? first_pose_stamp_ - first_frame_stamp_ : -1.0;
+    const double tracking_init_s = first_pose_seen_ ? first_pose_stamp_ - first_frame_stamp_ : -1.0;
+    const double imu_init_s = imu_initialized_seen_ ? imu_initialized_stamp_ - first_frame_stamp_ : -1.0;
     out << "key,value\n"
         << "shutdown_status,graceful\n"
         << "stereo_pairs_received," << stereo_received_.load() << '\n'
@@ -423,7 +442,25 @@ private:
         << "tracking_loss_events," << tracking_loss_events_ << '\n'
         << "tracking_loss_duration_s," << std::fixed << std::setprecision(6)
         << lost_duration_s_ << '\n'
-        << "initialization_time_s," << init_s << '\n'
+        << "initialization_time_s," << tracking_init_s << '\n'
+        << "tracking_initialization_time_s," << tracking_init_s << '\n'
+        << "imu_initialization_time_s," << imu_init_s << '\n'
+        << "imu_initialized," << (last_result_.imu_initialized ? 1 : 0) << '\n'
+        << "inertial_ba1," << (last_result_.inertial_ba1 ? 1 : 0) << '\n'
+        << "inertial_ba2," << (last_result_.inertial_ba2 ? 1 : 0) << '\n'
+        << "keyframes_created," << last_result_.keyframes_created << '\n'
+        << "keyframes_in_final_map," << last_result_.keyframes_in_map << '\n'
+        << "map_points_in_final_map," << last_result_.map_points_in_map << '\n'
+        << "local_mapping_keyframes," << last_result_.local_mapping_keyframes << '\n'
+        << "local_ba_executions," << last_result_.local_ba_executions << '\n'
+        << "local_ba_aborts," << last_result_.local_ba_aborts << '\n'
+        << "place_recognition_checks," << last_result_.place_recognition_checks << '\n'
+        << "loop_closures," << last_result_.loop_closures << '\n'
+        << "map_merges," << last_result_.map_merges << '\n'
+        << "global_ba_executions," << last_result_.global_ba_executions << '\n'
+        << "global_ba_aborts," << last_result_.global_ba_aborts << '\n'
+        << "active_map_reset_requests," << last_result_.active_map_reset_requests << '\n'
+        << "last_reset_reason," << csvEscape(last_result_.last_reset_reason) << '\n'
         << "detection_frames_matched," << det_matched_ << '\n'
         << "detection_frames_missed," << det_missed_ << '\n'
         << "masks_rejected," << mask_rejected_ << '\n';
@@ -432,9 +469,14 @@ private:
   void updateTrackingStats(const TrackResult & r)
   {
     ++processed_results_;
+    last_result_ = r;
     if (!have_frame_stamp_) {
       first_frame_stamp_ = r.stamp;
       have_frame_stamp_ = true;
+    }
+    if (!imu_initialized_seen_ && r.imu_initialized) {
+      imu_initialized_seen_ = true;
+      imu_initialized_stamp_ = r.stamp;
     }
     last_frame_stamp_ = r.stamp;
     const bool state_changed = !have_tracking_state_ || r.state != last_tracking_state_;
@@ -473,7 +515,18 @@ private:
       << std::chrono::duration<double, std::milli>(
         std::chrono::steady_clock::now() - process_start_).count() << ','
       << std::setprecision(3) << processCpuMs() << ','
-      << residentMemoryKb() << '\n';
+      << residentMemoryKb() << ',' << r.frame_features << ',' << r.map_matches_inliers << ','
+      << (r.imu_initialized ? 1 : 0) << ',' << (r.inertial_ba1 ? 1 : 0) << ','
+      << (r.inertial_ba2 ? 1 : 0) << ',' << r.map_id << ',' << r.maps << ','
+      << r.keyframes_in_map << ',' << r.map_points_in_map << ',' << r.keyframes_created << ','
+      << r.local_mapping_queue << ',' << (r.local_mapping_initializing ? 1 : 0) << ','
+      << (r.local_mapping_accepting_keyframes ? 1 : 0) << ','
+      << r.local_mapping_keyframes << ',' << r.local_ba_executions << ','
+      << r.local_ba_aborts << ',' << r.place_recognition_checks << ','
+      << r.loop_closures << ',' << r.map_merges << ',' << (r.global_ba_running ? 1 : 0) << ','
+      << r.global_ba_executions << ',' << r.global_ba_aborts << ','
+      << r.active_map_reset_requests << ',' << r.map_change_index << ','
+      << csvEscape(r.last_reset_reason) << '\n';
     performance_log_.flush();
   }
 
@@ -764,6 +817,9 @@ private:
   double first_frame_stamp_{0.0};
   double last_frame_stamp_{0.0};
   double first_pose_stamp_{0.0};
+  bool imu_initialized_seen_{false};
+  double imu_initialized_stamp_{0.0};
+  TrackResult last_result_;
   bool have_tracking_state_{false};
   int last_tracking_state_{-999};
   bool last_state_changed_{false};

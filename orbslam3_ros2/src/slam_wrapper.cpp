@@ -58,6 +58,7 @@ SlamWrapper::SlamWrapper(const SlamConfig & cfg)
                                    : ORB_SLAM3::System::STEREO;
   slam_ = std::make_unique<ORB_SLAM3::System>(
     cfg_.vocabulary_path, cfg_.settings_path, sensor, cfg_.use_viewer);
+  slam_->ConfigureEvaluationLogging(cfg_.evaluation_output_path);
 
   running_ = true;
   worker_ = std::thread(&SlamWrapper::workerLoop, this);
@@ -66,6 +67,41 @@ SlamWrapper::SlamWrapper(const SlamConfig & cfg)
 SlamWrapper::~SlamWrapper()
 {
   shutdown();
+}
+
+TrackResult SlamWrapper::evaluationSnapshot() const
+{
+  TrackResult r;
+  if (!slam_) {
+    return r;
+  }
+  const auto evaluation = slam_->GetEvaluationState();
+  r.imu_initialized = evaluation.imu_initialized;
+  r.inertial_ba1 = evaluation.inertial_ba1;
+  r.inertial_ba2 = evaluation.inertial_ba2;
+  r.local_mapping_initializing = evaluation.local_mapping_initializing;
+  r.local_mapping_accepting_keyframes = evaluation.local_mapping_accepting_keyframes;
+  r.global_ba_running = evaluation.global_ba_running;
+  r.map_id = evaluation.map_id;
+  r.maps = evaluation.maps;
+  r.keyframes_in_map = evaluation.keyframes_in_map;
+  r.map_points_in_map = evaluation.map_points_in_map;
+  r.keyframes_created = evaluation.keyframes_created;
+  r.local_mapping_queue = evaluation.local_mapping_queue;
+  r.local_mapping_keyframes = evaluation.local_mapping_keyframes;
+  r.local_ba_executions = evaluation.local_ba_executions;
+  r.local_ba_aborts = evaluation.local_ba_aborts;
+  r.place_recognition_checks = evaluation.place_recognition_checks;
+  r.loop_closures = evaluation.loop_closures;
+  r.map_merges = evaluation.map_merges;
+  r.global_ba_executions = evaluation.global_ba_executions;
+  r.global_ba_aborts = evaluation.global_ba_aborts;
+  r.active_map_reset_requests = evaluation.active_map_reset_requests;
+  r.map_change_index = evaluation.map_change_index;
+  r.frame_features = evaluation.frame_features;
+  r.map_matches_inliers = evaluation.map_matches_inliers;
+  r.last_reset_reason = evaluation.last_reset_reason;
+  return r;
 }
 
 void SlamWrapper::shutdown()
@@ -83,6 +119,7 @@ void SlamWrapper::shutdown()
   }
   if (slam_) {
     slam_->Shutdown();
+    slam_->SaveEvaluationTrajectories(cfg_.evaluation_output_path);
   }
 }
 
@@ -201,6 +238,32 @@ void SlamWrapper::workerLoop()
     r.tracking_ms = std::chrono::duration<double, std::milli>(
       tracking_end - tracking_start).count();
     r.state = slam_->GetTrackingState();
+    const auto evaluation = slam_->GetEvaluationState();
+    r.imu_initialized = evaluation.imu_initialized;
+    r.inertial_ba1 = evaluation.inertial_ba1;
+    r.inertial_ba2 = evaluation.inertial_ba2;
+    r.local_mapping_initializing = evaluation.local_mapping_initializing;
+    r.local_mapping_accepting_keyframes = evaluation.local_mapping_accepting_keyframes;
+    r.global_ba_running = evaluation.global_ba_running;
+    r.map_id = evaluation.map_id;
+    r.maps = evaluation.maps;
+    r.keyframes_in_map = evaluation.keyframes_in_map;
+    r.map_points_in_map = evaluation.map_points_in_map;
+    r.keyframes_created = evaluation.keyframes_created;
+    r.local_mapping_queue = evaluation.local_mapping_queue;
+    r.local_mapping_keyframes = evaluation.local_mapping_keyframes;
+    r.local_ba_executions = evaluation.local_ba_executions;
+    r.local_ba_aborts = evaluation.local_ba_aborts;
+    r.place_recognition_checks = evaluation.place_recognition_checks;
+    r.loop_closures = evaluation.loop_closures;
+    r.map_merges = evaluation.map_merges;
+    r.global_ba_executions = evaluation.global_ba_executions;
+    r.global_ba_aborts = evaluation.global_ba_aborts;
+    r.active_map_reset_requests = evaluation.active_map_reset_requests;
+    r.map_change_index = evaluation.map_change_index;
+    r.frame_features = evaluation.frame_features;
+    r.map_matches_inliers = evaluation.map_matches_inliers;
+    r.last_reset_reason = evaluation.last_reset_reason;
     // 2 == Tracking::OK. Anything else (NOT_INITIALIZED, RECENTLY_LOST, LOST)
     // carries a pose that is either meaningless or about to be revised, and
     // must not reach the trajectory CSV.

@@ -138,7 +138,7 @@ IMU.Frequency: 200.0
 # 1200 is the EuRoC stereo-inertial default at 752x480. These frames are 2.5x
 # larger in area, so 1500 keeps a similar feature density without making
 # extraction the bottleneck at 30 Hz.
-ORBextractor.nFeatures: 1000
+ORBextractor.nFeatures: 1500
 ORBextractor.scaleFactor: 1.2
 ORBextractor.nLevels: 8
 ORBextractor.iniThFAST: 20

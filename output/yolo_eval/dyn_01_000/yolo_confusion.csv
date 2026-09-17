@@ -1,0 +1,17 @@
+ground_truth,predicted,count
+bin,bin,338
+bin,box,0
+bin,bucket,0
+bin,background,316
+box,bin,0
+box,box,6423
+box,bucket,8
+box,background,4853
+bucket,bin,0
+bucket,box,41
+bucket,bucket,1367
+bucket,background,860
+background,bin,14
+background,box,3655
+background,bucket,522
+background,background,0

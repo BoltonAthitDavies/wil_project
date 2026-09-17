@@ -1,0 +1,5 @@
+actual\predicted,bin,box,bucket,background
+bin,2638,1,0,1602
+box,0,28051,25,20861
+bucket,1,110,6235,2758
+background,303,14895,1749,0

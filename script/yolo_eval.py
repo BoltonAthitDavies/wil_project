@@ -16,6 +16,8 @@ join straight onto a trajectory with a merge on column 0):
                        mask coverage, and the moving/static split
   yolo_detections.csv  one row per predicted box: class, score, matched or not,
                        IoU, and whether the GT it matched was moving
+  yolo_confusion.csv   object-detection confusion counts after class-agnostic
+                       IoU association; includes a background row and column
   overlay/*.jpg        GREEN = ground truth, RED = YOLO, YELLOW = ignored
                        (occluded). LOOK AT THESE FIRST -- if the green boxes do
                        not sit on the objects, every number below is meaningless.
@@ -201,6 +203,9 @@ def main() -> None:
     ap.add_argument('--conf', type=float, default=0.35)
     ap.add_argument('--iou-nms', type=float, default=0.5)
     ap.add_argument('--imgsz', type=int, default=640)
+    ap.add_argument('--device', default='auto',
+                    help="Ultralytics device (for example 'cuda:0' or 'cpu'); "
+                         "'auto' selects CUDA when available, otherwise CPU")
     ap.add_argument('--iou-match', type=float, default=0.5,
                     help='IoU for a prediction to count as a true positive')
     ap.add_argument('--min-box-px', type=float, default=12.0,
@@ -241,9 +246,12 @@ def main() -> None:
         raise SystemExit('ackermann_robot_001 not in pose/info')
 
     from ultralytics import YOLO
+    import torch
     model = YOLO(a.weights)
     names = dict(model.names)
-    print(f'model    : {a.weights}  classes={list(names.values())}')
+    device = ('cuda:0' if torch.cuda.is_available() else 'cpu') \
+        if a.device == 'auto' else a.device
+    print(f'model    : {a.weights}  device={device}  classes={list(names.values())}')
 
     ov_dir = os.path.join(a.out, 'overlay')
     if a.overlay:
@@ -259,6 +267,10 @@ def main() -> None:
 
     tot = dict(tp=0, fp=0, fn=0, tpm=0, fnm=0, tps=0, fps=0, gt=0, gtm=0, pred=0,
                ign=0, pign=0)
+    eval_classes = sorted(set(G.CLASS_OF.values()) | set(names.values()))
+    confusion = {(gt, pred): 0
+                 for gt in eval_classes + ['background']
+                 for pred in eval_classes + ['background']}
     todo = frames[: a.limit] if a.limit else frames
 
     for fi, (ts_ns, jpg) in enumerate(todo):
@@ -333,7 +345,7 @@ def main() -> None:
 
         img = cv2.imdecode(np.frombuffer(jpg, np.uint8), cv2.IMREAD_COLOR)
         res = model.predict(img, imgsz=a.imgsz, conf=a.conf, iou=a.iou_nms,
-                            device='cuda:0', verbose=False)[0]
+                            device=device, verbose=False)[0]
         preds = []
         if res.boxes is not None and len(res.boxes):
             xy = res.boxes.xyxy.cpu().numpy()
@@ -392,6 +404,33 @@ def main() -> None:
         n_move = sum(1 for g in scored if g['moving'])
         fnm = sum(1 for g in scored if g['moving'] and not g['matched'])
 
+        # Diagnostic class confusion uses a separate, class-agnostic IoU match.
+        # This exposes wrong-class localisations that the headline detector
+        # scoring correctly represents as one FP plus one FN. Predictions already
+        # excluded by the occlusion/scenery policy remain excluded here as well.
+        eligible_preds = [
+            p for p in preds
+            if not p.get('ignored')
+            and not (p.get('gt') is not None and p['gt']['ignore'])
+        ]
+        used_gt = set()
+        for p in eligible_preds:  # already sorted by descending confidence
+            best_i, best_iou = None, 0.0
+            for gi, g in enumerate(scored):
+                if gi in used_gt:
+                    continue
+                overlap = iou(p['box'], g['box'])
+                if overlap > best_iou:
+                    best_i, best_iou = gi, overlap
+            if best_i is not None and best_iou >= a.iou_match:
+                used_gt.add(best_i)
+                confusion[(scored[best_i]['cls'], p['cls'])] += 1
+            else:
+                confusion[('background', p['cls'])] += 1
+        for gi, g in enumerate(scored):
+            if gi not in used_gt:
+                confusion[(g['cls'], 'background')] += 1
+
         def area(bs):
             m = np.zeros((H // 4, W // 4), np.uint8)
             for b in bs:
@@ -440,6 +479,12 @@ def main() -> None:
 
     fe.close(); fd.close()
 
+    with open(os.path.join(a.out, 'yolo_confusion.csv'), 'w') as fc:
+        fc.write('ground_truth,predicted,count\n')
+        for gt in eval_classes + ['background']:
+            for pred in eval_classes + ['background']:
+                fc.write(f'{gt},{pred},{confusion[(gt, pred)]}\n')
+
     P = tot['tp'] / max(tot['tp'] + tot['fp'], 1)
     R = tot['tp'] / max(tot['tp'] + tot['fn'], 1)
     Rm = tot['tpm'] / max(tot['gtm'], 1)
@@ -451,7 +496,7 @@ TP / FP / FN      : {tot['tp']} / {tot['fp']} / {tot['fn']}
 precision         : {P:.3f}
 recall (all)      : {R:.3f}
 recall (MOVING)   : {Rm:.3f}   <- what the SLAM filter actually needs
-wrote             : {a.out}/yolo_eval.csv, yolo_detections.csv{', overlay/' if a.overlay else ''}
+wrote             : {a.out}/yolo_eval.csv, yolo_detections.csv, yolo_confusion.csv{', overlay/' if a.overlay else ''}
 """)
 
 

@@ -8,7 +8,7 @@ log/
 # plus their local install prefix. ~1.7 GB, none of it ours.
 thirdparty/
 trash/
-output/docs
+docs/
 output/output_orb
 output/output_vins
 output/output_orb_yolo

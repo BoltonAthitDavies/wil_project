@@ -1,7 +1,14 @@
 #!/usr/bin/env python3
-"""Strip every bay prop from a world, leaving the building and the wall furniture.
+"""Empty bays in a world, leaving the building and the wall furniture.
 
     python3 script/clear_bays.py --world <a.world> [--world <b.world>] [--dry-run]
+    python3 script/clear_bays.py --world <a.world> --random 3-7 --seed 2
+    python3 script/clear_bays.py --world <a.world> --bays 3,7,11
+
+With no selector every bay is emptied (the `*_objonwallonly` variants). --bays
+empties the listed ones; --random LO-HI picks a count uniformly in [LO, HI] and
+then that many bays uniformly without replacement. --seed makes the draw
+reproducible, so re-running reproduces a world rather than re-randomising it.
 
 Removes all live Bucket / ClutteringA / ClutteringC / ClutteringD includes -- the
 four models reshuffle_bays.py and fill_bays.py place inside bays. Shelves, desks,
@@ -17,7 +24,7 @@ scanning, so a commented block cannot be matched, and a live block following one
 cannot be swallowed (a commented block ends `</include> -->`, so a match starting
 at its `<include>` runs on to the next LIVE `</include>`).
 """
-import re, os, sys
+import re, os, sys, random
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import reshuffle_bays as R
@@ -27,14 +34,46 @@ PRE = R.PRE
 
 
 def in_a_bay(x, y):
-    return any(x0 <= x <= x1 and y0 <= y <= y1 for _k, x0, x1, y0, y1 in R.BAYS)
+    return bay_of(x, y) is not None
+
+
+def bay_of(x, y):
+    for i, (_k, x0, x1, y0, y1) in enumerate(R.BAYS):
+        if x0 <= x <= x1 and y0 <= y <= y1:
+            return i
+    return None
+
+
+def arg(flag, default=None):
+    return sys.argv[sys.argv.index(flag) + 1] if flag in sys.argv else default
+
+
+def chosen_bays(rng):
+    """Which bay indices to empty. None means all of them."""
+    if '--bays' in sys.argv:
+        return sorted(int(v) for v in arg('--bays').split(','))
+    spec = arg('--random')
+    if spec is None:
+        return None
+    lo, _, hi = spec.partition('-')
+    lo = int(lo)
+    hi = int(hi) if hi else lo
+    n = rng.randint(lo, hi)
+    return sorted(rng.sample(range(len(R.BAYS)), n))
 
 
 def main():
     worlds = [sys.argv[i + 1] for i, a in enumerate(sys.argv) if a == '--world']
     dry = '--dry-run' in sys.argv
+    seed = arg('--seed')
+    rng = random.Random(int(seed) if seed is not None else None)
+    target = chosen_bays(rng)
     if not worlds:
         raise SystemExit(__doc__)
+    if target is not None:
+        bad = [i for i in target if not 0 <= i < len(R.BAYS)]
+        if bad:
+            raise SystemExit('no such bay: %s (valid 0..%d)' % (bad, len(R.BAYS) - 1))
 
     for w in worlds:
         path = w if os.path.isabs(w) else os.path.join(ROOT, w)
@@ -52,8 +91,11 @@ def main():
             if model not in R.PROP:
                 continue
             p = [float(v) for v in re.search(r'<pose>([^<]*)</pose>', b).group(1).split()]
-            if not in_a_bay(p[0], p[1]):
+            bi = bay_of(p[0], p[1])
+            if bi is None:
                 kept.append((model, p[0], p[1]))
+                continue
+            if target is not None and bi not in target:
                 continue
             spans.append((m.start(), m.end()))
             counts[model] = counts.get(model, 0) + 1
@@ -68,6 +110,12 @@ def main():
             text = text[:a] + text[b:]
 
         print('  %s' % os.path.basename(path))
+        if target is None:
+            print('      emptying ALL %d bays' % len(R.BAYS))
+        else:
+            print('      emptying %d bays: %s  (%s)'
+                  % (len(target), target,
+                     ', '.join('%d=%s' % (i, R.ZONE[i]) for i in target)))
         for k in sorted(counts):
             print('      removed %2d %s' % (counts[k], k))
         print('      removed %d bay props in total' % len(spans))

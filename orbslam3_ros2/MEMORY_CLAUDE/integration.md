@@ -814,3 +814,23 @@ the machine down.
 interface — config keys, transport encodings, QoS, upstream error handling — and
 never from ORB-SLAM3's algorithms. And in each case the thing that resolved it was
 reading the source or measuring the data, after at least one wrong guess.
+
+
+## 14. Evaluation logging status (2026-09-16/17)
+
+The wrapper now creates a supplied `output_path` recursively. In addition to the
+online `vio.csv`, it records `tracking_frontend.csv`, `local_mapping.csv`,
+`loop_closing.csv`, `performance.csv`, `run_metadata.csv` and `run_summary.csv`.
+On graceful shutdown the ORB-SLAM3 fork also exports
+`final_frame_trajectory.txt` and `final_keyframe_trajectory.txt`. Together these
+cover tracking, local mapping, place recognition, loop closure/map merge, global
+BA, initialization, reset/loss events, queue pressure and process resource usage.
+See `MEMORY_CLAUDE/README.md` §11 for the file-by-file interpretation.
+
+Metadata caution: `replay_rate` and `world_path` are provenance labels, not runtime
+controls. Dataset identity comes from the containing folder name. For the relogged
+experiment only `dataset_dynamic_nofloortexture_01_000` and
+`dataset_static_nofloortexture_001` are local; all other no-floor-texture bags are
+on `/media/ambushee/32E4AAB1E4AA772F/dataset/`. The 66 raw-run metadata files were
+audited on 2026-09-17 and 15 incorrect paths were repaired without modifying any
+measurements.

@@ -8,7 +8,7 @@ from (sim and real, stereo extrinsics, IMU noise, the fisheye mapping, the four
 fork patches, and the bugs found along the way); and
 `vins_fusion_ros2/MEMORY_CLAUDE/README.md` for the VINS side of the YOLO work.
 
-Date: 2026-09-02/03. Reference paper: *RY-SLAM: A robust YOLO-based real-time
+Date: 2026-09-02/03. Last updated: 2026-09-17. Reference paper: *RY-SLAM: A robust YOLO-based real-time
 visual SLAM solution for dynamic environments*, Chen et al., ICVRV 2025
 (PDF at workspace root).
 
@@ -404,3 +404,41 @@ doing anything, and a future world could change that again.
 
 Weights live at `weight/best.pt` (moved there 2026-09-03; defaults updated in the
 detector and both launch files).
+
+
+## 11. Structured evaluation logging and dataset provenance (2026-09-16/17)
+
+The ORB-SLAM3 wrapper now creates `output_path` and missing parent directories and
+records the complete observable pipeline, rather than only `vio.csv`:
+
+| file | evidence recorded |
+|---|---|
+| `tracking_frontend.csv` | features, map inliers, frontend stage timings, tracking state and keyframe decisions |
+| `local_mapping.csv` | keyframe insertion, point culling/creation, local BA, map size, queue state and reset requests |
+| `loop_closing.csv` | place-recognition checks, accepted loop/map-merge events, correction magnitude/scale and duration |
+| `performance.csv` | per-frame timing, queues/drops, IMU starvation/initialization, map counters, loop/global-BA counters, CPU and memory |
+| `run_summary.csv` | tracking loss, initialization, map/local-BA/loop/merge/global-BA/reset totals and filter totals |
+| `run_metadata.csv` | dataset/world provenance, topics, frames, settings, notes and replay-rate label |
+| `final_frame_trajectory.txt`, `final_keyframe_trajectory.txt` | ORB-SLAM3 final optimized trajectories, written during clean shutdown |
+| `yolo_mask.csv` | mask actually supplied to tracking; created only with `filter:=true` |
+| `vio.csv` | online trajectory in the shared VINS-style comparison format |
+
+Thus the logs reasonably cover the tracking frontend, local-mapping backend, place
+recognition, loop closure, map merging and global bundle adjustment that are
+observable from ORB-SLAM3. They do not contain every internal residual or optimizer
+iteration. A forced kill can omit the final trajectories and a trustworthy
+`run_summary.csv`; prefer a graceful shutdown.
+
+`replay_rate` is descriptive metadata and must equal the rate actually passed to
+`ros2 bag play`. `world_path` identifies the source Gazebo world; it is not an
+ORB-SLAM map and is not used for localization or navigation.
+
+For the relogged raw results, trust the containing dataset folder name over stale
+metadata. The only datasets stored locally are
+`dataset_dynamic_nofloortexture_01_000` and
+`dataset_static_nofloortexture_001`, under
+`/home/ambushee/wil_project/dataset/`. The other no-floor-texture datasets are
+under `/media/ambushee/32E4AAB1E4AA772F/dataset/`. On 2026-09-17 all 66
+`output/output_*/**/run_metadata.csv` files were audited and 15 wrong
+`dataset_path` entries were corrected. All corrected paths existed; no measured
+data or trajectories were edited.

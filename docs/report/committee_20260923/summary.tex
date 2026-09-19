@@ -1,0 +1,179 @@
+% Two-page committee summary, 23 September 2026.
+% Written to be read cold, without the full progress report and without
+% familiarity with the project. Self-contained: compiles on its own.
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[margin=22mm]{geometry}
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{siunitx}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{titlesec}
+
+\setlist{nosep}
+\titlespacing*{\section}{0pt}{1.4ex plus .2ex}{0.6ex}
+\titleformat{\section}{\normalfont\large\bfseries}{\thesection.}{0.6em}{}
+\pagestyle{empty}
+
+\begin{document}
+
+\begin{center}
+  {\Large\bfseries Vision-Based Navigation for AMRs in a Dynamic Warehouse}\\[0.4em]
+  {\large Progress summary for committee review}\\[0.3em]
+  Bolton Athit Davies \quad$\cdot$\quad 23 September 2026 \quad$\cdot$\quad
+  evidence cutoff 16 September 2026
+\end{center}
+
+\vspace{0.6em}
+\noindent\rule{\textwidth}{0.4pt}
+\vspace{0.4em}
+
+\section{The question}
+
+Can a vision-based pipeline provide reliable localization for an autonomous
+mobile robot in a warehouse that contains moving objects? The work compares two
+stereo-inertial front ends, ORB-SLAM3 and VINS-Fusion, under controlled changes
+in scene dynamics, floor texture and compute load, and asks whether masking
+dynamic objects with a learned detector improves localization. Path planning is
+outside the scope: the deliverable is a reliable navigation state and map, not a
+planner.
+
+\section{What exists}
+
+A warehouse simulator with static, dynamic, textured-floor and featureless-floor
+variants; both estimators instrumented to record per-frame timing, delivery,
+state, CPU and memory; a custom YOLO detector feeding dynamic-object masks into
+both; RTAB-Map as a separate mapping and loop-closure back end; and a
+run-logging and validity-audit harness. The evidence base is 66 logged estimator
+runs across seven simulation datasets at three repeats per condition, five
+multi-sensor recordings spanning four worlds, \num{9860} camera frames with
+projected object ground truth, and one reconstructed map with geometry and
+drivability evaluation.
+
+\section{What is established}
+
+\textbf{A wheel+IMU EKF currently outperforms both visual pipelines in static
+scenes.} On five recordings spanning four worlds, the EKF achieves the lowest
+aligned ATE on four of five, at \SIrange{0.10}{0.88}{\percent} drift.
+
+\begin{center}\small
+\begin{tabular}{lrrrrr}
+\toprule
+Dataset & IMU only & Wheel odom. & VINS-Fusion & ORB-SLAM3 & EKF \\
+\midrule
+\texttt{allsensor\_000} & 21.70 & 2.80 & 0.62 & 0.58 & \textbf{0.19} \\
+\texttt{allsensor\_001} & 12.62 & 0.98 & 0.38 & 0.37 & \textbf{0.31} \\
+\texttt{allsensor\_002} & 13.24 & 1.49 & 0.56 & 0.60 & \textbf{0.26} \\
+\texttt{allsensor\_003} & 45.56 & 3.19 & 0.78 & 6.48 & \textbf{0.42} \\
+\texttt{allsensor\_004} & 26.71 & 3.24 & \textbf{0.43} & 1.24 & 0.49 \\
+\bottomrule
+\end{tabular}\\[0.3em]
+\footnotesize Aligned ATE RMSE in metres, rigid $SE(3)$ fit with scale fixed.
+\end{center}
+
+This is the baseline the project previously lacked: until now every trajectory
+figure reported visual error with nothing to compare it against. The EKF's
+advantage is specific to these conditions --- static scene, simulated wheel
+encoders, no slip --- so it is a floor the visual system must clear rather than a
+replacement for it. It does, however, sharpen the thesis question: vision must
+justify itself where dead reckoning fails, which means long runs, wheel slip,
+relocalization after tracking loss, and moving obstacles.
+
+\textbf{The detector's limit is detection, not semantics.} Over \num{9860}
+frames the detector reaches precision 0.684 and moving-object recall 0.591, while
+class assignment is 0.996 accurate once an object has been localized. Improving
+the classifier would change nothing; recall is the binding constraint. The model
+also produces bounding boxes rather than segmentation, and class membership is
+not evidence of motion.
+
+\textbf{The reconstructed map is geometrically sound.} Against the simulator's own
+collision geometry at \SI{0.25}{\metre} tolerance, occupied-cell precision is
+\SI{96.6}{\percent} with \SI{89.5}{\percent} recall over the region the robot
+observed. The lower whole-building figure of \SI{67.2}{\percent} is route
+coverage --- the run never entered the side aisles --- not mapping failure.
+
+\textbf{Neither pipeline runs at input rate.} Frames arrive every
+\SI{33}{\milli\second}; ORB-SLAM3 tracking takes \SI{63}{\milli\second} and its
+local mapping \SI{190}{\milli\second}, and enabling the detector raises these to
+\SI{113}{} and \SI{356}{\milli\second}. Input retention falls from
+\SI{89}{\percent} to \SI{67}{\percent}.
+
+\section{What is not established}
+
+\textbf{The dynamic-scene results are withheld.} Those worlds are not yet a
+physical simulation: props follow scripted kinematic paths, carrying collision
+geometry but producing no dynamic response against the robot. Forty-eight runs
+were logged there and all forty-eight fail the plausibility check, but those
+numbers describe the simulation rather than the problem, so they are excluded
+here and retained in the record as excluded evidence. The consequence is that the
+condition this thesis is named for has \emph{no valid testbed} --- untested,
+rather than tested and failed. Rebuilding those worlds is the first item of the
+next period and the cheapest candidate explanation for the breakdown itself.
+
+\textbf{The core hypothesis has no valid test behind it.} Two instrumentation
+faults prevent it, and the environment question above compounds them. The VINS-Fusion filter never fired: all twelve runs requested
+it and all twelve record zero matched detector frames and zero removed tracks,
+even though the detector works offline. Separately, eleven of twelve ORB-SLAM3
+baseline/filtered pairs received frame counts differing by \SIrange{10}{30}{\percent}
+on the same recording. One admissible pair exists out of twenty-four. No
+cross-treatment accuracy conclusion is drawn. Both are code-path faults and stand
+regardless of scene, but the filtered runs were recorded in the dynamic worlds,
+so the hypothesis now needs a working mask path \emph{and} a valid environment.
+
+\section{How the work is validated}
+
+Every comparison is tested for admissibility before its numbers are read: the
+same recorded input to both treatments within \SI{5}{\percent}, the intended
+treatment demonstrably active rather than merely requested, a common
+ground-truth interval with the matched sample count reported, and physical
+plausibility. Four claims were retracted or prevented this period by that
+protocol --- a camera-rotation parsing bug found through map distortion while ATE
+looked plausible throughout; a map wrongly judged unnavigable because its grid
+was mis-seated; a drivability score discovered to have been measured against the
+map's own construction run; and the two filter faults above. Each would otherwise
+have entered the thesis as a result.
+
+\section{Next period, in priority order}
+
+\begin{enumerate}[leftmargin=2.2em]
+  \item Repair the VINS mask delivery path. This alone unblocks the core
+    hypothesis, and needs no additional data.
+  \item Equalise ORB-SLAM3 input across paired runs so the filter comparison
+    becomes admissible.
+  \item Rebuild the dynamic worlds with physically simulated props, giving the
+    titular condition a valid testbed.
+  \item Add disturbance to the simulation --- wheel slip and encoder
+    quantisation --- since both idealisations currently favour the
+    dead-reckoning baseline.
+  \item Record an independent route for map drivability, and extend the map
+    evaluation to the large warehouse.
+\end{enumerate}
+
+\section{Guidance requested}
+
+\begin{enumerate}[leftmargin=2.2em]
+  \item \textbf{Scope.} Given that a wheel+IMU EKF currently beats both visual
+    pipelines in static scenes, should the thesis argue for vision as the primary
+    localization sensor, or reframe around the conditions under which vision adds
+    value over dead reckoning?
+  \item \textbf{Depth or breadth.} Rebuild the dynamic environment properly
+    before measuring anything further in it, or extend to the real robot and the
+    large warehouse with the static results as they stand?
+  \item \textbf{Integration.} Relocalization, global optimization and
+    multi-session map merging are listed as future work. Is that the right next
+    contribution, or premature until dynamic-scene tracking is sound?
+\end{enumerate}
+
+\vspace{0.6em}
+\noindent\rule{\textwidth}{0.4pt}\\[0.3em]
+\footnotesize Full detail, including every retracted, excluded and failed
+measurement, is in the accompanying progress report. Results flagged there in red
+are measured but not yet trustworthy as evidence, and are excluded from the
+claims above.
+
+\end{document}

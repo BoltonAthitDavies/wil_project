@@ -95,6 +95,7 @@ THE QoS RULE, WRITTEN OUT BECAUSE IT IS THE BUG YOU WILL HIT
 import argparse
 import math
 import os
+import re
 import signal
 import sys
 import threading
@@ -378,6 +379,21 @@ LATEST = QoSProfile(history=HistoryPolicy.KEEP_LAST, depth=1,
                     reliability=ReliabilityPolicy.BEST_EFFORT,
                     durability=DurabilityPolicy.VOLATILE)
 # Where each estimator's odometry is looked for when its topic is 'auto', in order.
+# Odometry topics that are NEVER a VIO estimate, however the graph looks.
+#
+# /model/<name>/odometry is AckermannSteering's dead reckoning: it integrates the
+# wheel joints inside the simulator. /model/<name>/odometry_with_covariance is the
+# same quantity. wheel_odom_noise.py's output is that feed made worse on purpose.
+# Left unfiltered, _find_odom's fallback adopts one of these and draws it under an
+# estimator's label, complete with an error figure -- which is how a session with
+# no VINS running still reported a VINS error.
+# .search(), not .match(): the wheel_odom alternative has to be able to fire in
+# the middle of a namespaced name such as /robot/wheel_odometry, which .match()
+# anchored at position 0 would never reach.
+NOT_AN_ESTIMATE = re.compile(
+    r'^/model/[^/]+/odometry(_with_covariance)?$'
+    r'|(^|/)wheel_odom')
+
 EST_PREFER = {
     'vins': ('/vins_estimator/odometry', '/odometry'),
     # orbslam3_node.cpp publishes the relative "~/odometry", so the topic is
@@ -468,6 +484,12 @@ class SharedState(object):
             Estimator('vins', 'VINS', args.vins_topic, args.align,
                       args.trail_min_step),
             Estimator('orb', 'ORB3', args.orb_topic, args.align,
+                      args.trail_min_step),
+            # Wheel odometry is NOT an estimator, but it is the same shape of
+            # thing to draw: a pose stream to overlay and score against ground
+            # truth. It gets its own key and label so it can never be mistaken for
+            # a VIO result the way it was when _find_odom adopted it as 'VINS'.
+            Estimator('odom', 'ODOM', args.wheel_odom_topic, args.align,
                       args.trail_min_step),
         ]
         self.plan = None                  # Nx2
@@ -681,9 +703,27 @@ class RosLink(object):
         skip = {self.args.gt_topic, '/odom', '/odometry_filtered'} | set(taken)
         skip |= set(c for p in EST_PREFER.values() for c in p) - set(prefer)
         for name, types in self.node.get_topic_names_and_types():
-            if 'nav_msgs/msg/Odometry' in types and name not in skip:
-                return name
+            if 'nav_msgs/msg/Odometry' not in types or name in skip:
+                continue
+            if NOT_AN_ESTIMATE.search(name):
+                continue
+            # Say so. This branch is a GUESS: it adopts a topic nobody named, and
+            # the trail is then drawn and scored under an estimator's label. A
+            # wheel-odometry feed picked up here reported "VINS err 0.567 m" with
+            # VINS not running at all.
+            self.node.get_logger().warning(
+                'no publisher on %s; falling back to %s. Pass --%s-topic if that '
+                'is not your estimator.' % (' or '.join(prefer), name, prefer and
+                                            self._key_for(prefer) or 'vins'))
+            return name
         return None
+
+    @staticmethod
+    def _key_for(prefer):
+        for k, v in EST_PREFER.items():
+            if tuple(v) == tuple(prefer):
+                return k
+        return 'vins'
 
     # -- callbacks --------------------------------------------------------------
     def _rate(self, topic):
@@ -1010,13 +1050,15 @@ C_WALL = QColor(70, 76, 86)
 C_GT = QColor('#4fc3f7')
 C_VINS = QColor('#ffb74d')
 C_ORB = QColor('#e040fb')      # magenta: cyan reads as the ground-truth trail
+C_ODOM = QColor('#8d99ae')     # grey: dead reckoning is not a result
                                # (#4fc3f7) at trail width, which is the one
                                # comparison this overlay exists to support
 # Palette and dash pattern per estimator key. Distinct dashes as well as distinct
 # hues, so the two trails stay tellable apart where they overlap and in a screenshot
 # that has lost its colour.
 EST_STYLE = {'vins': (C_VINS, Qt.DashLine),
-             'orb': (C_ORB, Qt.DotLine)}
+             'orb': (C_ORB, Qt.DotLine),
+             'odom': (C_ODOM, Qt.DashDotLine)}
 C_PLAN = QColor('#81c784')
 C_GOAL = QColor('#e57373')
 C_ROUTE = QColor('#ba9bf0')
@@ -2350,6 +2392,12 @@ def parse_args(argv):
     ap.add_argument('--vins-topic', default='auto',
                     help="'auto' probes /vins_estimator/odometry then /odometry then "
                          'any other Odometry publisher. "" disables the overlay.')
+    # No 'auto' for this one on purpose. Guessing a wheel-odometry topic is what
+    # produced a 'VINS err 0.567 m' readout with VINS not running; naming it is
+    # the whole point of having a separate overlay.
+    ap.add_argument('--wheel-odom-topic', default='',
+                    help='draw wheel odometry as its own ODOM overlay, e.g. '
+                         '/model/ackermann_robot_001/odometry. Empty = off.')
     ap.add_argument('--orb-topic', default='auto',
                     help="ORB-SLAM3 odometry. 'auto' probes /orbslam3/odometry (what "
                          "the launch files produce, they set name='orbslam3') then "

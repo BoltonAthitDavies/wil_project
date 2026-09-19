@@ -1,0 +1,120 @@
+\documentclass[12pt,a4paper,oneside]{report}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{geometry}
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ifthen}
+\usepackage{siunitx}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,fit,positioning,shapes.geometric}
+% sidewaystable: the per-run trajectory table is 18 columns wide and does not
+% fit the portrait text block.
+\usepackage{rotating}
+\usepackage{hyperref}
+\usepackage[nameinlink,noabbrev]{cleveref}
+
+\geometry{margin=25mm}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!45!black,
+  urlcolor=blue!55!black,
+  citecolor=blue!45!black,
+  pdftitle={WiL Minor Progress Report},
+  pdfauthor={WiL Project}
+}
+\setlist{nosep}
+\setlength{\emergencystretch}{3em}
+
+\definecolor{implemented}{HTML}{D9EAD3}
+\definecolor{external}{HTML}{D9EAF7}
+\definecolor{blocked}{HTML}{F4CCCC}
+\definecolor{planned}{HTML}{FFF2CC}
+
+% Per-block performance verdicts for the pipeline diagrams of section 4.9.
+% These fills are GENERATED, never typed: figures/block_colours_<cond>.tex is
+% written by script/block_performance.py from the run artifacts.
+\definecolor{perfgood}{HTML}{A5D6A7}
+\definecolor{perfpoor}{HTML}{FFCDD2}
+% 'no claim' is yellow. That moved perfnoeffect off yellow and onto a blue tint:
+% the two must stay visually distinct, because "measured, and it changes nothing"
+% and "not measured at all" are opposite statements about the evidence.
+\definecolor{perfnoeffect}{HTML}{D9EAF7}
+\definecolor{perfnone}{HTML}{FFF2CC}
+\newcommand{\perfmark}[1]{%
+  \ifthenelse{\equal{#1}{good}}{\colorbox{perfgood}{\scriptsize good}}{%
+  \ifthenelse{\equal{#1}{poor}}{\colorbox{perfpoor}{\scriptsize poor}}{%
+  \ifthenelse{\equal{#1}{noeffect}}{\colorbox{perfnoeffect}{\scriptsize no effect}}{%
+  \colorbox{perfnone}{\scriptsize no claim}}}}}
+
+% Queried material. Red marks a result, number or condition that is measured but
+% NOT yet trustworthy as evidence -- an unexplained mechanism, a confound, an
+% unfair comparison, or a figure whose provenance does not support the use it is
+% being put to. It is deliberately not used for "bad result": a large error that
+% is correctly measured and understood is a finding, not a query. Everything in
+% red needs an action before it can appear in the major report.
+\definecolor{flagred}{HTML}{B00000}
+\newcommand{\flag}[1]{\textcolor{flagred}{#1}}
+% Whole-paragraph query. Sets the paragraph in red behind a bracketed label so it
+% survives greyscale printing, where colour alone would vanish.
+\newenvironment{queried}[1][Questionable]%
+  {\par\addvspace{0.6ex}\begingroup\color{flagred}\noindent
+   \textbf{[#1]}\ \ignorespaces}%
+  {\par\endgroup\addvspace{0.6ex}}
+
+% Repository paths, identifiers, and commit hashes are typeset verbatim in a
+% typewriter face, but must remain breakable: an unbreakable 40-character hash
+% or a deep source path otherwise overruns the text block and prints on top of
+% the neighbouring table column. Breaks are offered at path separators first
+% (\allowbreak, penalty 0) and only reluctantly between other characters
+% (penalty 4000), so a path divides after "/", "_" or "." whenever it can and
+% splits a bare token such as a commit hash only when nothing else will fit.
+% Hyphens are deliberately not separators: breaking "--symlink-install" after a
+% hyphen would read as though a hyphen had been inserted.
+\newcommand{\wilsoftbreak}{\penalty4000\relax}
+\ExplSyntaxOn
+\tl_new:N \l__wil_repo_tl
+\NewDocumentCommand{\repo}{m}
+  {
+    \group_begin:
+      \tl_set:Nx \l__wil_repo_tl { \tl_to_str:n {#1} }
+      \regex_replace_all:nnN { ([a-zA-Z0-9]) } { \1 \c{wilsoftbreak} }
+        \l__wil_repo_tl
+      \regex_replace_all:nnN { ([/_.]) } { \1 \c{allowbreak} }
+        \l__wil_repo_tl
+      \texttt { \tl_use:N \l__wil_repo_tl }
+    \group_end:
+  }
+\ExplSyntaxOff
+\newcommand{\status}[1]{\textbf{#1}}
+
+% Defines \pipelinefig and the block styles used by section 4.9. Loaded here
+% rather than at the figure, because it declares \newcommand and \tikzset.
+\input{figures/pipeline_performance}
+
+\title{Vision-Based Navigation Pipeline for AMRs\\in a Dynamic Warehouse\\[1.5em]
+  \Large Minor Scientific Progress Report}
+\author{WiL Project}
+\date{Reporting cutoff: 16 September 2026}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+% The minor progress report begins with the implemented methodology chapter;
+% Chapters 1 and 2 belong to the existing major-report context.
+\setcounter{chapter}{2}
+\include{chapters/chapter_3_methodology}
+\include{chapters/chapter_4_results}
+
+\end{document}

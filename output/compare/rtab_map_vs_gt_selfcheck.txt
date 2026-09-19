@@ -1,0 +1,11 @@
+MAP GEOMETRY vs world file   (tolerance 0.25 m)
+  precision            96.6 %   (11634 occupied cells)
+  recall, whole building 67.2 %
+  recall, region mapped  89.5 %
+DRIVABILITY vs ground-truth route   (3032 poses, real footprint)
+  clear and mapped     100.0 %
+  FALSE OBSTACLE       0.0 %   <- footprint hits an occupied cell
+  unmapped (>50% unknown under footprint)  0.0 %
+  clearance to nearest mapped obstacle: median 1.01 m, p05 0.46 m
+
+wrote output/compare/rtab_map_vs_gt_selfcheck.png

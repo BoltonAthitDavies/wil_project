@@ -41,11 +41,17 @@ DEFAULT_WEIGHTS = os.path.join(WORKSPACE, 'weight', 'best.pt')
 
 
 def generate_launch_description():
-    config_file = os.path.join(
+    default_config = os.path.join(
         get_package_share_directory('orbslam3_ros2'),
-        'config', 'wil_sim', 'stereo_imu.yaml')
+        'config', 'wil_sim', 'stereo_imu_truenoise.yaml')
+    config_file = LaunchConfiguration('config_file')
 
     args = [
+        DeclareLaunchArgument(
+            'config_file', default_value=default_config,
+            description='Calibration/settings YAML. Override to run a treatment '
+                        'that changes only the config, e.g. '
+                        'stereo_imu_truenoise.yaml, without editing the default.'),
         DeclareLaunchArgument(
             'vocabulary_file', default_value=DEFAULT_VOCAB,
             description='ORB vocabulary. Build it with ./build_orbslam3.sh.'),

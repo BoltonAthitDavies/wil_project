@@ -1,0 +1,33 @@
+% Coordinate-frame chain. Edge labels are lifted clear of the node row and the
+% calibration-check edge is routed beneath the chain, so that no label or
+% connector is drawn on top of a frame box.
+\begin{tikzpicture}[
+  node distance=8mm,
+  frame/.style={draw, rounded corners, fill=implemented, minimum height=8mm,
+    minimum width=24mm, align=center},
+  sensor/.style={frame, fill=gray!15},
+  flow/.style={-{Latex[length=2.2mm]}, thick},
+  edgelabel/.style={font=\scriptsize, inner sep=1pt}
+]
+  \node[frame, fill=external] (map) {\texttt{map}};
+  \node[frame, right=of map] (odom) {\texttt{odom}};
+  \node[frame, right=of odom] (body) {\texttt{vio\_body}};
+  \node[frame, right=of body] (foot) {\texttt{base\_footprint}};
+  \node[frame, right=of foot] (base) {\texttt{base\_link}};
+  \node[sensor, below=16mm of base] (cam0) {\texttt{cam0\_optical}};
+  \node[sensor, right=of cam0] (cam1) {\texttt{cam1\_optical}};
+
+  % The labelled gaps are only 8 mm wide, so each label is raised 6 mm above the
+  % arrow: it then sits entirely above the 8 mm-tall boxes instead of over them.
+  \draw[flow] (map) -- node[edgelabel, above=6mm]{RTAB-Map correction} (odom);
+  \draw[flow] (odom) -- (body);
+  \draw[flow] (body) -- node[edgelabel, above=6mm]{measured offset} (foot);
+  \draw[flow] (foot) -- (base);
+  \draw[flow] (base) -- (cam0);
+  \draw[flow] (base) -- (cam1);
+
+  % Consistency check, routed below the chain so it does not cross
+  % base_footprint or base_link.
+  \draw[flow, dashed] (body.south) |-
+    node[edgelabel, above, pos=0.72]{runtime identity check} (cam0.west);
+\end{tikzpicture}

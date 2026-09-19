@@ -1,0 +1,125 @@
+% Per-block performance diagram, drawn once and instantiated per condition.
+%
+%   \pipelinefig{static}    \pipelinefig{dynamic}
+%
+% Block fills come from figures/block_colours_<cond>.tex, which
+% script/block_performance.py generates from the run artifacts. Nothing here
+% chooses a colour; this file only decides where the boxes go. If a measurement
+% changes, regenerate and the figure follows -- the alternative, typing ~40
+% colours by hand, would put that many unsourced claims into a drawing that
+% reads as authoritative.
+%
+% The structure follows the RY-SLAM framework figure in spirit, but the blocks
+% are this project's: stereo-inertial rather than RGB-D, bounding boxes rather
+% than segmentation masks, no motion gate, and no loop fusion inside VINS.
+% Copying that paper's layout would assert capabilities this system lacks.
+
+\newcommand{\bcol}[2]{\csname blockcolour@#1@#2\endcsname}
+
+% Geometry note. The figure is scaled to \textwidth, so the ONLY thing that makes
+% a connector visible is its length relative to the blocks either side. Wide blocks
+% with narrow gaps -- 20mm against 2.2mm, as this was first drawn -- leave arrows
+% about 2mm long after scaling, which reads as a smudge. Narrower blocks and much
+% wider gaps cost nothing in total width and give the arrows four times the run.
+\tikzset{
+  pblock/.style={draw, rounded corners=1.5pt, minimum height=11mm,
+    minimum width=18mm, align=center, font=\scriptsize, inner sep=2pt,
+    line width=0.4pt},
+  stagelab/.style={font=\scriptsize\bfseries, anchor=east, align=right},
+  pipelab/.style={font=\small\bfseries, anchor=west},
+  flowar/.style={-{Latex[length=2.4mm,width=1.8mm]}, gray!45!black,
+    line width=0.7pt},
+}
+
+% #1 condition, #2 block id. The node name, position and label text follow at the
+% call site, so this takes TWO arguments -- declaring three made it swallow the
+% opening parenthesis of the node name and every block failed to parse.
+\newcommand{\pb}[2]{\node[pblock, fill=\bcol{#1}{#2}] }
+
+\newcommand{\pipelinefig}[1]{%
+\begin{tikzpicture}[node distance=7mm and 8mm]
+  % ---------------- ORB-SLAM3 ----------------
+  \node[pipelab] (orbtitle) at (0,0) {ORB-SLAM3 (stereo-inertial)};
+  \pb{#1}{orbextract} (o1) at (2.0,-1.4) {Extract ORB\\(+preproc, stereo)};
+  \pb{#1}{orbimupre} (o2) [right=of o1] {IMU\\preintegration};
+  \pb{#1}{orbposepred} (o3) [right=of o2] {Initial pose\\estimation};
+  \pb{#1}{orbtracklocal} (o4) [right=of o3] {Track\\local map};
+  \pb{#1}{orbkfdec} (o5) [right=of o4] {New keyframe\\decision};
+  \pb{#1}{orbyolo} (o6) [right=of o5] {Dynamic feature\\removal (YOLO)};
+  \node[stagelab] at ([xshift=-3mm]o1.west) {Tracking};
+  \foreach \a/\b in {o1/o2,o2/o3,o3/o4,o4/o5} \draw[flowar] (\a) -- (\b);
+
+  \pb{#1}{orbkfins} (m1) at (2.0,-3.6) {KeyFrame\\insertion};
+  \pb{#1}{orbmpcull} (m2) [right=of m1] {MapPoints\\culling};
+  \pb{#1}{orbnewpoints} (m3) [right=of m2] {New points\\creation};
+  \pb{#1}{orblba} (m4) [right=of m3] {Local BA};
+  \pb{#1}{orbkfcull} (m5) [right=of m4] {Local keyframes\\culling};
+  \pb{#1}{orbimuref} (m6) [right=of m5] {IMU scale\\refinement};
+  \node[stagelab] at ([xshift=-3mm]m1.west) {Local\\mapping};
+  \foreach \a/\b in {m1/m2,m2/m3,m3/m4,m4/m5,m5/m6} \draw[flowar] (\a) -- (\b);
+  \draw[flowar] (o5.south) -- ++(0,-4mm) -| (m1.north);
+
+  \pb{#1}{orbplacerec} (l1) at (2.0,-5.8) {Place\\recognition};
+  \pb{#1}{orbloopfusion} (l2) [right=of l1] {Loop fusion\\+ ess.\ graph};
+  \pb{#1}{orbfullba} (l3) [right=of l2] {Full BA};
+  \node[stagelab] at ([xshift=-3mm]l1.west) {Loop\\closing};
+  \foreach \a/\b in {l1/l2,l2/l3} \draw[flowar] (\a) -- (\b);
+  \draw[flowar] (m6.south) -- ++(0,-4mm) -| (l1.north);
+
+  % ---------------- VINS-Fusion ----------------
+  \node[pipelab] at (0,-7.5) {VINS-Fusion (stereo-inertial) + RTAB-Map};
+  \pb{#1}{vinstrack} (v1) at (2.0,-8.9) {Feature\\tracking};
+  \pb{#1}{vinsqueue} (v2) [right=of v1] {Feature\\queue};
+  \pb{#1}{vinsyolo} (v3) [right=of v2] {Persistent-feature\\removal (YOLO)};
+  \node[stagelab] at ([xshift=-3mm]v1.west) {Front end};
+  \draw[flowar] (v1) -- (v2);
+
+  \pb{#1}{vinsimuprop} (b1) at (2.0,-11.1) {IMU\\propagation};
+  \pb{#1}{vinstri} (b2) [right=of b1] {Triangulation};
+  \pb{#1}{vinsconstruct} (b3) [right=of b2] {Problem\\construction};
+  \pb{#1}{vinssolve} (b4) [right=of b3] {Ceres solve};
+  \pb{#1}{vinsmarg} (b5) [right=of b4] {Marginalization};
+  \pb{#1}{vinsoutlier} (b6) [right=of b5] {Outlier\\rejection};
+  \node[stagelab] at ([xshift=-3mm]b1.west) {Back end};
+  \foreach \a/\b in {b1/b2,b2/b3,b3/b4,b4/b5,b5/b6} \draw[flowar] (\a) -- (\b);
+  \draw[flowar] (v2.south) -- ++(0,-4mm) -| (b1.north);
+
+  \pb{#1}{vinsslide} (c1) at (2.0,-13.3) {Slide\\window};
+  \pb{#1}{vinssolverq} (c2) [right=of c1] {Solver\\convergence};
+  \pb{#1}{vinsloop} (c3) [right=of c2] {Loop fusion\\(absent in fork)};
+  \pb{#1}{vinsrtab} (c4) [right=of c3] {RTAB-Map\\correction};
+  \node[stagelab] at ([xshift=-3mm]c1.west) {Output,\\back end};
+  \draw[flowar] (c1) -- (c2);
+  \draw[flowar] (b6.south) -- ++(0,-4mm) -| (c1.north);
+
+  % ---------------- EKF, static only ----------------
+  \ifthenelse{\equal{#1}{static}}{%
+    \node[pipelab] at (0,-15.0) {EKF wheel\,+\,IMU (non-visual baseline)};
+    \pb{#1}{ekfimupred} (e1) at (2.0,-16.4) {IMU\\prediction};
+    \pb{#1}{ekfwheelupd} (e2) [right=of e1] {Wheel speed\\correction};
+    \pb{#1}{ekfbiasobs} (e3) [right=of e2] {Gyro-bias\\observation};
+    \pb{#1}{ekfyaw} (e4) [right=of e3] {Yaw-rate model\\(bicycle)};
+    \pb{#1}{ekfcov} (e5) [right=of e4] {Covariance\\propagation};
+    \pb{#1}{ekfanchor} (e6) [right=of e5] {Initial pose\\anchor};
+    \node[stagelab] at ([xshift=-3mm]e1.west) {EKF};
+    \foreach \a/\b in {e1/e2,e2/e3,e3/e4,e4/e5} \draw[flowar] (\a) -- (\b);
+  }{%
+    \node[font=\scriptsize\itshape, anchor=west, text width=0.82\linewidth]
+      at (0,-15.4) {The EKF wheel\,+\,IMU baseline has no row here: no dynamic
+      dataset carries wheel encoders or wheel odometry, so it cannot be run in
+      this condition at all (\cref{tab:dataset-registry}).};
+  }
+
+  % ---------------- legend ----------------
+  \begin{scope}[shift={(0,-18.4)}]
+    \node[pblock, fill=perfgood, minimum height=8mm, minimum width=15mm] (g) at (2.2,0) {good};
+    \node[font=\scriptsize, anchor=west] at ([xshift=1.5mm]g.east)
+      {meets its criterion};
+    \node[pblock, fill=perfpoor, minimum height=8mm, minimum width=15mm] (r) at (7.4,0) {poor};
+    \node[font=\scriptsize, anchor=west] at ([xshift=1.5mm]r.east)
+      {fails its criterion};
+    \node[pblock, fill=perfnone, minimum height=8mm, minimum width=15mm] (n) at (12.4,0) {no claim};
+    \node[font=\scriptsize, anchor=west] at ([xshift=1.5mm]n.east)
+      {not instrumented, not exercised, or not implemented};
+  \end{scope}
+\end{tikzpicture}}

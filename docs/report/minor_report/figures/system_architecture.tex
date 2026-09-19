@@ -1,0 +1,46 @@
+% Experimental architecture. Nodes are placed on an explicit grid rather than by
+% relative chaining: the detector sits between the two estimators so that its two
+% optional edges are short verticals instead of connectors routed through the
+% estimator boxes, and every arrow enters a distinct face of its target node.
+% The trajectory-to-RTAB-Map gap is sized to hold its edge label clear of both
+% boxes and of the grouping rectangle.
+\begin{tikzpicture}[
+  block/.style={draw, rounded corners, align=center, minimum height=9mm,
+    text width=34mm, font=\footnotesize, fill=implemented, inner sep=2mm},
+  source/.style={block, fill=gray!15},
+  backend/.style={block, fill=external},
+  plan/.style={block, fill=planned, dashed},
+  flow/.style={-{Latex[length=2.2mm]}, thick},
+  optional/.style={flow, dashed},
+  edgelabel/.style={font=\scriptsize, fill=white, inner sep=1.5pt}
+]
+  \node[source]  at ( 0.0,  0.0) (sensors)    {Stereo images\\and IMU};
+  \node[block]   at ( 5.0,  2.8) (vins)       {VINS-Fusion\\track culling and\\feature suppression};
+  \node[block]   at ( 5.0,  0.0) (detector)   {Optional YOLO\\box detector};
+  \node[block]   at ( 5.0, -2.8) (orb)        {ORB-SLAM3\\feature rejection};
+  \node[source]  at (10.2,  0.0) (trajectory) {Common trajectory\\\texttt{vio.csv}};
+  \node[backend] at (16.6,  0.0) (rtab)       {RTAB-Map\\external back end};
+  \node[source]  at (10.2, -5.0) (evaluation) {Trajectory and\\map evaluation};
+  \node[plan]    at (16.6, -5.0) (future)     {Planned integrated\\relocalization, global\\optimization, map merging};
+
+  % Sensor stream reaches the detector and both estimators without crossings.
+  \draw[flow] (sensors.east) -- (vins.west);
+  \draw[flow] (sensors.east) -- (detector.west);
+  \draw[flow] (sensors.east) -- (orb.west);
+
+  % Optional masks: short verticals, so nothing is drawn across a box.
+  \draw[optional] (detector.north) -- (vins.south);
+  \draw[optional] (detector.south) -- (orb.north);
+
+  % Both estimators write the common trajectory; they enter the two left corners
+  % so the arrowheads stay apart and the south face is free for the next edge.
+  \draw[flow] (vins.east) -- (trajectory.north west);
+  \draw[flow] (orb.east) -- (trajectory.south west);
+  \draw[flow] (trajectory.south) -- (evaluation.north);
+  \draw[flow] (trajectory.east) -- node[edgelabel]{TF odometry} (rtab.west);
+  \draw[flow] (rtab.south west) -- (evaluation.east);
+  \draw[optional] (rtab.south) -- (future.north);
+
+  \node[draw, fit=(vins)(orb)(trajectory), inner sep=3mm,
+    label={[font=\scriptsize]above:front-end trajectory path}] {};
+\end{tikzpicture}

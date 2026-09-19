@@ -15,6 +15,7 @@ WHY SE(3) ALIGNMENT
     error against a trajectory that is otherwise sound.
 """
 
+import glob
 import os
 
 import numpy as np
@@ -42,11 +43,66 @@ PLAUSIBLE_MEAN_SPEED = 3.0    # m/s
 SYSTEMS = [("VINS-Fusion", "output_vins"), ("ORB-SLAM3", "output_orb")]
 SYSTEMS_YOLO = SYSTEMS + [("VINS-Fusion+YOLO", "output_vins_yolo"),
                           ("ORB-SLAM3+YOLO", "output_orb_yolo")]
+# The non-visual baselines from proprio_estimator.py. Separate from SYSTEMS because
+# they answer a different question: not "which VIO is better" but "does either VIO
+# beat doing no vision at all". Written in the same vio.csv format precisely so that
+# every metric here applies to them unchanged.
+SYSTEMS_PROPRIO = [("Wheel odometry", "output_wheel"),
+                   ("IMU dead reckoning", "output_imu"),
+                   ("EKF wheel+IMU", "output_ekf")]
 
 
-def sources(dataset, systems=SYSTEMS):
-    return [(label, os.path.join(ROOT, "output", tree, dataset, "vio.csv"))
-            for label, tree in systems]
+def run_dir(tree, dataset, logging="never"):
+    """Directory holding this system's artifacts for `dataset`.
+
+    `logging` is "never", "auto", or an explicit run name such as
+    "logging_20260916_02". An explicit name is the only safe choice once a dataset
+    holds more than one run of the same estimator: "auto" takes the newest, so the
+    day a second run appears every previously published number for that system
+    changes underneath the report without anything in the call site changing.
+
+    Two layouts coexist in output/. The estimator launch files write one `logging_*`
+    directory per run, so the artifacts sit at <tree>/<dataset>/logging_<stamp>/;
+    proprio_estimator.py and the older relogged copies write flat, at
+    <tree>/<dataset>/. Callers that know they are reading the newer per-run layout
+    pass logging="auto" and get the newest `logging_*` that actually contains a
+    vio.csv.
+
+    Default "never" on purpose: silently reaching into a run directory would make
+    runs appear in plot_compare.py and plot_summary.py that those scripts have never
+    reported before, changing published figures as a side effect of a helper added
+    for something else. Opting in keeps that an explicit decision per caller.
+    """
+    base = os.path.join(ROOT, "output", tree, dataset)
+    if logging not in ("never", "auto"):
+        return os.path.join(base, logging)
+    if logging == "auto" and not os.path.exists(os.path.join(base, "vio.csv")):
+        runs = sorted(d for d in glob.glob(os.path.join(base, "logging_*"))
+                      if os.path.exists(os.path.join(d, "vio.csv")))
+        if runs:
+            return runs[-1]
+    return base
+
+
+def split(entry):
+    """A systems entry is (label, tree) or (label, tree, run).
+
+    The optional third field pins one `logging_*` directory for that system, which
+    is what lets two runs of the same estimator -- for instance ORB-SLAM3 with and
+    without loop closure -- sit in one comparison as separate rows.
+    """
+    if len(entry) == 3:
+        return entry[0], entry[1], entry[2]
+    return entry[0], entry[1], None
+
+
+def sources(dataset, systems=SYSTEMS, logging="never"):
+    out = []
+    for e in systems:
+        label, tree, run = split(e)
+        out.append((label, os.path.join(run_dir(tree, dataset, run or logging),
+                                        "vio.csv")))
+    return out
 
 
 def gt_candidates(dataset, systems=SYSTEMS):
@@ -55,7 +111,7 @@ def gt_candidates(dataset, systems=SYSTEMS):
     # so for SYSTEMS_YOLO this just checks the same two trees SYSTEMS would, plus two
     # that in practice never hold a copy -- harmless, and keeps this generic rather
     # than special-casing YOLO trees out.
-    seen = dict.fromkeys(tree for _, tree in systems)
+    seen = dict.fromkeys(split(e)[1] for e in systems)
     return [os.path.join(ROOT, "output", tree, dataset, "ground_truth.csv")
             for tree in seen]
 
@@ -75,7 +131,7 @@ def discover(prefix="", contains=None, exclude=None, systems=SYSTEMS):
     find datasets that only have a YOLO-masked run.
     """
     found = set()
-    for tree in dict.fromkeys(tree for _, tree in systems):
+    for tree in dict.fromkeys(split(e)[1] for e in systems):
         base = os.path.join(ROOT, "output", tree)
         if not os.path.isdir(base):
             continue
@@ -204,6 +260,102 @@ def geodesic_deg(Ra, Rb):
     return np.degrees(np.arccos(np.clip((tr - 1) / 2, -1.0, 1.0)))
 
 
+# Intervals the RPE sweep reports. 1.0 s is the headline -- about 1.4 m at the sim
+# robot's cruising speed -- and the rest show how error accumulates with interval.
+RPE_DELTAS = (0.5, 1.0, 2.0, 5.0)
+
+
+def rpe(t, p_est, q_est, p_ref, q_ref, delta_s=1.0, tol=0.25, jump_idx=None):
+    """Relative pose error at a fixed time interval (Kuemmerle/TUM convention).
+
+    For each pair (i, j) separated by delta_s seconds, the error transform is
+    E = (Q_i^-1 Q_j)^-1 (P_i^-1 P_j), where P is the estimate and Q the reference.
+    Translation error is ||trans(E)||; rotation error is the geodesic angle of
+    rot(E), via geodesic_deg().
+
+    RPE needs NO global alignment, which is the whole point of reporting it here.
+    ATE on these runs is dominated by teleports: one discontinuity re-seats the
+    rigid fit and every subsequent pose inherits the offset, so the headline number
+    describes the jump rather than the tracking. RPE asks a local question instead
+    -- over the next delta_s seconds, did the estimate move the way the reference
+    moved -- and is immune to both the global frame and accumulated drift. It is
+    the standard-named replacement for this module's longest-clean-segment
+    heuristic, not an addition to it.
+
+    A pair is accepted only when its realised separation is within `tol` of
+    delta_s, so a gap in the log cannot silently widen the interval and inflate the
+    error. Pairs are overlapping (every index starts one), which is the TUM default;
+    `pairs` reports how many survived.
+
+    jump_idx: indices from find_jumps(). When given, the returned dict also carries
+    `*_clean` statistics computed over only those pairs that do not span a jump.
+    The difference between the two isolates the teleport contribution from ordinary
+    local error.
+
+    Returns a dict, or None when no pair satisfies the interval.
+    """
+    t = np.asarray(t, float)
+    if len(t) < 2:
+        return None
+    j = np.searchsorted(t, t + delta_s, side="left")
+    i = np.arange(len(t))
+    keep = j < len(t)
+    i, j = i[keep], j[keep]
+    if len(i) == 0:
+        return None
+    ok = np.abs((t[j] - t[i]) - delta_s) <= tol * delta_s
+    i, j = i[ok], j[ok]
+    if len(i) == 0:
+        return None
+
+    Re, Rr = quat_to_R(np.asarray(q_est)), quat_to_R(np.asarray(q_ref))
+    pe, pr = np.asarray(p_est, float), np.asarray(p_ref, float)
+
+    # Relative motion of each trajectory, expressed in its own frame at i.
+    rel_e = np.einsum("nji,nj->ni", Re[i], pe[j] - pe[i])
+    rel_r = np.einsum("nji,nj->ni", Rr[i], pr[j] - pr[i])
+    # ||trans(E)|| reduces to this: E's translation is an orthonormal rotation of
+    # (rel_e - rel_r), and rotation preserves norm.
+    e_trans = np.linalg.norm(rel_e - rel_r, axis=1)
+
+    rot_e = np.einsum("nji,njk->nik", Re[i], Re[j])
+    rot_r = np.einsum("nji,njk->nik", Rr[i], Rr[j])
+    e_rot = geodesic_deg(rot_r, rot_e)
+
+    out = dict(delta_s=delta_s, pairs=int(len(i)),
+               trans_rmse=float(np.sqrt((e_trans**2).mean())),
+               trans_median=float(np.median(e_trans)),
+               rot_rmse=float(np.sqrt((e_rot**2).mean())),
+               rot_median=float(np.median(e_rot)))
+
+    if jump_idx is None or len(jump_idx) == 0:
+        # With no jumps the clean subset is the whole set; say so explicitly rather
+        # than leaving the caller to decide what a missing field means.
+        out.update(pairs_clean=out["pairs"], trans_rmse_clean=out["trans_rmse"],
+                   trans_median_clean=out["trans_median"],
+                   rot_rmse_clean=out["rot_rmse"], rot_median_clean=out["rot_median"])
+        return out
+
+    # A jump at index k is the step k -> k+1, so a pair (i, j) spans it when
+    # i <= k < j. Counting jumps in each prefix makes that an O(n) test.
+    spans = np.zeros(len(t), int)
+    spans[np.asarray(jump_idx, int) + 1] = 1
+    before = np.cumsum(spans)
+    clean = before[j] == before[i]
+    if not clean.any():
+        out.update(pairs_clean=0, trans_rmse_clean=float("nan"),
+                   trans_median_clean=float("nan"), rot_rmse_clean=float("nan"),
+                   rot_median_clean=float("nan"))
+        return out
+    ct, cr = e_trans[clean], e_rot[clean]
+    out.update(pairs_clean=int(clean.sum()),
+               trans_rmse_clean=float(np.sqrt((ct**2).mean())),
+               trans_median_clean=float(np.median(ct)),
+               rot_rmse_clean=float(np.sqrt((cr**2).mean())),
+               rot_median_clean=float(np.median(cr)))
+    return out
+
+
 def num(x, w=10, prec=2):
     """Number in at most w characters. A fully diverged run reports distances of 1e13 m;
     plain %f then blows the column apart and welds the whole row into one token. Keep the
@@ -214,7 +366,8 @@ def num(x, w=10, prec=2):
     return f"{t:>{w}}"
 
 
-def analyse(dataset, log=lambda *_: None, trim_start=0.0, systems=SYSTEMS):
+def analyse(dataset, log=lambda *_: None, trim_start=0.0, systems=SYSTEMS,
+            logging="never"):
     """Load a dataset and align every estimate to the reference.
 
     trim_start: seconds to discard from the FRONT of each estimate's own overlap with
@@ -237,7 +390,7 @@ def analyse(dataset, log=lambda *_: None, trim_start=0.0, systems=SYSTEMS):
     (largest single jump, metres), rot_rms, rot_max (rotational error in degrees).
     """
     runs = []
-    for name, path in sources(dataset, systems):
+    for name, path in sources(dataset, systems, logging):
         r = load(path)
         if r is None:
             log(f"  [skip] {name}: no usable data at {path}")

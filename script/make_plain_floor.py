@@ -2,6 +2,7 @@
 """Build a featureless copy of the ground model, and point worlds at it.
 
     python3 script/make_plain_floor.py --world <a.world> [--world <b.world>] [--dry-run]
+    python3 script/make_plain_floor.py --keep hazard --world <c.world>   # bay lines only
 
 WHY A SEPARATE MODEL, NOT A WORLD EDIT
     Nothing about the floor's appearance lives in the .world file. Every world
@@ -47,6 +48,11 @@ PKG = os.path.join(ROOT, 'aws-robomaker-small-warehouse-world')
 MODELS = os.path.join(PKG, 'models')
 SRC = 'aws_robomaker_warehouse_GroundB_01'
 DST = 'aws_robomaker_warehouse_GroundB_01_plain'
+DST_KEEP = 'aws_robomaker_warehouse_GroundB_01_bayline'
+# Atlas bands, by the u coordinate of a face's centroid. The 154 painted triangles
+# split cleanly: 112 hazard (the bay OUTLINES) and 42 green (the walkway lines).
+BANDS = (('hazard', 0.000, 0.342), ('green', 0.342, 0.590),
+         ('blue', 0.590, 0.820), ('yellow', 0.820, 1.000))
 MARKING_MATERIAL = 'Material #946569'      # the painted-line batch
 CONCRETE_MATERIAL = 'Material #946568'
 FALLBACK_RGB = (0.813810, 0.811311, 0.804215)   # measured mean of GroundB_01.png
@@ -80,6 +86,75 @@ def mean_rgb(png):
     except Exception as e:
         print('  (PIL unavailable: %s -- using measured constant)' % e)
         return FALLBACK_RGB
+
+
+def band_of(u):
+    u %= 1.0
+    for name, lo, hi in BANDS:
+        if lo <= u < hi:
+            return name
+    return BANDS[-1][0]
+
+
+def filter_markings(dae, keep):
+    """Thin the markings batch down to the named atlas bands, in place.
+
+    The 154 painted faces are ONE <triangles> element sharing one material, so
+    keeping the bay outlines while dropping the walkway lines is not a matter of
+    removing an element -- it means rewriting the <p> index list face by face and
+    fixing the count attribute to match. A stale count is the failure that matters:
+    COLLADA readers trust it, and an over-long count walks off the end of <p>.
+    """
+    import xml.etree.ElementTree as ET
+    ns = '{http://www.collada.org/2005/11/COLLADASchema}'
+    root = ET.fromstring(dae)
+    arr = {fa.get('id'): fa.text.split() for fa in root.iter(ns + 'float_array')}
+    uvs = [float(x) for k, v in arr.items() if k.endswith('UV0-array') for x in v]
+    tri = next(t for t in root.iter(ns + 'triangles')
+               if t.get('material') == MARKING_MATERIAL)
+    inp = {i.get('semantic'): int(i.get('offset')) for i in tri.findall(ns + 'input')}
+    P = [int(x) for x in tri.find(ns + 'p').text.split()]
+    st = max(inp.values()) + 1
+
+    kept, dropped = [], 0
+    for i in range(0, len(P), st * 3):
+        face = P[i:i + st * 3]
+        us = [uvs[face[k * st + inp['TEXCOORD']] * 2] for k in range(3)]
+        if band_of(sum(us) / 3.0) in keep:
+            kept.extend(face)
+        else:
+            dropped += 1
+    n_faces = len(kept) // (st * 3)
+
+    old_p = re.search(r'(<triangles[^>]*material="%s"[^>]*>.*?<p>)(.*?)(</p>)'
+                      % re.escape(MARKING_MATERIAL), dae, re.S)
+    dae = dae[:old_p.start(2)] + ' '.join(str(v) for v in kept) + dae[old_p.end(2):]
+    dae = re.sub(r'(<triangles count=")\d+("[^>]*material="%s")'
+                 % re.escape(MARKING_MATERIAL), r'\g<1>%d\g<2>' % n_faces, dae)
+    return dae, n_faces, dropped
+
+
+def flatten_concrete(dae, rgb):
+    """Concrete <diffuse>: <texture .../> -> flat <color>. Leaves the atlas alone."""
+    m = re.search(r'(<effect id="%s-fx".*?<diffuse>)(.*?)(</diffuse>)'
+                  % re.escape(CONCRETE_MATERIAL), dae, re.S)
+    if not m or '<texture' not in m.group(2):
+        raise SystemExit('concrete diffuse texture not found -- mesh changed?')
+    flat = ('\n              <color sid="diffuse">%.6f %.6f %.6f 1.000000</color>'
+            '\n            ' % rgb)
+    return dae[:m.start(2)] + flat + dae[m.end(2):]
+
+
+def keep_bands(dae, rgb, keep):
+    """Flat concrete plus only the named marking bands, atlas intact."""
+    n = len(dae)
+    dae, n_faces, dropped = filter_markings(dae, keep)
+    dae = flatten_concrete(dae, rgb)
+    # The concrete's own image is now unreferenced; the atlas must survive, so the
+    # image library cannot simply be emptied the way strip() does.
+    dae = re.sub(r'[ \t]*<image id="[^"]*"[^>]*>\s*<init_from>[^<]*%s\.png'
+                 r'</init_from>\s*</image>\n?' % re.escape(SRC), '', dae)
+    return dae, n, n_faces, dropped
 
 
 def strip(dae, rgb):
@@ -124,40 +199,64 @@ def strip(dae, rgb):
 def main():
     worlds = [sys.argv[i + 1] for i, a in enumerate(sys.argv) if a == '--world']
     dry = '--dry-run' in sys.argv
+    keep = set()
+    if '--keep' in sys.argv:
+        keep = set(sys.argv[sys.argv.index('--keep') + 1].split(','))
+        known = set(b[0] for b in BANDS)
+        if not keep <= known:
+            raise SystemExit('unknown band(s) %s; known: %s'
+                             % (sorted(keep - known), sorted(known)))
+    dst = DST_KEEP if keep else DST
 
-    src_dir, dst_dir = os.path.join(MODELS, SRC), os.path.join(MODELS, DST)
+    src_dir, dst_dir = os.path.join(MODELS, SRC), os.path.join(MODELS, dst)
     vis = os.path.join(src_dir, 'meshes', SRC + '_visual.DAE')
     col = os.path.join(src_dir, 'meshes', SRC + '_collision.DAE')
     png = os.path.join(src_dir, 'materials', 'textures', SRC + '.png')
 
     rgb = mean_rgb(png)
-    plain, before = strip(open(vis).read(), rgb)
-    print('  concrete flat colour  %.6f %.6f %.6f' % rgb)
-    print('  visual DAE  %d -> %d bytes (markings batch removed)' % (before, len(plain)))
+    if keep:
+        plain, before, n_faces, dropped = keep_bands(open(vis).read(), rgb, keep)
+        print('  concrete flat colour  %.6f %.6f %.6f' % rgb)
+        print('  kept %d marking faces (%s), dropped %d'
+              % (n_faces, ','.join(sorted(keep)), dropped))
+    else:
+        plain, before = strip(open(vis).read(), rgb)
+        print('  concrete flat colour  %.6f %.6f %.6f' % rgb)
+        print('  markings batch removed entirely')
+    print('  visual DAE  %d -> %d bytes' % (before, len(plain)))
 
     if not dry:
         if os.path.isdir(dst_dir):
             shutil.rmtree(dst_dir)
         os.makedirs(os.path.join(dst_dir, 'meshes'))
-        open(os.path.join(dst_dir, 'meshes', DST + '_visual.DAE'), 'w').write(plain)
-        shutil.copyfile(col, os.path.join(dst_dir, 'meshes', DST + '_collision.DAE'))
+        open(os.path.join(dst_dir, 'meshes', dst + '_visual.DAE'), 'w').write(plain)
+        shutil.copyfile(col, os.path.join(dst_dir, 'meshes', dst + '_collision.DAE'))
+        if keep:
+            # The atlas is still referenced by the surviving faces, so it has to
+            # travel with the model: a model:// mesh resolves its <init_from>
+            # relative to ITS OWN directory, not the original's.
+            tex_dir = os.path.join(dst_dir, 'materials', 'textures')
+            os.makedirs(tex_dir, exist_ok=True)
+            atlas = SRC.replace('GroundB_01', 'GroundB_02') + '.png'
+            shutil.copyfile(os.path.join(src_dir, 'materials', 'textures', atlas),
+                            os.path.join(tex_dir, atlas))
         # model.sdf: same link, inertia and friction; only the mesh uris move.
         sdf = open(os.path.join(src_dir, 'model.sdf')).read()
-        sdf = sdf.replace('<model name="%s">' % SRC, '<model name="%s">' % DST)
+        sdf = sdf.replace('<model name="%s">' % SRC, '<model name="%s">' % dst)
         sdf = sdf.replace('model://%s/meshes/%s_' % (SRC, SRC),
-                          'model://%s/meshes/%s_' % (DST, DST))
+                          'model://%s/meshes/%s_' % (dst, dst))
         open(os.path.join(dst_dir, 'model.sdf'), 'w').write(sdf)
-        open(os.path.join(dst_dir, 'model.config'), 'w').write(CONFIG % (DST, SRC))
-        print('  wrote models/%s/ (visual, collision, model.sdf, model.config)' % DST)
+        open(os.path.join(dst_dir, 'model.config'), 'w').write(CONFIG % (dst, SRC))
+        print('  wrote models/%s/' % dst)
 
     for w in worlds:
         path = w if os.path.isabs(w) else os.path.join(ROOT, w)
         t = open(path).read()
-        t2, k = re.subn(r'model://%s(?![_A-Za-z0-9])' % re.escape(SRC),
-                        'model://' + DST, t)
+        t2, k = re.subn(r'model://%s(?:_plain)?(?![_A-Za-z0-9])' % re.escape(SRC),
+                        'model://' + dst, t)
         # the <name> too, so the entity is distinguishable at runtime
-        t2 = re.sub(r'<name>%s_(\d+)</name>' % re.escape(SRC),
-                    r'<name>%s_\1</name>' % DST, t2)
+        t2 = re.sub(r'<name>%s(?:_plain)?_(\d+)</name>' % re.escape(SRC),
+                    r'<name>%s_\1</name>' % dst, t2)
         print('  %-52s %d ground uri(s) repointed' % (os.path.basename(path), k))
         if k != 1:
             print('    WARNING: expected 1, got %d' % k)

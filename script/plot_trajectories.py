@@ -140,9 +140,17 @@ def render(theme_name, data):
         lo, hi = lo - pad, hi + pad
         off = [a["name"] for a in d["aligned"]
                if (a["p"][:, :2] < lo).any() or (a["p"][:, :2] > hi).any()]
-        ax.set_aspect("equal", adjustable="datalim")
+        # adjustable="box", NOT "datalim". With "datalim" matplotlib satisfies the
+        # equal aspect by EXPANDING the data limits set below, so a subplot wider
+        # than it is tall silently widens x: dataset_static_nofloortexture_000 was
+        # drawn over 55 m of x for a trajectory 17 m wide, and the ground truth sat
+        # in a third of the panel with dead paper either side. "box" honours the
+        # limits and shrinks the axes box instead, so the reference fills the panel
+        # and the subtitle's claim that panels are pinned to the ground-truth extent
+        # is actually true.
         ax.set_xlim(lo[0], hi[0])
         ax.set_ylim(lo[1], hi[1])
+        ax.set_aspect("equal", adjustable="box")
 
         ax.set_title(d["name"], color=th["ink"], fontsize=9, loc="left", pad=6)
         # the two numbers that say whether the panel is worth trusting

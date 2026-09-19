@@ -20,6 +20,31 @@
 File.version: "1.0"
 
 #--------------------------------------------------------------------------------------------
+# Loop closing
+#--------------------------------------------------------------------------------------------
+# The ONLY loop-closing knob ORB-SLAM3 exposes to YAML. Everything else -- the 3
+# BoW candidates, the 3 consecutive confirmations, the 30/50/100 match gates and
+# the 0.008 rad roll/pitch gravity check -- is hard-coded in LoopClosing.cc and
+# needs a library rebuild to change.
+#
+# System.cc reads it straight off the FileStorage, before the Settings parser, so
+# it is a bare top-level key like File.version rather than something namespaced.
+# It is cast to int: write 0 or 1, NOT false/true, which OpenCV will not parse.
+# Absent means 1.
+#
+# Set to 0 deliberately. On dataset_allsensor_003 place recognition ran 527 times
+# and produced 64 loop candidates; the gravity check rejected 63 of them as
+# "BAD LOOP!!!". The single one that passed (KF 467 <- KF 256) applied an 18.69 m
+# correction and put a 30 m discontinuity into vio.csv at t=88.3 s on a 190 m
+# trajectory -- a false positive that survived. The checks also cost ~51 ms per
+# keyframe, 23.9 s over that run, even when finding nothing.
+#
+# CAUTION: 0 disables place recognition, loop closure AND map merging together.
+# dataset_dynamic_nofloortexture_02_000 logged a genuine merge, so that sequence
+# is not a like-for-like comparison. Restore stock behaviour with 1.
+loopClosing: 1
+
+#--------------------------------------------------------------------------------------------
 # Cameras
 #--------------------------------------------------------------------------------------------
 # An ideal gz camera is a perfect pinhole with square pixels and the principal

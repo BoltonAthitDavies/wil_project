@@ -1,0 +1,136 @@
+% Dimensioned plan and elevation of the simulated Ackermann robot.
+%
+% Every coordinate below is read from
+% aws-robomaker-small-warehouse-world/models/ackermann_robot/model.sdf and is
+% expressed in metres relative to base_footprint, so the drawing is to scale and
+% can be re-derived from the model rather than trusted. A Gazebo screenshot was
+% deliberately not used: the quantities that matter to the estimators are the
+% wheel base, track, wheel radius and sensor offsets, and a perspective render
+% shows none of them.
+%
+% NOTE ON THE TWO VIEWS. They are placed side by side with shift={(1.45,0)},
+% i.e. in DIAGRAM units, not with yshift/xshift in centimetres. Inside a scope
+% that already carries scale=9 a shift given in cm is multiplied by that scale,
+% which silently pushes the second view about 56 cm away and off the page.
+\begin{tikzpicture}[
+  scale=9,
+  chassis/.style={draw, fill=gray!12, thick},
+  wheel/.style={draw, fill=gray!45, thick},
+  steered/.style={draw, dashed, gray!60!black, line width=0.4pt},
+  mast/.style={draw, fill=gray!25},
+  sensor/.style={draw, fill=external, thick},
+  imu/.style={draw, fill=implemented, thick},
+  dim/.style={{Latex[length=1.2mm]}-{Latex[length=1.2mm]}, gray!60!black,
+    line width=0.3pt},
+  dimlab/.style={font=\tiny, inner sep=1pt, fill=white},
+  leader/.style={gray!60!black, line width=0.25pt},
+  lbl/.style={font=\tiny, inner sep=1pt},
+  tick/.style={gray!60!black, line width=0.25pt}
+]
+
+% ======================= PLAN VIEW (x forward, y left) =======================
+\begin{scope}
+  \node[font=\small\bfseries] at (0.15,0.44) {Plan view};
+
+  % chassis deck: 0.6 x 0.463 centred on base_footprint
+  \draw[chassis] (-0.3,-0.2315) rectangle (0.3,0.2315);
+
+  % steered front wheels shown at full lock, +/-0.6109 rad = +/-35 deg,
+  % rotated about the kingpin rather than drawn as a bare angle sweep
+  \foreach \y in {0.21,-0.21}{
+    \begin{scope}[shift={(0.21,\y)}, rotate=35]
+      \draw[steered] (-0.0585,-0.0325) rectangle (0.0585,0.0325);
+    \end{scope}
+  }
+
+  % wheels: radius 0.0585, half-width 0.0325, at x = +/-0.21, y = +/-0.21
+  \foreach \x in {0.21,-0.21}{
+    \foreach \y in {0.21,-0.21}{
+      \draw[wheel] (\x-0.0585,\y-0.0325) rectangle (\x+0.0585,\y+0.0325);
+    }
+  }
+  \node[lbl, anchor=south west] at (0.135,0.275)
+    {$\delta_{\max}=\pm\SI{0.6109}{\radian}$};
+
+  % camera mast and the two cameras
+  \draw[mast] (0.3078,-0.01) rectangle (0.5395,0.01);
+  \draw[sensor] (0.486,0.0836) rectangle (0.506,0.1036);
+  \draw[sensor] (0.486,-0.01) rectangle (0.506,0.01);
+
+  % IMU
+  \draw[imu] (0.313,-0.025) rectangle (0.363,0.025);
+  \node[lbl, anchor=north] at (0.338,-0.032) {\texttt{imu}};
+
+  % base_footprint origin marker
+  \draw[thick] (-0.025,0) -- (0.025,0) (0,-0.025) -- (0,0.025);
+  \node[lbl, anchor=north] at (0,-0.035) {\texttt{base\_footprint}};
+
+  % camera labels, lifted clear on leaders so they cannot collide with the
+  % baseline dimension between them
+  \draw[leader] (0.506,0.0936) -- (0.60,0.155);
+  \node[lbl, anchor=west] at (0.605,0.155) {\texttt{cam0} (left)};
+  \draw[leader] (0.506,0) -- (0.60,-0.075);
+  \node[lbl, anchor=west] at (0.605,-0.075) {\texttt{cam1} (right)};
+
+  % --- dimensions ---
+  \draw[tick] (0.21,-0.2425) -- (0.21,-0.315);
+  \draw[tick] (-0.21,-0.2425) -- (-0.21,-0.315);
+  \draw[dim] (-0.21,-0.30) -- (0.21,-0.30);
+  \node[dimlab] at (0,-0.30) {wheel base \SI{0.42}{\metre}};
+
+  \draw[tick] (-0.2685,0.21) -- (-0.375,0.21);
+  \draw[tick] (-0.2685,-0.21) -- (-0.375,-0.21);
+  \draw[dim] (-0.36,-0.21) -- (-0.36,0.21);
+  \node[dimlab, rotate=90] at (-0.36,0) {track \SI{0.42}{\metre}};
+
+  \draw[tick] (0.506,0.0936) -- (0.565,0.0936);
+  \draw[tick] (0.506,0) -- (0.565,0);
+  \draw[dim] (0.552,0) -- (0.552,0.0936);
+  \node[dimlab, rotate=90] at (0.552,0.047) {\SI{0.0936}{\metre}};
+\end{scope}
+
+% ======================= ELEVATION (x forward, z up) =======================
+\begin{scope}[shift={(1.45,-0.16)}]
+  \node[font=\small\bfseries] at (0.15,0.60) {Side elevation};
+
+  % ground line
+  \draw[gray!55, line width=0.5pt] (-0.38,0) -- (0.60,0);
+
+  % wheels seen edge on: centre z = 0.072, radius 0.0585
+  \foreach \x in {0.21,-0.21}{
+    \draw[wheel] (\x,0.072) circle (0.0585);
+    \draw[gray!60!black, line width=0.25pt] (\x,0.072) circle (0.007);
+  }
+
+  % chassis deck: z from 0.072 to 0.122
+  \draw[chassis] (-0.3,0.072) rectangle (0.3,0.122);
+
+  % mast: vertical post, camera bar, short riser
+  \draw[mast] (0.399,0.122) rectangle (0.419,0.3715);
+  \draw[mast] (0.3078,0.3715) rectangle (0.5395,0.3915);
+  \draw[mast] (0.486,0.3915) rectangle (0.506,0.4295);
+
+  % cameras at z = 0.4395 (cam0 hides cam1 in this projection)
+  \draw[sensor] (0.482,0.4295) rectangle (0.510,0.4495);
+  \draw[leader] (0.510,0.4395) -- (0.55,0.50);
+  \node[lbl, anchor=west] at (0.555,0.50) {\texttt{cam0}, \texttt{cam1}};
+
+  % IMU at z = 0.192
+  \draw[imu] (0.313,0.182) rectangle (0.363,0.202);
+  \draw[leader] (0.363,0.192) -- (0.44,0.25);
+  \node[lbl, anchor=west] at (0.445,0.25) {\texttt{imu}, $z=\SI{0.192}{\metre}$};
+
+  % --- dimensions ---
+  \draw[dim] (0.21,0.072) -- (0.21,0.1305);
+  \node[dimlab, anchor=west] at (0.222,0.101) {$r=\SI{0.0585}{\metre}$};
+
+  \draw[tick] (0.510,0.4395) -- (0.585,0.4395);
+  \draw[dim] (0.572,0) -- (0.572,0.4395);
+  \node[dimlab, rotate=90] at (0.572,0.22) {\SI{0.4395}{\metre}};
+
+  \draw[tick] (-0.2685,0.072) -- (-0.375,0.072);
+  \draw[dim] (-0.36,0) -- (-0.36,0.072);
+  \node[dimlab, rotate=90] at (-0.36,0.036) {axle \SI{0.072}{\metre}};
+\end{scope}
+
+\end{tikzpicture}

@@ -1,0 +1,223 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\@writefile{toc}{\contentsline {chapter}{\numberline {4}Experiments and Research Results}{27}{chapter.4}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\newlabel{chap:results}{{4}{27}{Experiments and Research Results}{chapter.4}{}}
+\newlabel{chap:results@cref}{{[chapter][4][]4}{[1][27][]27}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.1}Relogged Campaign and Validity Audit}{27}{section.4.1}\protected@file@percent }
+\newlabel{sec:results-validity}{{4.1}{27}{Relogged Campaign and Validity Audit}{section.4.1}{}}
+\newlabel{sec:results-validity@cref}{{[section][1][4]4.1}{[1][27][]27}}
+\@writefile{lot}{\contentsline {table}{\numberline {4.1}{\ignorespaces Relogged experiment progress and validity. ``Operational'' requires graceful shutdown, estimator initialization, at least ten processed frames, and a trajectory. Treatment validity additionally requires the intended filter to be active and paired input counts and durations to differ by no more than 5\%.}}{28}{table.4.1}\protected@file@percent }
+\newlabel{tab:run-validity}{{4.1}{28}{Relogged experiment progress and validity. ``Operational'' requires graceful shutdown, estimator initialization, at least ten processed frames, and a trajectory. Treatment validity additionally requires the intended filter to be active and paired input counts and durations to differ by no more than 5\%}{table.4.1}{}}
+\newlabel{tab:run-validity@cref}{{[table][1][4]4.1}{[1][27][]28}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.2}Non-Visual Baseline and Estimator Comparison}{28}{section.4.2}\protected@file@percent }
+\newlabel{sec:results-proprio}{{4.2}{28}{Non-Visual Baseline and Estimator Comparison}{section.4.2}{}}
+\newlabel{sec:results-proprio@cref}{{[section][2][4]4.2}{[1][28][]28}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2.1}Question, hypotheses, and conditions}{28}{subsection.4.2.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4.2}{\ignorespaces Controlled conditions for the estimator comparison. All five estimators consume the same two recordings and are scored against the same ground truth over the same interval.}}{29}{table.4.2}\protected@file@percent }
+\newlabel{tab:proprio-controls}{{4.2}{29}{Controlled conditions for the estimator comparison. All five estimators consume the same two recordings and are scored against the same ground truth over the same interval}{table.4.2}{}}
+\newlabel{tab:proprio-controls@cref}{{[table][2][4]4.2}{[1][29][]29}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2.2}Validity}{29}{subsection.4.2.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4.3}{\ignorespaces Loop-closing activity in the enabled ORB-SLAM3 configuration (\repo {logging_20260916_01}). Accepted closures are a small and dataset-dependent fraction of candidates, and two datasets accept none at all despite the closer running throughout. In the disabled configuration (\repo {logging_20260916_02}) no keyframe ever reaches the loop closer on any dataset.}}{30}{table.4.3}\protected@file@percent }
+\newlabel{tab:orb-loop}{{4.3}{30}{Loop-closing activity in the enabled ORB-SLAM3 configuration (\repo {logging_20260916_01}). Accepted closures are a small and dataset-dependent fraction of candidates, and two datasets accept none at all despite the closer running throughout. In the disabled configuration (\repo {logging_20260916_02}) no keyframe ever reaches the loop closer on any dataset}{table.4.3}{}}
+\newlabel{tab:orb-loop@cref}{{[table][3][4]4.3}{[1][30][]30}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2.3}Accuracy results}{31}{subsection.4.2.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4.4}{\ignorespaces Estimator comparison on the five \repo {allsensor} bags, which span four worlds and both floor conditions; they are not repeats of one another except for \repo {allsensor_000} and \repo {allsensor_001}. Bold marks the best aligned ATE of each dataset---the EKF on four of five, VINS-Fusion on \repo {allsensor_004}. ``Aligned ATE'' is RMSE after a rigid $SE(3)$ fit with scale fixed, the convention used throughout this chapter. ``Anchored'' columns are the direct difference from ground truth with no alignment and are defined only for the estimators that start from the ground-truth pose; the visual estimators' own world frames make that subtraction meaningless, so those cells are set to --. Drift is the final position error as a fraction of distance driven.}}{31}{table.4.4}\protected@file@percent }
+\newlabel{tab:proprio-accuracy}{{4.4}{31}{Estimator comparison on the five \repo {allsensor} bags, which span four worlds and both floor conditions; they are not repeats of one another except for \repo {allsensor_000} and \repo {allsensor_001}. Bold marks the best aligned ATE of each dataset---the EKF on four of five, VINS-Fusion on \repo {allsensor_004}. ``Aligned ATE'' is RMSE after a rigid $SE(3)$ fit with scale fixed, the convention used throughout this chapter. ``Anchored'' columns are the direct difference from ground truth with no alignment and are defined only for the estimators that start from the ground-truth pose; the visual estimators' own world frames make that subtraction meaningless, so those cells are set to --. Drift is the final position error as a fraction of distance driven}{table.4.4}{}}
+\newlabel{tab:proprio-accuracy@cref}{{[table][4][4]4.4}{[1][31][]31}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2.4}Falsification of H1, and the drift mechanism}{32}{subsection.4.2.4}\protected@file@percent }
+\newlabel{sec:h1-falsified}{{4.2.4}{32}{Falsification of H1, and the drift mechanism}{subsection.4.2.4}{}}
+\newlabel{sec:h1-falsified@cref}{{[subsection][4][4,2]4.2.4}{[1][32][]32}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.1}{\ignorespaces Estimator comparison on \repo {dataset_allsensor_001}, world frame. The baselines are drawn as estimated; the visual estimators are drawn after the same rigid $SE(3)$ alignment used for their metrics, because their own world frames are arbitrary. Ground truth is hidden beneath the EKF, VINS and ORB traces for most of the run. Wheel odometry (blue) bows consistently outward; IMU dead reckoning (red) leaves the building.}}{33}{figure.4.1}\protected@file@percent }
+\newlabel{fig:proprio-trajectories}{{4.1}{33}{Estimator comparison on \repo {dataset_allsensor_001}, world frame. The baselines are drawn as estimated; the visual estimators are drawn after the same rigid $SE(3)$ alignment used for their metrics, because their own world frames are arbitrary. Ground truth is hidden beneath the EKF, VINS and ORB traces for most of the run. Wheel odometry (blue) bows consistently outward; IMU dead reckoning (red) leaves the building}{figure.4.1}{}}
+\newlabel{fig:proprio-trajectories@cref}{{[figure][1][4]4.1}{[1][32][]33}}
+\@writefile{lot}{\contentsline {table}{\numberline {4.5}{\ignorespaces Wheel-odometry heading drift against the fitted yaw-rate scale. ``Rotation'' is the total unsigned ground-truth rotation of the run, and ``error/rotation'' expresses the final heading error as a fraction of it. Scale error and heading error correspond in neither sign nor magnitude. The last column is the constant-offset prediction described below: the mean yaw-rate residual of the run multiplied by its duration, which matches the measured error to within \SI {1.4}{\degree } on every dataset, and to within \SI {0.5}{\degree } on three of five.}}{33}{table.4.5}\protected@file@percent }
+\newlabel{tab:h1}{{4.5}{33}{Wheel-odometry heading drift against the fitted yaw-rate scale. ``Rotation'' is the total unsigned ground-truth rotation of the run, and ``error/rotation'' expresses the final heading error as a fraction of it. Scale error and heading error correspond in neither sign nor magnitude. The last column is the constant-offset prediction described below: the mean yaw-rate residual of the run multiplied by its duration, which matches the measured error to within \SI {1.4}{\degree } on every dataset, and to within \SI {0.5}{\degree } on three of five}{table.4.5}{}}
+\newlabel{tab:h1@cref}{{[table][5][4]4.5}{[1][32][]33}}
+\@writefile{lot}{\contentsline {table}{\numberline {4.6}{\ignorespaces The EKF's heading error follows the quality of the wheel yaw rate it uses to observe its gyroscope bias. The filter is no better than its rate reference, which is the cost of making the bias observable at all.}}{34}{table.4.6}\protected@file@percent }
+\newlabel{tab:ekf-coupling}{{4.6}{34}{The EKF's heading error follows the quality of the wheel yaw rate it uses to observe its gyroscope bias. The filter is no better than its rate reference, which is the cost of making the bias observable at all}{table.4.6}{}}
+\newlabel{tab:ekf-coupling@cref}{{[table][6][4]4.6}{[1][34][]34}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2.5}Covariance consistency}{34}{subsection.4.2.5}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4.7}{\ignorespaces Covariance consistency of the non-visual estimators. A consistent filter gives $\mathrm  {ANEES}=3.0$ and $\sigma $-coverages of 0.683, 0.954 and 0.997. Every estimator is overconfident by roughly two orders of magnitude. Neither VINS-Fusion nor ORB-SLAM3 writes a pose covariance, so neither can be tested here.}}{35}{table.4.7}\protected@file@percent }
+\newlabel{tab:proprio-covariance}{{4.7}{35}{Covariance consistency of the non-visual estimators. A consistent filter gives $\mathrm {ANEES}=3.0$ and $\sigma $-coverages of 0.683, 0.954 and 0.997. Every estimator is overconfident by roughly two orders of magnitude. Neither VINS-Fusion nor ORB-SLAM3 writes a pose covariance, so neither can be tested here}{table.4.7}{}}
+\newlabel{tab:proprio-covariance@cref}{{[table][7][4]4.7}{[1][34][]35}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2.6}Cross-validation of the EKF noise model}{35}{subsection.4.2.6}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4.2}{\ignorespaces Error against claimed uncertainty for \repo {dataset_allsensor_001}. Top left: position error over time, baselines anchored and visual estimators $SE(3)$-aligned. Top right and bottom right: absolute error against the estimator's own $3\sigma $ bound, in $x$ and in heading; where the solid line sits above the dashed line of the same colour the filter is overconfident. Bottom left: NEES against the consistent value of 3. The step near \SI {9.5}{\second } in every panel is the first turn of the run.}}{36}{figure.4.2}\protected@file@percent }
+\newlabel{fig:proprio-covariance}{{4.2}{36}{Error against claimed uncertainty for \repo {dataset_allsensor_001}. Top left: position error over time, baselines anchored and visual estimators $SE(3)$-aligned. Top right and bottom right: absolute error against the estimator's own $3\sigma $ bound, in $x$ and in heading; where the solid line sits above the dashed line of the same colour the filter is overconfident. Bottom left: NEES against the consistent value of 3. The step near \SI {9.5}{\second } in every panel is the first turn of the run}{figure.4.2}{}}
+\newlabel{fig:proprio-covariance@cref}{{[figure][2][4]4.2}{[1][35][]36}}
+\@writefile{lot}{\contentsline {table}{\numberline {4.8}{\ignorespaces EKF accuracy with an in-sample and an out-of-sample noise model. The change is negative on four of five bags---the borrowed model is \emph  {better} there---and the mean change is about $-10\%$, which is the signature of no systematic in-sample advantage.}}{37}{table.4.8}\protected@file@percent }
+\newlabel{tab:proprio-xval}{{4.8}{37}{EKF accuracy with an in-sample and an out-of-sample noise model. The change is negative on four of five bags---the borrowed model is \emph {better} there---and the mean change is about $-10\%$, which is the signature of no systematic in-sample advantage}{table.4.8}{}}
+\newlabel{tab:proprio-xval@cref}{{[table][8][4]4.8}{[1][37][]37}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2.7}Interpretation and limitations}{37}{subsection.4.2.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4.3}Offline YOLO Detector Performance}{38}{section.4.3}\protected@file@percent }
+\newlabel{sec:yolo-performance}{{4.3}{38}{Offline YOLO Detector Performance}{section.4.3}{}}
+\newlabel{sec:yolo-performance@cref}{{[section][3][4]4.3}{[1][38][]38}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3.1}Bounding-Box Detection and Localization}{38}{subsection.4.3.1}\protected@file@percent }
+\newlabel{sec:yolo-bbox}{{4.3.1}{38}{Bounding-Box Detection and Localization}{subsection.4.3.1}{}}
+\newlabel{sec:yolo-bbox@cref}{{[subsection][1][4,3]4.3.1}{[1][38][]38}}
+\@writefile{lot}{\contentsline {table}{\numberline {4.9}{\ignorespaces Offline YOLO performance against projected Gazebo object ground truth. This is a detector-capability measurement, not an evaluation of delivery to the online SLAM filters.}}{39}{table.4.9}\protected@file@percent }
+\newlabel{tab:yolo-performance}{{4.9}{39}{Offline YOLO performance against projected Gazebo object ground truth. This is a detector-capability measurement, not an evaluation of delivery to the online SLAM filters}{table.4.9}{}}
+\newlabel{tab:yolo-performance@cref}{{[table][9][4]4.9}{[1][38][]39}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.3}{\ignorespaces Per-dataset and pooled detector scores and box-area coverage. Pooled precision, recall, F1, and moving-object recall are calculated from pooled counts, rather than by averaging the four displayed dataset scores.}}{39}{figure.4.3}\protected@file@percent }
+\newlabel{fig:yolo-performance-summary}{{4.3}{39}{Per-dataset and pooled detector scores and box-area coverage. Pooled precision, recall, F1, and moving-object recall are calculated from pooled counts, rather than by averaging the four displayed dataset scores}{figure.4.3}{}}
+\newlabel{fig:yolo-performance-summary@cref}{{[figure][3][4]4.3}{[1][39][]39}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.4}{\ignorespaces Representative validation overlay used before accepting the offline metrics. Green boxes are projected ground truth, red boxes are YOLO predictions, and yellow boxes are occluded or ignored regions. An asterisk marks a ground-truth object classified as moving from its world-pose history.}}{40}{figure.4.4}\protected@file@percent }
+\newlabel{fig:yolo-ground-truth-overlay}{{4.4}{40}{Representative validation overlay used before accepting the offline metrics. Green boxes are projected ground truth, red boxes are YOLO predictions, and yellow boxes are occluded or ignored regions. An asterisk marks a ground-truth object classified as moving from its world-pose history}{figure.4.4}{}}
+\newlabel{fig:yolo-ground-truth-overlay@cref}{{[figure][4][4]4.4}{[1][39][]40}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3.2}Object-Class Assignment Conditional on Localization}{41}{subsection.4.3.2}\protected@file@percent }
+\newlabel{sec:yolo-classification}{{4.3.2}{41}{Object-Class Assignment Conditional on Localization}{subsection.4.3.2}{}}
+\newlabel{sec:yolo-classification@cref}{{[subsection][2][4,3]4.3.2}{[1][41][]41}}
+\@writefile{lot}{\contentsline {table}{\numberline {4.10}{\ignorespaces Object-class assignment conditional on successful IoU association, pooled across the four dynamic datasets.}}{41}{table.4.10}\protected@file@percent }
+\newlabel{tab:yolo-classification}{{4.10}{41}{Object-class assignment conditional on successful IoU association, pooled across the four dynamic datasets}{table.4.10}{}}
+\newlabel{tab:yolo-classification@cref}{{[table][10][4]4.10}{[1][41][]41}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.5}{\ignorespaces Object-class confusion conditional on class-agnostic IoU association. Rows are actual object classes and columns are predicted object classes. The left panel gives counts on a logarithmic colour scale; the right panel normalizes within each actual class. Background is intentionally excluded.}}{41}{figure.4.5}\protected@file@percent }
+\newlabel{fig:yolo-classification-confusion}{{4.5}{41}{Object-class confusion conditional on class-agnostic IoU association. Rows are actual object classes and columns are predicted object classes. The left panel gives counts on a logarithmic colour scale; the right panel normalizes within each actual class. Background is intentionally excluded}{figure.4.5}{}}
+\newlabel{fig:yolo-classification-confusion@cref}{{[figure][5][4]4.5}{[1][41][]41}}
+\gdef \LT@ii {\LT@entry 
+    {1}{30.76358pt}\LT@entry 
+    {1}{53.52718pt}\LT@entry 
+    {1}{126.36096pt}\LT@entry 
+    {1}{235.62206pt}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.4}Observed Anomaly Catalogue}{42}{section.4.4}\protected@file@percent }
+\newlabel{sec:anomaly-catalogue}{{4.4}{42}{Observed Anomaly Catalogue}{section.4.4}{}}
+\newlabel{sec:anomaly-catalogue@cref}{{[section][4][4]4.4}{[1][41][]42}}
+\@writefile{lot}{\contentsline {table}{\numberline {4.11}{Anomaly catalogue for the relogged campaign. Severity prioritizes impact on interpretation, not certainty about cause.}}{42}{table.4.11}\protected@file@percent }
+\newlabel{tab:anomaly-catalogue}{{4.11}{42}{Anomaly catalogue for the relogged campaign. Severity prioritizes impact on interpretation, not certainty about cause}{table.4.11}{}}
+\newlabel{tab:anomaly-catalogue@cref}{{[table][11][4]4.11}{[1][42][]42}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.5}Trajectory Accuracy, Plausibility, and Robustness}{42}{section.4.5}\protected@file@percent }
+\newlabel{sec:trajectory-results}{{4.5}{42}{Trajectory Accuracy, Plausibility, and Robustness}{section.4.5}{}}
+\newlabel{sec:trajectory-results@cref}{{[section][5][4]4.5}{[1][42][]42}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.6}{\ignorespaces Run-level anomaly diagnostics. The panels show detector-message and positive-box exposure, dynamic jump fractions, global versus clean-segment ATE, ORB paired-input mismatch, and static ORB jump timing. These are observations only; the plot does not assign a root cause.}}{43}{figure.4.6}\protected@file@percent }
+\newlabel{fig:anomaly-diagnostics}{{4.6}{43}{Run-level anomaly diagnostics. The panels show detector-message and positive-box exposure, dynamic jump fractions, global versus clean-segment ATE, ORB paired-input mismatch, and static ORB jump timing. These are observations only; the plot does not assign a root cause}{figure.4.6}{}}
+\newlabel{fig:anomaly-diagnostics@cref}{{[figure][6][4]4.6}{[1][42][]43}}
+\@writefile{lot}{\contentsline {table}{\numberline {4.12}{\ignorespaces Trajectory error against rosbag ground truth, median (IQR). ``Clean'' is ATE RMSE after independently aligning the longest segment without an implied speed above \SI {10}{\metre \per \second }. Requested VINS+YOLO values are not active-filter measurements.}}{44}{table.4.12}\protected@file@percent }
+\newlabel{tab:trajectory-errors}{{4.12}{44}{Trajectory error against rosbag ground truth, median (IQR). ``Clean'' is ATE RMSE after independently aligning the longest segment without an implied speed above \SI {10}{\metre \per \second }. Requested VINS+YOLO values are not active-filter measurements}{table.4.12}{}}
+\newlabel{tab:trajectory-errors@cref}{{[table][12][4]4.12}{[1][44][]44}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5.1}Relative pose error}{44}{subsection.4.5.1}\protected@file@percent }
+\newlabel{sec:rpe}{{4.5.1}{44}{Relative pose error}{subsection.4.5.1}{}}
+\newlabel{sec:rpe@cref}{{[subsection][1][4,5]4.5.1}{[1][44][]44}}
+\@writefile{lot}{\contentsline {table}{\numberline {4.13}{\ignorespaces Relative pose error at $\Delta =\SI {1}{\second }$, median (IQR) over runs. ``Jump-free'' excludes pairs spanning a detected tracking jump; the difference between the two columns is the teleport contribution. Requested VINS+YOLO values are not active-filter measurements.}}{44}{table.4.13}\protected@file@percent }
+\newlabel{tab:rpe-summary}{{4.13}{44}{Relative pose error at $\Delta =\SI {1}{\second }$, median (IQR) over runs. ``Jump-free'' excludes pairs spanning a detected tracking jump; the difference between the two columns is the teleport contribution. Requested VINS+YOLO values are not active-filter measurements}{table.4.13}{}}
+\newlabel{tab:rpe-summary@cref}{{[table][13][4]4.13}{[1][44][]44}}
+\@writefile{toc}{\contentsline {paragraph}{The dynamic runs are not locally coherent.}{45}{section*.8}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4.14}{\ignorespaces Jump-free translational RPE against interval, median over runs, in metres. ``Growth'' is the ratio from \SI {0.5}{\second } to \SI {5}{\second }; linear accumulation would give \num {10}$\times $ and a pure random walk \num {3.2}$\times $.}}{45}{table.4.14}\protected@file@percent }
+\newlabel{tab:rpe-sweep}{{4.14}{45}{Jump-free translational RPE against interval, median over runs, in metres. ``Growth'' is the ratio from \SI {0.5}{\second } to \SI {5}{\second }; linear accumulation would give \num {10}$\times $ and a pure random walk \num {3.2}$\times $}{table.4.14}{}}
+\newlabel{tab:rpe-sweep@cref}{{[table][14][4]4.14}{[1][45][]45}}
+\@writefile{toc}{\contentsline {paragraph}{ORB-SLAM3's static rotational penalty is entirely jump-localised.}{45}{section*.9}\protected@file@percent }
+\newlabel{RF2}{46}
+\@writefile{lot}{\contentsline {table}{\numberline {4.15}{\ignorespaces Truth-based trajectory error for every repeat of the relogged campaign. Every dataset is a no-floor-texture world, so that shared part of each dataset name is omitted. ``ATE'' and ``clean'' are global and longest-clean-segment ATE RMSE in metres, ``rot'' is rotational geodesic RMSE in degrees, and ``jmp'' counts steps implying more than \SI {10}{\metre \per \second }. All 66 runs are operational; two static ORB run summaries have incomplete schemas, and only one of 12 ORB baseline/filter pairs passed input matching. Static datasets were not run in either filtered mode; those cells are set to --.}}{46}{table.4.15}\protected@file@percent }
+\newlabel{tab:truth-summary}{{4.15}{46}{Truth-based trajectory error for every repeat of the relogged campaign. Every dataset is a no-floor-texture world, so that shared part of each dataset name is omitted. ``ATE'' and ``clean'' are global and longest-clean-segment ATE RMSE in metres, ``rot'' is rotational geodesic RMSE in degrees, and ``jmp'' counts steps implying more than \SI {10}{\metre \per \second }. All 66 runs are operational; two static ORB run summaries have incomplete schemas, and only one of 12 ORB baseline/filter pairs passed input matching. Static datasets were not run in either filtered mode; those cells are set to --}{table.4.15}{}}
+\newlabel{tab:truth-summary@cref}{{[table][15][4]4.15}{[1][45][]46}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.7}{\ignorespaces Representative repeated-run trajectory diagnostic for \repo {dataset_dynamic_nofloortexture_00_000/logging_20260916_01}, in the same visual format as the existing comparison figures. The table gives the per-system summary for this run; ``clean'' is ATE RMSE over the longest jump-free segment. The very large paths and frequent jumps are retained rather than clipped into a favourable view. ATE and rotational errors use the rosbag \repo {/ground_truth/odometry} topic after rigid $SE(3)$ alignment with scale fixed. The nominal VINS+YOLO trace is invalid as a filtering treatment because no masks were matched.}}{47}{figure.4.7}\protected@file@percent }
+\newlabel{fig:relogged-trajectory-example}{{4.7}{47}{Representative repeated-run trajectory diagnostic for \repo {dataset_dynamic_nofloortexture_00_000/logging_20260916_01}, in the same visual format as the existing comparison figures. The table gives the per-system summary for this run; ``clean'' is ATE RMSE over the longest jump-free segment. The very large paths and frequent jumps are retained rather than clipped into a favourable view. ATE and rotational errors use the rosbag \repo {/ground_truth/odometry} topic after rigid $SE(3)$ alignment with scale fixed. The nominal VINS+YOLO trace is invalid as a filtering treatment because no masks were matched}{figure.4.7}{}}
+\newlabel{fig:relogged-trajectory-example@cref}{{[figure][7][4]4.7}{[1][45][]47}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.8}{\ignorespaces Per-run robustness and keyframe observations for the dynamic datasets. Points are experimental runs and black marks are mean $\pm $ sample SD. VINS reset count and ORB tracking-loss count have different semantics. The asterisk identifies the requested VINS filter mode in which no masks were matched.}}{48}{figure.4.8}\protected@file@percent }
+\newlabel{fig:robustness-results}{{4.8}{48}{Per-run robustness and keyframe observations for the dynamic datasets. Points are experimental runs and black marks are mean $\pm $ sample SD. VINS reset count and ORB tracking-loss count have different semantics. The asterisk identifies the requested VINS filter mode in which no masks were matched}{figure.4.8}{}}
+\newlabel{fig:robustness-results@cref}{{[figure][8][4]4.8}{[1][45][]48}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.6}Real-Time and Computational Measurements}{48}{section.4.6}\protected@file@percent }
+\newlabel{sec:compute-results}{{4.6}{48}{Real-Time and Computational Measurements}{section.4.6}{}}
+\newlabel{sec:compute-results@cref}{{[section][6][4]4.6}{[1][45][]48}}
+\@writefile{lot}{\contentsline {table}{\numberline {4.16}{\ignorespaces Dynamic-run capacity and resource measurements, mean $\pm $ sample SD, $n=12$ per row. Nominal VINS+YOLO values are not active-filter measurements.}}{48}{table.4.16}\protected@file@percent }
+\newlabel{tab:capacity-results}{{4.16}{48}{Dynamic-run capacity and resource measurements, mean $\pm $ sample SD, $n=12$ per row. Nominal VINS+YOLO values are not active-filter measurements}{table.4.16}{}}
+\newlabel{tab:capacity-results@cref}{{[table][16][4]4.16}{[1][48][]48}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.9}{\ignorespaces Raw dynamic-run capacity and process-resource values. Each point is a run; black marks show mean $\pm $ sample SD. This plot exposes run-to-run spread rather than presenting only aggregate bars.}}{49}{figure.4.9}\protected@file@percent }
+\newlabel{fig:capacity-resources}{{4.9}{49}{Raw dynamic-run capacity and process-resource values. Each point is a run; black marks show mean $\pm $ sample SD. This plot exposes run-to-run spread rather than presenting only aggregate bars}{figure.4.9}{}}
+\newlabel{fig:capacity-resources@cref}{{[figure][9][4]4.9}{[1][48][]49}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.10}{\ignorespaces Module-latency distributions for dynamic datasets. Boxes summarize all recorded module events; coloured points are per-run medians ($n=12$ in each requested mode). ORB local mapping is asynchronous per keyframe, while VINS back-end rows follow estimator updates.}}{49}{figure.4.10}\protected@file@percent }
+\newlabel{fig:module-latency}{{4.10}{49}{Module-latency distributions for dynamic datasets. Boxes summarize all recorded module events; coloured points are per-run medians ($n=12$ in each requested mode). ORB local mapping is asynchronous per keyframe, while VINS back-end rows follow estimator updates}{figure.4.10}{}}
+\newlabel{fig:module-latency@cref}{{[figure][10][4]4.10}{[1][48][]49}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.7}Dense Map Reconstruction and Map-Quality Evaluation}{50}{section.4.7}\protected@file@percent }
+\newlabel{sec:map-quality}{{4.7}{50}{Dense Map Reconstruction and Map-Quality Evaluation}{section.4.7}{}}
+\newlabel{sec:map-quality@cref}{{[section][7][4]4.7}{[1][50][]50}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.7.1}Question, scope, and conditions}{50}{subsection.4.7.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4.17}{\ignorespaces Conditions for the dense-map evaluation. The database and the ground-truth route come from the \emph  {same} run, which bounds what the drivability figures can establish.}}{50}{table.4.17}\protected@file@percent }
+\newlabel{tab:map-conditions}{{4.17}{50}{Conditions for the dense-map evaluation. The database and the ground-truth route come from the \emph {same} run, which bounds what the drivability figures can establish}{table.4.17}{}}
+\newlabel{tab:map-conditions@cref}{{[table][17][4]4.17}{[1][50][]50}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.7.2}Map placement as a validity precondition}{50}{subsection.4.7.2}\protected@file@percent }
+\newlabel{sec:map-placement}{{4.7.2}{50}{Map placement as a validity precondition}{subsection.4.7.2}{}}
+\newlabel{sec:map-placement@cref}{{[subsection][2][4,7]4.7.2}{[1][50][]50}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.7.3}Graph and database summary}{51}{subsection.4.7.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4.18}{\ignorespaces Stored contents of \repo {map/map_tiny.db}. Link rows are stored per direction; the undirected count is the number of distinct node pairs.}}{51}{table.4.18}\protected@file@percent }
+\newlabel{tab:map-graph}{{4.18}{51}{Stored contents of \repo {map/map_tiny.db}. Link rows are stored per direction; the undirected count is the number of distinct node pairs}{table.4.18}{}}
+\newlabel{tab:map-graph@cref}{{[table][18][4]4.18}{[1][51][]51}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.7.4}Geometry against the world file}{51}{subsection.4.7.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4.19}{\ignorespaces Occupied-cell geometry of \repo {map/map_tiny.db} against \repo {small_warehouse_static_tinymap.world} at \SI {0.25}{\metre } tolerance.}}{51}{table.4.19}\protected@file@percent }
+\newlabel{tab:map-geometry}{{4.19}{51}{Occupied-cell geometry of \repo {map/map_tiny.db} against \repo {small_warehouse_static_tinymap.world} at \SI {0.25}{\metre } tolerance}{table.4.19}{}}
+\newlabel{tab:map-geometry@cref}{{[table][19][4]4.19}{[1][51][]51}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.7.5}Drivability against the true route}{52}{subsection.4.7.5}\protected@file@percent }
+\newlabel{sec:map-drivability}{{4.7.5}{52}{Drivability against the true route}{subsection.4.7.5}{}}
+\newlabel{sec:map-drivability@cref}{{[subsection][5][4,7]4.7.5}{[1][51][]52}}
+\@writefile{lot}{\contentsline {table}{\numberline {4.20}{\ignorespaces Drivability of \repo {map/map_tiny.db} under the true $0.83\times 0.50$\nobreakspace  {}m nav2 footprint, evaluated against two different routes. ``Independent'' is \repo {dataset_static_tiny_repeat}, the run that did not build the map and is no longer available. ``Build run'' is \repo {dataset/dataset_map_tiny}, the run the map was constructed from. Geometry is identical in both cases because it does not depend on the route.}}{52}{table.4.20}\protected@file@percent }
+\newlabel{tab:map-drivability}{{4.20}{52}{Drivability of \repo {map/map_tiny.db} under the true $0.83\times 0.50$~m nav2 footprint, evaluated against two different routes. ``Independent'' is \repo {dataset_static_tiny_repeat}, the run that did not build the map and is no longer available. ``Build run'' is \repo {dataset/dataset_map_tiny}, the run the map was constructed from. Geometry is identical in both cases because it does not depend on the route}{table.4.20}{}}
+\newlabel{tab:map-drivability@cref}{{[table][20][4]4.20}{[1][52][]52}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.11}{\ignorespaces Dense-map evaluation of \repo {map/map_tiny.db}. Left: occupied cells (red) over the world file's true collision geometry (grey), with the ground-truth route coloured by drivability and the spawn marked. Top right: distance from each occupied cell to real structure, with the \SI {0.25}{\metre } tolerance marked; the bulk falls well inside tolerance with a thin tail to about \SI {1.25}{\metre }. Bottom right: clearance from the true route to the nearest mapped obstacle, against the footprint half-width and the nav2 inflation radius. The ground truth was a different run through the same static warehouse, so this validates geometry and drivability, not trajectory error; that run is no longer available (\cref  {sec:map-drivability}).}}{53}{figure.4.11}\protected@file@percent }
+\newlabel{fig:map-vs-gt}{{4.11}{53}{Dense-map evaluation of \repo {map/map_tiny.db}. Left: occupied cells (red) over the world file's true collision geometry (grey), with the ground-truth route coloured by drivability and the spawn marked. Top right: distance from each occupied cell to real structure, with the \SI {0.25}{\metre } tolerance marked; the bulk falls well inside tolerance with a thin tail to about \SI {1.25}{\metre }. Bottom right: clearance from the true route to the nearest mapped obstacle, against the footprint half-width and the nav2 inflation radius. The ground truth was a different run through the same static warehouse, so this validates geometry and drivability, not trajectory error; that run is no longer available (\cref {sec:map-drivability})}{figure.4.11}{}}
+\newlabel{fig:map-vs-gt@cref}{{[figure][11][4]4.11}{[1][52][]53}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.12}{\ignorespaces The same database scored against the run that built it, \repo {dataset/dataset_map_tiny}. The route is a figure-eight rather than the oval of \cref  {fig:map-vs-gt}, and no pose on it collides with the map: the false-obstacle rate falls from \SI {0.7}{\percent } to \SI {0.0}{\percent }. The geometry panels are identical to \cref  {fig:map-vs-gt} because geometry does not depend on the route. The footer claiming a different run is emitted unconditionally by the evaluator and is incorrect for this figure.}}{54}{figure.4.12}\protected@file@percent }
+\newlabel{fig:map-vs-gt-selfcheck}{{4.12}{54}{The same database scored against the run that built it, \repo {dataset/dataset_map_tiny}. The route is a figure-eight rather than the oval of \cref {fig:map-vs-gt}, and no pose on it collides with the map: the false-obstacle rate falls from \SI {0.7}{\percent } to \SI {0.0}{\percent }. The geometry panels are identical to \cref {fig:map-vs-gt} because geometry does not depend on the route. The footer claiming a different run is emitted unconditionally by the evaluator and is incorrect for this figure}{figure.4.12}{}}
+\newlabel{fig:map-vs-gt-selfcheck@cref}{{[figure][12][4]4.12}{[1][52][]54}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.7.6}Interpretation and limitations}{55}{subsection.4.7.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.7.7}Planned extension to the large warehouse}{55}{subsection.4.7.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4.8}Loop Closure, Map Merging, and Global-Correction Evidence}{56}{section.4.8}\protected@file@percent }
+\newlabel{sec:global-events}{{4.8}{56}{Loop Closure, Map Merging, and Global-Correction Evidence}{section.4.8}{}}
+\newlabel{sec:global-events@cref}{{[section][8][4]4.8}{[1][56][]56}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.9}Interpretation, Limitations, and Advisor Decisions}{56}{section.4.9}\protected@file@percent }
+\newlabel{sec:results-discussion}{{4.9}{56}{Interpretation, Limitations, and Advisor Decisions}{section.4.9}{}}
+\newlabel{sec:results-discussion@cref}{{[section][9][4]4.9}{[1][56][]56}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.9.1}Where each pipeline is weak, block by block}{56}{subsection.4.9.1}\protected@file@percent }
+\newlabel{sec:block-performance}{{4.9.1}{56}{Where each pipeline is weak, block by block}{subsection.4.9.1}{}}
+\newlabel{sec:block-performance@cref}{{[subsection][1][4,9]4.9.1}{[1][56][]56}}
+\@writefile{toc}{\contentsline {paragraph}{Where the criteria come from.}{57}{section*.10}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4.13}{\ignorespaces Per-block performance in the \textbf  {static} condition, over the five \repo {allsensor} datasets. The EKF baseline appears here and not in \cref  {fig:blockperf-dynamic} because no dynamic dataset carries wheel encoders. Evidence for every colour is in \cref  {tab:blockperf-static-orb,tab:blockperf-static-vins,tab:blockperf-static-ekf}, one table per algorithm.}}{58}{figure.4.13}\protected@file@percent }
+\newlabel{fig:blockperf-static}{{4.13}{58}{Per-block performance in the \textbf {static} condition, over the five \repo {allsensor} datasets. The EKF baseline appears here and not in \cref {fig:blockperf-dynamic} because no dynamic dataset carries wheel encoders. Evidence for every colour is in \cref {tab:blockperf-static-orb,tab:blockperf-static-vins,tab:blockperf-static-ekf}, one table per algorithm}{figure.4.13}{}}
+\newlabel{fig:blockperf-static@cref}{{[figure][13][4]4.13}{[1][57][]58}}
+\@writefile{lot}{\contentsline {table}{\numberline {4.21}{\ignorespaces Per-block evidence for \textbf  {ORB-SLAM3} in the static condition, \cref  {fig:blockperf-static}. Five \repo {allsensor} datasets, median across runs, loop closing enabled (\repo {logging_20260916_01}).}}{59}{table.4.21}\protected@file@percent }
+\newlabel{tab:blockperf-static-orb}{{4.21}{59}{Per-block evidence for \textbf {ORB-SLAM3} in the static condition, \cref {fig:blockperf-static}. Five \repo {allsensor} datasets, median across runs, loop closing enabled (\repo {logging_20260916_01})}{table.4.21}{}}
+\newlabel{tab:blockperf-static-orb@cref}{{[table][21][4]4.21}{[1][59][]59}}
+\@writefile{lot}{\contentsline {table}{\numberline {4.22}{\ignorespaces Per-block evidence for \textbf  {VINS-Fusion} in the static condition, \cref  {fig:blockperf-static}. Five \repo {allsensor} datasets, median across runs.}}{60}{table.4.22}\protected@file@percent }
+\newlabel{tab:blockperf-static-vins}{{4.22}{60}{Per-block evidence for \textbf {VINS-Fusion} in the static condition, \cref {fig:blockperf-static}. Five \repo {allsensor} datasets, median across runs}{table.4.22}{}}
+\newlabel{tab:blockperf-static-vins@cref}{{[table][22][4]4.22}{[1][60][]60}}
+\@writefile{lot}{\contentsline {table}{\numberline {4.23}{\ignorespaces Per-block evidence for the \textbf  {EKF wheel\,+\,IMU} baseline, \cref  {fig:blockperf-static}. Every row but the last two is an ablation: the block was removed or swapped and all five datasets re-run, so these are the only verdicts in this section that speak to trajectory error.}}{61}{table.4.23}\protected@file@percent }
+\newlabel{tab:blockperf-static-ekf}{{4.23}{61}{Per-block evidence for the \textbf {EKF wheel\,+\,IMU} baseline, \cref {fig:blockperf-static}. Every row but the last two is an ablation: the block was removed or swapped and all five datasets re-run, so these are the only verdicts in this section that speak to trajectory error}{table.4.23}{}}
+\newlabel{tab:blockperf-static-ekf@cref}{{[table][23][4]4.23}{[1][61][]61}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.14}{\ignorespaces Per-block performance in the \textbf  {dynamic} condition, over the twelve relogged dynamic runs of each estimator. Loop closing carries no ablation here because the relogged campaign has no loop-closure-disabled variant. Evidence in \cref  {tab:blockperf-dynamic-orb,tab:blockperf-dynamic-vins}, one table per algorithm.}}{62}{figure.4.14}\protected@file@percent }
+\newlabel{fig:blockperf-dynamic}{{4.14}{62}{Per-block performance in the \textbf {dynamic} condition, over the twelve relogged dynamic runs of each estimator. Loop closing carries no ablation here because the relogged campaign has no loop-closure-disabled variant. Evidence in \cref {tab:blockperf-dynamic-orb,tab:blockperf-dynamic-vins}, one table per algorithm}{figure.4.14}{}}
+\newlabel{fig:blockperf-dynamic@cref}{{[figure][14][4]4.14}{[1][62][]62}}
+\@writefile{lot}{\contentsline {table}{\numberline {4.24}{\ignorespaces Per-block evidence for \textbf  {ORB-SLAM3} in the dynamic condition, \cref  {fig:blockperf-dynamic}. Twelve relogged dynamic runs, median across runs.}}{63}{table.4.24}\protected@file@percent }
+\newlabel{tab:blockperf-dynamic-orb}{{4.24}{63}{Per-block evidence for \textbf {ORB-SLAM3} in the dynamic condition, \cref {fig:blockperf-dynamic}. Twelve relogged dynamic runs, median across runs}{table.4.24}{}}
+\newlabel{tab:blockperf-dynamic-orb@cref}{{[table][24][4]4.24}{[1][63][]63}}
+\@writefile{lot}{\contentsline {table}{\numberline {4.25}{\ignorespaces Per-block evidence for \textbf  {VINS-Fusion} in the dynamic condition, \cref  {fig:blockperf-dynamic}. Twelve relogged dynamic runs, median across runs.}}{64}{table.4.25}\protected@file@percent }
+\newlabel{tab:blockperf-dynamic-vins}{{4.25}{64}{Per-block evidence for \textbf {VINS-Fusion} in the dynamic condition, \cref {fig:blockperf-dynamic}. Twelve relogged dynamic runs, median across runs}{table.4.25}{}}
+\newlabel{tab:blockperf-dynamic-vins@cref}{{[table][25][4]4.25}{[1][64][]64}}
+\@writefile{lot}{\contentsline {table}{\numberline {4.26}{\ignorespaces Limitations of the results reported in this chapter, and what each one prevents. ``Scope'' identifies the experiment affected: R is the relogged campaign, E the estimator comparison of \cref  {sec:results-proprio}, and A both.}}{66}{table.4.26}\protected@file@percent }
+\newlabel{tab:limitations}{{4.26}{66}{Limitations of the results reported in this chapter, and what each one prevents. ``Scope'' identifies the experiment affected: R is the relogged campaign, E the estimator comparison of \cref {sec:results-proprio}, and A both}{table.4.26}{}}
+\newlabel{tab:limitations@cref}{{[table][26][4]4.26}{[1][65][]66}}
+\@writefile{toc}{\contentsline {section}{Analysis Artifacts}{67}{section*.11}\protected@file@percent }
+\@setckpt{chapters/chapter_4_results}{
+\setcounter{page}{68}
+\setcounter{equation}{0}
+\setcounter{enumi}{10}
+\setcounter{enumii}{0}
+\setcounter{enumiii}{0}
+\setcounter{enumiv}{0}
+\setcounter{footnote}{0}
+\setcounter{mpfootnote}{0}
+\setcounter{part}{0}
+\setcounter{chapter}{4}
+\setcounter{section}{9}
+\setcounter{subsection}{1}
+\setcounter{subsubsection}{0}
+\setcounter{paragraph}{0}
+\setcounter{subparagraph}{0}
+\setcounter{figure}{14}
+\setcounter{table}{26}
+\setcounter{LT@tables}{2}
+\setcounter{LT@chunks}{3}
+\setcounter{parentequation}{0}
+\setcounter{r@tfl@t}{2}
+\setcounter{Item}{10}
+\setcounter{Hfootnote}{0}
+\setcounter{bookmark@seq@number}{58}
+\setcounter{section@level}{4}
+}

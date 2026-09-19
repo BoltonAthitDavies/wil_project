@@ -17,10 +17,14 @@ from __future__ import annotations
 
 import csv
 import sys
+
+import numpy as np
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 METRICS = REPO / "output/compare/relogged_20260916/trajectory_metrics.csv"
+RPE_SWEEP = REPO / "output/compare/relogged_20260916/rpe_metrics.csv"
+RPE_DELTAS = (0.5, 1.0, 2.0, 5.0)
 TABLE_DIR = REPO / "docs/report/minor_report/tables"
 
 # Column order matches the retired figure so the two can be compared directly.
@@ -177,6 +181,83 @@ def example_run_table(runs) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _num(row, key):
+    v = row.get(key, "")
+    return float(v) if v not in ("", "nan", None) else float("nan")
+
+
+def _med_iqr(values, decimals):
+    """Median (IQR). These distributions are strongly right-skewed on the dynamic
+    runs -- one teleport sets the mean -- so median and IQR are reported instead of
+    mean and standard deviation."""
+    a = np.array([v for v in values if not np.isnan(v)], float)
+    if a.size == 0:
+        return MISSING
+    med = np.median(a)
+    iqr = np.percentile(a, 75) - np.percentile(a, 25)
+    return f"{med:.{decimals}f}\\,({iqr:.{decimals}f})"
+
+
+def _scene(dataset):
+    return "static" if "_static_" in dataset else "dynamic"
+
+
+def rpe_summary_table(rows):
+    """RPE at the headline interval, split by scene and requested mode."""
+    lines = [r"\begin{tabular}{llrrrrr}", r"\toprule",
+             r"& & & \multicolumn{2}{c}{Translational (m)} &"
+             r" \multicolumn{2}{c}{Rotational (deg)} \\",
+             r"\cmidrule(lr){4-5}\cmidrule(lr){6-7}",
+             r"Scene & Requested mode & Jumps & all pairs & jump-free"
+             r" & all pairs & jump-free \\", r"\midrule"]
+    for scene in ("static", "dynamic"):
+        for system in SYSTEMS:
+            sel = [r for r in rows
+                   if _scene(r["dataset"]) == scene and r["system"] == system]
+            if not sel:
+                continue
+            cells = [scene.capitalize(), SYSTEM_HEADINGS[system],
+                     _med_iqr([_num(r, "jumps") for r in sel], 0),
+                     _med_iqr([_num(r, "rpe1_trans_rmse_m") for r in sel], 3),
+                     _med_iqr([_num(r, "rpe1_trans_rmse_clean_m") for r in sel], 3),
+                     _med_iqr([_num(r, "rpe1_rot_rmse_deg") for r in sel], 2),
+                     _med_iqr([_num(r, "rpe1_rot_rmse_clean_deg") for r in sel], 2)]
+            lines.append(" & ".join(cells) + r" \\")
+        if scene == "static":
+            lines.append(r"\midrule")
+    lines += [r"\bottomrule", r"\end{tabular}"]
+    return "\n".join(lines) + "\n"
+
+
+def rpe_sweep_table(path):
+    """Jump-free RPE against interval: the error-growth curve."""
+    with path.open(newline="") as fh:
+        rows = list(csv.DictReader(fh))
+    lines = [r"\begin{tabular}{ll" + "r" * len(RPE_DELTAS) + "r}", r"\toprule",
+             r"Scene & Requested mode & "
+             + " & ".join(rf"\SI{{{d}}}{{\second}}" for d in RPE_DELTAS)
+             + r" & Growth \\", r"\midrule"]
+    for scene in ("static", "dynamic"):
+        for system in SYSTEMS:
+            vals = []
+            for d in RPE_DELTAS:
+                sel = [_num(r, "trans_rmse_clean") for r in rows
+                       if _scene(r["dataset"]) == scene and r["system"] == system
+                       and abs(float(r["delta_s"]) - d) < 1e-9]
+                a = np.array([v for v in sel if not np.isnan(v)], float)
+                vals.append(np.median(a) if a.size else float("nan"))
+            if np.isnan(vals[0]):
+                continue
+            growth = vals[-1] / vals[0] if vals[0] else float("nan")
+            lines.append(" & ".join([scene.capitalize(), SYSTEM_HEADINGS[system]]
+                                    + [f"{v:.3f}" for v in vals]
+                                    + [f"{growth:.1f}$\\times$"]) + r" \\")
+        if scene == "static":
+            lines.append(r"\midrule")
+    lines += [r"\bottomrule", r"\end{tabular}"]
+    return "\n".join(lines) + "\n"
+
+
 def main() -> int:
     if not METRICS.is_file():
         print(f"missing metrics file: {METRICS}", file=sys.stderr)
@@ -190,9 +271,12 @@ def main() -> int:
         "% output/compare/relogged_20260916/trajectory_metrics.csv.\n"
         "% Do not edit by hand; regenerate instead.\n"
     )
+    raw = read_metrics(METRICS)
     outputs = {
         "trajectory_per_run.tex": per_run_table(runs),
         "example_run_summary.tex": example_run_table(runs),
+        "rpe_summary.tex": rpe_summary_table(raw),
+        "rpe_sweep.tex": rpe_sweep_table(RPE_SWEEP),
     }
     for name, body in outputs.items():
         target = TABLE_DIR / name

@@ -18,6 +18,11 @@ from collections import defaultdict
 from pathlib import Path
 
 import matplotlib
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from vio_metrics import rpe, RPE_DELTAS  # noqa: E402
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
@@ -142,10 +147,21 @@ def geodesic_deg(Ra, Rb):
     return np.degrees(np.arccos(np.clip((tr - 1) / 2, -1, 1)))
 
 
-def discover_runs():
+# The relogged campaign is a fixed set: the seven featureless-floor datasets, each
+# requested three times. Later campaigns write into the same output trees, so a bare
+# glob stops describing this campaign the moment one lands -- the dataset_allsensor
+# runs took the discovery from 66 runs over 7 datasets to 81 over 12, which would
+# have silently restated every number and figure section 4.1 reports. Membership is
+# therefore stated, not inferred from the directory layout.
+CAMPAIGN = "nofloortexture"
+
+
+def discover_runs(contains=CAMPAIGN):
     runs = []
     for tree, label in SYSTEMS.items():
         for path in sorted((RAW / tree / "simulation").glob("*/logging_*")):
+            if contains and contains not in path.parent.name:
+                continue
             runs.append(dict(path=path, tree=tree, system=label,
                              dataset=path.parent.name, repeat=path.name))
     return runs
@@ -263,7 +279,7 @@ def trajectory_group(runs, dataset, repeat, valid_keys):
     ref = load_vio(OUT / "ground_truth" / f"{dataset}.csv")
     if ref is None:
         return None
-    aligned, rows = {}, []
+    aligned, rows, rpe_rows = {}, [], []
     for name in ORDER:
         d = data.get(name)
         if d is None:
@@ -290,6 +306,15 @@ def trajectory_group(runs, dataset, repeat, valid_keys):
         clean_err = np.linalg.norm((Rc @ p[a:b].T).T + tc - rp[a:b], axis=1)
         aligned[name] = dict(t=t-t[0], raw_t=t, p=pa, v=va, eul=euler_zyx(Ra),
                              ref=rp, err=err, rot_err=rot_err)
+        # RPE takes the raw estimate, not `pa`: it compares relative motion over a
+        # fixed interval and must not see the global rigid fit. Every delta is swept
+        # for the drift curve; delta = 1 s is carried into the headline table.
+        for d in RPE_DELTAS:
+            rp_d = rpe(t, p, q, rp, rq, d, jump_idx=jump_idx)
+            if rp_d is not None:
+                rpe_rows.append(dict(dataset=dataset, repeat=repeat, system=name,
+                                     **rp_d))
+        head = rpe(t, p, q, rp, rq, 1.0, jump_idx=jump_idx) or {}
         rows.append(dict(dataset=dataset, repeat=repeat, system=name,
                          reference="rosbag /ground_truth/odometry", poses=len(t),
                          overlap_s=t[-1]-t[0], path_m=steps.sum(),
@@ -297,8 +322,16 @@ def trajectory_group(runs, dataset, repeat, valid_keys):
                          trans_max_m=np.max(err), trans_final_m=err[-1],
                          rot_rmse_deg=np.sqrt(np.mean(rot_err**2)),
                          rot_max_deg=np.max(rot_err), clean_rmse_m=np.sqrt(np.mean(clean_err**2)),
-                         jumps=jumps, mean_speed_m_s=steps.sum()/(t[-1]-t[0])))
-    return ref, aligned, rows
+                         jumps=jumps, mean_speed_m_s=steps.sum()/(t[-1]-t[0]),
+                         rpe1_pairs=head.get("pairs"),
+                         rpe1_trans_rmse_m=head.get("trans_rmse"),
+                         rpe1_trans_median_m=head.get("trans_median"),
+                         rpe1_rot_rmse_deg=head.get("rot_rmse"),
+                         rpe1_rot_median_deg=head.get("rot_median"),
+                         rpe1_pairs_clean=head.get("pairs_clean"),
+                         rpe1_trans_rmse_clean_m=head.get("trans_rmse_clean"),
+                         rpe1_rot_rmse_clean_deg=head.get("rot_rmse_clean")))
+    return ref, aligned, rows, rpe_rows
 
 
 def csv_write(path, rows):
@@ -337,12 +370,16 @@ def plot_detail(dataset, repeat, aligned, rows, theme):
     axh.text(0, .02, "Ground truth: rosbag /ground_truth/odometry; SE(3) alignment with scale fixed. VINS+YOLO*: zero matched masks.",
              color=th["ink3"], fontsize=8.5)
     ax = fig.add_subplot(gs[1:3, :2])
-    refa = aligned["VINS-Fusion"]
+    # Any system's entry carries the same resampled reference; keying on
+    # VINS-Fusion crashed on a repeat that only ORB-SLAM3 was run for.
+    refa = next(iter(aligned.values()))
     ax.plot(refa["ref"][:,0], refa["ref"][:,1], color=COLORS["reference"], lw=3, alpha=.6,
             label="ground truth")
     for name, a in aligned.items():
         ax.plot(a["p"][:,0], a["p"][:,1], color=COLORS[name], lw=1.4, label=name)
-    ax.set_aspect("equal", adjustable="datalim"); style(ax, th, "x [m]", "y [m]", "Trajectory, top-down (SE(3)-aligned, scale fixed)")
+    pin_to_reference(ax, refa["ref"], aligned, th)
+    style(ax, th, "x [m]", "y [m]",
+          "Trajectory, top-down (SE(3)-aligned, scale fixed, pinned to ground truth)")
     ax.legend(fontsize=8, facecolor=th["surface"], edgecolor=th["grid"], labelcolor=th["ink2"])
     ax = fig.add_subplot(gs[1, 2])
     for name, a in aligned.items(): ax.plot(a["t"], a["err"], color=COLORS[name], lw=1.2, label=name)
@@ -433,6 +470,36 @@ def plot_robustness(run_rows, theme):
     fig.tight_layout(rect=[0,.02,1,.9]); p=OUT/f"robustness_{theme}.png"; fig.savefig(p,dpi=160,facecolor=th["surface"]); plt.close(fig)
 
 
+def pin_to_reference(ax, ref, aligned, th, frac=0.12):
+    """Set the view to the ground truth's own extent and say what that hides.
+
+    Two things were wrong before. The axes were never limited at all, so a run that
+    wanders off by hundreds of metres set the scale for the panel and shrank the
+    reference -- the thing the panel exists to compare against -- to a squiggle.
+    And adjustable="datalim" lets matplotlib satisfy the equal aspect by EXPANDING
+    whatever limits are set, so pinning them without changing that mode does
+    nothing in a subplot wider than it is tall.
+
+    Clipping a diverged trace out of frame is a favourable view unless it is
+    declared, so the systems that leave the box are named on the panel. The report
+    keeps the unclipped extent in the error-vs-time panels and the ATE tables; this
+    only changes what the top-down view is scaled to.
+    """
+    lo, hi = ref[:, :2].min(0), ref[:, :2].max(0)
+    span = (hi - lo).max()
+    pad = frac * span if span > 0 else 1.0
+    lo, hi = lo - pad, hi + pad
+    off = [n for n, a in aligned.items()
+           if (a["p"][:, :2] < lo).any() or (a["p"][:, :2] > hi).any()]
+    ax.set_xlim(lo[0], hi[0])
+    ax.set_ylim(lo[1], hi[1])
+    ax.set_aspect("equal", adjustable="box")
+    if off:
+        ax.text(.02, .98, "off view: " + ", ".join(off), transform=ax.transAxes,
+                ha="left", va="top", fontsize=6.5, color=th["ink3"])
+    return off
+
+
 def plot_trajectory_montage(groups, theme):
     """Cross-run sheet matching the established trajectories_* figure family."""
     th = THEMES[theme]
@@ -445,7 +512,7 @@ def plot_trajectory_montage(groups, theme):
     for k, (dataset, repeat, aligned, rows) in enumerate(groups):
         ax = axes[k // cols, k % cols]
         ax.set_visible(True)
-        ref = aligned["VINS-Fusion"]["ref"]
+        ref = next(iter(aligned.values()))["ref"]
         ax.plot(ref[:, 0], ref[:, 1], color=COLORS["reference"], lw=2.5,
                 alpha=.55, label="ground truth")
         for name in ORDER:
@@ -453,7 +520,7 @@ def plot_trajectory_montage(groups, theme):
             if a is not None:
                 ax.plot(a["p"][:, 0], a["p"][:, 1], color=COLORS[name], lw=1.05,
                         label=name)
-        ax.set_aspect("equal", adjustable="datalim")
+        pin_to_reference(ax, ref, aligned, th)
         style(ax, th, "x [m]", "y [m]",
               f"{dataset.replace('dataset_', '')} / {repeat.rsplit('_', 1)[-1]}")
         # Compact plausibility annotation alongside the ground-truth view.
@@ -571,7 +638,7 @@ def main():
                 "p95_ms":np.percentile(vals,95),"max_ms":np.max(vals)})
     csv_write(OUT/"module_latency_summary.csv",module_csv)
 
-    trajectory_rows=[]
+    trajectory_rows=[]; rpe_sweep_rows=[]
     datasets=sorted({r["dataset"] for r in runs})
     repeats=sorted({r["repeat"] for r in runs})
     groups=[]
@@ -579,9 +646,11 @@ def main():
         for rep in repeats:
             g=trajectory_group(runs,ds,rep,valid_keys)
             if g is None: continue
-            _,aligned,rows=g; groups.append((ds,rep,aligned,rows)); trajectory_rows.extend(rows)
+            _,aligned,rows,rpe_g=g; groups.append((ds,rep,aligned,rows))
+            trajectory_rows.extend(rows); rpe_sweep_rows.extend(rpe_g)
             for theme in THEMES: plot_detail(ds,rep,aligned,rows,theme)
     csv_write(OUT/"trajectory_metrics.csv",trajectory_rows)
+    csv_write(OUT/"rpe_metrics.csv",rpe_sweep_rows)
     for theme in THEMES:
         plot_capacity(run_rows,theme); plot_latency(module_rows,theme); plot_robustness(run_rows,theme)
         plot_trajectory_montage(groups, theme); plot_summary_table(groups, run_rows, theme)
@@ -604,7 +673,8 @@ def main():
                                           "comparable" if di<=5 and dd<=5 else "descriptive_only"),
                                   input_difference_pct=di,duration_difference_pct=dd))
     csv_write(OUT/"pair_validity.csv",audit)
-    print(f"wrote {len(run_rows)} run summaries, {len(trajectory_rows)} trajectory rows, {len(module_csv)} module rows")
+    print(f"wrote {len(run_rows)} run summaries, {len(trajectory_rows)} trajectory rows, {len(module_csv)} module rows, "
+          f"{len(rpe_sweep_rows)} RPE rows")
     print(OUT)
 
 

@@ -24,3 +24,8 @@ __pycache__/
 
 # --- redundant archive of realsense/ ---
 realsense.zip
+
+# --- docker (docker/README.md): in-container colcon bases and build provenance ---
+build_docker/
+install_docker/
+docker/build_info.txt

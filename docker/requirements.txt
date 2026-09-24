@@ -1,0 +1,16 @@
+# Python stack for wil_project, pinned to the host's validated versions
+# (pip freeze on 2026-09-24). torch/torchvision come from the PyTorch cu121
+# index; the CUDA runtime ships inside those wheels, so the container only
+# needs the host driver via nvidia-container-toolkit.
+--extra-index-url https://download.pytorch.org/whl/cu121
+torch==2.5.1+cu121
+torchvision==0.20.1+cu121
+ultralytics==8.4.138
+numpy==1.26.4
+opencv-python==4.11.0.86
+matplotlib==3.10.7
+pandas==2.3.3
+scipy==1.15.3
+rosbags==0.11.5
+transforms3d==0.3.1
+pillow==11.3.0

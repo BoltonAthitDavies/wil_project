@@ -1,0 +1,47 @@
+# Build context for docker/Dockerfile (context = repository root).
+# Keep the context to source, configs, worlds, launch files and best.pt.
+
+# git metadata (~600 MB incl. submodules); provenance goes via docker/build_info.txt
+.git
+**/.git
+.gitmodules
+
+# recorded bags, results, maps -- bind-mounted at run time instead
+dataset/
+output/
+map/
+trash/
+gif/
+weight/runs/
+weight/*.pdf
+
+# host build trees and the out-of-tree ORB-SLAM3 build (rebuilt in the image)
+build/
+install/
+log/
+build_docker/
+install_docker/
+thirdparty/
+gz_kinematic_trajectory/build/
+rtabmap_ros/log/
+
+# rtabmap packages that are never built
+rtabmap_ros/rtabmap_demos/
+rtabmap_ros/rtabmap_examples/
+rtabmap_ros/rtabmap_viz/
+rtabmap_ros/rtabmap_rviz_plugins/
+rtabmap_ros/rtabmap_costmap_plugins/
+rtabmap_ros/rtabmap_odom/
+rtabmap_ros/rtabmap_ros/
+rtabmap_ros/docker/
+
+# documents, reports, tooling metadata
+docs/
+.claude/
+.agents/
+realsense.zip
+Athit opentopic
+
+# python caches
+**/__pycache__/
+*.py[cod]

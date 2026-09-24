@@ -1,0 +1,68 @@
+# docker compose -f docker/compose.yml [-f docker/compose.gpu.yml] up -d wil
+#
+# Services
+#   wil      baked image: workspace copied in and colcon-built at image build
+#            time. Data directories are bind-mounted so runs write to the host.
+#   wil-dev  same image, but the WHOLE host checkout is mounted over
+#            /home/ambushee/wil_project. Edit on the host, `ws_build` inside.
+#            (profile "dev": add --profile dev to compose commands)
+#
+# Networking is host mode with host IPC so ROS 2 DDS discovery and Fast DDS
+# shared memory work between container, host and other containers unchanged.
+name: wil
+
+x-wil-common: &wil-common
+  image: wil_project:latest
+  build:
+    context: ..
+    dockerfile: docker/Dockerfile
+    target: full
+    args:
+      USER_UID: ${USER_UID:-1000}
+      USER_GID: ${USER_GID:-1000}
+      WIL_GIT_DESCRIBE: ${WIL_GIT_DESCRIBE:-unknown}
+  network_mode: host
+  ipc: host
+  stdin_open: true
+  tty: true
+  command: ["sleep", "infinity"]
+  environment:
+    DISPLAY: ${DISPLAY:-:0}
+    QT_X11_NO_MITSHM: "1"
+    XDG_RUNTIME_DIR: /tmp/runtime-wil
+    ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-0}
+    ROS_LOCALHOST_ONLY: ${ROS_LOCALHOST_ONLY:-0}
+    # Ogre2 (Gazebo GUI + headless EGL rendering) and rviz2 need a working GL.
+    # With the GPU override this is the NVIDIA driver; without it, Mesa via
+    # /dev/dri (software fallback: LIBGL_ALWAYS_SOFTWARE=1).
+    LIBGL_ALWAYS_SOFTWARE: ${LIBGL_ALWAYS_SOFTWARE:-0}
+  devices:
+    - /dev/dri:/dev/dri
+  volumes:
+    - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    - ${XAUTHORITY:-/dev/null}:/home/ambushee/.Xauthority:ro
+    # data in, results out -- all gitignored on the host
+    - ../dataset:/home/ambushee/wil_project/dataset
+    - ../output:/home/ambushee/wil_project/output
+    - ../map:/home/ambushee/wil_project/map
+    - ../trash:/home/ambushee/wil_project/trash
+    - ../gif:/home/ambushee/wil_project/gif
+    - ../weight:/home/ambushee/wil_project/weight
+    # flash drive with the real-rig bags and the sim bag copies. Read-only:
+    # nothing in the protocol writes there.
+    - /media/ambushee:/media/ambushee:ro
+
+services:
+  wil:
+    <<: *wil-common
+    container_name: wil
+
+  wil-dev:
+    <<: *wil-common
+    container_name: wil-dev
+    profiles: ["dev"]
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ${XAUTHORITY:-/dev/null}:/home/ambushee/.Xauthority:ro
+      - ..:/home/ambushee/wil_project
+      - /media/ambushee:/media/ambushee:ro

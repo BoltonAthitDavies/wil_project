@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# colcon build for wil_project inside the container.
+#
+# Builds into build_docker/ and install_docker/ so a bind-mounted host
+# workspace keeps its own host-built build/ and install/ untouched (those link
+# against host-only paths such as ~/local/lib/libceres.so.4 and would not load
+# here). Package set = the four workspace packages plus the five rtabmap_ros
+# packages up to rtabmap_slam (rtabmap_odom/viz/examples are deliberately not
+# built; see rtabmap_ros/MEMORY_CLAUDE/README.md).
+#
+#   ws_build                 # everything (symlink install, for editing on the host)
+#   ws_build --packages-select orbslam3_ros2
+#   WS_SYMLINK=0 ws_build    # plain copy install (what the baked image uses, so
+#                            # build_docker/ can be deleted afterwards)
+set -euo pipefail
+source /opt/ros/humble/setup.bash
+WS="${WIL_WS:-$HOME/wil_project}"
+cd "$WS"
+
+if [ ! -e thirdparty/ORB_SLAM3/lib/libORB_SLAM3.so ]; then
+    if [ -e /opt/wil/thirdparty/ORB_SLAM3/lib/libORB_SLAM3.so ] && { [ ! -e thirdparty ] || [ -L thirdparty ]; }; then
+        ln -sfn /opt/wil/thirdparty thirdparty
+    else
+        echo "[ws_build] no libORB_SLAM3.so under $WS/thirdparty and none in /opt/wil" >&2
+        exit 1
+    fi
+fi
+
+# thirdparty/ carries CMakeLists.txt files colcon would otherwise try to build.
+touch thirdparty/COLCON_IGNORE 2>/dev/null || true
+
+SYMLINK=(--symlink-install)
+[ "${WS_SYMLINK:-1}" = "0" ] && SYMLINK=()
+
+exec colcon build \
+    "${SYMLINK[@]}" \
+    --build-base build_docker \
+    --install-base install_docker \
+    --cmake-args -DCMAKE_BUILD_TYPE=Release \
+    --packages-up-to rtabmap_slam orbslam3_ros2 vins_fusion_ros2 \
+                     aws_robomaker_small_warehouse_world realsense_imu \
+    "$@"

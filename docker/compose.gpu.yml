@@ -1,0 +1,18 @@
+# GPU override. Requires nvidia-container-toolkit on the host
+# (see docker/README.md). Use together with compose.yml:
+#   docker compose -f docker/compose.yml -f docker/compose.gpu.yml up -d wil
+services:
+  wil: &gpu
+    environment:
+      NVIDIA_VISIBLE_DEVICES: all
+      # "all" includes graphics+display so Gazebo/rviz/Pangolin render on the
+      # NVIDIA GL stack, not only compute for torch.
+      NVIDIA_DRIVER_CAPABILITIES: all
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+  wil-dev: *gpu

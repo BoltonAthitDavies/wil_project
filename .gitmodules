@@ -10,3 +10,10 @@
 	path = rtabmap_ros
 	url = https://github.com/BoltonAthitDavies/rtabmap_ros.git
 	branch = ros2
+[submodule "thirdparty/ORB_SLAM3"]
+	path = thirdparty/ORB_SLAM3
+	url = https://github.com/BoltonAthitDavies/ORB_SLAM3.git
+	branch = wil
+[submodule "thirdparty/Pangolin"]
+	path = thirdparty/Pangolin
+	url = https://github.com/stevenlovegrove/Pangolin.git

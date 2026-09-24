@@ -102,8 +102,12 @@ RUN git clone --depth 1 --branch 2.2.0 https://github.com/ceres-solver/ceres-sol
 # --- Python: CUDA torch + ultralytics + analysis stack ------------------------
 # Pinned to the versions the host validated (pip freeze, 2026-09-24). numpy is
 # pinned to 1.x because Humble's cv_bridge / rclpy bindings break on numpy 2.
+# The base image has apt's distutils-installed sympy 1.9, which pip cannot
+# uninstall; torch 2.5.1 needs sympy==1.13.1, so install it alongside
+# (--ignore-installed) into /usr/local, which shadows the apt copy.
 COPY docker/requirements.txt /tmp/requirements.txt
 RUN python3 -m pip install --no-cache-dir --upgrade pip \
+    && python3 -m pip install --no-cache-dir --ignore-installed sympy==1.13.1 \
     && python3 -m pip install --no-cache-dir -r /tmp/requirements.txt \
     && rm /tmp/requirements.txt
 
@@ -185,8 +189,17 @@ RUN ln -sfn /opt/wil/thirdparty thirdparty
 # the packages that are actually built; the rtabmap packages that are NOT
 # built (odom, viz, examples, demos, costmap_plugins) are excluded so their
 # heavy optional deps are not pulled in.
-RUN sudo apt-get update \
-    && (sudo rosdep init 2>/dev/null || true) && rosdep update --rosdistro "${ROS_DISTRO}" \
+#
+# rosdep's database is fetched with git from github.com rather than from
+# raw.githubusercontent.com, which the KMUTT campus firewall blocks (it serves
+# a self-signed "Web Page Blocked" page -> CERTIFICATE_VERIFY_FAILED).
+ENV ROSDISTRO_INDEX_URL=file:///opt/rosdistro/index-v4.yaml
+RUN sudo git clone --depth 1 https://github.com/ros/rosdistro /opt/rosdistro \
+    && sudo mkdir -p /etc/ros/rosdep/sources.list.d \
+    && printf 'yaml file:///opt/rosdistro/rosdep/%s.yaml\n' base python ruby \
+        | sudo tee /etc/ros/rosdep/sources.list.d/20-default.list \
+    && sudo apt-get update \
+    && rosdep update --rosdistro "${ROS_DISTRO}" \
     && rosdep install --rosdistro "${ROS_DISTRO}" --ignore-src -y -r \
         --from-paths orbslam3_ros2 vins_fusion_ros2 aws-robomaker-small-warehouse-world realsense/realsense_imu \
                      rtabmap_ros/rtabmap_msgs rtabmap_ros/rtabmap_conversions rtabmap_ros/rtabmap_sync \

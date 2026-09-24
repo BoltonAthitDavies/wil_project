@@ -13,7 +13,10 @@
 #   WS_SYMLINK=0 ws_build    # plain copy install (what the baked image uses, so
 #                            # build_docker/ can be deleted afterwards)
 set -euo pipefail
+# ROS setup scripts read unset variables (AMENT_TRACE_SETUP_FILES, ...).
+set +u
 source /opt/ros/humble/setup.bash
+set -u
 WS="${WIL_WS:-$HOME/wil_project}"
 cd "$WS"
 

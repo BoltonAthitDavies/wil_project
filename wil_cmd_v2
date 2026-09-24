@@ -1,0 +1,123 @@
+small_warehouse_dynamic_00_bayline.world
+small_warehouse_dynamic_00_nofloortexture.world
+small_warehouse_dynamic_00.world
+small_warehouse_dynamic_01_bayline.world
+small_warehouse_dynamic_01_nofloortexture.world
+small_warehouse_dynamic_01.world
+small_warehouse_dynamic_02_bayline.world
+small_warehouse_dynamic_02_nofloortexture.world
+small_warehouse_dynamic_02.world
+small_warehouse_dynamic_realistic_nofloortexture.world
+
+small_warehouse_static_01_bayline.world
+small_warehouse_static_01_nofloortexture.world
+small_warehouse_static_01.world
+small_warehouse_static_02_bayline.world
+small_warehouse_static_02_nofloortexture.world
+small_warehouse_static_03_bayline.world
+small_warehouse_static_03_nofloortexture.world
+small_warehouse_static_04_bayline.world
+small_warehouse_static_04_nofloortexture.world
+small_warehouse_static_bayline_objonwallonly.world
+small_warehouse_static_nofloortexture_objonwallonly.world
+small_warehouse_static_tinymap.launch.world
+
+
+# terminal 1 (simulation)
+ros2 launch aws_robomaker_small_warehouse_world small_warehouse_static_01_nofloortexture.launch.py headless:=True bridge_wheel_odom:=True bridge_joint_states:=True bridge_model_poses:=True
+
+or (run rosbag file)
+ros2 bag play /home/ambushee/wil_project/dataset/{YOU CHOOSE}*
+
+# terminal 2 (2D viewer for teleops and map visualization)
+python3 ./script/viewer.py --rotate 180 --world /home/ambushee/wil_project/aws-robomaker-small-warehouse-world/worlds/small_warehouse_static/small_warehouse_static_tinymap.world --wheel-odom-topic /model/ackermann_robot_001/odometry --live-poses --map ros --map-pose 1.8,9.0,-90 
+
+--/media/ambushee/32E4AAB1E4AA772F/dataset/
+--/home/ambushee/wil_project/dataset/
+
+# orbslam3 cmd (/home/ambushee/wil_project/dataset or /media/ambushee/32E4AAB1E4AA772F/dataset)
+ros2 launch orbslam3_ros2 wil_sim_stereo_imu.launch.py \
+  output_path:=/home/ambushee/wil_project/output/output_orb/simulation/dataset_allsensor_000/logging_20260916_03 \
+  experiment_id:=logging_20260916_03 \
+  dataset_path:=/home/ambushee/wil_project/dataset/dataset_allsensor_000 \
+  world_path:=/home/ambushee/wil_project/aws-robomaker-small-warehouse-world/worlds/small_warehouse_static/small_warehouse_static_01_nofloortexture.world \
+  replay_rate:=0.5 \
+  run_notes:='baseline logging validation' filter:=true
+
+# vins cmd
+ros2 run vins_fusion_ros2 vins_fusion_ros2_node --ros-args \
+  -p config_file:=/home/ambushee/wil_project/vins_fusion_ros2/config/wil_sim/stereo_imu.yaml \
+  -p use_sim_time:=true \
+  -p output_path:=/home/ambushee/wil_project/output/output_vins/simulation/dataset_allsensor_004/logging_20260916_03 \
+  -p experiment_id:=logging_20260916_03 \
+  -p dataset_path:=/home/ambushee/wil_project/dataset/dataset_allsensor_004 \
+  -p world_path:=/home/ambushee/wil_project/aws-robomaker-small-warehouse-world/worlds/small_warehouse_static/small_warehouse_static_bayline_objonwallonly.world \
+  -p replay_rate:=0.5 \
+  -p run_notes:="VINS logging validation" -p filter:=true
+
+# rtab cmd
+ros2 launch ./rtabmap_ros/rtab_sim.launch.py rviz:=true grid_range_max:=8.0     output_path:=trash/ database_path:=map/map_02.db detection_rate:=4.0 shim_rate:=4.0
+
+# create map with orb (large map)
+ros2 launch ./rtabmap_ros/rtab_sim.launch.py mode:=construct rviz:=true \
+    ground_height:=0.29 \
+    output_path:=trash/ database_path:=map/map_03.db \
+    odom_frame:=orbslam3_world body_frame:=base_footprint \
+    grid_range_max:=8.0 detection_rate:=4.0 shim_rate:=4.0 
+
+# create map with vins (large map)
+ros2 launch ./rtabmap_ros/rtab_sim.launch.py mode:=construct rviz:=true \
+    output_path:=trash/ database_path:=map/map_02_vins.db \
+    grid_range_max:=8.0 detection_rate:=4.0 shim_rate:=4.0 
+
+# rviz
+ros2 run rviz2 rviz2
+
+colcon build --packages-up-to rtabmap_slam
+
+# visualize dense map
+rtabmap-databaseViewer map/map_tiny.db
+
+############################################################################################# new version ############################################################################################# terminal 1 (simulation)
+ros2 launch aws_robomaker_small_warehouse_world small_warehouse_static_tinymap.launch.py headless:=True bridge_model_poses:=True
+
+# or (run rosbag file)   -- no --clock, the bags already record it
+ros2 bag play /home/ambushee/wil_project/dataset/dataset_static_tiny_repeat
+
+
+# terminal 2 (2D viewer for teleop and map visualization)
+python3 ./script/viewer.py --rotate 180 --world /home/ambushee/wil_project/aws-robomaker-small-warehouse-world/worlds/small_warehouse_static/small_warehouse_static_01.world --live-poses
+
+
+# terminal 3 -- pick ONE front-end
+
+# orbslam3 cmd
+ros2 launch orbslam3_ros2 wil_sim_stereo_imu.launch.py output_path:=/home/ambushee/wil_project/output/output_orb/simulation/dataset_static_tiny_repeat
+
+# vins cmd
+ros2 run vins_fusion_ros2 vins_fusion_ros2_node --ros-args -p config_file:=/home/ambushee/wil_project/vins_fusion_ros2/config/wil_sim/stereo_imu.yaml -p output_path:=/home/ambushee/wil_project/output/output_vins/simulation/dataset_static -p use_sim_time:=True
+
+
+# terminal 4 (rtab vins) -- 3 modes, only this line changes
+
+# BUILD a new map   (your command, with a real filename so it can't eat map/rtabmap.db)
+ros2 launch ./rtabmap_ros/rtab_sim.launch.py mode:=construct rviz:=true grid_range_max:=8.0 detection_rate:=4.0 shim_rate:=4.0 output_path:=trash/ database_path:=map/tiny_new.db
+
+# ADD to that map   (relocalizes into it, then keeps mapping)
+ros2 launch ./rtabmap_ros/rtab_sim.launch.py mode:=extend rviz:=true grid_range_max:=8.0 detection_rate:=4.0 shim_rate:=4.0 output_path:=trash/ database_path:=map/tiny_new.db
+
+# USE that map, read-only   (no mapping, just "where am I")
+ros2 launch ./rtabmap_ros/rtab_sim.launch.py mode:=localize read_only:=true rviz:=true output_path:=trash/ database_path:=map/map_tiny.db
+
+-----------------------------------------------------------------------------------
+
+# terminal 4 (rtab orbs) -- 3 modes, only this line changes
+
+# BUILD a new map   (your command, with a real filename so it can't eat map/rtabmap.db)
+ros2 launch ./rtabmap_ros/rtab_sim.launch.py mode:=construct rviz:=true grid_range_max:=8.0 detection_rate:=4.0 shim_rate:=4.0 output_path:=trash/ database_path:=map/map_02.db
+
+# ADD to that map   (relocalizes into it, then keeps mapping)
+ros2 launch ./rtabmap_ros/rtab_sim.launch.py mode:=extend rviz:=true grid_range_max:=8.0 detection_rate:=4.0 shim_rate:=4.0 output_path:=trash/ database_path:=map/tiny_new.db
+
+# USE that map, read-only   (no mapping, just "where am I")
+ros2 launch ./rtabmap_ros/rtab_sim.launch.py mode:=localize read_only:=true rviz:=true output_path:=trash/ database_path:=map/map_tiny.db odom_frame:=orbslam3_world body_frame:=base_footprint

@@ -1,0 +1,242 @@
+'/Game/Carla/Maps/Town05_Opt', '/Game/Carla/Maps/Town05', '/Game/Carla/Maps/Town10HD', '/Game/Carla/Maps/Town03_Opt', '/Game/Carla/Maps/Town03', '/Game/Carla/Maps/Town01', '/Game/Carla/Maps/Town10HD_Opt', '/Game/Carla/Maps/Town07_Opt', '/Game/Carla/Maps/Town01_Opt', '/Game/Carla/Maps/Town04', '/Game/Carla/Maps/Town06_Opt', '/Game/Carla/Maps/Town02', '/Game/Carla/Maps/Town04_Opt', '/Game/Carla/Maps/Town07', '/Game/Carla/Maps/Town06', '/Game/Carla/Maps/Town02_Opt', '/Game/Carla/Maps/Town13/Town13', '/Game/Carla/Maps/Town12/Town12', '/Game/Carla/Maps/Town15/Town15', '/Game/Carla/Maps/Town11/Town11', '/Game/Carla/Maps/Town11/Town11'
+
+source ~/carla-ros-bridge/install/setup.bash
+ros2 topic pub --once /carla/weather_control carla_msgs/msg/CarlaWeatherParameters \
+  "{cloudiness: 0.0, precipitation: 0.0, precipitation_deposits: 0.0,
+    wind_intensity: 0.0, sun_azimuth_angle: 0.0, sun_altitude_angle: 90.0,
+    fog_density: 0.0, fog_distance: 0.0, wetness: 0.0}"
+
+colcon build --packages-select carla_ros_bridge carla_ros_bridge_original carla_spawn_objects carla opentopic && source install/setup.bash
+
+colcon build --packages-select opentopic && source install/setup.bash
+
+--------------------------------------------------
+	Memory saving
+--------------------------------------------------	
+# kill all ros2 node
+ps aux | grep ros | awk '{print $2}' | xargs kill -9
+
+ros2 daemon stop
+ros2 daemon start
+
+# To clear PageCache only:
+sync; echo 1 | sudo tee /proc/sys/vm/drop_caches
+
+# To clear dentries and inodes:
+sync; echo 2 | sudo tee /proc/sys/vm/drop_caches
+
+# To clear all (Recommended):
+sync; echo 3 | sudo tee /proc/sys/vm/drop_caches
+
+# Clear swap
+sudo swapoff -a
+sudo swapon -a
+
+# visualize VRAM
+watch -n 1 nvidia-smi
+--------------------------------------------------
+	Open carla serve
+--------------------------------------------------	
+~/carla-package/CarlaUE4.sh -RenderOffScreen -quality-level=Low
+
+
+
+--------------------------------------------------
+	Open ros-bridge example
+--------------------------------------------------
+cd carla-ros-bridge
+source /home/fibo3/carla-ros-bridge/install/setup.bash 
+
+
+
+# clear coredump (nessesary)
+sudo rm -rf /var/lib/apport/coredump/*
+
+		
+carla_clean & ros2 launch carla_ros_bridge carla_ros_bridge_with_example_ego_vehicle.launch.py \
+		synchronous_mode:=True \
+		town:=/Game/Carla/Maps/Town01 \
+		fixed_delta_seconds:=0.1
+'''
+
+--------------------------------------------------
+	Run V-SLAM
+--------------------------------------------------
+# Terminal 1 — start CARLA + bridge as normal
+# Terminal 2 — launch VINS
+source /opt/ros/humble/setup.bash && source install/setup.bash
+ros2 run vins vins_node   $(pwd)/src/VINS-Fusion-ROS2/config/carla/carla_mono_imu_config.yaml
+
+--------------------------------------------------
+	Open Foxglove
+--------------------------------------------------
+ros2 launch foxglove_bridge foxglove_bridge_launch.xml port:=8765
+
+--------------------------------------------------
+	Deploy global+Local planner
+--------------------------------------------------
+cd carla-ros-bridge
+ros2 launch opentopic opentopic.launch.py
+
+--------------------------------------------------
+	Train DRL Local Planner
+--------------------------------------------------
+cd carla-ros-bridge
+python3 -m opentopic.drl_training.train 
+
+--------------------------------------------------
+	Tensorboard
+--------------------------------------------------
+tensorboard --logdir drl_log/first_try/drl_tb_logs/
+
+
+--------------------------------------------------
+	    Open rviz
+--------------------------------------------------
+'''
+ros2 run rviz2 rviz2
+'''
+
+
+--------------------------------------------------
+	    Recording video.
+--------------------------------------------------
+# Record single topic (.avi)
+ros2 run image_view video_recorder --ros-args   -r image:=/carla/rgb_bird_eye/image   -p filename:=bird_eye.avi   -p fps:=20.0
+
+# Record multiple topics (rosbag)
+ros2 bag record /carla/rgb_bird_eye/image \
+/carla/ego_vehicle/rgb_front/image \
+/carla/ego_vehicle/odometry 
+
+/carla/ego_vehicle/rgb_top_down/image \
+/carla/ego_vehicle/rgb_top_front/image \
+/carla/ego_vehicle/rgb_top_left/image \
+/carla/ego_vehicle/rgb_top_rear/image \
+/carla/ego_vehicle/rgb_top_right/image 
+
+# play rosbag file (1 terminal)
+ros2 bag play /home/fibo3/carla-ros-bridge/rosbag2_2026_04_24-13_48_35/rosbag2_2026_04_24-13_48_35_0.db3
+
+# play rosbag img file (2 terminal)
+ros2 run image_view image_view --ros-args -r image:=/cam0/image_mono
+ros2 run image_view image_view --ros-args -r image:=/carla/ego_vehicle/rgb_front/image
+
+# play rosbag odom file (2 terminal)
+ros2 topic echo /carla/ego_vehicle/odometry
+
+# decompressed image data from rosbag files
+ros2 run image_transport republish compressed raw --ros-args \
+  -r in/compressed:=/cam0/image_raw/compressed -r out:=/cam0/image_raw
+ros2 run image_transport republish compressed raw --ros-args \
+  -r in/compressed:=/cam1/image_raw/compressed -r out:=/cam1/image_raw
+
+# run vins (real world)
+ros2 run vins_fusion_ros2 vins_fusion_ros2_node --ros-args \
+  -p config_file:=/home/ambushee/wil_project/vins_fusion_ros2/config/wil/stereo_imu.yaml \
+  -p pose_graph_save_path:=./output/rosbag_realsense_imu_cambaseline95mm/ \
+  -p use_sim_time:=false
+  
+# run vins (simulation)
+ros2 run vins_fusion_ros2 vins_fusion_ros2_node --ros-args \
+  -p config_file:=/home/ambushee/wil_project/vins_fusion_ros2/config/wil_sim/stereo_imu.yaml \
+  -p output_path:=./output/output_vins/simulation/dynamic_dataset_large_emptybg \
+  -p use_sim_time:=True
+
+# Record multiple topics (rosbag in simulation)
+ros2 bag record -o dataset/dataset_map_02 --max-cache-size 536870912 \
+/cam0/image_raw/compressed \
+/cam1/image_raw/compressed \
+/cmd_vel \
+/ground_truth/odometry \
+/imu \
+/clock \
+/world/default/pose/info \
+/model/ackermann_robot_001/joint_state /model/ackermann_robot_001/odometry
+
+
+# cam0
+ros2 run image_transport republish compressed raw --ros-args \
+  -r in/compressed:=/cam0/image_raw/compressed -r out:=/cam0/image_raw
+ros2 run vins_fusion_ros2 image_encoding_fixer --ros-args \
+  -r in:=/cam0/image_raw -r out:=/cam0/image_mono
+
+# cam1
+ros2 run image_transport republish compressed raw --ros-args \
+  -r in/compressed:=/cam1/image_raw/compressed -r out:=/cam1/image_raw
+ros2 run vins_fusion_ros2 image_encoding_fixer --ros-args \
+  -r in:=/cam1/image_raw -r out:=/cam1/image_mono
+
+ros2 run image_view image_view --ros-args -r image:=/cam0/image_mono
+ros2 run image_view image_view --ros-args -r image:=/cam0/image_raw
+
+# To clear all (Recommended):
+sync; echo 3 | sudo tee /proc/sys/vm/drop_caches
+
+# kill gazebo
+pkill -f "ign gazebo"
+
+# kill all ros2 node
+ps aux | grep ros | awk '{print $2}' | xargs kill -9
+
+ros2 daemon stop
+ros2 daemon start
+
+# create swap mems
+sudo swapon --show
+sudo swapoff /swapfile
+sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+sudo swapon --show
+
+# delete swap mems
+sudo swapoff -a
+sudo rm /swapfile
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--------------------------------------------------
+	    How claude fix memory issue.
+--------------------------------------------------
+Root cause: UE4 4.26's Vulkan memory allocator had two bugs that only surface with NVIDIA driver 535+ on RTX 40xx GPUs.
+
+Fix 1 — VulkanMemory.cpp (UE4): Stale AllocationSize after retry
+
+When a 32MB page allocation failed, the code retried with the actual buffer size (e.g. 2MB) but then called Map(32MB) on the 2MB allocation → segfault. Added AllocationSize = Size after the retry.
+
+Fix 2 — VulkanMemory.cpp (UE4): HOST_CACHED fallback
+
+When the HOST_CACHED memory type (TypeIndex=3) failed entirely — as it does on this GPU/driver — the allocator had no fallback and crashed. Added a graceful fallback to HOST_COHERENT-only (TypeIndex=2).
+
+Fix 3 — VulkanTexture.cpp (UE4): Wrong buffer usage flags
+
+The CPUReadback staging buffer was created with BufferCreateInfo.usage = BufferMemFlags (memory property flags used as usage flags by mistake). Changed to the correct VK_BUFFER_USAGE_TRANSFER_DST_BIT.
+
+Fix 4 — PixelReader.cpp (CARLA): Per-frame VkBuffer allocation
+
+CARLA was creating and destroying a new FRHIGPUTextureReadback every single camera frame, causing repeated failed Vulkan allocation attempts and high overhead. Changed to a static cache per render target — the VkBuffer is now

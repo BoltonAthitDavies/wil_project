@@ -748,6 +748,22 @@ def do_run(args):
         'bag': os.path.abspath(args.bag),
         'noise_model': os.path.abspath(args.noise),
         'output_dir': os.path.abspath(args.out),
+        # The IMU noise terms are recorded as VALUES, not only as a path to the
+        # file that held them. A path is not provenance: the file can be
+        # regenerated, edited or moved, and a run that cites one cannot afterwards
+        # be shown to have used any particular number. That failure is not
+        # hypothetical here -- the visual estimators record only config_file, and
+        # because of it the noise-transfer question of sec:proprio-tuning could not
+        # be settled from their metadata at all.
+        'imu_gyro_sigma_z': float(noise['imu']['gyro_sigma_xyz'][2]),
+        'imu_accel_sigma_x': float(noise['imu']['accel_sigma_xyz'][0]),
+        'imu_gyro_bias_rw': float(noise['imu']['gyro_bias_rw']),
+        'imu_gyro_bias_rw_source': noise['imu'].get('gyro_bias_rw_source', ''),
+        'wheel_speed_sigma': float(noise['wheel']['speed_sigma']),
+        'noise_model_bag': noise['provenance'].get('bag', ''),
+        'noise_model_override': noise['provenance'].get('override_preset', 'none'),
+        'noise_model_is_foreign': os.path.abspath(args.bag)
+                                  != noise['provenance'].get('bag'),
         'command': ' '.join(sys.argv),
         'generated': datetime.datetime.now().isoformat(timespec='seconds'),
         'git_commit_superproject': git_commit(ROOT),

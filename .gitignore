@@ -9,6 +9,7 @@ log/
 thirdparty/
 trash/
 map/
+gif/
 output/output_orb
 output/output_vins
 output/output_orb_yolo

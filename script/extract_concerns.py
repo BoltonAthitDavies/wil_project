@@ -179,7 +179,10 @@ def harvest(path):
         items.append(dict(kind='block', label=label, sec=sec, sub=sub,
                           body=clean(text[m.end():end]), pos=m.start()))
 
-    for m in re.finditer(r'\\flag\{', text):
+    # \moved marks a queried sentence that was lifted OUT of the report body --
+    # main.tex renders it as nothing, so this document is the only place it
+    # appears. It is otherwise identical to \flag and is extracted the same way.
+    for m in re.finditer(r'\\(?:flag|moved)\{', text):
         if any(a <= m.start() <= b for a, b in spans):
             continue  # already inside a queried block
         end = match_brace(text, m.end() - 1)
@@ -241,6 +244,14 @@ PREAMBLE_HEAD = r"""\documentclass[11pt,a4paper]{article}
 PREAMBLE_TAIL = r"""
 \geometry{margin=22mm}
 \usepackage{titlesec}
+
+% The inherited preamble SUPPRESSES queried material, because the report no
+% longer renders it -- that is the whole point of this document existing. Undo
+% the suppression here, or every passage extracted below would be typeset into
+% nothing and this document would silently come out empty of the very text it
+% was built to carry.
+\renewcommand{\flag}[1]{\textcolor{flagred}{#1}}
+\renewcommand{\moved}[1]{\textcolor{flagred}{#1}}
 % Cross-reference targets live in the report, so a reference is printed, not
 % resolved -- a dangling \cref would either fail or print a wrong number.
 \newcommand{\reportref}[1]{\textcolor{gray}{[\texttt{\detokenize{#1}}]}}

@@ -4,8 +4,8 @@
 % keeps the job it was written for, behind a cover and a one-page reading guide:
 %
 %   summary.pdf    2 pp   executive summary, reads cold without the rest
-%   main.pdf      68 pp   the full record, with repository evidence
-%   concerns.pdf   7 pp   every queried passage, as a checklist
+%   main.pdf      71 pp   the full record, with repository evidence
+%   concerns.pdf   8 pp   every queried passage, as a checklist
 %
 % The slides are deliberately NOT bound in: they are for presenting, not reading,
 % and their content is a subset of the summary.
@@ -57,8 +57,8 @@
 \vfill
 \begin{center}
   \small
-  Executive summary (2\,pp) \quad$\cdot$\quad Progress report (68\,pp)
-  \quad$\cdot$\quad Open concerns (7\,pp)
+  Executive summary (2\,pp) \quad$\cdot$\quad Progress report (71\,pp)
+  \quad$\cdot$\quad Open concerns (8\,pp)
 \end{center}
 \clearpage
 
@@ -74,7 +74,7 @@ Written to be read cold, without the rest and without prior knowledge of the
 project. It states the research question, what is established, what is not, and
 what guidance is requested. \textbf{If you read only one part, read this one.}
 
-\subsection*{2. Progress report --- 68 pages}
+\subsection*{2. Progress report --- 71 pages}
 
 The full record, and the evidence behind every number in the summary. Its
 register is deliberately technical: implementation claims cite the exact source
@@ -83,28 +83,35 @@ claim can be checked rather than taken on trust. It is not written to be read
 straight through. Use the table of contents, or follow a reference from the
 summary.
 
-\subsection*{3. Open concerns --- 7 pages}
+\subsection*{3. Open concerns --- 8 pages}
 
-Every passage the report marks as \flag{queried}, collected into one checklist of
-67 items. This is the fastest route to ``what does the author not yet stand
-behind?''
+Every passage the report has queried, collected into one checklist of 77 items.
+\textbf{These no longer appear in the progress report itself} --- they were moved
+here, so that the report reads as a record of what was measured and this document
+carries what is not yet trusted. It is the fastest route to ``what does the author
+not yet stand behind?''
 
 \bigskip
 \hrule
 \bigskip
 
-\subsection*{What the red text means}
+\subsection*{What the concerns document contains}
 
-A red passage marks a result, number or condition that is \emph{measured but not
+A queried passage is a result, number or condition that is \emph{measured but not
 yet trustworthy as evidence} --- an unexplained mechanism, a confound, an unfair
 comparison, or a figure whose provenance does not support the use it is being put
 to.
 
-It deliberately does \textbf{not} mark a bad result. A large error that is
-correctly measured and understood is a finding, and appears in black. The red
-marks doubt about the evidence, not disappointment with the outcome. Sixty-seven
-such passages is a consequence of flagging aggressively, not of the work being
-unusually uncertain.
+It deliberately does \textbf{not} mean a bad result. A large error that is
+correctly measured and understood is a finding, and stays in the report as one.
+A query is doubt about the evidence, not disappointment with the outcome.
+Seventy-seven such passages is a consequence of querying aggressively, not of the
+work being unusually uncertain.
+
+Queried \emph{values} --- a table cell, a measured number, a status word --- could
+not be lifted out without leaving holes in the tables that contain them, so they
+remain in the report as ordinary black figures and are listed in document~3 with
+the reason each is queried. Queried \emph{passages} appear only in document~3.
 
 \subsection*{What is deliberately excluded}
 
@@ -125,11 +132,19 @@ the next period.
 
 The report's cutoff is 16 September 2026, and components are labelled
 \emph{implemented}, \emph{verified}, \emph{partially verified}, \emph{blocked},
-\emph{failed} or \emph{planned} as at that date. Three pieces of work landed
+\emph{failed} or \emph{planned} as at that date. Four pieces of work landed
 after it and are marked as later additions in the text rather than folded in
-silently: relative pose error, the dense-map evaluation, and the
-simulation-fidelity assessment. The cutoff was left where it was precisely so
-that those additions stay visible as additions.
+silently: relative pose error, the dense-map evaluation, the simulation-fidelity
+assessment, and the noise-model control of section~4.2.7. The cutoff was left
+where it was precisely so that those additions stay visible as additions.
+
+\subsection*{A result that changed after the cutoff}
+
+The last of those changes a headline result. Section~4.2 previously reported
+that a wheel+IMU filter outperformed both visual pipelines in static scenes; the
+control shows that the two estimator families had never been tuned alike, and
+that the ranking reverses once they are. The summary and the report both now say
+so, and the superseded reading is retained in the text rather than removed.
 
 \clearpage
 

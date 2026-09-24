@@ -23,109 +23,169 @@
 \newlabel{sec:platform-calibration@cref}{{[section][2][3]3.2}{[1][5][]5}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.2.1}Computing and software environment}{5}{subsection.3.2.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.2.2}Simulated sensor rig}{5}{subsection.3.2.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.2}{\ignorespaces Computing and software environment. A single laptop produced every result reported here; there is no second platform, so no entry below supports a cross-hardware comparison.}}{6}{table.3.2}\protected@file@percent }
+\newlabel{tab:compute-environment}{{3.2}{6}{Computing and software environment. A single laptop produced every result reported here; there is no second platform, so no entry below supports a cross-hardware comparison}{table.3.2}{}}
+\newlabel{tab:compute-environment@cref}{{[table][2][3]3.2}{[1][5][]6}}
 \@writefile{lof}{\contentsline {figure}{\numberline {3.2}{\ignorespaces Simulated Ackermann platform, drawn to scale from the model definition. Distances are in metres relative to \texttt  {base\_footprint}. The stereo pair is mounted asymmetrically: \texttt  {cam1} sits on the vehicle centreline and \texttt  {cam0} is offset \SI {0.0936}{\metre } to its left, so the optical centre of the pair is not the chassis centreline. The wheel base and track are equal at \SI {0.42}{\metre }, which is what makes the rear-wheel differential a poor yaw-rate estimator (\cref  {sec:proprio-method}).}}{6}{figure.3.2}\protected@file@percent }
 \newlabel{fig:ackermann-robot}{{3.2}{6}{Simulated Ackermann platform, drawn to scale from the model definition. Distances are in metres relative to \texttt {base\_footprint}. The stereo pair is mounted asymmetrically: \texttt {cam1} sits on the vehicle centreline and \texttt {cam0} is offset \SI {0.0936}{\metre } to its left, so the optical centre of the pair is not the chassis centreline. The wheel base and track are equal at \SI {0.42}{\metre }, which is what makes the rear-wheel differential a poor yaw-rate estimator (\cref {sec:proprio-method})}{figure.3.2}{}}
-\newlabel{fig:ackermann-robot@cref}{{[figure][2][3]3.2}{[1][6][]6}}
-\@writefile{lot}{\contentsline {table}{\numberline {3.2}{\ignorespaces Simulated sensor configuration. Intrinsics are analytic rather than calibrated: the simulator renders an exact pinhole camera, so $f_x=f_y$ follow from the image width and the horizontal field of view and the distortion coefficients are identically zero. The stereo baseline was independently checked from positive disparity in a recorded bag rather than taken from the model alone.}}{6}{table.3.2}\protected@file@percent }
-\newlabel{tab:sim-sensor-rig}{{3.2}{6}{Simulated sensor configuration. Intrinsics are analytic rather than calibrated: the simulator renders an exact pinhole camera, so $f_x=f_y$ follow from the image width and the horizontal field of view and the distortion coefficients are identically zero. The stereo baseline was independently checked from positive disparity in a recorded bag rather than taken from the model alone}{table.3.2}{}}
-\newlabel{tab:sim-sensor-rig@cref}{{[table][2][3]3.2}{[1][6][]6}}
-\@writefile{lot}{\contentsline {table}{\numberline {3.3}{\ignorespaces Inertial noise parameters supplied to the visual-inertial estimators, beside the values measured from the recorded IMU stream in \cref  {sec:proprio-method}. The configured values are inherited estimator defaults, not measurements of this simulated IMU; the discrepancy is carried forward as a queried item rather than silently reconciled.}}{7}{table.3.3}\protected@file@percent }
-\newlabel{tab:imu-noise-assumed}{{3.3}{7}{Inertial noise parameters supplied to the visual-inertial estimators, beside the values measured from the recorded IMU stream in \cref {sec:proprio-method}. The configured values are inherited estimator defaults, not measurements of this simulated IMU; the discrepancy is carried forward as a queried item rather than silently reconciled}{table.3.3}{}}
-\newlabel{tab:imu-noise-assumed@cref}{{[table][3][3]3.3}{[1][6][]7}}
-\@writefile{lot}{\contentsline {table}{\numberline {3.4}{\ignorespaces Platform geometry and drivetrain limits used by the wheel-odometry and EKF baselines. \texttt  {AckermannSteering} exposes no noise parameter, so the simulated encoders and odometry are noise free at source.}}{7}{table.3.4}\protected@file@percent }
-\newlabel{tab:platform-geometry}{{3.4}{7}{Platform geometry and drivetrain limits used by the wheel-odometry and EKF baselines. \texttt {AckermannSteering} exposes no noise parameter, so the simulated encoders and odometry are noise free at source}{table.3.4}{}}
-\newlabel{tab:platform-geometry@cref}{{[table][4][3]3.4}{[1][7][]7}}
+\newlabel{fig:ackermann-robot@cref}{{[figure][2][3]3.2}{[1][5][]6}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.3}{\ignorespaces Simulated sensor configuration. Intrinsics are analytic rather than calibrated: the simulator renders an exact pinhole camera, so $f_x=f_y$ follow from the image width and the horizontal field of view and the distortion coefficients are identically zero. The stereo baseline was independently checked from positive disparity in a recorded bag rather than taken from the model alone.}}{7}{table.3.3}\protected@file@percent }
+\newlabel{tab:sim-sensor-rig}{{3.3}{7}{Simulated sensor configuration. Intrinsics are analytic rather than calibrated: the simulator renders an exact pinhole camera, so $f_x=f_y$ follow from the image width and the horizontal field of view and the distortion coefficients are identically zero. The stereo baseline was independently checked from positive disparity in a recorded bag rather than taken from the model alone}{table.3.3}{}}
+\newlabel{tab:sim-sensor-rig@cref}{{[table][3][3]3.3}{[1][5][]7}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.4}{\ignorespaces Inertial noise parameters supplied to the visual-inertial estimators, beside the values measured from the recorded IMU stream in \cref  {sec:proprio-method}. The configured values are inherited estimator defaults, not measurements of this simulated IMU; the discrepancy is carried forward as a queried item rather than silently reconciled.}}{7}{table.3.4}\protected@file@percent }
+\newlabel{tab:imu-noise-assumed}{{3.4}{7}{Inertial noise parameters supplied to the visual-inertial estimators, beside the values measured from the recorded IMU stream in \cref {sec:proprio-method}. The configured values are inherited estimator defaults, not measurements of this simulated IMU; the discrepancy is carried forward as a queried item rather than silently reconciled}{table.3.4}{}}
+\newlabel{tab:imu-noise-assumed@cref}{{[table][4][3]3.4}{[1][7][]7}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.2.3}Simulation fidelity and its limits}{7}{subsection.3.2.3}\protected@file@percent }
 \newlabel{sec:sim-fidelity}{{3.2.3}{7}{Simulation fidelity and its limits}{subsection.3.2.3}{}}
 \newlabel{sec:sim-fidelity@cref}{{[subsection][3][3,2]3.2.3}{[1][7][]7}}
-\@writefile{toc}{\contentsline {paragraph}{Inertial measurement.}{8}{section*.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Wheel encoders.}{8}{section*.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Contact friction, and why the encoder is flattered.}{8}{section*.4}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {3.5}{\ignorespaces Measured wheel slip on the five multi-sensor recordings. The ratio is encoder-integrated distance over true path length; above one is slip, below one is a rolling-radius error and cannot be slip. Measured by \repo {script/check_slip.py}.}}{9}{table.3.5}\protected@file@percent }
-\newlabel{tab:measured-slip}{{3.5}{9}{Measured wheel slip on the five multi-sensor recordings. The ratio is encoder-integrated distance over true path length; above one is slip, below one is a rolling-radius error and cannot be slip. Measured by \repo {script/check_slip.py}}{table.3.5}{}}
-\newlabel{tab:measured-slip@cref}{{[table][5][3]3.5}{[1][8][]9}}
-\@writefile{toc}{\contentsline {paragraph}{Noise models supplied to the estimators.}{9}{section*.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.4}Real sensor rig and calibration limits}{9}{subsection.3.2.4}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {3.6}{\ignorespaces Real sensor rig, and the calibration status of each quantity. Only the first three rows are measured; the remainder are approximations or placeholders that bound what can be claimed from real-robot data.}}{10}{table.3.6}\protected@file@percent }
-\newlabel{tab:real-rig}{{3.6}{10}{Real sensor rig, and the calibration status of each quantity. Only the first three rows are measured; the remainder are approximations or placeholders that bound what can be claimed from real-robot data}{table.3.6}{}}
-\newlabel{tab:real-rig@cref}{{[table][6][3]3.6}{[1][9][]10}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.5}Coordinate-frame contract}{10}{subsection.3.2.5}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3.3}{\ignorespaces Coordinate-frame contract used by the composed RTAB-Map pipeline. The dashed connection is a calibration consistency check, not a second pose publisher.}}{10}{figure.3.3}\protected@file@percent }
-\newlabel{fig:frame-chain}{{3.3}{10}{Coordinate-frame contract used by the composed RTAB-Map pipeline. The dashed connection is a calibration consistency check, not a second pose publisher}{figure.3.3}{}}
-\newlabel{fig:frame-chain@cref}{{[figure][3][3]3.3}{[1][10][]10}}
-\@writefile{toc}{\contentsline {section}{\numberline {3.3}Environments, Datasets, and Controlled Factors}{11}{section.3.3}\protected@file@percent }
-\newlabel{sec:environments-datasets}{{3.3}{11}{Environments, Datasets, and Controlled Factors}{section.3.3}{}}
-\newlabel{sec:environments-datasets@cref}{{[section][3][3]3.3}{[1][11][]11}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.1}Simulation environment}{11}{subsection.3.3.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3.4}{\ignorespaces Baked occupancy truth of the three large-warehouse object arrangements, each \SI {42.2}{\metre } square at \SI {0.05}{\metre } per cell with origin $(-21.1,-21.1)$\nobreakspace  {}m. Black is occupied, white is free; there is no unknown space because the grids are rasterised from collision geometry rather than observed. Occupied cells are \SI {17.79}{\percent } of\nobreakspace  {}(a), \SI {8.74}{\percent } of\nobreakspace  {}(b) and \SI {10.98}{\percent } of\nobreakspace  {}(c). Panel\nobreakspace  {}(b) clears the central floor and keeps obstacles against the walls, which is the arrangement used by \repo {dataset_allsensor_002} and \repo {dataset_allsensor_003}. \emph  {No occupancy grid is shown per floor treatment, and none exists:} the \texttt  {bayline} and plain floors differ only in surface material, which carries no collision geometry, so their baked grids are identical to the panels above. See \cref  {fig:floor-treatments}.}}{11}{figure.3.4}\protected@file@percent }
-\newlabel{fig:warehouse-maps}{{3.4}{11}{Baked occupancy truth of the three large-warehouse object arrangements, each \SI {42.2}{\metre } square at \SI {0.05}{\metre } per cell with origin $(-21.1,-21.1)$~m. Black is occupied, white is free; there is no unknown space because the grids are rasterised from collision geometry rather than observed. Occupied cells are \SI {17.79}{\percent } of~(a), \SI {8.74}{\percent } of~(b) and \SI {10.98}{\percent } of~(c). Panel~(b) clears the central floor and keeps obstacles against the walls, which is the arrangement used by \repo {dataset_allsensor_002} and \repo {dataset_allsensor_003}. \emph {No occupancy grid is shown per floor treatment, and none exists:} the \texttt {bayline} and plain floors differ only in surface material, which carries no collision geometry, so their baked grids are identical to the panels above. See \cref {fig:floor-treatments}}{figure.3.4}{}}
-\newlabel{fig:warehouse-maps@cref}{{[figure][4][3]3.4}{[1][11][]11}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3.5}{\ignorespaces The two recorded floor conditions, rendered across the full \SI {42.2}{\metre } floor at \SI {0.05}{\metre } per pixel. Both share the same flat diffuse base, RGB $(0.814,0.811,0.804)$; the only difference between them is the 112 painted marking faces that \texttt  {bayline} adds, forming the hazard-striped outlines of fourteen storage bays. Panel\nobreakspace  {}(c) is a \SI {12}{\metre } square detail showing the strips at \SI {0.145}{\metre } width. Everything not outlined is untextured in both conditions.}}{12}{figure.3.5}\protected@file@percent }
-\newlabel{fig:floor-treatments}{{3.5}{12}{The two recorded floor conditions, rendered across the full \SI {42.2}{\metre } floor at \SI {0.05}{\metre } per pixel. Both share the same flat diffuse base, RGB $(0.814,0.811,0.804)$; the only difference between them is the 112 painted marking faces that \texttt {bayline} adds, forming the hazard-striped outlines of fourteen storage bays. Panel~(c) is a \SI {12}{\metre } square detail showing the strips at \SI {0.145}{\metre } width. Everything not outlined is untextured in both conditions}{figure.3.5}{}}
-\newlabel{fig:floor-treatments@cref}{{[figure][5][3]3.5}{[1][11][]12}}
-\@writefile{lot}{\contentsline {table}{\numberline {3.7}{\ignorespaces Ground models and the floor conditions they produce. The mesh and its collision geometry are identical in all three, so the floor treatment changes what a camera sees and nothing a wheel, an occupancy grid or a collision check responds to. The concrete-grain texture belongs to the stock model only, and no recorded dataset uses it.}}{12}{table.3.7}\protected@file@percent }
-\newlabel{tab:floor-variants}{{3.7}{12}{Ground models and the floor conditions they produce. The mesh and its collision geometry are identical in all three, so the floor treatment changes what a camera sees and nothing a wheel, an occupancy grid or a collision check responds to. The concrete-grain texture belongs to the stock model only, and no recorded dataset uses it}{table.3.7}{}}
-\newlabel{tab:floor-variants@cref}{{[table][7][3]3.7}{[1][11][]12}}
-\@writefile{lot}{\contentsline {table}{\numberline {3.8}{\ignorespaces Controlled experimental factors available in the simulation environment, with the levels realised at the reporting cutoff. A factor is listed as exercised only where a recorded dataset exists for more than one of its levels.}}{13}{table.3.8}\protected@file@percent }
-\newlabel{tab:controlled-factors}{{3.8}{13}{Controlled experimental factors available in the simulation environment, with the levels realised at the reporting cutoff. A factor is listed as exercised only where a recorded dataset exists for more than one of its levels}{table.3.8}{}}
-\newlabel{tab:controlled-factors@cref}{{[table][8][3]3.8}{[1][13][]13}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.2}Dataset registry}{14}{subsection.3.3.2}\protected@file@percent }
-\newlabel{RF1}{15}
-\@writefile{lot}{\contentsline {table}{\numberline {3.9}{\ignorespaces Complete dataset registry at the reporting cutoff, across both storage locations. The \texttt  {bayline} families carry a textured floor; every other simulation entry is featureless. ``WS'' is the workspace tree \repo {dataset/} and ``FD'' the removable drive; a size is given where that location holds a copy. ``Prop.'' marks the proprioceptive group (\repo {/model/ackermann_robot_001/joint_state} and \repo {/model/ackermann_robot_001/odometry}); ``IMU'' counts inertial messages, on \repo {/imu} for simulation and \repo {/hwt101ct_yaw_publisher} for the real rig. Durations are rosbag wall-clock recording durations: the simulator ran below real time, so a bag's sim-time span is shorter than the figure shown. Integrity was checked by opening each SQLite store and counting rows against the count its \repo {metadata.yaml} declares, not by trusting the metadata.}}{15}{table.3.9}\protected@file@percent }
-\newlabel{tab:dataset-registry}{{3.9}{15}{Complete dataset registry at the reporting cutoff, across both storage locations. The \texttt {bayline} families carry a textured floor; every other simulation entry is featureless. ``WS'' is the workspace tree \repo {dataset/} and ``FD'' the removable drive; a size is given where that location holds a copy. ``Prop.'' marks the proprioceptive group (\repo {/model/ackermann_robot_001/joint_state} and \repo {/model/ackermann_robot_001/odometry}); ``IMU'' counts inertial messages, on \repo {/imu} for simulation and \repo {/hwt101ct_yaw_publisher} for the real rig. Durations are rosbag wall-clock recording durations: the simulator ran below real time, so a bag's sim-time span is shorter than the figure shown. Integrity was checked by opening each SQLite store and counting rows against the count its \repo {metadata.yaml} declares, not by trusting the metadata}{table.3.9}{}}
-\newlabel{tab:dataset-registry@cref}{{[table][9][3]3.9}{[1][14][]15}}
-\@writefile{toc}{\contentsline {section}{\numberline {3.4}ORB-SLAM3 and Semantic Feature Filtering}{16}{section.3.4}\protected@file@percent }
-\newlabel{sec:orb-method}{{3.4}{16}{ORB-SLAM3 and Semantic Feature Filtering}{section.3.4}{}}
-\newlabel{sec:orb-method@cref}{{[section][4][3]3.4}{[1][14][]16}}
-\@writefile{toc}{\contentsline {section}{\numberline {3.5}VINS-Fusion and the RTAB-Map Back End}{16}{section.3.5}\protected@file@percent }
-\newlabel{sec:vins-rtab-method}{{3.5}{16}{VINS-Fusion and the RTAB-Map Back End}{section.3.5}{}}
-\newlabel{sec:vins-rtab-method@cref}{{[section][5][3]3.5}{[1][16][]16}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.5.1}VINS-Fusion front end}{16}{subsection.3.5.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.5.2}RTAB-Map mapping and localization back end}{17}{subsection.3.5.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {3.6}Non-Visual Baseline Estimators}{17}{section.3.6}\protected@file@percent }
-\newlabel{sec:proprio-method}{{3.6}{17}{Non-Visual Baseline Estimators}{section.3.6}{}}
-\newlabel{sec:proprio-method@cref}{{[section][6][3]3.6}{[1][17][]17}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.6.1}Implementation form and why it is offline}{18}{subsection.3.6.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.6.2}Sensor model derived from data}{18}{subsection.3.6.2}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {3.10}{\ignorespaces Sensor noise and scale measured from each bag by \repo {proprio_estimator.py calibrate}. Scales are least-squares gains through the origin against ground truth; $\sigma $ values are the residual standard deviations. A scale of 1.0 is an unbiased sensor. The bias random walks are assumed, not measured, because the longest stationary window is \SI {1.54}{\second }.}}{18}{table.3.10}\protected@file@percent }
-\newlabel{tab:proprio-noise}{{3.10}{18}{Sensor noise and scale measured from each bag by \repo {proprio_estimator.py calibrate}. Scales are least-squares gains through the origin against ground truth; $\sigma $ values are the residual standard deviations. A scale of 1.0 is an unbiased sensor. The bias random walks are assumed, not measured, because the longest stationary window is \SI {1.54}{\second }}{table.3.10}{}}
-\newlabel{tab:proprio-noise@cref}{{[table][10][3]3.10}{[1][18][]18}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.6.3}The orientation field must not be used}{19}{subsection.3.6.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.6.4}Estimator definitions}{19}{subsection.3.6.4}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {3.11}{\ignorespaces Implemented non-visual estimators. ``Anchoring'' refers to the initial pose: dead reckoning has no global reference, so all three start from the ground-truth pose at their first sample, and this is recorded as an alignment decision rather than treated as neutral.}}{19}{table.3.11}\protected@file@percent }
-\newlabel{tab:proprio-estimators}{{3.11}{19}{Implemented non-visual estimators. ``Anchoring'' refers to the initial pose: dead reckoning has no global reference, so all three start from the ground-truth pose at their first sample, and this is recorded as an alignment decision rather than treated as neutral}{table.3.11}{}}
-\newlabel{tab:proprio-estimators@cref}{{[table][11][3]3.11}{[1][19][]19}}
-\@writefile{toc}{\contentsline {section}{\numberline {3.7}YOLO Model, Mask Construction, and Synchronization}{20}{section.3.7}\protected@file@percent }
-\newlabel{sec:yolo-method}{{3.7}{20}{YOLO Model, Mask Construction, and Synchronization}{section.3.7}{}}
-\newlabel{sec:yolo-method@cref}{{[section][7][3]3.7}{[1][19][]20}}
-\@writefile{toc}{\contentsline {section}{\numberline {3.8}Collection Protocol, Validity, and Artifacts}{20}{section.3.8}\protected@file@percent }
-\newlabel{sec:collection-validity}{{3.8}{20}{Collection Protocol, Validity, and Artifacts}{section.3.8}{}}
-\newlabel{sec:collection-validity@cref}{{[section][8][3]3.8}{[1][20][]20}}
-\@writefile{lot}{\contentsline {table}{\numberline {3.12}{\ignorespaces Principal stored artifacts.}}{21}{table.3.12}\protected@file@percent }
-\newlabel{tab:stored-artifacts}{{3.12}{21}{Principal stored artifacts}{table.3.12}{}}
-\newlabel{tab:stored-artifacts@cref}{{[table][12][3]3.12}{[1][20][]21}}
-\@writefile{toc}{\contentsline {section}{\numberline {3.9}Evaluation Metrics and Analysis}{22}{section.3.9}\protected@file@percent }
-\newlabel{sec:evaluation-method}{{3.9}{22}{Evaluation Metrics and Analysis}{section.3.9}{}}
-\newlabel{sec:evaluation-method@cref}{{[section][9][3]3.9}{[1][22][]22}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.9.1}Trajectory evaluation}{22}{subsection.3.9.1}\protected@file@percent }
-\newlabel{sec:method-trajectory}{{3.9.1}{22}{Trajectory evaluation}{subsection.3.9.1}{}}
-\newlabel{sec:method-trajectory@cref}{{[subsection][1][3,9]3.9.1}{[1][22][]22}}
-\@writefile{toc}{\contentsline {paragraph}{Relative pose error.}{22}{section*.6}\protected@file@percent }
-\newlabel{eq:rpe}{{3.1}{22}{Relative pose error}{equation.3.9.1}{}}
-\newlabel{eq:rpe@cref}{{[equation][1][3]3.1}{[1][22][]22}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.9.2}Detection evaluation}{23}{subsection.3.9.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.9.3}Map and localization evaluation}{23}{subsection.3.9.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.9.4}Computational performance}{23}{subsection.3.9.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {3.10}Reproducibility Controls and Implementation Deviations}{24}{section.3.10}\protected@file@percent }
-\newlabel{sec:reproducibility-deviations}{{3.10}{24}{Reproducibility Controls and Implementation Deviations}{section.3.10}{}}
-\newlabel{sec:reproducibility-deviations@cref}{{[section][10][3]3.10}{[1][24][]24}}
-\@writefile{toc}{\contentsline {section}{Repository Evidence Used for This Draft}{24}{section*.7}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {3.13}{\ignorespaces Planned-versus-implemented deviations at the reporting cutoff. ``Added'' marks work not present in the original proposal.}}{25}{table.3.13}\protected@file@percent }
-\newlabel{tab:deviations}{{3.13}{25}{Planned-versus-implemented deviations at the reporting cutoff. ``Added'' marks work not present in the original proposal}{table.3.13}{}}
-\newlabel{tab:deviations@cref}{{[table][13][3]3.13}{[1][24][]25}}
+\@writefile{toc}{\contentsline {paragraph}{Inertial measurement.}{7}{section*.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.5}{\ignorespaces Platform geometry and drivetrain limits used by the wheel-odometry and EKF baselines. \texttt  {AckermannSteering} exposes no noise parameter, so the simulated encoders and odometry are noise free at source.}}{8}{table.3.5}\protected@file@percent }
+\newlabel{tab:platform-geometry}{{3.5}{8}{Platform geometry and drivetrain limits used by the wheel-odometry and EKF baselines. \texttt {AckermannSteering} exposes no noise parameter, so the simulated encoders and odometry are noise free at source}{table.3.5}{}}
+\newlabel{tab:platform-geometry@cref}{{[table][5][3]3.5}{[1][7][]8}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.6}{\ignorespaces Noise injected by the simulator, from the \repo {<imu>} and \repo {<camera>} sensor blocks of the robot model. Densities are per-sample $\sigma $ divided by $\sqrt  {f_s}$ at \SI {200}{\hertz }, in the channel's own units per $\sqrt  {\si {\hertz }}$. The EuRoC column is the ADIS16448 of that benchmark, on which both visual estimators were published.}}{8}{table.3.6}\protected@file@percent }
+\newlabel{tab:injected-noise}{{3.6}{8}{Noise injected by the simulator, from the \repo {<imu>} and \repo {<camera>} sensor blocks of the robot model. Densities are per-sample $\sigma $ divided by $\sqrt {f_s}$ at \SI {200}{\hertz }, in the channel's own units per $\sqrt {\si {\hertz }}$. The EuRoC column is the ADIS16448 of that benchmark, on which both visual estimators were published}{table.3.6}{}}
+\newlabel{tab:injected-noise@cref}{{[table][6][3]3.6}{[1][8][]8}}
+\@writefile{toc}{\contentsline {paragraph}{Wheel encoders.}{9}{section*.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Physics engine and solver.}{9}{section*.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.7}{\ignorespaces Gazebo physics configuration, identical in all 26 world files. Entries marked ``engine default'' are not declared anywhere in the project and are therefore whatever \repo {dartsim} chooses.}}{9}{table.3.7}\protected@file@percent }
+\newlabel{tab:physics-setup}{{3.7}{9}{Gazebo physics configuration, identical in all 26 world files. Entries marked ``engine default'' are not declared anywhere in the project and are therefore whatever \repo {dartsim} chooses}{table.3.7}{}}
+\newlabel{tab:physics-setup@cref}{{[table][7][3]3.7}{[1][9][]9}}
+\@writefile{toc}{\contentsline {paragraph}{Contact friction, and why the encoder is flattered.}{10}{section*.5}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.8}{\ignorespaces Measured wheel slip on the five multi-sensor recordings. The ratio is encoder-integrated distance over true path length; above one is slip, below one is a rolling-radius error and cannot be slip. Measured by \repo {script/check_slip.py}.}}{10}{table.3.8}\protected@file@percent }
+\newlabel{tab:measured-slip}{{3.8}{10}{Measured wheel slip on the five multi-sensor recordings. The ratio is encoder-integrated distance over true path length; above one is slip, below one is a rolling-radius error and cannot be slip. Measured by \repo {script/check_slip.py}}{table.3.8}{}}
+\newlabel{tab:measured-slip@cref}{{[table][8][3]3.8}{[1][10][]10}}
+\@writefile{toc}{\contentsline {paragraph}{Noise models supplied to the estimators.}{10}{section*.6}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.9}{\ignorespaces What the visual estimators are configured to expect, against what the simulator injects. Both estimators use identical values. Inflating noise above datasheet figures is standard practice in visual-inertial odometry and the configuration records that intent; the ratios are given so the size of the margin is visible.}}{10}{table.3.9}\protected@file@percent }
+\newlabel{tab:configured-vs-injected}{{3.9}{10}{What the visual estimators are configured to expect, against what the simulator injects. Both estimators use identical values. Inflating noise above datasheet figures is standard practice in visual-inertial odometry and the configuration records that intent; the ratios are given so the size of the margin is visible}{table.3.9}{}}
+\newlabel{tab:configured-vs-injected@cref}{{[table][9][3]3.9}{[1][10][]10}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.4}Real sensor rig and calibration limits}{11}{subsection.3.2.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.10}{\ignorespaces Real sensor rig, and the calibration status of each quantity. Only the first three rows are measured; the remainder are approximations or placeholders that bound what can be claimed from real-robot data.}}{11}{table.3.10}\protected@file@percent }
+\newlabel{tab:real-rig}{{3.10}{11}{Real sensor rig, and the calibration status of each quantity. Only the first three rows are measured; the remainder are approximations or placeholders that bound what can be claimed from real-robot data}{table.3.10}{}}
+\newlabel{tab:real-rig@cref}{{[table][10][3]3.10}{[1][11][]11}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.5}Coordinate-frame contract}{12}{subsection.3.2.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3.3}{\ignorespaces Coordinate-frame contract used by the composed RTAB-Map pipeline. The dashed connection is a calibration consistency check, not a second pose publisher.}}{12}{figure.3.3}\protected@file@percent }
+\newlabel{fig:frame-chain}{{3.3}{12}{Coordinate-frame contract used by the composed RTAB-Map pipeline. The dashed connection is a calibration consistency check, not a second pose publisher}{figure.3.3}{}}
+\newlabel{fig:frame-chain@cref}{{[figure][3][3]3.3}{[1][12][]12}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.3}Environments, Datasets, and Controlled Factors}{12}{section.3.3}\protected@file@percent }
+\newlabel{sec:environments-datasets}{{3.3}{12}{Environments, Datasets, and Controlled Factors}{section.3.3}{}}
+\newlabel{sec:environments-datasets@cref}{{[section][3][3]3.3}{[1][12][]12}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.1}Simulation environment}{12}{subsection.3.3.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3.4}{\ignorespaces Baked occupancy truth of the three large-warehouse object arrangements, each \SI {42.2}{\metre } square at \SI {0.05}{\metre } per cell with origin $(-21.1,-21.1)$\nobreakspace  {}m. Black is occupied, white is free; there is no unknown space because the grids are rasterised from collision geometry rather than observed. Occupied cells are \SI {17.79}{\percent } of\nobreakspace  {}(a), \SI {8.74}{\percent } of\nobreakspace  {}(b) and \SI {10.98}{\percent } of\nobreakspace  {}(c). Panel\nobreakspace  {}(b) clears the central floor and keeps obstacles against the walls, which is the arrangement used by \repo {dataset_allsensor_002} and \repo {dataset_allsensor_003}. \emph  {No occupancy grid is shown per floor treatment, and none exists:} the \texttt  {bayline} and plain floors differ only in surface material, which carries no collision geometry, so their baked grids are identical to the panels above. See \cref  {fig:floor-treatments}.}}{13}{figure.3.4}\protected@file@percent }
+\newlabel{fig:warehouse-maps}{{3.4}{13}{Baked occupancy truth of the three large-warehouse object arrangements, each \SI {42.2}{\metre } square at \SI {0.05}{\metre } per cell with origin $(-21.1,-21.1)$~m. Black is occupied, white is free; there is no unknown space because the grids are rasterised from collision geometry rather than observed. Occupied cells are \SI {17.79}{\percent } of~(a), \SI {8.74}{\percent } of~(b) and \SI {10.98}{\percent } of~(c). Panel~(b) clears the central floor and keeps obstacles against the walls, which is the arrangement used by \repo {dataset_allsensor_002} and \repo {dataset_allsensor_003}. \emph {No occupancy grid is shown per floor treatment, and none exists:} the \texttt {bayline} and plain floors differ only in surface material, which carries no collision geometry, so their baked grids are identical to the panels above. See \cref {fig:floor-treatments}}{figure.3.4}{}}
+\newlabel{fig:warehouse-maps@cref}{{[figure][4][3]3.4}{[1][12][]13}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.11}{\ignorespaces Ground models and the floor conditions they produce. The mesh and its collision geometry are identical in all three, so the floor treatment changes what a camera sees and nothing a wheel, an occupancy grid or a collision check responds to. The concrete-grain texture belongs to the stock model only, and no recorded dataset uses it.}}{13}{table.3.11}\protected@file@percent }
+\newlabel{tab:floor-variants}{{3.11}{13}{Ground models and the floor conditions they produce. The mesh and its collision geometry are identical in all three, so the floor treatment changes what a camera sees and nothing a wheel, an occupancy grid or a collision check responds to. The concrete-grain texture belongs to the stock model only, and no recorded dataset uses it}{table.3.11}{}}
+\newlabel{tab:floor-variants@cref}{{[table][11][3]3.11}{[1][13][]13}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.12}{\ignorespaces What each dataset contains. ``Objects'' counts obstacle instances whose collision geometry intersects the robot-height band, excluding the wall ring. ``Route'' is the ground-truth path length and ``sim span'' its duration in simulated time. The world column drops the floor suffix, which is given separately, so two rows sharing a world arrangement but differing in floor are visible as such.}}{14}{table.3.12}\protected@file@percent }
+\newlabel{tab:dataset-scenes}{{3.12}{14}{What each dataset contains. ``Objects'' counts obstacle instances whose collision geometry intersects the robot-height band, excluding the wall ring. ``Route'' is the ground-truth path length and ``sim span'' its duration in simulated time. The world column drops the floor suffix, which is given separately, so two rows sharing a world arrangement but differing in floor are visible as such}{table.3.12}{}}
+\newlabel{tab:dataset-scenes@cref}{{[table][12][3]3.12}{[1][13][]14}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.5}{\ignorespaces The two recorded floor conditions, rendered across the full \SI {42.2}{\metre } floor at \SI {0.05}{\metre } per pixel. Both share the same flat diffuse base, RGB $(0.814,0.811,0.804)$; the only difference between them is the 112 painted marking faces that \texttt  {bayline} adds, forming the hazard-striped outlines of fourteen storage bays. Panel\nobreakspace  {}(c) is a \SI {12}{\metre } square detail showing the strips at \SI {0.145}{\metre } width. Everything not outlined is untextured in both conditions.}}{15}{figure.3.5}\protected@file@percent }
+\newlabel{fig:floor-treatments}{{3.5}{15}{The two recorded floor conditions, rendered across the full \SI {42.2}{\metre } floor at \SI {0.05}{\metre } per pixel. Both share the same flat diffuse base, RGB $(0.814,0.811,0.804)$; the only difference between them is the 112 painted marking faces that \texttt {bayline} adds, forming the hazard-striped outlines of fourteen storage bays. Panel~(c) is a \SI {12}{\metre } square detail showing the strips at \SI {0.145}{\metre } width. Everything not outlined is untextured in both conditions}{figure.3.5}{}}
+\newlabel{fig:floor-treatments@cref}{{[figure][5][3]3.5}{[1][12][]15}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.13}{\ignorespaces Controlled experimental factors available in the simulation environment, with the levels realised at the reporting cutoff. A factor is listed as exercised only where a recorded dataset exists for more than one of its levels.}}{15}{table.3.13}\protected@file@percent }
+\newlabel{tab:controlled-factors}{{3.13}{15}{Controlled experimental factors available in the simulation environment, with the levels realised at the reporting cutoff. A factor is listed as exercised only where a recorded dataset exists for more than one of its levels}{table.3.13}{}}
+\newlabel{tab:controlled-factors@cref}{{[table][13][3]3.13}{[1][13][]15}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.6}{\ignorespaces Every simulation dataset as a scene: floor treatment, object layout and ground-truth route in one view. Grey is open floor; dark polygons are obstacle footprints, taken as convex hulls of each collision mesh sliced at robot height, the same geometry the occupancy bake uses. Yellow hazard striping is the painted bay outline of the \texttt  {bayline} floor and is absent on plain floors. The blue trace is the recorded \repo {/ground_truth/odometry} route, green marking its start and red its end. Moving props are drawn at their authored pose, which is where the world file places them at $t=0$; this is a layout figure and does not show where a prop was at any instant during a dynamic recording. *\nobreakspace  {}marks a dataset whose recorded world no longer exists and whose objects were reconstructed---see the note below \cref  {tab:dataset-scenes}.}}{16}{figure.3.6}\protected@file@percent }
+\newlabel{fig:dataset-scenes}{{3.6}{16}{Every simulation dataset as a scene: floor treatment, object layout and ground-truth route in one view. Grey is open floor; dark polygons are obstacle footprints, taken as convex hulls of each collision mesh sliced at robot height, the same geometry the occupancy bake uses. Yellow hazard striping is the painted bay outline of the \texttt {bayline} floor and is absent on plain floors. The blue trace is the recorded \repo {/ground_truth/odometry} route, green marking its start and red its end. Moving props are drawn at their authored pose, which is where the world file places them at $t=0$; this is a layout figure and does not show where a prop was at any instant during a dynamic recording. \flag {*}~marks a dataset whose recorded world no longer exists and whose objects were reconstructed---see the note below \cref {tab:dataset-scenes}}{figure.3.6}{}}
+\newlabel{fig:dataset-scenes@cref}{{[figure][6][3]3.6}{[1][13][]16}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.2}Dataset registry}{17}{subsection.3.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3.4}ORB-SLAM3 and Semantic Feature Filtering}{17}{section.3.4}\protected@file@percent }
+\newlabel{sec:orb-method}{{3.4}{17}{ORB-SLAM3 and Semantic Feature Filtering}{section.3.4}{}}
+\newlabel{sec:orb-method@cref}{{[section][4][3]3.4}{[1][17][]17}}
+\newlabel{RF1}{18}
+\@writefile{lot}{\contentsline {table}{\numberline {3.14}{\ignorespaces Complete dataset registry at the reporting cutoff, across both storage locations. The \texttt  {bayline} families carry a textured floor; every other simulation entry is featureless. ``WS'' is the workspace tree \repo {dataset/} and ``FD'' the removable drive; a size is given where that location holds a copy. ``Prop.'' marks the proprioceptive group (\repo {/model/ackermann_robot_001/joint_state} and \repo {/model/ackermann_robot_001/odometry}); ``IMU'' counts inertial messages, on \repo {/imu} for simulation and \repo {/hwt101ct_yaw_publisher} for the real rig. Durations are rosbag wall-clock recording durations: the simulator ran below real time, so a bag's sim-time span is shorter than the figure shown. Integrity was checked by opening each SQLite store and counting rows against the count its \repo {metadata.yaml} declares, not by trusting the metadata.}}{18}{table.3.14}\protected@file@percent }
+\newlabel{tab:dataset-registry}{{3.14}{18}{Complete dataset registry at the reporting cutoff, across both storage locations. The \texttt {bayline} families carry a textured floor; every other simulation entry is featureless. ``WS'' is the workspace tree \repo {dataset/} and ``FD'' the removable drive; a size is given where that location holds a copy. ``Prop.'' marks the proprioceptive group (\repo {/model/ackermann_robot_001/joint_state} and \repo {/model/ackermann_robot_001/odometry}); ``IMU'' counts inertial messages, on \repo {/imu} for simulation and \repo {/hwt101ct_yaw_publisher} for the real rig. Durations are rosbag wall-clock recording durations: the simulator ran below real time, so a bag's sim-time span is shorter than the figure shown. Integrity was checked by opening each SQLite store and counting rows against the count its \repo {metadata.yaml} declares, not by trusting the metadata}{table.3.14}{}}
+\newlabel{tab:dataset-registry@cref}{{[table][14][3]3.14}{[1][17][]18}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.7}{\ignorespaces ORB-SLAM3 pipeline and the semantic-mask insertion point. Green is built by this project, grey is the pinned upstream core, blue the optional detector path. The mask is applied to candidate keypoints \emph  {before} octree distribution, which is what allows the per-level feature quota to redistribute onto surviving static regions rather than simply shrink. A candidate is rejected when at least five samples of its $3\times 3$ neighbourhood are dynamic, and only the left camera is masked, because ORB-SLAM3 forms stereo matches outwards from left keypoints.}}{19}{figure.3.7}\protected@file@percent }
+\newlabel{fig:orb-pipeline}{{3.7}{19}{ORB-SLAM3 pipeline and the semantic-mask insertion point. Green is built by this project, grey is the pinned upstream core, blue the optional detector path. The mask is applied to candidate keypoints \emph {before} octree distribution, which is what allows the per-level feature quota to redistribute onto surviving static regions rather than simply shrink. A candidate is rejected when at least five samples of its $3\times 3$ neighbourhood are dynamic, and only the left camera is masked, because ORB-SLAM3 forms stereo matches outwards from left keypoints}{figure.3.7}{}}
+\newlabel{fig:orb-pipeline@cref}{{[figure][7][3]3.7}{[1][19][]19}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.5}VINS-Fusion and the RTAB-Map Back End}{19}{section.3.5}\protected@file@percent }
+\newlabel{sec:vins-rtab-method}{{3.5}{19}{VINS-Fusion and the RTAB-Map Back End}{section.3.5}{}}
+\newlabel{sec:vins-rtab-method@cref}{{[section][5][3]3.5}{[1][19][]19}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5.1}VINS-Fusion front end}{19}{subsection.3.5.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.15}{\ignorespaces ORB-SLAM3 configuration at the cutoff. Wrapper values are from \repo {orbslam3_ros2/src/}; extractor and IMU values from \repo {config/wil_sim/stereo_imu.yaml}. Noise densities are given in \cref  {tab:imu-noise-assumed} and are not repeated here.}}{20}{table.3.15}\protected@file@percent }
+\newlabel{tab:orb-params}{{3.15}{20}{ORB-SLAM3 configuration at the cutoff. Wrapper values are from \repo {orbslam3_ros2/src/}; extractor and IMU values from \repo {config/wil_sim/stereo_imu.yaml}. Noise densities are given in \cref {tab:imu-noise-assumed} and are not repeated here}{table.3.15}{}}
+\newlabel{tab:orb-params@cref}{{[table][15][3]3.15}{[1][19][]20}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5.2}RTAB-Map mapping and localization back end}{20}{subsection.3.5.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3.8}{\ignorespaces VINS-Fusion pipeline and its two semantic-mask insertion points. Because the front end propagates existing KLT tracks and only detects new features to replenish them, suppressing new detections alone is insufficient: a track that attached to an object before it was detected would survive masking. Tracks in masked regions must therefore also be culled (1) while the same mask suppresses replenishment (2). Contrast \cref  {fig:orb-pipeline}, where re-extraction every frame makes a single insertion sufficient. The count of persistent tracks removed is logged as a mechanism diagnostic --- the counter that read zero in all twelve filtered runs.}}{21}{figure.3.8}\protected@file@percent }
+\newlabel{fig:vins-pipeline}{{3.8}{21}{VINS-Fusion pipeline and its two semantic-mask insertion points. Because the front end propagates existing KLT tracks and only detects new features to replenish them, suppressing new detections alone is insufficient: a track that attached to an object before it was detected would survive masking. Tracks in masked regions must therefore also be culled (1) while the same mask suppresses replenishment (2). Contrast \cref {fig:orb-pipeline}, where re-extraction every frame makes a single insertion sufficient. The count of persistent tracks removed is logged as a mechanism diagnostic --- the counter that read zero in all twelve filtered runs}{figure.3.8}{}}
+\newlabel{fig:vins-pipeline@cref}{{[figure][8][3]3.8}{[1][20][]21}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.16}{\ignorespaces VINS-Fusion simulation configuration at the cutoff, from \repo {vins_fusion_ros2/config/wil_sim/stereo_imu.yaml}. Inertial noise densities are in \cref  {tab:imu-noise-assumed}.}}{21}{table.3.16}\protected@file@percent }
+\newlabel{tab:vins-params}{{3.16}{21}{VINS-Fusion simulation configuration at the cutoff, from \repo {vins_fusion_ros2/config/wil_sim/stereo_imu.yaml}. Inertial noise densities are in \cref {tab:imu-noise-assumed}}{table.3.16}{}}
+\newlabel{tab:vins-params@cref}{{[table][16][3]3.16}{[1][20][]21}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.6}Non-Visual Baseline Estimators}{22}{section.3.6}\protected@file@percent }
+\newlabel{sec:proprio-method}{{3.6}{22}{Non-Visual Baseline Estimators}{section.3.6}{}}
+\newlabel{sec:proprio-method@cref}{{[section][6][3]3.6}{[1][22][]22}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6.1}Implementation form and why it is offline}{22}{subsection.3.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6.2}Sensor model derived from data}{23}{subsection.3.6.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.17}{\ignorespaces Sensor noise and scale measured from each bag by \repo {proprio_estimator.py calibrate}. Scales are least-squares gains through the origin against ground truth; $\sigma $ values are the residual standard deviations. A scale of 1.0 is an unbiased sensor. The bias random walks are assumed, not measured, because the longest stationary window is \SI {1.54}{\second }.}}{23}{table.3.17}\protected@file@percent }
+\newlabel{tab:proprio-noise}{{3.17}{23}{Sensor noise and scale measured from each bag by \repo {proprio_estimator.py calibrate}. Scales are least-squares gains through the origin against ground truth; $\sigma $ values are the residual standard deviations. A scale of 1.0 is an unbiased sensor. The bias random walks are assumed, not measured, because the longest stationary window is \SI {1.54}{\second }}{table.3.17}{}}
+\newlabel{tab:proprio-noise@cref}{{[table][17][3]3.17}{[1][23][]23}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6.3}The orientation field must not be used}{23}{subsection.3.6.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6.4}Estimator definitions}{24}{subsection.3.6.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.18}{\ignorespaces Implemented non-visual estimators. ``Anchoring'' refers to the initial pose: dead reckoning has no global reference, so all three start from the ground-truth pose at their first sample, and this is recorded as an alignment decision rather than treated as neutral.}}{24}{table.3.18}\protected@file@percent }
+\newlabel{tab:proprio-estimators}{{3.18}{24}{Implemented non-visual estimators. ``Anchoring'' refers to the initial pose: dead reckoning has no global reference, so all three start from the ground-truth pose at their first sample, and this is recorded as an alignment decision rather than treated as neutral}{table.3.18}{}}
+\newlabel{tab:proprio-estimators@cref}{{[table][18][3]3.18}{[1][24][]24}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6.5}EKF formulation}{24}{subsection.3.6.5}\protected@file@percent }
+\newlabel{sec:ekf-formulation}{{3.6.5}{24}{EKF formulation}{subsection.3.6.5}{}}
+\newlabel{sec:ekf-formulation@cref}{{[subsection][5][3,6]3.6.5}{[1][24][]24}}
+\@writefile{toc}{\contentsline {paragraph}{State and inputs.}{24}{section*.7}\protected@file@percent }
+\newlabel{eq:ekf-state}{{3.1}{24}{State and inputs}{equation.3.6.1}{}}
+\newlabel{eq:ekf-state@cref}{{[equation][1][3]3.1}{[1][24][]24}}
+\newlabel{eq:ekf-input}{{3.2}{24}{State and inputs}{equation.3.6.2}{}}
+\newlabel{eq:ekf-input@cref}{{[equation][2][3]3.2}{[1][24][]24}}
+\newlabel{eq:ekf-propagate}{{3.3}{24}{State and inputs}{equation.3.6.3}{}}
+\newlabel{eq:ekf-propagate@cref}{{[equation][3][3]3.3}{[1][24][]24}}
+\@writefile{toc}{\contentsline {paragraph}{Covariance and process noise.}{24}{section*.8}\protected@file@percent }
+\newlabel{eq:ekf-predict}{{3.4}{24}{Covariance and process noise}{equation.3.6.4}{}}
+\newlabel{eq:ekf-predict@cref}{{[equation][4][3]3.4}{[1][24][]24}}
+\@writefile{toc}{\contentsline {paragraph}{Measurement.}{25}{section*.9}\protected@file@percent }
+\newlabel{eq:ekf-update}{{3.5}{25}{Measurement}{equation.3.6.5}{}}
+\newlabel{eq:ekf-update@cref}{{[equation][5][3]3.5}{[1][25][]25}}
+\newlabel{eq:ekf-joseph}{{3.6}{25}{Measurement}{equation.3.6.6}{}}
+\newlabel{eq:ekf-joseph@cref}{{[equation][6][3]3.6}{[1][25][]25}}
+\@writefile{toc}{\contentsline {paragraph}{Where the numbers come from.}{25}{section*.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6.6}Why the bias, and not the heading, is observed}{25}{subsection.3.6.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3.7}YOLO Model, Mask Construction, and Synchronization}{25}{section.3.7}\protected@file@percent }
+\newlabel{sec:yolo-method}{{3.7}{25}{YOLO Model, Mask Construction, and Synchronization}{section.3.7}{}}
+\newlabel{sec:yolo-method@cref}{{[section][7][3]3.7}{[1][25][]25}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.8}Collection Protocol, Validity, and Artifacts}{26}{section.3.8}\protected@file@percent }
+\newlabel{sec:collection-validity}{{3.8}{26}{Collection Protocol, Validity, and Artifacts}{section.3.8}{}}
+\newlabel{sec:collection-validity@cref}{{[section][8][3]3.8}{[1][26][]26}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.19}{\ignorespaces Principal stored artifacts.}}{27}{table.3.19}\protected@file@percent }
+\newlabel{tab:stored-artifacts}{{3.19}{27}{Principal stored artifacts}{table.3.19}{}}
+\newlabel{tab:stored-artifacts@cref}{{[table][19][3]3.19}{[1][26][]27}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.9}Evaluation Metrics and Analysis}{28}{section.3.9}\protected@file@percent }
+\newlabel{sec:evaluation-method}{{3.9}{28}{Evaluation Metrics and Analysis}{section.3.9}{}}
+\newlabel{sec:evaluation-method@cref}{{[section][9][3]3.9}{[1][28][]28}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.9.1}Trajectory evaluation}{28}{subsection.3.9.1}\protected@file@percent }
+\newlabel{sec:method-trajectory}{{3.9.1}{28}{Trajectory evaluation}{subsection.3.9.1}{}}
+\newlabel{sec:method-trajectory@cref}{{[subsection][1][3,9]3.9.1}{[1][28][]28}}
+\@writefile{toc}{\contentsline {paragraph}{Relative pose error.}{28}{section*.11}\protected@file@percent }
+\newlabel{eq:rpe}{{3.7}{28}{Relative pose error}{equation.3.9.7}{}}
+\newlabel{eq:rpe@cref}{{[equation][7][3]3.7}{[1][28][]28}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.9.2}Detection evaluation}{29}{subsection.3.9.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Constructing the ground-truth boxes}{29}{section*.12}\protected@file@percent }
+\newlabel{sec:yolo-gt-projection}{{3.9.2}{29}{Constructing the ground-truth boxes}{section*.12}{}}
+\newlabel{sec:yolo-gt-projection@cref}{{[subsection][2][3,9]3.9.2}{[1][29][]29}}
+\newlabel{eq:pinhole}{{3.8}{29}{Constructing the ground-truth boxes}{equation.3.9.8}{}}
+\newlabel{eq:pinhole@cref}{{[equation][8][3]3.8}{[1][29][]29}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.20}{\ignorespaces Parameters of the detection evaluation. The intrinsics are not calibrated: Gazebo renders an ideal pinhole, so $f_x = f_y = (W/2)/\qopname  \relax o{tan}(\phi /2)$ with every distortion term zero, and the values below are exact rather than estimated. The three exemption rules decide which ground-truth objects are scored at all, and are the reason the recall in \cref  {sec:yolo-performance} is computed over a subset of the objects present.}}{30}{table.3.20}\protected@file@percent }
+\newlabel{tab:yolo-eval-params}{{3.20}{30}{Parameters of the detection evaluation. The intrinsics are not calibrated: Gazebo renders an ideal pinhole, so $f_x = f_y = (W/2)/\tan (\phi /2)$ with every distortion term zero, and the values below are exact rather than estimated. The three exemption rules decide which ground-truth objects are scored at all, and are the reason the recall in \cref {sec:yolo-performance} is computed over a subset of the objects present}{table.3.20}{}}
+\newlabel{tab:yolo-eval-params@cref}{{[table][20][3]3.20}{[1][29][]30}}
+\@writefile{toc}{\contentsline {subsubsection}{What this convention costs}{31}{section*.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.9.3}Map and localization evaluation}{31}{subsection.3.9.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.9.4}Computational performance}{31}{subsection.3.9.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3.10}Reproducibility Controls and Implementation Deviations}{32}{section.3.10}\protected@file@percent }
+\newlabel{sec:reproducibility-deviations}{{3.10}{32}{Reproducibility Controls and Implementation Deviations}{section.3.10}{}}
+\newlabel{sec:reproducibility-deviations@cref}{{[section][10][3]3.10}{[1][32][]32}}
+\@writefile{toc}{\contentsline {section}{Repository Evidence Used for This Draft}{32}{section*.14}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.21}{\ignorespaces Planned-versus-implemented deviations at the reporting cutoff. ``Added'' marks work not present in the original proposal.}}{33}{table.3.21}\protected@file@percent }
+\newlabel{tab:deviations}{{3.21}{33}{Planned-versus-implemented deviations at the reporting cutoff. ``Added'' marks work not present in the original proposal}{table.3.21}{}}
+\newlabel{tab:deviations@cref}{{[table][21][3]3.21}{[1][32][]33}}
 \@setckpt{chapters/chapter_3_methodology}{
-\setcounter{page}{27}
-\setcounter{equation}{1}
+\setcounter{page}{34}
+\setcounter{equation}{8}
 \setcounter{enumi}{10}
 \setcounter{enumii}{0}
 \setcounter{enumiii}{0}
@@ -139,14 +199,14 @@
 \setcounter{subsubsection}{0}
 \setcounter{paragraph}{0}
 \setcounter{subparagraph}{0}
-\setcounter{figure}{5}
-\setcounter{table}{13}
+\setcounter{figure}{8}
+\setcounter{table}{21}
 \setcounter{LT@tables}{1}
 \setcounter{LT@chunks}{3}
 \setcounter{parentequation}{0}
 \setcounter{r@tfl@t}{1}
-\setcounter{Item}{10}
+\setcounter{Item}{16}
 \setcounter{Hfootnote}{0}
-\setcounter{bookmark@seq@number}{29}
+\setcounter{bookmark@seq@number}{31}
 \setcounter{section@level}{1}
 }

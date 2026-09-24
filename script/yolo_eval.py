@@ -213,6 +213,20 @@ def main() -> None:
     ap.add_argument('--ignore-cover', type=float, default=0.5,
                     help="prediction this covered by unlabelled box-like scenery "
                          "(shelves etc) is ignored rather than counted a FP")
+    ap.add_argument('--no-ignore', action='store_true',
+                    help="score EVERY ground-truth object and every prediction, "
+                         "disabling the small-box, occlusion and unlabelled-"
+                         "scenery exemptions. The exemptions exist because a "
+                         "projected mesh extent is not a box a human would have "
+                         "drawn, so scoring them is unfair to the detector -- but "
+                         "the training split has no such concept, so a comparison "
+                         "against training metrics needs this mode. Use it ONLY "
+                         "for that comparison; the headline numbers stay in the "
+                         "default mode. NOTE it does not touch --min-box-px: a "
+                         "sub-12-pixel speck goes unlabelled in a human-annotated "
+                         "set too, so dropping it is not the same kind of "
+                         "exemption. Lower that separately if the comparison "
+                         "needs it, and say which value was used.")
     ap.add_argument('--occlusion', type=float, default=0.70,
                     help='GT covered more than this by NEARER boxes becomes "ignore"')
     ap.add_argument('--move-thresh', type=float, default=0.05,
@@ -323,7 +337,7 @@ def main() -> None:
                     continue
                 reg = stencil[y0:y1, x0:x1]
                 covered = float((reg < g['depth'] - 1e-3).mean())
-                if covered > a.occlusion:
+                if covered > a.occlusion and not a.no_ignore:
                     g['ignore'] = True
 
         # Unlabelled but box-like scenery (loaded shelves, pallet jacks, desks).
@@ -386,7 +400,7 @@ def main() -> None:
                     iw = max(0.0, min(p['box'][2], b[2]) - max(p['box'][0], b[0]))
                     ih = max(0.0, min(p['box'][3], b[3]) - max(p['box'][1], b[1]))
                     cov = max(cov, iw * ih / pa)
-                if cov > a.ignore_cover:
+                if cov > a.ignore_cover and not a.no_ignore:
                     p['ignored'] = True
                     tot['pign'] += 1
                 else:

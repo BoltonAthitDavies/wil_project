@@ -105,18 +105,59 @@ or otherwise recorded before a reproducibility release.
 
 \subsection{Computing and software environment}
 
-Development and recorded experiments use Ubuntu 22.04.5, ROS~2 Humble, GCC
-11.4.0, CMake 3.22.1, and system OpenCV 4.5.4. The recorded development machine
-has 16 logical CPU cores, 15~GB RAM, no swap, and an NVIDIA RTX~3070 Laptop GPU.
-The detector environment recorded in the engineering log contains PyTorch
-2.5.1+cu121, torchvision 0.20.1, Ultralytics 8.4.138, NumPy 1.26.4, and Python
-OpenCV 4.11. ORB-SLAM3 is built out of tree with Pangolin 0.9.1. RTAB-Map uses the
-apt core library \repo{ros-humble-rtabmap} 0.23.7 with the project checkout of its
-ROS wrappers; only wrapper packages through \repo{rtabmap_slam} are built.
+One machine produced every simulation result in this report.
+\Cref{tab:compute-environment} records it. Each entry was re-read from the
+running system on 20 September 2026 rather than copied forward from the
+engineering log, and all agreed.
 
-These specifications describe the current laptop, not a completed cross-hardware
-experiment. The proposed Jetson-versus-laptop study has not been instrumented or
-executed, so no hardware comparison is inferred from the present data.
+\begin{table}[htbp]
+\centering
+\caption{Computing and software environment. A single laptop produced every
+result reported here; there is no second platform, so no entry below supports a
+cross-hardware comparison.}
+\label{tab:compute-environment}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.20\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}X}
+\toprule
+Component & Version & Role \\
+\midrule
+\multicolumn{3}{l}{\emph{Platform}} \\
+Operating system & Ubuntu 22.04.5 LTS & \\
+Middleware & ROS~2 Humble & \\
+CPU & 16 logical cores & \\
+Memory & \SI{15}{\giga\byte}, no swap & no swap, so memory pressure fails
+  outright rather than degrading \\
+GPU & NVIDIA RTX~3070 Laptop & detector inference only \\
+\midrule
+\multicolumn{3}{l}{\emph{Build toolchain}} \\
+GCC & 11.4.0 & \\
+CMake & 3.22.1 & \\
+OpenCV (system) & 4.5.4 & links both estimators \\
+Pangolin & 0.9.1 & ORB-SLAM3 built out of tree \\
+\midrule
+\multicolumn{3}{l}{\emph{Detector environment}} \\
+PyTorch & 2.5.1+cu121 & \\
+torchvision & 0.20.1+cu121 & \\
+Ultralytics & 8.4.138 & YOLO training and inference \\
+NumPy & 1.26.4 & \\
+OpenCV (Python) & 4.11.0 & \flag{differs from the 4.5.4 the estimators link} \\
+\midrule
+\multicolumn{3}{l}{\emph{Mapping back end}} \\
+\repo{ros-humble-rtabmap} & 0.23.7 & apt core library \\
+RTAB-Map ROS wrappers & project checkout & only packages through
+  \repo{rtabmap_slam} are built \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Two consequences follow from the table rather than from any experiment. The
+proposed Jetson-versus-laptop study has not been instrumented or executed, so
+every timing, throughput and CPU figure in \cref{chap:results} describes this
+machine alone and none supports a hardware comparison. And the detector runs a
+different OpenCV build from the one the estimators link against, which is
+unremarkable for two separate processes but would matter if image handling were
+ever moved across that boundary.
 
 \subsection{Simulated sensor rig}
 
@@ -271,23 +312,51 @@ sound estimate. That query can be closed without a new recording: the noise is
 \emph{declared}, not emergent, so the simulator's own configuration is the
 ground truth the measurement was trying to recover.
 
-The \repo{<imu>} sensor block injects zero-mean Gaussian noise at
-\SI{200}{\hertz} with per-sample standard deviations of
-\SI{0.0048}{\radian\per\second} and
-\SI{0.0566}{\metre\per\second\squared} --- densities of \num{3.394e-4} and
-\num{4.002e-3} in their respective units per $\sqrt{\si{\hertz}}$. The measured
-gyroscope range of \numrange{3.00e-4}{3.64e-4} brackets the declared value, which
-corroborates both. The measured accelerometer range of
-\numrange{1.39e-2}{2.94e-2} does not: it is three to seven times the declared
-figure, and the discrepancy is the estimator's, not the sensor's, since the
-residual on the driving axis carries real longitudinal acceleration that a
-1.54\,\si{\second} window cannot separate from noise. The declared values should
-be preferred wherever a number is needed.
+\Cref{tab:injected-noise} collects what the simulator actually injects, together
+with the measured values and the EuRoC reference. The measured gyroscope range
+brackets the declared value, which corroborates both. The measured accelerometer
+range does not: it is three to seven times the declared figure, and that
+discrepancy is the estimator's rather than the sensor's, because the residual on
+the driving axis carries real longitudinal acceleration that a
+\SI{1.54}{\second} window cannot separate from noise. Prefer the declared values
+wherever a number is needed.
 
-Against the ADIS16448 of the EuRoC benchmark, on which both estimators were
-published, the simulated unit is \emph{twice as noisy} on both channels, so it is
-not an optimistic sensor. Bias is first-order Gauss--Markov with correlation
-times of \SI{1000}{\second} and \SI{300}{\second}.
+\begin{table}[htbp]
+\centering
+\caption{Noise injected by the simulator, from the \repo{<imu>} and
+\repo{<camera>} sensor blocks of the robot model. Densities are per-sample
+$\sigma$ divided by $\sqrt{f_s}$ at \SI{200}{\hertz}, in the channel's own units
+per $\sqrt{\si{\hertz}}$. The EuRoC column is the ADIS16448 of that
+benchmark, on which both visual estimators were published.}
+\label{tab:injected-noise}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}X llll}
+\toprule
+Channel (units of $\sigma$) & Declared $\sigma$ & Density & Measured & EuRoC \\
+\midrule
+Gyroscope, per axis (\si{\radian\per\second}) & \num{0.0048} & \num{3.394e-4} &
+  \numrange{3.00e-4}{3.64e-4} & \num{1.70e-4} \\
+Accelerometer, per axis (\si{\metre\per\second\squared}) & \num{0.0566} &
+  \num{4.002e-3} & \flag{\numrange{1.39e-2}{2.94e-2}} & \num{2.00e-3} \\
+Camera, per pixel (normalised intensity) & \num{0.005} & --- & not measured & --- \\
+\midrule
+\multicolumn{5}{l}{\emph{Bias, first-order Gauss--Markov: $\sigma_b$ and
+  correlation time $\tau$}} \\
+Gyroscope bias (\si{\radian\per\second}) & \num{3.8785e-5} &
+  $\tau=\SI{1000}{\second}$ & not measurable & --- \\
+Accelerometer bias (\si{\metre\per\second\squared}) & \num{0.006} &
+  $\tau=\SI{300}{\second}$ & not measurable & --- \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Two readings follow. The simulated IMU is \emph{twice as noisy} as the EuRoC
+reference on both channels, so it is not an optimistic sensor. The camera, at
+about \num{1.3} grey levels out of \num{255} and with no distortion terms, is
+very much cleaner than any real one. Both bias correlation times exceed the
+\SIrange{85}{130}{\second} run lengths, so within a run the bias behaves as a
+slowly varying constant and its instability is never exercised.
 
 The IMU is therefore not optimistic in its noise. Three things are nonetheless
 absent: chassis vibration, which on a real platform is frequently the dominant
@@ -307,13 +376,68 @@ setting a floor on low-speed velocity estimation that the simulation does not
 have. \repo{script/encoder_sim.py} exists to impose that floor downstream and has
 not been applied to any result in this report.
 
-\paragraph{Contact friction, and why the encoder is flattered.} ODE uses the
-smaller friction coefficient of the two contacting surfaces. The wheels declare
-$\mu=1$, $\mu_2=1$; every ground model declares $\mu=100$, $\mu_2=50$; so the
-contact runs at $\mu=1.0$, the optimistic end of the published dry-clean-concrete
-range. Force-dependent slip is disabled, \repo{slip1} and \repo{slip2} being
-pinned at zero on all three ground models, so contact is rigid until Coulomb
-traction is exceeded.
+\paragraph{Physics engine and solver.} \Cref{tab:physics-setup} records the
+simulation's physics configuration, which is identical across all 26 world files.
+Two entries deserve comment because they are easy to misread.
+
+The \repo{<physics>} element declares \repo{type="ignored"}. That is not a
+misconfiguration: in Gazebo Fortress the engine is selected by the physics system
+plugin, not by that attribute, and the attribute is disregarded. No world passes
+an \repo{<engine>} parameter to the plugin, so the engine is Fortress's default,
+\repo{dartsim}. This matters for the friction discussion below, and it is the
+reason \repo{slip1} and \repo{slip2} have no effect.
+
+No solver block is declared anywhere --- no iteration count, no SOR parameter, no
+constraint-force mixing or error-reduction terms. Every one of those therefore
+takes the engine default. A \SI{1}{\milli\second} step is a fine integration
+step for a \SI{1.4}{\metre\per\second} ground vehicle, but the untuned contact
+solver is the part of this setup least able to support a quantitative claim about
+contact behaviour.
+
+\begin{table}[htbp]
+\centering
+\caption{Gazebo physics configuration, identical in all 26 world files. Entries
+marked ``engine default'' are not declared anywhere in the project and are
+therefore whatever \repo{dartsim} chooses.}
+\label{tab:physics-setup}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.24\textwidth}>{\raggedright\arraybackslash}p{0.22\textwidth}>{\raggedright\arraybackslash}X}
+\toprule
+Setting & Value & Note \\
+\midrule
+Engine & \repo{dartsim} & Fortress default; no world sets \repo{<engine>} \\
+\repo{<physics type>} & \repo{"ignored"} & disregarded in Fortress; the plugin
+  selects the engine \\
+\repo{max_step_size} & \SI{1}{\milli\second} & \SI{1}{\kilo\hertz} integration \\
+\repo{real_time_factor} & 1 & no deliberate slow-down \\
+\repo{real_time_update_rate} & engine default & not declared \\
+Solver type and iterations & engine default & no \repo{<solver>} block anywhere \\
+CFM / ERP & engine default & no \repo{<constraints>} block anywhere \\
+Gravity & \SI{-9.8}{\metre\per\second\squared} & against ORB-SLAM3's hard-coded
+  \num{9.81}, a \SI{0.1}{\percent} difference \\
+\repo{slip1}, \repo{slip2} & 0 on all grounds & \flag{an ODE feature;
+  \repo{dartsim} does not implement it, so inert at any value} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Achieved real-time factor was not logged during recording, so the table states
+the requested factor rather than the realised one. Replay rate, which is logged,
+is a separate control and is given per experiment in \cref{chap:results}.
+
+\paragraph{Contact friction, and why the encoder is flattered.} The wheels
+declare $\mu=1$, $\mu_2=1$ and every ground model declares $\mu=100$, $\mu_2=50$.
+Both sets sit inside \repo{<friction><ode>} elements, which is where SDF places
+them irrespective of engine, and \repo{dartsim} consumes them
+(\cref{tab:physics-setup}). How it combines two differing coefficients is not
+established here, so the effective value is not asserted; what is measured is the
+outcome in \cref{tab:measured-slip}.
+
+\repo{slip1} and \repo{slip2} are pinned at zero on all three ground models, but
+that is not why force-dependent slip is absent. Those parameters are an ODE
+feature, and \repo{dartsim} does not implement them, so they would be inert at
+any value. Contact is rigid until Coulomb traction is exceeded regardless.
 
 \Cref{tab:measured-slip} gives the consequence, measured rather than assumed, by
 integrating rear-wheel angle against true path length.
@@ -358,10 +482,35 @@ quantisation floor. Neither has been used in any result reported here.
 \end{queried}
 
 \paragraph{Noise models supplied to the estimators.} The two are not told the
-truth about the IMU. Both configurations set
-\repo{acc_n}~$=\SI{0.02}{}$ and \repo{gyr_n}~$=\SI{0.002}{}$, over-stating the
-injected densities by \num{5.0} and \num{5.9} times respectively, and
-\repo{gyr_w} by a factor of \num{58}. Inflating noise above datasheet values is
+truth about the IMU, as \cref{tab:configured-vs-injected} shows.
+
+\begin{table}[htbp]
+\centering
+\caption{What the visual estimators are configured to expect, against what the
+simulator injects. Both estimators use identical values. Inflating noise above
+datasheet figures is standard practice in visual-inertial odometry and the
+configuration records that intent; the ratios are given so the size of the
+margin is visible.}
+\label{tab:configured-vs-injected}
+\small
+\begin{tabularx}{\textwidth}{llll>{\raggedright\arraybackslash}X}
+\toprule
+Parameter & Configured & Injected & Ratio & Quantity \\
+\midrule
+\repo{gyr_n} & \num{0.002}  & \num{3.394e-4} & \num{5.9}$\times$ &
+  gyroscope noise density \\
+\repo{acc_n} & \num{0.02}   & \num{4.002e-3} & \num{5.0}$\times$ &
+  accelerometer noise density \\
+\repo{gyr_w} & \num{0.0001} & \num{1.735e-6} & \flag{\num{58}$\times$} &
+  gyroscope bias random walk \\
+\repo{acc_w} & \num{0.001}  & \num{4.899e-4} & \num{2.0}$\times$ &
+  accelerometer bias random walk \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The injected bias random walks are the Gauss--Markov driving densities
+$\sigma_b\sqrt{2/\tau}$ implied by \cref{tab:injected-noise}. Inflating noise above datasheet values is
 standard practice in visual-inertial odometry, and the configuration records that
 intent. The EKF baseline, by contrast, derives its noise model by measuring it
 against ground truth from the same recording.
@@ -594,6 +743,128 @@ possibilities imply opposite corrections. The estimator results in
 panels~(a) and~(b) only.
 \end{queried}
 
+Each recorded dataset is the combination of three things that vary independently
+and are easy to confuse when read off three separate artifacts: the floor
+treatment, the object arrangement, and the route the robot actually drove.
+\Cref{fig:dataset-scenes} draws all three together for every dataset, and
+\cref{tab:dataset-scenes} gives the numbers behind the pictures. Both are produced
+by \repo{script/render_dataset_scene.py}, which resolves each dataset's world from
+its own run manifest rather than from its name---necessary because
+\repo{dataset_static_nofloortexture_001} sits in the \texttt{\_01} arrangement
+while \repo{_000} and \repo{_002} sit in the canonical one, and all three carry
+\texttt{nofloortexture} in the name.
+
+\begin{figure}[p]
+  \centering
+  \begin{minipage}[t]{0.235\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/scene_allsensor_000.png}\\[0.3ex]
+    {\scriptsize \repo{allsensor_000}}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.235\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/scene_allsensor_001.png}\\[0.3ex]
+    {\scriptsize \repo{allsensor_001}}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.235\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/scene_allsensor_002.png}\\[0.3ex]
+    {\scriptsize \repo{allsensor_002}}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.235\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/scene_allsensor_003.png}\\[0.3ex]
+    {\scriptsize \repo{allsensor_003}}
+  \end{minipage}
+
+  \vspace{1.2ex}
+  \begin{minipage}[t]{0.235\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/scene_allsensor_004.png}\\[0.3ex]
+    {\scriptsize \repo{allsensor_004}}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.235\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/scene_static_nofloortexture_000.png}\\[0.3ex]
+    {\scriptsize \repo{static_000}\flag{*}}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.235\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/scene_static_nofloortexture_001.png}\\[0.3ex]
+    {\scriptsize \repo{static_001}}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.235\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/scene_static_nofloortexture_002.png}\\[0.3ex]
+    {\scriptsize \repo{static_002}\flag{*}}
+  \end{minipage}
+
+  \vspace{1.2ex}
+  \begin{minipage}[t]{0.235\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/scene_dynamic_nofloortexture_00_000.png}\\[0.3ex]
+    {\scriptsize \repo{dynamic_00_000}}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.235\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/scene_dynamic_nofloortexture_00_001.png}\\[0.3ex]
+    {\scriptsize \repo{dynamic_00_001}}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.235\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/scene_dynamic_nofloortexture_01_000.png}\\[0.3ex]
+    {\scriptsize \repo{dynamic_01_000}}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.235\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/scene_dynamic_nofloortexture_02_000.png}\\[0.3ex]
+    {\scriptsize \repo{dynamic_02_000}}
+  \end{minipage}
+  \caption{Every simulation dataset as a scene: floor treatment, object layout and
+  ground-truth route in one view. Grey is open floor; dark polygons are obstacle
+  footprints, taken as convex hulls of each collision mesh sliced at robot height,
+  the same geometry the occupancy bake uses. Yellow hazard striping is the painted
+  bay outline of the \texttt{bayline} floor and is absent on plain floors. The blue
+  trace is the recorded \repo{/ground_truth/odometry} route, green marking its
+  start and red its end. Moving props are drawn at their authored pose, which is
+  where the world file places them at $t=0$; this is a layout figure and does not
+  show where a prop was at any instant during a dynamic recording. \flag{*}~marks a
+  dataset whose recorded world no longer exists and whose objects were
+  reconstructed---see the note below \cref{tab:dataset-scenes}.}
+  \label{fig:dataset-scenes}
+\end{figure}
+
+\begin{table}[htbp]
+\centering
+\caption{What each dataset contains. ``Objects'' counts obstacle instances whose
+collision geometry intersects the robot-height band, excluding the wall ring.
+``Route'' is the ground-truth path length and ``sim span'' its duration in
+simulated time. The world column drops the floor suffix, which is given separately,
+so two rows sharing a world arrangement but differing in floor are visible as such.}
+\label{tab:dataset-scenes}
+\small
+\setlength{\tabcolsep}{4pt}
+\input{tables/dataset_scenes}
+\end{table}
+
+\begin{queried}[Missing world]
+\repo{dataset_static_nofloortexture_000} and \repo{_002} name
+\repo{worlds/small_warehouse_static/small_warehouse_static_nofloortexture.world}
+in their run manifests, and \flag{that file no longer exists in the repository}.
+Both datasets contribute to the relogged campaign of \cref{sec:results-validity},
+so their scenes could not be drawn from the recorded world and their conditions
+cannot be re-inspected directly.
+
+The panels marked \flag{*} are reconstructions. They are exact for geometry rather
+than approximate, because \repo{script/make_plain_floor.py} produces a floor
+variant by swapping only the ground model's \texttt{<include>} URI and leaves every
+object untouched: the missing world therefore differed from the surviving
+\repo{small_warehouse_static.world} in its floor alone, and that floor is
+recoverable from the suffix. It remains a reconstruction and not the recorded file,
+and the two datasets should be re-recorded, or the world restored from history,
+before either is used for anything the floor or the object layout bears on.
+\end{queried}
+
 The available controlled factors are summarised in \cref{tab:controlled-factors}.
 
 \begin{table}[htbp]
@@ -797,10 +1068,63 @@ least five samples in a $3\times3$ neighbourhood are dynamic. Only left-camera
 features are masked because ORB-SLAM3 establishes stereo matches from left
 keypoints to right candidates.
 
-The current simulation YAML requests 1,000 ORB features, eight pyramid levels, a
-1.2 scale factor, initial FAST threshold 20, and fallback threshold 7. An older
-engineering note states 1,500 features, but the current configuration is
-authoritative. No controlled feature-count or FAST-threshold sweep is complete.
+The current simulation YAML requests \num{1500} ORB features, eight pyramid
+levels, a 1.2 scale factor, initial FAST threshold 20, and fallback threshold 7;
+\cref{tab:orb-params} collects these. An earlier draft of this section reported
+\num{1000} and attributed \num{1500} to a superseded engineering note. That was
+backwards: \repo{ORBextractor.nFeatures} is \num{1500} in the committed
+configuration, and no uncommitted change touches it. No controlled feature-count
+or FAST-threshold sweep is complete.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{\textwidth}{!}{\input{figures/orb_pipeline}}
+  \caption{ORB-SLAM3 pipeline and the semantic-mask insertion point. Green is
+  built by this project, grey is the pinned upstream core, blue the optional
+  detector path. The mask is applied to candidate keypoints \emph{before} octree
+  distribution, which is what allows the per-level feature quota to redistribute
+  onto surviving static regions rather than simply shrink. A candidate is
+  rejected when at least five samples of its $3\times3$ neighbourhood are
+  dynamic, and only the left camera is masked, because ORB-SLAM3 forms stereo
+  matches outwards from left keypoints.}
+  \label{fig:orb-pipeline}
+\end{figure}
+
+\begin{table}[htbp]
+\centering
+\caption{ORB-SLAM3 configuration at the cutoff. Wrapper values are from
+\repo{orbslam3_ros2/src/}; extractor and IMU values from
+\repo{config/wil_sim/stereo_imu.yaml}. Noise densities are given in
+\cref{tab:imu-noise-assumed} and are not repeated here.}
+\label{tab:orb-params}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.30\textwidth}l>{\raggedright\arraybackslash}X}
+\toprule
+Parameter & Value & Role \\
+\midrule
+\multicolumn{3}{l}{\emph{Wrapper (built here)}} \\
+Stereo sync slop & \SI{0.02}{\second} & approximate-time pairing \\
+Image queue depth & 1 frame & older frame dropped, drop count logged \\
+Detector match window & \SI{0.15}{\second} & nearest in source-image time \\
+Box expansion & \SI{8}{px} & before rasterizing the mask \\
+Mask reject threshold & 0.8 of frame & safety cut-out on runaway coverage \\
+Boundary rule & $\ge 5$ of $3\times3$ & candidate rejected when dynamic \\
+Masked camera & left only & stereo matches form from left keypoints \\
+\midrule
+\multicolumn{3}{l}{\emph{Extractor and core}} \\
+\repo{ORBextractor.nFeatures} & \num{1500} & per-frame feature budget \\
+\repo{ORBextractor.nLevels} & 8 & pyramid levels \\
+\repo{ORBextractor.scaleFactor} & 1.2 & inter-level scale \\
+\repo{ORBextractor.iniThFAST} & 20 & initial corner threshold \\
+\repo{ORBextractor.minThFAST} & 7 & fallback threshold \\
+\repo{Stereo.ThDepth} & 90.0 & close/far stereo split \\
+\repo{IMU.Frequency} & \SI{200}{\hertz} & preintegration rate \\
+\repo{loopClosing} & 1 & \flag{comment in the same file says ``set to 0
+  deliberately''} \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
 The wrapper publishes \repo{/orbslam3/odometry}, \repo{/orbslam3/pose}, and TF
 after valid tracking. It writes the common 11-column trajectory format directly
@@ -831,6 +1155,51 @@ the YOLO mask. Tracks in zero-valued regions fail the retention test, while the
 same mask is passed to \texttt{goodFeaturesToTrack()} to suppress new points. The
 count of persistent tracks removed in dynamic regions is accumulated as a
 mechanism diagnostic.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{\textwidth}{!}{\input{figures/vins_pipeline}}
+  \caption{VINS-Fusion pipeline and its two semantic-mask insertion points.
+  Because the front end propagates existing KLT tracks and only detects new
+  features to replenish them, suppressing new detections alone is insufficient:
+  a track that attached to an object before it was detected would survive
+  masking. Tracks in masked regions must therefore also be culled (1) while the
+  same mask suppresses replenishment (2). Contrast \cref{fig:orb-pipeline},
+  where re-extraction every frame makes a single insertion sufficient. The count
+  of persistent tracks removed is logged as a mechanism diagnostic --- the
+  counter that read zero in all twelve filtered runs.}
+  \label{fig:vins-pipeline}
+\end{figure}
+
+\begin{table}[htbp]
+\centering
+\caption{VINS-Fusion simulation configuration at the cutoff, from
+\repo{vins_fusion_ros2/config/wil_sim/stereo_imu.yaml}. Inertial noise densities
+are in \cref{tab:imu-noise-assumed}.}
+\label{tab:vins-params}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.26\textwidth}l>{\raggedright\arraybackslash}X}
+\toprule
+Parameter & Value & Role \\
+\midrule
+\repo{num_of_cam} / \repo{imu} & 2 / 1 & stereo-inertial \\
+\repo{image_skip} & 1 & every image processed \\
+\repo{max_cnt} & 150 & tracked-feature budget \\
+\repo{min_dist} & \SI{30}{px} & minimum feature separation \\
+\repo{freq} & \SI{25}{\hertz} & target feature publication \\
+\repo{keyframe_parallax} & \SI{10}{px} & keyframe decision \\
+\repo{F_threshold} & 1.0 & RANSAC fundamental-matrix gate \\
+\repo{max_solver_time} & \SI{0.08}{\second} & Ceres budget per update \\
+\repo{max_num_iterations} & 100 & Ceres iteration cap \\
+\repo{estimate_extrinsic} & 0 & simulated extrinsics held fixed \\
+\repo{estimate_td} & 0 & camera--IMU delay held at \SI{0}{\second} \\
+\repo{g_norm} & \SI{9.8}{\metre\per\second\squared} & matches the world's gravity \\
+Image queue & 100 & raised to survive initialization backlog \\
+IMU queue & \num{2000} & raised for the same reason \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
 VINS writes the optimized state after each estimator update to \repo{vio.csv} and
 broadcasts \texttt{world~$\rightarrow$~body} using configurable frame names. The
@@ -928,8 +1297,8 @@ measured, because the longest stationary window is \SI{1.54}{\second}.}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{llrrrrrl}
 \toprule
-Group & Quantity & \repo{\_000} & \repo{\_001} & \repo{\_002} & \repo{\_003} &
-  \repo{\_004} & Units \\
+Group & Quantity & \repo{_000} & \repo{_001} & \repo{_002} & \repo{_003} &
+  \repo{_004} & Units \\
  & & plain & plain & plain & bayline & bayline & \\
 \midrule
 IMU & gyroscope $z$ bias & $6.48\times10^{-5}$ & $7.75\times10^{-5}$ &
@@ -1012,6 +1381,87 @@ EKF wheel + IMU & both of the above & $[p_x,p_y,\theta,v,b_\omega]$ & wheel spee
 \bottomrule
 \end{tabularx}
 \end{table}
+
+\subsection{EKF formulation}
+\label{sec:ekf-formulation}
+
+\paragraph{State and inputs.} The filter carries five planar states,
+\begin{equation}
+  \mathbf{x} = \begin{bmatrix}p_x & p_y & \theta & v & b_\omega\end{bmatrix}^{\top},
+  \label{eq:ekf-state}
+\end{equation}
+where $b_\omega$ is the gyroscope $z$ bias. Roll and pitch stay within
+\SI{0.002}{\degree} across every recording, so a full 15-state inertial
+formulation would spend nine states on quantities this platform does not have,
+and their covariances would be unobservable noise in the consistency test that
+motivates the experiment.
+
+The IMU is not a measurement here: it drives the prediction. Bias-corrected yaw
+rate and longitudinal acceleration act as the input,
+\begin{equation}
+  \omega = \omega_{\text{gyro}} - b_\omega, \qquad a = a_x - b_a,
+  \label{eq:ekf-input}
+\end{equation}
+with $b_a$ a constant measured during calibration rather than a tracked state.
+Propagation uses the midpoint heading $\theta_m = \theta + \tfrac{1}{2}\omega\,\Delta t$,
+which matters over \SI{117}{\metre} of driving:
+\begin{align}
+  p_x &\mathrel{+}= v\cos\theta_m\,\Delta t + \tfrac{1}{2}a\cos\theta_m\,\Delta t^2, \notag\\
+  p_y &\mathrel{+}= v\sin\theta_m\,\Delta t + \tfrac{1}{2}a\sin\theta_m\,\Delta t^2, \notag\\
+  v   &\mathrel{+}= a\,\Delta t, \qquad \theta \mathrel{+}= \omega\,\Delta t.
+  \label{eq:ekf-propagate}
+\end{align}
+
+\paragraph{Covariance and process noise.} With $\mathbf{F}=\partial f/\partial
+\mathbf{x}$ and $\mathbf{G}$ mapping the noise inputs into the state,
+\begin{equation}
+  \mathbf{P} \leftarrow \mathbf{F}\mathbf{P}\mathbf{F}^{\top}
+    + \mathbf{G}\,\mathrm{diag}(\sigma_a^2,\ \sigma_g^2,\ \sigma_{b}^2)\,\mathbf{G}^{\top}.
+  \label{eq:ekf-predict}
+\end{equation}
+The non-trivial entries are
+$F_{13}=-v\sin\theta_m\Delta t$, $F_{14}=\cos\theta_m\Delta t$,
+$F_{23}=v\cos\theta_m\Delta t$, $F_{24}=\sin\theta_m\Delta t$ and
+$F_{35}=-\Delta t$; the last couples bias error directly into heading, which is
+what makes $b_\omega$ worth estimating. In $\mathbf{G}$, accelerometer noise
+enters position as $\tfrac{1}{2}\cos\theta_m\Delta t^2$ and speed as $\Delta t$,
+gyroscope noise enters heading as $\Delta t$, and the bias row carries
+$\sqrt{\Delta t}$ rather than $\Delta t$ because a random walk accumulates as
+$\sqrt{t}$.
+
+Both IMU noise terms are therefore \emph{process} noise. Nothing from the IMU
+appears in $\mathbf{R}$, because the IMU propagates the state rather than
+observing it.
+
+\paragraph{Measurement.} The wheels correct at \SI{50}{\hertz} with
+\begin{equation}
+  \mathbf{z} = \begin{bmatrix}v_{\text{wheel}} \\
+    \omega_{\text{gyro}} - \omega_{\text{wheel}}\end{bmatrix}, \qquad
+  \mathbf{H} = \begin{bmatrix}0&0&0&1&0\\ 0&0&0&0&1\end{bmatrix}, \qquad
+  \mathbf{R} = \mathrm{diag}\!\left(\sigma_{v,w}^2,\ \sigma_{\omega,w}^2+\sigma_g^2\right).
+  \label{eq:ekf-update}
+\end{equation}
+The second variance is a sum because that observation is a \emph{difference} of
+two noisy sensors and inherits both. The update uses the Joseph form,
+\begin{equation}
+  \mathbf{P} \leftarrow (\mathbf{I}-\mathbf{K}\mathbf{H})\mathbf{P}
+    (\mathbf{I}-\mathbf{K}\mathbf{H})^{\top} + \mathbf{K}\mathbf{R}\mathbf{K}^{\top},
+  \label{eq:ekf-joseph}
+\end{equation}
+symmetrised afterwards. The shorter $(\mathbf{I}-\mathbf{K}\mathbf{H})\mathbf{P}$
+does not reliably stay positive definite across the roughly \num{16000} updates
+in a run, and here the covariance is itself the measurement under test, so it
+cannot be allowed to decay.
+
+\paragraph{Where the numbers come from.} $\sigma_a$ and $\sigma_g$ are measured
+from the recording by the calibration pass (\cref{tab:proprio-noise}), not taken
+from a datasheet, because every covariance field in these bags is identically
+zero. $\sigma_{v,w}$ and $\sigma_{\omega,w}$ likewise come from the wheel stream
+against ground truth. \moved{$\sigma_b$, the bias random walk, is assumed rather
+than measured: the longest stationary window in any recording is
+\SI{1.54}{\second} and an Allan-variance estimate needs minutes.}
+
+\subsection{Why the bias, and not the heading, is observed}
 
 The EKF's second measurement is deliberately an observation of the \emph{gyroscope
 bias} and not of heading. Integrating the wheel yaw rate into a heading and
@@ -1207,6 +1657,119 @@ coverage are computed by \repo{yolo_eval.py} at recorded confidence, matching-Io
 occlusion, minimum-size, and motion thresholds. Mask-use statistics are joined to
 trajectories by \repo{timestamp_ns}. A semantic class is never treated as
 ground-truth motion.
+
+\subsubsection{Constructing the ground-truth boxes}
+\label{sec:yolo-gt-projection}
+
+The detector is scored against boxes computed from the simulator's own state
+rather than against hand annotation. No image is labelled by hand anywhere in
+this project. The chain from a recorded object pose to a box in pixels is as
+follows; all of it is in \repo{yolo_eval.py} and \repo{yolo_gt.py}.
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item \textbf{Geometry, not just pose.} A pose is a point and a box needs
+    extent, so \repo{yolo_gt.vertices()} reads the prop's collision mesh
+    (\repo{.dae}) from the Gazebo model directory and returns its vertices
+    $V$ in the model frame. Meshes above \num{4000} vertices are decimated with
+    a fixed seed: a few thousand points bound a silhouette as tightly as
+    \num{100000} and keep the per-frame cost flat.
+  \item \textbf{Object to world.} The pose $(R_{wo}, p_{wo})$ recorded for that
+    object places the vertices: $v_w = R_{wo} V + p_{wo}$.
+  \item \textbf{Camera pose.} The robot pose gives $T_{wb}$, and the camera is
+    placed on the body by the extrinsic $T_{bc}$ read from
+    \repo{config/wil_sim/stereo_imu.yaml}, so $T_{wc} = T_{wb} T_{bc}$. Reading
+    the extrinsic from the estimator's own configuration file is deliberate: the
+    evaluation and VINS-Fusion then cannot disagree about where the camera is.
+  \item \textbf{World to camera}, by inverting that transform, using the
+    transpose because the rotation is orthonormal:
+    $R_{cw} = R_{wc}^{\top}$, $t_{cw} = -R_{cw} t_{wc}$, $v_c = R_{cw} v_w +
+    t_{cw}$.
+  \item \textbf{Projection.} Vertices with $z \le \SI{0.05}{\metre}$ are
+    discarded \emph{before} the division, then the remainder are projected
+    through an ideal pinhole:
+    \begin{equation}
+      u = f_x \frac{x_c}{z_c} + c_x, \qquad
+      v = f_y \frac{y_c}{z_c} + c_y .
+      \label{eq:pinhole}
+    \end{equation}
+  \item \textbf{Box.} The axis-aligned extent of the projected points,
+    $[\min u, \max u] \times [\min v, \max v]$, clipped to the image.
+\end{enumerate}
+
+The $z$ guard in step 5 is not a formality. A vertex behind the camera has
+negative $z$, and the division then mirrors it to the wrong side of the image,
+producing a well-formed box in entirely the wrong place --- a failure that looks
+like a detector error rather than a projection error. Objects that straddle the
+image plane are projected from their visible vertices only.
+
+Each object also stores $\tilde{z} = \mathrm{median}(z_c)$, which is what the
+occlusion test below uses to decide which of two overlapping objects is nearer.
+
+\begin{table}[htbp]
+\centering
+\caption{Parameters of the detection evaluation. The intrinsics are not
+calibrated: Gazebo renders an ideal pinhole, so $f_x = f_y = (W/2)/\tan(\phi/2)$
+with every distortion term zero, and the values below are exact rather than
+estimated. The three exemption rules decide which ground-truth objects are scored
+at all, and are the reason the recall in \cref{sec:yolo-performance} is computed
+over a subset of the objects present.}
+\label{tab:yolo-eval-params}
+\small
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.30\textwidth}lX}
+\toprule
+Parameter & Value & Role \\
+\midrule
+$f_x$, $f_y$ & \num{640}, \num{640} & ideal pinhole, \SI{90}{\degree} horizontal
+  field of view \\
+$c_x$, $c_y$ & \num{640}, \num{360} & principal point at image centre \\
+Image size & $1280 \times 720$ & \\
+Distortion & all zero & the renderer applies none \\
+Mesh vertices per prop & $\le \num{4000}$ & decimated with a fixed seed \\
+Near-plane guard & \SI{0.05}{\metre} & vertices nearer than this are dropped
+  before projection \\
+\midrule
+Confidence, \repo{--conf} & \num{0.35} & detections below this are never emitted \\
+NMS IoU, \repo{--iou-nms} & \num{0.5} & \\
+Matching IoU, \repo{--iou-match} & \num{0.5} & prediction counts as a hit above
+  this \\
+Motion threshold, \repo{--move-thresh} & \SI{0.05}{\metre\per\second} & object
+  is ``moving'' above this, from its pose history \\
+\midrule
+\textbf{Exemption:} minimum size, \repo{--min-box-px} & \SI{12}{px} & smaller
+  ground-truth boxes are discarded and never appear \\
+\textbf{Exemption:} occlusion, \repo{--occlusion} & \num{0.70} & ground truth
+  covered more than this by nearer objects is scored as neither hit nor miss
+  (\emph{yellow} in \cref{fig:yolo-ground-truth-overlay}) \\
+\textbf{Exemption:} scenery cover, \repo{--ignore-cover} & \num{0.50} & a
+  prediction this covered by unlabelled scenery is neither credited nor penalised \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsubsection{What this convention costs}
+
+Two consequences follow from scoring against projected geometry, and both bear on
+how the detector numbers in \cref{sec:yolo-performance} should be read.
+
+The boxes are \emph{tighter than a human would draw}. They are the exact
+silhouette of the collision mesh, whereas an annotator draws a looser rectangle
+and rounds generously. A detector trained on human boxes is therefore scored
+against a stricter convention than it was fitted to, and loses IoU that
+represents no error on its part. Of the differences between how this detector
+is scored here and how it was scored during training, this is the one that cannot
+be removed without relabelling.
+
+The exemptions are \emph{not symmetric with the training convention}. A
+human-annotated set has no notion of an exempt object: every labelled box counts.
+The occlusion and minimum-size rules exist because a crate that is nine tenths
+behind a shelf is not a fair test of a detector, which is the right decision for
+reporting detector quality --- but it means recall here is computed over the
+easier subset. The size of that effect is measurable from the stored counts:
+\num{34476} of the \num{96758} ground-truth objects across the five recordings
+are exempt, and recomputing recall with every one of them counted as a miss moves
+it from \num{0.593} to \num{0.382}
+(\repo{script/yolo_generalization.py}). Any comparison against a
+training-set recall has to use the second figure, not the first.
 
 \subsection{Map and localization evaluation}
 

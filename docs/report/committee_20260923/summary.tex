@@ -6,7 +6,7 @@
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{lmodern}
-\usepackage[margin=22mm]{geometry}
+\usepackage[margin=20mm]{geometry}
 \usepackage{microtype}
 \usepackage{booktabs}
 \usepackage{tabularx}
@@ -57,31 +57,38 @@ drivability evaluation.
 
 \section{What is established}
 
-\textbf{A wheel+IMU EKF currently outperforms both visual pipelines in static
-scenes.} On five recordings spanning four worlds, the EKF achieves the lowest
-aligned ATE on four of five, at \SIrange{0.10}{0.88}{\percent} drift.
+\textbf{In static scenes the comparison is decided by the noise model, not the
+architecture.} A wheel+IMU EKF achieves the lowest aligned ATE on four of five
+recordings. That ranking does not survive a control: the EKF's noise model is
+measured from each recording, while both visual pipelines read four constants
+from a hand-set file. Given that file, the filter loses to VINS-Fusion on
+\emph{all five}.
 
+\vspace{-0.7em}
 \begin{center}\small
-\begin{tabular}{lrrrrr}
+\begin{tabular}{lrrrrrr}
 \toprule
-Dataset & IMU only & Wheel odom. & VINS-Fusion & ORB-SLAM3 & EKF \\
+Dataset & IMU only & Wheel odom. & VINS-Fusion & ORB-SLAM3 & EKF & EKF$^\dagger$ \\
 \midrule
-\texttt{allsensor\_000} & 21.70 & 2.80 & 0.62 & 0.58 & \textbf{0.19} \\
-\texttt{allsensor\_001} & 12.62 & 0.98 & 0.38 & 0.37 & \textbf{0.31} \\
-\texttt{allsensor\_002} & 13.24 & 1.49 & 0.56 & 0.60 & \textbf{0.26} \\
-\texttt{allsensor\_003} & 45.56 & 3.19 & 0.78 & 6.48 & \textbf{0.42} \\
-\texttt{allsensor\_004} & 26.71 & 3.24 & \textbf{0.43} & 1.24 & 0.49 \\
+\texttt{allsensor\_000} & 21.70 & 2.80 & 0.62 & 0.58 & \textbf{0.19} & 1.31 \\
+\texttt{allsensor\_001} & 12.62 & 0.98 & 0.38 & 0.37 & \textbf{0.31} & 0.68 \\
+\texttt{allsensor\_002} & 13.24 & 1.49 & 0.56 & 0.60 & \textbf{0.26} & 0.87 \\
+\texttt{allsensor\_003} & 45.56 & 3.19 & 0.78 & 6.48 & \textbf{0.42} & 1.23 \\
+\texttt{allsensor\_004} & 26.71 & 3.24 & \textbf{0.43} & 1.24 & 0.49 & 1.58 \\
 \bottomrule
 \end{tabular}\\[0.3em]
-\footnotesize Aligned ATE RMSE in metres, rigid $SE(3)$ fit with scale fixed.
+\footnotesize Aligned ATE RMSE in metres, rigid $SE(3)$ fit, scale fixed.
+$\dagger$: the same filter given the visual pipelines' four IMU noise terms.
 \end{center}
+\vspace{-0.9em}
 
-This is the baseline the project previously lacked: until now every trajectory
-figure reported visual error with nothing to compare it against. The EKF's
-advantage is specific to these conditions --- static scene, simulated wheel
-encoders, no slip --- so it is a floor the visual system must clear rather than a
-replacement for it. It does, however, sharpen the thesis question: vision must
-justify itself where dead reckoning fails, which means long runs, wheel slip,
+The project now has the proprioceptive baseline it previously lacked, and it is a
+floor the visual system must clear. But the height of that floor is a tuning
+result: neither visual pipeline has ever been tuned to this platform, the
+cheapest untried improvement available. The advantage is also specific to these
+conditions --- static scene, simulated encoders, slip under \SI{1}{\percent} ---
+so it sharpens the thesis question rather than answering it: vision must justify
+itself where dead reckoning fails, which means long runs, wheel slip,
 relocalization after tracking loss, and moving obstacles.
 
 \textbf{The detector's limit is detection, not semantics.} Over \num{9860}
@@ -131,12 +138,13 @@ Every comparison is tested for admissibility before its numbers are read: the
 same recorded input to both treatments within \SI{5}{\percent}, the intended
 treatment demonstrably active rather than merely requested, a common
 ground-truth interval with the matched sample count reported, and physical
-plausibility. Four claims were retracted or prevented this period by that
+plausibility. Five claims were retracted or prevented this period by that
 protocol --- a camera-rotation parsing bug found through map distortion while ATE
 looked plausible throughout; a map wrongly judged unnavigable because its grid
-was mis-seated; a drivability score discovered to have been measured against the
-map's own construction run; and the two filter faults above. Each would otherwise
-have entered the thesis as a result.
+was mis-seated; a drivability score measured against the map's own construction
+run; the two filter faults above; and the accuracy ranking in section~3, the
+project's most favourable result, overturned by a control run against it
+deliberately. Each would otherwise have entered the thesis as a result.
 
 \section{Next period, in priority order}
 
@@ -157,10 +165,10 @@ have entered the thesis as a result.
 \section{Guidance requested}
 
 \begin{enumerate}[leftmargin=2.2em]
-  \item \textbf{Scope.} Given that a wheel+IMU EKF currently beats both visual
-    pipelines in static scenes, should the thesis argue for vision as the primary
-    localization sensor, or reframe around the conditions under which vision adds
-    value over dead reckoning?
+  \item \textbf{Scope.} The static-scene comparison reduces to a tuning
+    difference. Should the next period equalise it --- tuning both visual
+    pipelines to this sensor suite and re-running --- before any decision on
+    whether the thesis argues for vision as the primary localization sensor?
   \item \textbf{Depth or breadth.} Rebuild the dynamic environment properly
     before measuring anything further in it, or extend to the real robot and the
     large warehouse with the static results as they stand?
@@ -169,11 +177,11 @@ have entered the thesis as a result.
     contribution, or premature until dynamic-scene tracking is sound?
 \end{enumerate}
 
-\vspace{0.6em}
-\noindent\rule{\textwidth}{0.4pt}\\[0.3em]
+\vspace{0.4em}
+\noindent\rule{\textwidth}{0.4pt}\\[0.2em]
 \footnotesize Full detail, including every retracted, excluded and failed
-measurement, is in the accompanying progress report. Results flagged there in red
-are measured but not yet trustworthy as evidence, and are excluded from the
-claims above.
+measurement, is in the accompanying progress report. The 77 passages that are
+measured but not yet trustworthy as evidence are listed in the separate Open
+concerns document, and are excluded from the claims above.
 
 \end{document}

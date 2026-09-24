@@ -4,63 +4,78 @@
 \contentsline {subsection}{\numberline {3.2.1}Computing and software environment}{5}{subsection.3.2.1}%
 \contentsline {subsection}{\numberline {3.2.2}Simulated sensor rig}{5}{subsection.3.2.2}%
 \contentsline {subsection}{\numberline {3.2.3}Simulation fidelity and its limits}{7}{subsection.3.2.3}%
-\contentsline {paragraph}{Inertial measurement.}{8}{section*.2}%
-\contentsline {paragraph}{Wheel encoders.}{8}{section*.3}%
-\contentsline {paragraph}{Contact friction, and why the encoder is flattered.}{8}{section*.4}%
-\contentsline {paragraph}{Noise models supplied to the estimators.}{9}{section*.5}%
-\contentsline {subsection}{\numberline {3.2.4}Real sensor rig and calibration limits}{9}{subsection.3.2.4}%
-\contentsline {subsection}{\numberline {3.2.5}Coordinate-frame contract}{10}{subsection.3.2.5}%
-\contentsline {section}{\numberline {3.3}Environments, Datasets, and Controlled Factors}{11}{section.3.3}%
-\contentsline {subsection}{\numberline {3.3.1}Simulation environment}{11}{subsection.3.3.1}%
-\contentsline {subsection}{\numberline {3.3.2}Dataset registry}{14}{subsection.3.3.2}%
-\contentsline {section}{\numberline {3.4}ORB-SLAM3 and Semantic Feature Filtering}{16}{section.3.4}%
-\contentsline {section}{\numberline {3.5}VINS-Fusion and the RTAB-Map Back End}{16}{section.3.5}%
-\contentsline {subsection}{\numberline {3.5.1}VINS-Fusion front end}{16}{subsection.3.5.1}%
-\contentsline {subsection}{\numberline {3.5.2}RTAB-Map mapping and localization back end}{17}{subsection.3.5.2}%
-\contentsline {section}{\numberline {3.6}Non-Visual Baseline Estimators}{17}{section.3.6}%
-\contentsline {subsection}{\numberline {3.6.1}Implementation form and why it is offline}{18}{subsection.3.6.1}%
-\contentsline {subsection}{\numberline {3.6.2}Sensor model derived from data}{18}{subsection.3.6.2}%
-\contentsline {subsection}{\numberline {3.6.3}The orientation field must not be used}{19}{subsection.3.6.3}%
-\contentsline {subsection}{\numberline {3.6.4}Estimator definitions}{19}{subsection.3.6.4}%
-\contentsline {section}{\numberline {3.7}YOLO Model, Mask Construction, and Synchronization}{20}{section.3.7}%
-\contentsline {section}{\numberline {3.8}Collection Protocol, Validity, and Artifacts}{20}{section.3.8}%
-\contentsline {section}{\numberline {3.9}Evaluation Metrics and Analysis}{22}{section.3.9}%
-\contentsline {subsection}{\numberline {3.9.1}Trajectory evaluation}{22}{subsection.3.9.1}%
-\contentsline {paragraph}{Relative pose error.}{22}{section*.6}%
-\contentsline {subsection}{\numberline {3.9.2}Detection evaluation}{23}{subsection.3.9.2}%
-\contentsline {subsection}{\numberline {3.9.3}Map and localization evaluation}{23}{subsection.3.9.3}%
-\contentsline {subsection}{\numberline {3.9.4}Computational performance}{23}{subsection.3.9.4}%
-\contentsline {section}{\numberline {3.10}Reproducibility Controls and Implementation Deviations}{24}{section.3.10}%
-\contentsline {section}{Repository Evidence Used for This Draft}{24}{section*.7}%
-\contentsline {chapter}{\numberline {4}Experiments and Research Results}{27}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Relogged Campaign and Validity Audit}{27}{section.4.1}%
-\contentsline {section}{\numberline {4.2}Non-Visual Baseline and Estimator Comparison}{28}{section.4.2}%
-\contentsline {subsection}{\numberline {4.2.1}Question, hypotheses, and conditions}{28}{subsection.4.2.1}%
-\contentsline {subsection}{\numberline {4.2.2}Validity}{29}{subsection.4.2.2}%
-\contentsline {subsection}{\numberline {4.2.3}Accuracy results}{31}{subsection.4.2.3}%
-\contentsline {subsection}{\numberline {4.2.4}Falsification of H1, and the drift mechanism}{32}{subsection.4.2.4}%
-\contentsline {subsection}{\numberline {4.2.5}Covariance consistency}{34}{subsection.4.2.5}%
-\contentsline {subsection}{\numberline {4.2.6}Cross-validation of the EKF noise model}{35}{subsection.4.2.6}%
-\contentsline {subsection}{\numberline {4.2.7}Interpretation and limitations}{37}{subsection.4.2.7}%
-\contentsline {section}{\numberline {4.3}Offline YOLO Detector Performance}{38}{section.4.3}%
-\contentsline {subsection}{\numberline {4.3.1}Bounding-Box Detection and Localization}{38}{subsection.4.3.1}%
-\contentsline {subsection}{\numberline {4.3.2}Object-Class Assignment Conditional on Localization}{41}{subsection.4.3.2}%
-\contentsline {section}{\numberline {4.4}Observed Anomaly Catalogue}{42}{section.4.4}%
-\contentsline {section}{\numberline {4.5}Trajectory Accuracy, Plausibility, and Robustness}{42}{section.4.5}%
-\contentsline {subsection}{\numberline {4.5.1}Relative pose error}{44}{subsection.4.5.1}%
-\contentsline {paragraph}{The dynamic runs are not locally coherent.}{45}{section*.8}%
-\contentsline {paragraph}{ORB-SLAM3's static rotational penalty is entirely jump-localised.}{45}{section*.9}%
-\contentsline {section}{\numberline {4.6}Real-Time and Computational Measurements}{48}{section.4.6}%
-\contentsline {section}{\numberline {4.7}Dense Map Reconstruction and Map-Quality Evaluation}{50}{section.4.7}%
-\contentsline {subsection}{\numberline {4.7.1}Question, scope, and conditions}{50}{subsection.4.7.1}%
-\contentsline {subsection}{\numberline {4.7.2}Map placement as a validity precondition}{50}{subsection.4.7.2}%
-\contentsline {subsection}{\numberline {4.7.3}Graph and database summary}{51}{subsection.4.7.3}%
-\contentsline {subsection}{\numberline {4.7.4}Geometry against the world file}{51}{subsection.4.7.4}%
-\contentsline {subsection}{\numberline {4.7.5}Drivability against the true route}{52}{subsection.4.7.5}%
-\contentsline {subsection}{\numberline {4.7.6}Interpretation and limitations}{55}{subsection.4.7.6}%
-\contentsline {subsection}{\numberline {4.7.7}Planned extension to the large warehouse}{55}{subsection.4.7.7}%
-\contentsline {section}{\numberline {4.8}Loop Closure, Map Merging, and Global-Correction Evidence}{56}{section.4.8}%
-\contentsline {section}{\numberline {4.9}Interpretation, Limitations, and Advisor Decisions}{56}{section.4.9}%
-\contentsline {subsection}{\numberline {4.9.1}Where each pipeline is weak, block by block}{56}{subsection.4.9.1}%
-\contentsline {paragraph}{Where the criteria come from.}{57}{section*.10}%
-\contentsline {section}{Analysis Artifacts}{67}{section*.11}%
+\contentsline {paragraph}{Inertial measurement.}{7}{section*.2}%
+\contentsline {paragraph}{Wheel encoders.}{9}{section*.3}%
+\contentsline {paragraph}{Physics engine and solver.}{9}{section*.4}%
+\contentsline {paragraph}{Contact friction, and why the encoder is flattered.}{10}{section*.5}%
+\contentsline {paragraph}{Noise models supplied to the estimators.}{10}{section*.6}%
+\contentsline {subsection}{\numberline {3.2.4}Real sensor rig and calibration limits}{11}{subsection.3.2.4}%
+\contentsline {subsection}{\numberline {3.2.5}Coordinate-frame contract}{12}{subsection.3.2.5}%
+\contentsline {section}{\numberline {3.3}Environments, Datasets, and Controlled Factors}{12}{section.3.3}%
+\contentsline {subsection}{\numberline {3.3.1}Simulation environment}{12}{subsection.3.3.1}%
+\contentsline {subsection}{\numberline {3.3.2}Dataset registry}{17}{subsection.3.3.2}%
+\contentsline {section}{\numberline {3.4}ORB-SLAM3 and Semantic Feature Filtering}{17}{section.3.4}%
+\contentsline {section}{\numberline {3.5}VINS-Fusion and the RTAB-Map Back End}{19}{section.3.5}%
+\contentsline {subsection}{\numberline {3.5.1}VINS-Fusion front end}{19}{subsection.3.5.1}%
+\contentsline {subsection}{\numberline {3.5.2}RTAB-Map mapping and localization back end}{20}{subsection.3.5.2}%
+\contentsline {section}{\numberline {3.6}Non-Visual Baseline Estimators}{22}{section.3.6}%
+\contentsline {subsection}{\numberline {3.6.1}Implementation form and why it is offline}{22}{subsection.3.6.1}%
+\contentsline {subsection}{\numberline {3.6.2}Sensor model derived from data}{23}{subsection.3.6.2}%
+\contentsline {subsection}{\numberline {3.6.3}The orientation field must not be used}{23}{subsection.3.6.3}%
+\contentsline {subsection}{\numberline {3.6.4}Estimator definitions}{24}{subsection.3.6.4}%
+\contentsline {subsection}{\numberline {3.6.5}EKF formulation}{24}{subsection.3.6.5}%
+\contentsline {paragraph}{State and inputs.}{24}{section*.7}%
+\contentsline {paragraph}{Covariance and process noise.}{24}{section*.8}%
+\contentsline {paragraph}{Measurement.}{25}{section*.9}%
+\contentsline {paragraph}{Where the numbers come from.}{25}{section*.10}%
+\contentsline {subsection}{\numberline {3.6.6}Why the bias, and not the heading, is observed}{25}{subsection.3.6.6}%
+\contentsline {section}{\numberline {3.7}YOLO Model, Mask Construction, and Synchronization}{25}{section.3.7}%
+\contentsline {section}{\numberline {3.8}Collection Protocol, Validity, and Artifacts}{26}{section.3.8}%
+\contentsline {section}{\numberline {3.9}Evaluation Metrics and Analysis}{28}{section.3.9}%
+\contentsline {subsection}{\numberline {3.9.1}Trajectory evaluation}{28}{subsection.3.9.1}%
+\contentsline {paragraph}{Relative pose error.}{28}{section*.11}%
+\contentsline {subsection}{\numberline {3.9.2}Detection evaluation}{29}{subsection.3.9.2}%
+\contentsline {subsubsection}{Constructing the ground-truth boxes}{29}{section*.12}%
+\contentsline {subsubsection}{What this convention costs}{31}{section*.13}%
+\contentsline {subsection}{\numberline {3.9.3}Map and localization evaluation}{31}{subsection.3.9.3}%
+\contentsline {subsection}{\numberline {3.9.4}Computational performance}{31}{subsection.3.9.4}%
+\contentsline {section}{\numberline {3.10}Reproducibility Controls and Implementation Deviations}{32}{section.3.10}%
+\contentsline {section}{Repository Evidence Used for This Draft}{32}{section*.14}%
+\contentsline {chapter}{\numberline {4}Experiments and Research Results}{34}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Relogged Campaign and Validity Audit}{34}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Non-Visual Baseline and Estimator Comparison}{35}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}Question, hypotheses, and conditions}{35}{subsection.4.2.1}%
+\contentsline {subsection}{\numberline {4.2.2}Validity}{36}{subsection.4.2.2}%
+\contentsline {subsection}{\numberline {4.2.3}Accuracy results}{37}{subsection.4.2.3}%
+\contentsline {subsection}{\numberline {4.2.4}Falsification of H1, and the drift mechanism}{39}{subsection.4.2.4}%
+\contentsline {subsection}{\numberline {4.2.5}Covariance consistency}{41}{subsection.4.2.5}%
+\contentsline {subsection}{\numberline {4.2.6}Cross-validation of the EKF noise model}{42}{subsection.4.2.6}%
+\contentsline {subsection}{\numberline {4.2.7}Transferring the visual systems' noise model to the EKF}{43}{subsection.4.2.7}%
+\contentsline {paragraph}{Question and hypothesis.}{43}{section*.15}%
+\contentsline {paragraph}{Conditions and controls.}{43}{section*.16}%
+\contentsline {paragraph}{Validity and sample count.}{44}{section*.17}%
+\contentsline {paragraph}{Results.}{44}{section*.18}%
+\contentsline {paragraph}{Interpretation.}{44}{section*.19}%
+\contentsline {subsection}{\numberline {4.2.8}Interpretation and limitations}{45}{subsection.4.2.8}%
+\contentsline {section}{\numberline {4.3}Offline YOLO Detector Performance}{45}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}Bounding-Box Detection and Localization}{46}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.3.2}Object-Class Assignment Conditional on Localization}{48}{subsection.4.3.2}%
+\contentsline {section}{\numberline {4.4}Observed Anomaly Catalogue}{49}{section.4.4}%
+\contentsline {section}{\numberline {4.5}Trajectory Accuracy, Plausibility, and Robustness}{50}{section.4.5}%
+\contentsline {subsection}{\numberline {4.5.1}Relative pose error}{51}{subsection.4.5.1}%
+\contentsline {paragraph}{The dynamic runs are not locally coherent.}{51}{section*.21}%
+\contentsline {paragraph}{ORB-SLAM3's static rotational penalty is entirely jump-localised.}{51}{section*.22}%
+\contentsline {section}{\numberline {4.6}Real-Time and Computational Measurements}{52}{section.4.6}%
+\contentsline {section}{\numberline {4.7}Dense Map Reconstruction and Map-Quality Evaluation}{57}{section.4.7}%
+\contentsline {subsection}{\numberline {4.7.1}Question, scope, and conditions}{57}{subsection.4.7.1}%
+\contentsline {subsection}{\numberline {4.7.2}Map placement as a validity precondition}{57}{subsection.4.7.2}%
+\contentsline {subsection}{\numberline {4.7.3}Graph and database summary}{58}{subsection.4.7.3}%
+\contentsline {subsection}{\numberline {4.7.4}Geometry against the world file}{58}{subsection.4.7.4}%
+\contentsline {subsection}{\numberline {4.7.5}Drivability against the true route}{59}{subsection.4.7.5}%
+\contentsline {subsection}{\numberline {4.7.6}Interpretation and limitations}{62}{subsection.4.7.6}%
+\contentsline {subsection}{\numberline {4.7.7}Planned extension to the large warehouse}{62}{subsection.4.7.7}%
+\contentsline {section}{\numberline {4.8}Loop Closure, Map Merging, and Global-Correction Evidence}{63}{section.4.8}%
+\contentsline {section}{\numberline {4.9}Interpretation, Limitations, and Advisor Decisions}{63}{section.4.9}%
+\contentsline {subsection}{\numberline {4.9.1}Where each pipeline is weak, block by block}{63}{subsection.4.9.1}%
+\contentsline {paragraph}{Where the criteria come from.}{63}{section*.23}%
+\contentsline {section}{Analysis Artifacts}{74}{section*.24}%

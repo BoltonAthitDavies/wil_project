@@ -64,20 +64,43 @@
   \ifthenelse{\equal{#1}{noeffect}}{\colorbox{perfnoeffect}{\scriptsize no effect}}{%
   \colorbox{perfnone}{\scriptsize no claim}}}}}
 
-% Queried material. Red marks a result, number or condition that is measured but
-% NOT yet trustworthy as evidence -- an unexplained mechanism, a confound, an
+% Queried material. A query marks a result, number or condition that is measured
+% but NOT yet trustworthy as evidence -- an unexplained mechanism, a confound, an
 % unfair comparison, or a figure whose provenance does not support the use it is
 % being put to. It is deliberately not used for "bad result": a large error that
-% is correctly measured and understood is a finding, not a query. Everything in
-% red needs an action before it can appear in the major report.
+% is correctly measured and understood is a finding, not a query.
+%
+% THE QUERIES NO LONGER RENDER IN THIS DOCUMENT. They are collected into the
+% separate Open concerns document, which script/extract_concerns.py builds by
+% PARSING THIS SOURCE. The markup therefore stays in the chapter files and is
+% suppressed here rather than deleted -- deleting it would leave the concerns
+% document with nothing to extract, and the chapter source is the single record
+% of which passages are queried. To see them in place again, restore the two
+% definitions marked RENDERING below.
 \definecolor{flagred}{HTML}{B00000}
-\newcommand{\flag}[1]{\textcolor{flagred}{#1}}
-% Whole-paragraph query. Sets the paragraph in red behind a bracketed label so it
-% survives greyscale printing, where colour alone would vanish.
+
+% \flag marks a queried VALUE: a table cell, a measured number, a status word,
+% or a fragment inside a sentence. Those cannot be lifted out of the document --
+% removing a table cell leaves a hole in the table, and removing a clause breaks
+% the sentence around it -- so the value stays and only the colour is dropped.
+\newcommand{\flag}[1]{#1}
+% RENDERING: \newcommand{\flag}[1]{\textcolor{flagred}{#1}}
+
+% \moved marks a queried passage that is a COMPLETE, self-contained sentence in
+% running prose, so it can be lifted out without damaging what surrounds it. It
+% renders as nothing here and appears only in the concerns document.
+\newcommand{\moved}[1]{\unskip}
+
+% Whole-paragraph query. Suppressed in this document; extracted in full by
+% script/extract_concerns.py.
 \newenvironment{queried}[1][Questionable]%
-  {\par\addvspace{0.6ex}\begingroup\color{flagred}\noindent
-   \textbf{[#1]}\ \ignorespaces}%
-  {\par\endgroup\addvspace{0.6ex}}
+  {\setbox0\vbox\bgroup}%
+  {\egroup}
+% RENDERING:
+% \newenvironment{queried}[1][Questionable]%
+%   {\par\addvspace{0.6ex}\begingroup\color{flagred}\noindent
+%    \textbf{[#1]}\ \ignorespaces}%
+%   {\par\endgroup\addvspace{0.6ex}}
 
 % Repository paths, identifiers, and commit hashes are typeset verbatim in a
 % typewriter face, but must remain breakable: an unbreakable 40-character hash
@@ -117,6 +140,14 @@
 
 \geometry{margin=22mm}
 \usepackage{titlesec}
+
+% The inherited preamble SUPPRESSES queried material, because the report no
+% longer renders it -- that is the whole point of this document existing. Undo
+% the suppression here, or every passage extracted below would be typeset into
+% nothing and this document would silently come out empty of the very text it
+% was built to carry.
+\renewcommand{\flag}[1]{\textcolor{flagred}{#1}}
+\renewcommand{\moved}[1]{\textcolor{flagred}{#1}}
 % Cross-reference targets live in the report, so a reference is printed, not
 % resolved -- a dangling \cref would either fail or print a wrong number.
 \newcommand{\reportref}[1]{\textcolor{gray}{[\texttt{\detokenize{#1}}]}}
@@ -126,7 +157,7 @@
 
 \title{Open Concerns}
 \author{Bolton Athit Davies}
-\date{19 September 2026}
+\date{20 September 2026}
 
 \begin{document}
 \maketitle
@@ -134,7 +165,7 @@
 
 \noindent
 Every passage the minor progress report marks as \flag{queried}, collected into
-one list. 67 items, from the minor progress report.
+one list. 77 items, from the minor progress report.
 
 \medskip
 \noindent
@@ -156,14 +187,19 @@ the report.
 
 \section*{Chapter 3 --- Methodology}
 
+\subsection*{Computing and software environment}
+\noindent\textbf{1.}\quad \emph{table row:} OpenCV (Python) \textbar{} 4.11.0 \textbar{} \flag{differs from the 4.5.4 the estimators link}
+
+\medskip
+
 \subsection*{Simulated sensor rig}
-\noindent\textbf{1.}\quad \emph{table row:} \texttt{acc\_n} \textbar{} 0.02 \textbar{} \flag{0.0139--0.0294} \textbar{} m\,s$^{-2}/\sqrt{\mathrm{Hz}}$
+\noindent\textbf{2.}\quad \emph{table row:} \texttt{acc\_n} \textbar{} 0.02 \textbar{} \flag{0.0139--0.0294} \textbar{} m\,s$^{-2}/\sqrt{\mathrm{Hz}}$
 
 \medskip
-\noindent\textbf{2.}\quad \emph{table row:} \texttt{gyr\_n} \textbar{} 0.002 \textbar{} \flag{0.000300--0.000364} \textbar{} rad\,s$^{-1}/\sqrt{\mathrm{Hz}}$
+\noindent\textbf{3.}\quad \emph{table row:} \texttt{gyr\_n} \textbar{} 0.002 \textbar{} \flag{0.000300--0.000364} \textbar{} rad\,s$^{-1}/\sqrt{\mathrm{Hz}}$
 
 \medskip
-\noindent\textbf{3.\ \flag{[Queried]}}\quad The configured gyroscope noise density is \num{2e-3} whereas the stationary
+\noindent\textbf{4.\ \flag{[Queried]}}\quad The configured gyroscope noise density is \num{2e-3} whereas the stationary
 windows of the five recorded streams give \numrange{3.00e-4}{3.64e-4}, so the
 configured value is about six times too large. The configured accelerometer
 density of 0.02 sits inside the measured spread but that spread is itself wide,
@@ -176,7 +212,7 @@ this report depends on these four numbers, but they should be re-derived from a
 dedicated stationary recording before any tuning claim is made.
 
 \medskip
-\noindent\textbf{4.\ \flag{[Queried]}}\quad The accelerometer characterisation is not stable across recordings of the same
+\noindent\textbf{5.\ \flag{[Queried]}}\quad The accelerometer characterisation is not stable across recordings of the same
 simulated sensor. \repo{allsensor_002}, whose stationary window is
 \SI{1.54}{\second} and therefore the best conditioned of the three, returns an $x$
 bias of \SI{0.0683}{\metre\per\second\squared}, against 0.0191 for
@@ -192,7 +228,14 @@ same window-length problem.
 \medskip
 
 \subsection*{Simulation fidelity and its limits}
-\noindent\textbf{5.\ \flag{[Threat to validity]}}\quad This is a bias with a known direction. The EKF baseline of
+\noindent\textbf{6.}\quad \emph{table row:} Accelerometer, per axis (\si{\metre\per\second\squared}) \textbar{} \num{0.0566} \textbar{} \num{4.002e-3} \textbar{} \flag{\numrange{1.39e-2}{2.94e-2}} \textbar{} \num{2.00e-3}
+
+\medskip
+\noindent\textbf{7.}\quad \emph{table row:} \repo{slip1}, \repo{slip2} \textbar{} 0 on all grounds \textbar{} \flag{an ODE feature;
+  \repo{dartsim} does not implement it, so inert at any value}
+
+\medskip
+\noindent\textbf{8.\ \flag{[Threat to validity]}}\quad This is a bias with a known direction. The EKF baseline of
 \reportref{sec:results-proprio} is evaluated on a floor where the wheels effectively
 cannot slip and with an encoder of unlimited resolution, which is dead
 reckoning's best case. Both idealisations favour the EKF over the visual
@@ -204,20 +247,23 @@ made an experimental factor; \repo{script/encoder_sim.py} imposes a realistic
 quantisation floor. Neither has been used in any result reported here.
 
 \medskip
+\noindent\textbf{9.}\quad \emph{table row:} \repo{gyr_w} \textbar{} \num{0.0001} \textbar{} \num{1.735e-6} \textbar{} \flag{\num{58}$\times$} \textbar{} gyroscope bias random walk
+
+\medskip
 
 \subsection*{Real sensor rig and calibration limits}
-\noindent\textbf{6.}\quad \emph{table row:} Second-camera intrinsics \textbar{} reuse of the first camera \textbar{} \flag{approximation}
+\noindent\textbf{10.}\quad \emph{table row:} Second-camera intrinsics \textbar{} reuse of the first camera \textbar{} \flag{approximation}
 
 \medskip
-\noindent\textbf{7.}\quad \emph{table row:} IMU-to-camera translation \textbar{} zero \textbar{} \flag{placeholder}
+\noindent\textbf{11.}\quad \emph{table row:} IMU-to-camera translation \textbar{} zero \textbar{} \flag{placeholder}
 
 \medskip
-\noindent\textbf{8.}\quad \emph{table row:} Stationary $\lVert a\rVert$ \textbar{} \SI{9.2642}{\metre\per\second\squared} \textbar{} \flag{measured, deviates from \num{9.81}}
+\noindent\textbf{12.}\quad \emph{table row:} Stationary $\lVert a\rVert$ \textbar{} \SI{9.2642}{\metre\per\second\squared} \textbar{} \flag{measured, deviates from \num{9.81}}
 
 \medskip
 
 \subsection*{Simulation environment}
-\noindent\textbf{9.\ \flag{[Naming]}}\quad The factor recorded in this project as ``textured versus featureless floor'' is
+\noindent\textbf{13.\ \flag{[Naming]}}\quad The factor recorded in this project as ``textured versus featureless floor'' is
 narrower than the name suggests, and \reportref{fig:floor-treatments} is the evidence.
 Both conditions rest on the \emph{same flat, untextured diffuse colour}; the stock
 concrete-grain texture appears in neither. The entire difference is fourteen
@@ -234,7 +280,7 @@ require a world built on the stock \repo{GroundB_01} model, which no recorded
 dataset uses.
 
 \medskip
-\noindent\textbf{10.\ \flag{[Unverified]}}\quad The dynamic world's baked grid, \reportref{fig:warehouse-maps}(c), contains
+\noindent\textbf{14.\ \flag{[Unverified]}}\quad The dynamic world's baked grid, \reportref{fig:warehouse-maps}(c), contains
 \SI{38}{\percent} fewer occupied cells than the distributed static arrangement
 in~(a). \repo{bake_map.py} rasterises every \texttt{<include>} in the
 world file at its authored pose, so kinematically driven props should appear at
@@ -249,19 +295,19 @@ panels~(a) and~(b) only.
 \medskip
 
 \subsection*{Dataset registry}
-\noindent\textbf{11.}\quad \emph{table row:} \repo{dataset_static_nofloortexture_001} \textbar{} static \textbar{} 617 \textbar{} 1 \textbar{} 92.0 \textbar{} 113\,332 \textbar{} \checkmark \textbar{} \checkmark \textbar{} -- \textbar{} \flag{FD stub, WS ok}
+\noindent\textbf{15.}\quad \emph{table row:} \repo{dataset_static_nofloortexture_001} \textbar{} static \textbar{} 617 \textbar{} 1 \textbar{} 92.0 \textbar{} 113\,332 \textbar{} \checkmark \textbar{} \checkmark \textbar{} -- \textbar{} \flag{FD stub, WS ok}
 
 \medskip
-\noindent\textbf{12.}\quad \emph{table row:} \repo{dataset_dynamic_nofloortexture_01_000} \textbar{} dynamic \texttt{\_01} \textbar{} 713 \textbar{} 710 \textbar{} 165.4 \textbar{} 126\,790 \textbar{} \checkmark \textbar{} \checkmark \textbar{} -- \textbar{} \flag{FD malformed, WS ok}
+\noindent\textbf{16.}\quad \emph{table row:} \repo{dataset_dynamic_nofloortexture_01_000} \textbar{} dynamic \texttt{\_01} \textbar{} 713 \textbar{} 710 \textbar{} 165.4 \textbar{} 126\,790 \textbar{} \checkmark \textbar{} \checkmark \textbar{} -- \textbar{} \flag{FD malformed, WS ok}
 
 \medskip
-\noindent\textbf{13.}\quad \emph{table row:} \repo{dataset_real_001} \textbar{} real rig \textbar{} -- \textbar{} 2099 \textbar{} 85.5 \textbar{} 9\,629 \textbar{} -- \textbar{} -- \textbar{} -- \textbar{} \flag{0 IMU messages}
+\noindent\textbf{17.}\quad \emph{table row:} \repo{dataset_real_001} \textbar{} real rig \textbar{} -- \textbar{} 2099 \textbar{} 85.5 \textbar{} 9\,629 \textbar{} -- \textbar{} -- \textbar{} -- \textbar{} \flag{0 IMU messages}
 
 \medskip
-\noindent\textbf{14.}\quad \emph{table row:} \repo{dataset_real_002} \textbar{} real rig \textbar{} -- \textbar{} 2869 \textbar{} 113.5 \textbar{} 12\,682 \textbar{} -- \textbar{} -- \textbar{} -- \textbar{} \flag{0 IMU messages}
+\noindent\textbf{18.}\quad \emph{table row:} \repo{dataset_real_002} \textbar{} real rig \textbar{} -- \textbar{} 2869 \textbar{} 113.5 \textbar{} 12\,682 \textbar{} -- \textbar{} -- \textbar{} -- \textbar{} \flag{0 IMU messages}
 
 \medskip
-\noindent\textbf{15.\ \flag{[Data integrity]}}\quad Two drive copies are unreadable while presenting a complete, plausible
+\noindent\textbf{19.\ \flag{[Data integrity]}}\quad Two drive copies are unreadable while presenting a complete, plausible
 \repo{metadata.yaml}. \repo{dataset_static_nofloortexture_001} is a
 \SI{524288}{\byte} stub whose metadata nevertheless declares 113\,332 messages,
 and \repo{dataset_dynamic_nofloortexture_01_000} is \SI{710}{\mega\byte}---within
@@ -278,7 +324,7 @@ SQLite store and counting rows, which is now part of the pre-experiment inspecti
 in \reportref{sec:collection-validity}.
 
 \medskip
-\noindent\textbf{16.\ \flag{[Scope limit]}}\quad Only the five \repo{dataset_allsensor} bags carry wheel encoders and wheel
+\noindent\textbf{20.\ \flag{[Scope limit]}}\quad Only the five \repo{dataset_allsensor} bags carry wheel encoders and wheel
 odometry; the other thirteen recordings omit those topics entirely. The
 proprioceptive baseline of \reportref{sec:results-proprio} therefore cannot be computed
 for any dynamic condition, for the mapping bags, or for the real rig, and the
@@ -288,7 +334,7 @@ vision and most favourable to dead reckoning. Extending it requires re-recording
 with the two topics bridged, not new analysis.
 
 \medskip
-\noindent\textbf{17.\ \flag{[Excluded]}}\quad \repo{dataset_real_001} and \repo{dataset_real_002} are excluded because their
+\noindent\textbf{21.\ \flag{[Excluded]}}\quad \repo{dataset_real_001} and \repo{dataset_real_002} are excluded because their
 inertial topic \repo{/hwt101ct_yaw_publisher} contains \emph{zero} messages, so
 neither supports stereo-inertial operation at all. Their image streams are intact
 (2\,562 and 3\,405 pairs), so they remain usable for detector or image-only work.
@@ -297,41 +343,70 @@ messages.
 
 \medskip
 
+\subsection*{ORB-SLAM3 and Semantic Feature Filtering}
+\noindent\textbf{22.}\quad \emph{table row:} \repo{loopClosing} \textbar{} 1 \textbar{} \flag{comment in the same file says ``set to 0
+  deliberately''}
+
+\medskip
+
 \subsection*{Sensor model derived from data}
-\noindent\textbf{18.}\quad \emph{table row:} accelerometer $x$ bias \textbar{} 0.0191 \textbar{} 0.0304 \textbar{} \flag{0.0683} \textbar{} 0.0309 \textbar{} 0.0016 \textbar{} \si{\metre\per\second\squared}
+\noindent\textbf{23.}\quad \emph{table row:} accelerometer $x$ bias \textbar{} 0.0191 \textbar{} 0.0304 \textbar{} \flag{0.0683} \textbar{} 0.0309 \textbar{} 0.0016 \textbar{} \si{\metre\per\second\squared}
 
 \medskip
-\noindent\textbf{19.}\quad \emph{table row:} accelerometer $x$ scale \textbar{} 1.0199 \textbar{} 1.0249 \textbar{} \flag{1.0669} \textbar{} \flag{1.0525} \textbar{} \flag{1.0465} \textbar{} --
+\noindent\textbf{24.}\quad \emph{table row:} accelerometer $x$ scale \textbar{} 1.0199 \textbar{} 1.0249 \textbar{} \flag{1.0669} \textbar{} \flag{1.0525} \textbar{} \flag{1.0465} \textbar{} --
 
 \medskip
-\noindent\textbf{20.}\quad \emph{table row:} accelerometer $x$ scale \textbar{} 1.0199 \textbar{} 1.0249 \textbar{} \flag{1.0669} \textbar{} \flag{1.0525} \textbar{} \flag{1.0465} \textbar{} --
+\noindent\textbf{25.}\quad \emph{table row:} accelerometer $x$ scale \textbar{} 1.0199 \textbar{} 1.0249 \textbar{} \flag{1.0669} \textbar{} \flag{1.0525} \textbar{} \flag{1.0465} \textbar{} --
 
 \medskip
-\noindent\textbf{21.}\quad \emph{table row:} accelerometer $x$ scale \textbar{} 1.0199 \textbar{} 1.0249 \textbar{} \flag{1.0669} \textbar{} \flag{1.0525} \textbar{} \flag{1.0465} \textbar{} --
+\noindent\textbf{26.}\quad \emph{table row:} accelerometer $x$ scale \textbar{} 1.0199 \textbar{} 1.0249 \textbar{} \flag{1.0669} \textbar{} \flag{1.0525} \textbar{} \flag{1.0465} \textbar{} --
 
 \medskip
-\noindent\textbf{22.}\quad \emph{table row:} yaw-rate scale, bicycle \textbar{} 1.0110 \textbar{} 0.9527 \textbar{} 1.0034 \textbar{} \flag{0.9375} \textbar{} \flag{0.9250} \textbar{} --
+\noindent\textbf{27.}\quad \emph{table row:} yaw-rate scale, bicycle \textbar{} 1.0110 \textbar{} 0.9527 \textbar{} 1.0034 \textbar{} \flag{0.9375} \textbar{} \flag{0.9250} \textbar{} --
 
 \medskip
-\noindent\textbf{23.}\quad \emph{table row:} yaw-rate scale, bicycle \textbar{} 1.0110 \textbar{} 0.9527 \textbar{} 1.0034 \textbar{} \flag{0.9375} \textbar{} \flag{0.9250} \textbar{} --
+\noindent\textbf{28.}\quad \emph{table row:} yaw-rate scale, bicycle \textbar{} 1.0110 \textbar{} 0.9527 \textbar{} 1.0034 \textbar{} \flag{0.9375} \textbar{} \flag{0.9250} \textbar{} --
 
 \medskip
-\noindent\textbf{24.}\quad \emph{table row:} Window \textbar{} static duration \textbar{} 0.68 \textbar{} 0.58 \textbar{} 1.54 \textbar{} 1.04 \textbar{} \flag{0.52} \textbar{} \si{\second}
+\noindent\textbf{29.}\quad \emph{table row:} Window \textbar{} static duration \textbar{} 0.68 \textbar{} 0.58 \textbar{} 1.54 \textbar{} 1.04 \textbar{} \flag{0.52} \textbar{} \si{\second}
+
+\medskip
+
+\subsection*{EKF formulation}
+\noindent\textbf{30.}\quad \moved{$\sigma_b$, the bias random walk, is assumed rather
+than measured: the longest stationary window in any recording is
+\SI{1.54}{\second} and an Allan-variance estimate needs minutes.}
 
 \medskip
 
 \subsection*{Reproducibility Controls and Implementation Deviations}
-\noindent\textbf{25.}\quad \emph{table row:} Real-robot evaluation \textbar{} metric accuracy against ground truth \textbar{} calibration-limited, no independent trajectory truth \textbar{} \flag{blocked}
+\noindent\textbf{31.}\quad \emph{table row:} Real-robot evaluation \textbar{} metric accuracy against ground truth \textbar{} calibration-limited, no independent trajectory truth \textbar{} \flag{blocked}
 
 \medskip
-\noindent\textbf{26.}\quad \emph{table row:} Metric infrastructure \textbar{} resource, throughput, uncertainty, manifests \textbar{} partially implemented; RPE now complete \textbar{} \flag{incomplete}
+\noindent\textbf{32.}\quad \emph{table row:} Metric infrastructure \textbar{} resource, throughput, uncertainty, manifests \textbar{} partially implemented; RPE now complete \textbar{} \flag{incomplete}
 
 \medskip
 
 \section*{Chapter 4 --- Results}
 
+\subsection*{Question, hypotheses, and conditions}
+\noindent\textbf{1.}\quad \emph{table row:} IMU noise model \textbar{} \flag{not controlled in this experiment.} The EKF's is measured
+  per bag by \repo{proprio_estimator.py calibrate}; both visual estimators read
+  four constants from \repo{config/wil_sim/stereo_imu.yaml}. The factor is
+  confounded with the estimator here and is separated in
+  \reportref{sec:proprio-tuning}
+
+\medskip
+
 \subsection*{Validity}
-\noindent\textbf{1.\ \flag{[Queried]}}\quad ORB-SLAM3 receives fewer stereo pairs than are available on every dataset, while
+\noindent\textbf{2.}\quad \flag{The initialization and reset figures below were extracted for
+\repo{allsensor_000} and \repo{allsensor_001} only and have not been recovered for
+the other three bags:} VINS-Fusion initialized once in \SI{0.33}{\second} with no
+resets, and both ORB-SLAM3 runs shut down gracefully with no tracking-loss events
+and inertial initialization at \SI{2.48}{\second} and \SI{2.51}{\second}.
+
+\medskip
+\noindent\textbf{3.\ \flag{[Queried]}}\quad ORB-SLAM3 receives fewer stereo pairs than are available on every dataset, while
 VINS-Fusion receives all of them (2639, 2478 of 2479, 2628, 3102 and 3046). The
 ORB shortfall is \SIrange{3.8}{11.9}{\percent} and varies by run as well as by
 dataset: \SI{90.2}{\percent} and \SI{94.2}{\percent} of the available pairs on
@@ -347,7 +422,7 @@ images arriving. What the source does show is an asymmetry in input buffering.
 ORB-SLAM3 subscribes with \repo{rclcpp::SensorDataQoS()}, which is best-effort with
 a depth of five, so a frame arriving while the tracking callback is busy is
 discarded by the middleware and never recorded anywhere; VINS-Fusion subscribes
-with \repo{KeepLast(100).reliable()} and buffers the same burst. \flag{The shortfall
+with \repo{KeepLast(100).reliable()} and buffers the same burst. \moved{The shortfall
 is therefore most consistent with ORB-SLAM3 dropping frames at its own subscriber
 under load, not with loss in transport.} The loop-closure-free runs support that
 reading on three datasets, receiving more pairs than the enabled runs on
@@ -361,7 +436,7 @@ load but in input-queue policy, so such a comparison would measure the QoS choic
 as much as the algorithm.
 
 \medskip
-\noindent\textbf{2.\ \flag{[Ruled out]}}\quad A plausible reading of these results is that the visual estimators lose to the EKF
+\noindent\textbf{4.\ \flag{[Ruled out]}}\quad A plausible reading of these results is that the visual estimators lose to the EKF
 because their input rate collapsed. The data does not support it. Source imagery
 is regular at \SI{30.3}{\hertz} in simulated time on all five bags, with a median
 inter-frame interval of \SI{0.0330}{\second} and no gap exceeding
@@ -372,7 +447,7 @@ unexplained, but it cannot account for the margin, because the estimator with no
 frame loss at all shows the same one.
 
 \medskip
-\noindent\textbf{3.\ \flag{[Queried]}}\quad ORB-SLAM3 was run in two configurations on every dataset, recorded as
+\noindent\textbf{5.\ \flag{[Queried]}}\quad ORB-SLAM3 was run in two configurations on every dataset, recorded as
 \repo{logging_20260916_01} with loop closing enabled and
 \repo{logging_20260916_02} with it disabled, and both are reported below as
 separate systems. Within the enabled configuration the loop closer behaves very
@@ -389,7 +464,7 @@ distinguishable only in \repo{loop_closing.csv}, where every event carries
 to it.
 
 \medskip
-\noindent\textbf{4.\ \flag{[Provenance gap]}}\quad \repo{run_metadata.csv} records 22 parameters and loop-closure state is not among
+\noindent\textbf{6.\ \flag{[Provenance gap]}}\quad \repo{run_metadata.csv} records 22 parameters and loop-closure state is not among
 them, so the whole distinction rests on the directory name---and that name does
 not mean the same thing everywhere in this chapter. In the relogged campaign of
 \reportref{sec:results-validity}, \repo{logging_20260916_01} through \repo{_03} are
@@ -408,44 +483,43 @@ campaign.
 \medskip
 
 \subsection*{Accuracy results}
-\noindent\textbf{5.}\quad \emph{table row:} plain \textbar{} Wheel odometry \textbar{} 1.485 \textbar{} 2.888 \textbar{} 4.332 \textbar{} 3.76 \textbar{} \flag{$-30.11$}
+\noindent\textbf{7.}\quad \emph{table row:} plain \textbar{} Wheel odometry \textbar{} 1.485 \textbar{} 2.888 \textbar{} 4.332 \textbar{} 3.76 \textbar{} \flag{$-30.11$}
 
 \medskip
-\noindent\textbf{6.}\quad \emph{table row:} \repo{allsensor_003} \textbar{} \texttt{bayline\_} \textbar{} IMU dead reckoning \textbar{} 45.562 \textbar{} 62.903 \textbar{} 74.745 \textbar{} \flag{53.16} \textbar{} $-5.84$
+\noindent\textbf{8.}\quad \emph{table row:} \repo{allsensor_003} \textbar{} \texttt{bayline\_} \textbar{} IMU dead reckoning \textbar{} 45.562 \textbar{} 62.903 \textbar{} 74.745 \textbar{} \flag{53.16} \textbar{} $-5.84$
 
 \medskip
-\noindent\textbf{7.}\quad \emph{table row:} \texttt{objonwallonly} \textbar{} Wheel odometry \textbar{} 3.192 \textbar{} 3.979 \textbar{} 9.231 \textbar{} 6.57 \textbar{} \flag{$-37.17$}
+\noindent\textbf{9.}\quad \emph{table row:} \texttt{objonwallonly} \textbar{} Wheel odometry \textbar{} 3.192 \textbar{} 3.979 \textbar{} 9.231 \textbar{} 6.57 \textbar{} \flag{$-37.17$}
 
 \medskip
-\noindent\textbf{8.}\quad \emph{table row:} ORB-SLAM3 \textbar{} \flag{6.481} \textbar{} -- \textbar{} -- \textbar{} -- \textbar{} --
+\noindent\textbf{10.}\quad \emph{table row:} ORB-SLAM3 \textbar{} \flag{6.481} \textbar{} -- \textbar{} -- \textbar{} -- \textbar{} --
 
 \medskip
-\noindent\textbf{9.}\quad \flag{That earlier figure of
-``3.0, 1.2 and 2.2 times'' was computed against ORB-SLAM3 with loop closing
+\noindent\textbf{11.}\quad \moved{That earlier figure
+of ``3.0, 1.2 and 2.2 times'' was computed against ORB-SLAM3 with loop closing
 enabled, which is not the best visual result available.} Measured against the best
-visual estimator of each dataset, and using the cross-validated EKF so that no
-in-sample tuning advantage is carried
+visual estimator of each dataset, and using the cross-validated EKF
 (\reportref{tab:proprio-xval}), the margins are 1.38, 1.41, 2.53, 1.31 and
 \num{1.13}.
 
 \medskip
-\noindent\textbf{10.}\quad \flag{Nor did adding the bay markings help it} ---the two
+\noindent\textbf{12.}\quad \flag{Nor did adding the bay markings help it} ---the two
 \texttt{bayline} datasets give VINS-Fusion 0.784 and \SI{0.425}{\metre} against
 0.616, 0.383 and \SI{0.558}{\metre} on the plain floors, which is no improvement.
 
 \medskip
 
 \subsection*{Falsification of H1, and the drift mechanism}
-\noindent\textbf{11.}\quad H1 is \flag{falsified} across all five datasets.
+\noindent\textbf{13.}\quad H1 is \flag{falsified} across all five datasets.
 
 \medskip
-\noindent\textbf{12.}\quad \emph{table row:} \repo{allsensor_002} \textbar{} $+0.34$ \textbar{} \flag{$-30.11$} \textbar{} 865 \textbar{} $-3.481$ \textbar{} $-31.03$
+\noindent\textbf{14.}\quad \emph{table row:} \repo{allsensor_002} \textbar{} $+0.34$ \textbar{} \flag{$-30.11$} \textbar{} 865 \textbar{} $-3.481$ \textbar{} $-31.03$
 
 \medskip
-\noindent\textbf{13.}\quad \emph{table row:} \repo{allsensor_003} \textbar{} $-6.25$ \textbar{} \flag{$-37.17$} \textbar{} 1123 \textbar{} $-3.309$ \textbar{} $-38.51$
+\noindent\textbf{15.}\quad \emph{table row:} \repo{allsensor_003} \textbar{} $-6.25$ \textbar{} \flag{$-37.17$} \textbar{} 1123 \textbar{} $-3.309$ \textbar{} $-38.51$
 
 \medskip
-\noindent\textbf{14.\ \flag{[Corrected]}}\quad An earlier reading of this experiment proposed that the offset came from the
+\noindent\textbf{16.\ \flag{[Corrected]}}\quad An earlier reading of this experiment proposed that the offset came from the
 bicycle model averaging the two kingpin angles, since $\tan$ of a mean is not the
 mean of $\tan$. That explanation is \emph{wrong} and is withdrawn. Recomputing the
 yaw rate as the mean of each wheel's own bicycle-equivalent rate changes the
@@ -455,13 +529,13 @@ under \SI{4}{\percent} in every case, two orders of magnitude short of what the
 observed drift requires. The averaging is not the source.
 
 \medskip
-\noindent\textbf{15.}\quad \emph{table row:} \repo{allsensor_003} \textbar{} bayline \textbar{} 0.9375 \textbar{} 0.1192 \textbar{} \flag{3.54} \textbar{} 0.423
+\noindent\textbf{17.}\quad \emph{table row:} \repo{allsensor_003} \textbar{} bayline \textbar{} 0.9375 \textbar{} 0.1192 \textbar{} \flag{3.54} \textbar{} 0.423
 
 \medskip
-\noindent\textbf{16.}\quad \emph{table row:} \repo{allsensor_004} \textbar{} bayline \textbar{} 0.9250 \textbar{} 0.0613 \textbar{} \flag{3.41} \textbar{} 0.494
+\noindent\textbf{18.}\quad \emph{table row:} \repo{allsensor_004} \textbar{} bayline \textbar{} 0.9250 \textbar{} 0.0613 \textbar{} \flag{3.41} \textbar{} 0.494
 
 \medskip
-\noindent\textbf{17.}\quad \flag{That inference
+\noindent\textbf{19.}\quad \flag{That inference
 does not survive the textured-floor datasets} and is withdrawn: the coupling is
 the dominant term in the EKF's heading error whenever the wheel rate is poor, and
 it sets a floor on the filter's accuracy that no amount of gyroscope quality can
@@ -470,25 +544,25 @@ lift.
 \medskip
 
 \subsection*{Covariance consistency}
-\noindent\textbf{18.}\quad \emph{table row:} IMU dead reckoning \textbar{} 311.0 \textbar{} 0.005 \textbar{} 0.022 \textbar{} \flag{0.043} \textbar{} overconfident
+\noindent\textbf{20.}\quad \emph{table row:} IMU dead reckoning \textbar{} 311.0 \textbar{} 0.005 \textbar{} 0.022 \textbar{} \flag{0.043} \textbar{} overconfident
 
 \medskip
-\noindent\textbf{19.}\quad \emph{table row:} IMU dead reckoning \textbar{} 339.9 \textbar{} 0.001 \textbar{} 0.009 \textbar{} \flag{0.021} \textbar{} overconfident
+\noindent\textbf{21.}\quad \emph{table row:} IMU dead reckoning \textbar{} 339.9 \textbar{} 0.001 \textbar{} 0.009 \textbar{} \flag{0.021} \textbar{} overconfident
 
 \medskip
-\noindent\textbf{20.}\quad \emph{table row:} IMU dead reckoning \textbar{} 244.7 \textbar{} 0.017 \textbar{} 0.045 \textbar{} \flag{0.147} \textbar{} overconfident
+\noindent\textbf{22.}\quad \emph{table row:} IMU dead reckoning \textbar{} 244.7 \textbar{} 0.017 \textbar{} 0.045 \textbar{} \flag{0.147} \textbar{} overconfident
 
 \medskip
-\noindent\textbf{21.}\quad \emph{table row:} IMU dead reckoning \textbar{} \flag{1504.3} \textbar{} 0.010 \textbar{} 0.018 \textbar{} \flag{0.035} \textbar{} overconfident
+\noindent\textbf{23.}\quad \emph{table row:} IMU dead reckoning \textbar{} \flag{1504.3} \textbar{} 0.010 \textbar{} 0.018 \textbar{} \flag{0.035} \textbar{} overconfident
 
 \medskip
-\noindent\textbf{22.}\quad \emph{table row:} IMU dead reckoning \textbar{} \flag{1504.3} \textbar{} 0.010 \textbar{} 0.018 \textbar{} \flag{0.035} \textbar{} overconfident
+\noindent\textbf{24.}\quad \emph{table row:} IMU dead reckoning \textbar{} \flag{1504.3} \textbar{} 0.010 \textbar{} 0.018 \textbar{} \flag{0.035} \textbar{} overconfident
 
 \medskip
-\noindent\textbf{23.}\quad \emph{table row:} IMU dead reckoning \textbar{} 289.5 \textbar{} 0.004 \textbar{} 0.017 \textbar{} \flag{0.044} \textbar{} overconfident
+\noindent\textbf{25.}\quad \emph{table row:} IMU dead reckoning \textbar{} 289.5 \textbar{} 0.004 \textbar{} 0.017 \textbar{} \flag{0.044} \textbar{} overconfident
 
 \medskip
-\noindent\textbf{24.\ \flag{[Method caveat]}}\quad The $\chi^2$ interval behind the verdict column assumes independent samples. At
+\noindent\textbf{26.\ \flag{[Method caveat]}}\quad The $\chi^2$ interval behind the verdict column assumes independent samples. At
 \SI{200}{\hertz} consecutive dead-reckoning errors are almost perfectly
 correlated, so the test is run on a \SI{1}{\hertz} subsample (81 to 102 samples per dataset).
 That reduces the dependence but does not remove it, and the verdicts should be
@@ -497,8 +571,44 @@ and are the sturdier statement.
 
 \medskip
 
+\subsection*{Cross-validation of the EKF noise model}
+\noindent\textbf{27.\ \flag{[What this control does not cover]}}\quad Exchanging noise models between bags tests whether the filter saw \emph{this}
+recording's answer. It cannot test the asymmetry that matters here, because both
+models are still measured from data: all five bags come from one simulated IMU, so
+the exchanged $\sigma$ values differ by less than a factor of two on every term
+except accelerometer $x$. The visual estimators receive nothing of the kind---they
+read four constants from a file. The control in \reportref{sec:proprio-tuning} replaces
+this one.
+
+\medskip
+
+\subsection*{Transferring the visual systems' noise model to the EKF}
+\noindent\textbf{28.\ \flag{[What the control does and does not establish]}}\quad \flag{H4 was written down after the exploratory runs had been scored, not
+before.} What is reported here is a post-hoc formalisation of an exploratory
+finding; the decision rule and the direction of the test were fixed before this
+subsection was written, but not before the data was seen. The unanimity---every
+bag, both directions, a mechanism that isolates to one term---is what makes it
+worth reporting at this stage, not a pre-registered test, and a confirmatory
+repeat on bags not used to form the hypothesis is the honest follow-up.
+
+This is also an equal-handicap comparison, not an equal-effort one: both families
+now run on a declared IMU noise that nobody fitted to the data. It establishes
+that the EKF's advantage in \reportref{tab:proprio-accuracy} is smaller than the
+tuning difference between the two families, and reverses under it. It does
+\emph{not} establish that the visual systems would win a symmetric comparison.
+The mirror experiment---giving VINS-Fusion and ORB-SLAM3 the measured
+values---requires re-recording and has not been run to a reportable standard; the
+one VINS run whose metadata confirms it diverged (\reportref{sec:sim-fidelity}). The
+transfer is not perfectly symmetric in role either: the filter's $\sigma_{g}$ is
+a scalar in a planar five-state model, whereas \repo{gyr_n} feeds three-axis
+pre-integration. Finally, $n=1$ per cell is a property of a deterministic filter
+and not a design choice, but it means the between-bag range is the only
+uncertainty this experiment can report.
+
+\medskip
+
 \subsection*{Interpretation and limitations}
-\noindent\textbf{25.\ \flag{[Generalisation limit]}}\quad The comparison is confined to \emph{static} scenes. Four worlds and both floor
+\noindent\textbf{29.\ \flag{[Generalisation limit]}}\quad The comparison is confined to \emph{static} scenes. Four worlds and both floor
 conditions are now covered and the ranking is stable across them, so the earlier
 form of this limitation---that the result held only on featureless floors, vision's
 worst case---is no longer the binding one. \flag{Adding the bay markings did not improve
@@ -516,7 +626,7 @@ objects, and where the visual systems' known failures occur---until the
 the single most informative next run in this line of work.
 
 \medskip
-\noindent\textbf{26.\ \flag{[Queried]}}\quad Both visual estimators replayed their bags at $0.5\times$ real time, so each frame
+\noindent\textbf{30.\ \flag{[Queried]}}\quad Both visual estimators replayed their bags at $0.5\times$ real time, so each frame
 received roughly twice the wall-clock budget it would have online. The accuracy
 figures in \reportref{tab:proprio-accuracy} are therefore not evidence of real-time
 capability, and no timing conclusion may be drawn from this experiment. The three
@@ -524,14 +634,14 @@ baselines, being offline, have no replay rate at all, which is a second asymmetr
 in the same comparison.
 
 \medskip
-\noindent\textbf{27.\ \flag{[Statistical limit]}}\quad $n=5$ across four worlds, and no condition is repeated more than twice. The tables
+\noindent\textbf{31.\ \flag{[Statistical limit]}}\quad $n=5$ across four worlds, and no condition is repeated more than twice. The tables
 therefore report individual values deliberately; no mean, standard deviation or
 confidence interval is computed, and between-dataset differences are not evidence
 of a systematic effect. A single run per world cannot establish a scene-content
 effect; it shows only that the estimator ranking survives changes of scene.
 
 \medskip
-\noindent\textbf{28.\ \flag{[Unmeasured variance]}}\quad ORB-SLAM3 is multi-threaded and not deterministic, and its run-to-run spread on
+\noindent\textbf{32.\ \flag{[Unmeasured variance]}}\quad ORB-SLAM3 is multi-threaded and not deterministic, and its run-to-run spread on
 identical input has not been measured here: each of its two configurations was run
 once per dataset. Several differences this chapter reports sit within a range that
 spread could plausibly cover---most sharply \SI{6.481}{\metre} with loop closing
@@ -546,7 +656,7 @@ loop-closure conclusion is drawn.
 \medskip
 
 \subsection*{Trajectory Accuracy, Plausibility, and Robustness}
-\noindent\textbf{29.\ \flag{[Excluded: dynamic-scene trajectory results]}}\quad Every dynamic-scene trajectory result in this section, and the anomalies A3 and
+\noindent\textbf{33.\ \flag{[Excluded: dynamic-scene trajectory results]}}\quad Every dynamic-scene trajectory result in this section, and the anomalies A3 and
 A4 that derive from them, are \textbf{withheld as findings} and retained only as
 excluded evidence. The reason is the environment, not the measurement: the
 dynamic worlds move their props along scripted kinematic paths. The props carry
@@ -577,7 +687,7 @@ untouched --- and the map evaluation of \reportref{sec:map-quality}.
 \medskip
 
 \subsection*{Interpretation and limitations}
-\noindent\textbf{30.\ \flag{[Queried: reproducibility of the drivability half]}}\quad The geometry result is fully reproducible: both \repo{map/map_tiny.db} and the
+\noindent\textbf{34.\ \flag{[Queried: reproducibility of the drivability half]}}\quad The geometry result is fully reproducible: both \repo{map/map_tiny.db} and the
 world file are present. The drivability result is not. Its reference run,
 \repo{dataset_static_tiny_repeat}, is absent from \repo{dataset/} and from the
 removable drive, and the only surviving recording of this warehouse is the one
@@ -593,7 +703,7 @@ and retained.
 \medskip
 
 \subsection*{Where each pipeline is weak, block by block}
-\noindent\textbf{31.\ \flag{[Withdrawn criterion]}}\quad An earlier revision of these tables graded VINS-Fusion's solver quality against
+\noindent\textbf{35.\ \flag{[Withdrawn criterion]}}\quad An earlier revision of these tables graded VINS-Fusion's solver quality against
 ``median final cost $>5000$''. That threshold was chosen after observing 1176 in
 static scenes and 14110 in dynamic ones, so it separated two numbers already in
 hand and the \flag{``poor'' verdict it produced was guaranteed by the choice
@@ -609,7 +719,7 @@ and \SI{45.3}{\percent} in dynamic ones reaching the iteration or
 graded, because any threshold on it would repeat the same error.
 
 \medskip
-\noindent\textbf{32.}\quad \textbf{Both visual front ends are the dominant cost, and neither keeps up
+\noindent\textbf{36.}\quad \textbf{Both visual front ends are the dominant cost, and neither keeps up
 cleanly.} ORB-SLAM3 spends \SI{33.1}{\milli\second} of a \SI{53.8}{\milli\second}
 tracking budget on preprocessing, extraction and stereo matching in static scenes,
 rising to \SI{45.1}{\milli\second} of \SI{61.2}{\milli\second} in dynamic ones.
@@ -620,39 +730,39 @@ processes frames as fast as they arrive, and the two differ in what they do abou
 it.
 
 \medskip
-\noindent\textbf{33.}\quad \emph{table row:} E \textbar{} \flag{replay rate $0.5\times$ for both visual estimators} \textbar{} accuracy figures
+\noindent\textbf{37.}\quad \emph{table row:} E \textbar{} \flag{replay rate $0.5\times$ for both visual estimators} \textbar{} accuracy figures
   are not evidence of real-time capability
 
 \medskip
-\noindent\textbf{34.}\quad \emph{table row:} E \textbar{} \flag{baselines are offline, visual estimators ran live} \textbar{} timing-induced
+\noindent\textbf{38.}\quad \emph{table row:} E \textbar{} \flag{baselines are offline, visual estimators ran live} \textbar{} timing-induced
   error is present on one side of the comparison only
 
 \medskip
-\noindent\textbf{35.}\quad \emph{table row:} E \textbar{} \flag{only \repo{allsensor} bags carry wheel encoders} \textbar{} the baseline exists
+\noindent\textbf{39.}\quad \emph{table row:} E \textbar{} \flag{only \repo{allsensor} bags carry wheel encoders} \textbar{} the baseline exists
   for static featureless-floor scenes only; no dynamic condition
 
 \medskip
-\noindent\textbf{36.}\quad \emph{table row:} E \textbar{} \flag{$n=5$ across four worlds, no condition repeated more than twice} \textbar{} no
+\noindent\textbf{40.}\quad \emph{table row:} E \textbar{} \flag{$n=5$ across four worlds, no condition repeated more than twice} \textbar{} no
   mean, deviation or interval; between-bag differences are not effects
 
 \medskip
-\noindent\textbf{37.}\quad \emph{table row:} E \textbar{} \flag{ORB-SLAM3 drops frames at a depth-5 best-effort subscriber; VINS buffers
+\noindent\textbf{41.}\quad \emph{table row:} E \textbar{} \flag{ORB-SLAM3 drops frames at a depth-5 best-effort subscriber; VINS buffers
   100 deep} \textbar{} input delivery is not matched between the two; no timing comparison
   is admissible
 
 \medskip
-\noindent\textbf{38.}\quad \emph{table row:} E \textbar{} \flag{ORB-SLAM3 run-to-run spread unmeasured, one run per configuration} \textbar{} loop-closure differences cannot be attributed; repeats required
+\noindent\textbf{42.}\quad \emph{table row:} E \textbar{} \flag{ORB-SLAM3 run-to-run spread unmeasured, one run per configuration} \textbar{} loop-closure differences cannot be attributed; repeats required
 
 \medskip
-\noindent\textbf{39.}\quad \emph{table row:} E \textbar{} \flag{loop-closure state absent from \repo{run_metadata.csv}} \textbar{} configurations
+\noindent\textbf{43.}\quad \emph{table row:} E \textbar{} \flag{loop-closure state absent from \repo{run_metadata.csv}} \textbar{} configurations
   distinguishable only by inspecting \repo{loop_closing.csv}
 
 \medskip
-\noindent\textbf{40.}\quad \emph{table row:} E \textbar{} \flag{origin of the wheel yaw-rate offset untested} \textbar{} the drift is predicted
+\noindent\textbf{44.}\quad \emph{table row:} E \textbar{} \flag{origin of the wheel yaw-rate offset untested} \textbar{} the drift is predicted
   but not yet attributable or correctable (\reportref{sec:h1-falsified})
 
 \medskip
-\noindent\textbf{41.}\quad \emph{table row:} E \textbar{} \flag{accelerometer characterisation unstable across bags} \textbar{} bias 0.019 to
+\noindent\textbf{45.}\quad \emph{table row:} E \textbar{} \flag{accelerometer characterisation unstable across bags} \textbar{} bias 0.019 to
   0.068, scale 1.020 to 1.067 for one simulated sensor
 
 \medskip

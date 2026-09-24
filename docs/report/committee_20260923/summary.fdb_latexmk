@@ -1,5 +1,5 @@
 # Fdb version 3
-["pdflatex"] 1789791710 "summary.tex" "summary.pdf" "summary" 1789791711
+["pdflatex"] 1789916278 "summary.tex" "summary.pdf" "summary" 1789916279
   "/etc/texmf/web2c/texmf.cnf" 1789525515 475 c0e671620eb5563b2130f56340a5fde8 ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/ecrm1095.tfm" 1136768653 3584 929cdff2b7a8c11bd4d49fd68cb0ae70 ""
@@ -78,6 +78,8 @@
   "/usr/share/texmf/fonts/type1/public/lm/lmr9.pfb" 1254938640 121065 50bbfa703ce7e11638752ef5a6d120c7 ""
   "/usr/share/texmf/fonts/type1/public/lm/lmri10.pfb" 1254938640 112593 fda2373ba4420af33949610de4c28fe8 ""
   "/usr/share/texmf/fonts/type1/public/lm/lmsy10.pfb" 1254938640 27863 09ce3735688ffde955e72da27c95b61a ""
+  "/usr/share/texmf/fonts/type1/public/lm/lmsy7.pfb" 1254938640 27941 d1f5d03f61a46c3fcc3a2ba904ddda52 ""
+  "/usr/share/texmf/fonts/type1/public/lm/lmsy9.pfb" 1254938640 27835 16c2fa83351d4ef8cf5aebfab8a44bc1 ""
   "/usr/share/texmf/fonts/type1/public/lm/lmtt10.pfb" 1254938640 113227 1010e11451afc2822c95dae77c390042 ""
   "/usr/share/texmf/tex/latex/lm/lmodern.sty" 1256929440 1606 c17281c7cff2bbd7ff0173e1433487ec ""
   "/usr/share/texmf/tex/latex/lm/omllmm.fd" 1256929440 888 44447a3a3af84a22454ef89500942d93 ""
@@ -89,8 +91,8 @@
   "/usr/share/texmf/web2c/texmf.cnf" 1644012257 39432 7155514e09a3d69036fac785183a21c2 ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1789525526 165012 f177baa1c39a3ebd62c3096a43521a0d ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1789525528 1435854 f4f5f67aa9d1ba2a312ed1460dac1994 ""
-  "summary.aux" 1789791711 786 0018ada73f33938c748f3a9d4fc3e005 "pdflatex"
-  "summary.tex" 1789791710 8851 b39003a7aa5526154767c637447862fa ""
+  "summary.aux" 1789916279 786 0018ada73f33938c748f3a9d4fc3e005 "pdflatex"
+  "summary.tex" 1789916278 9433 7397b2fe383768707e823a0ed4414643 ""
   (generated)
   "summary.aux"
   "summary.log"

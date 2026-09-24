@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  19 SEP 2026 11:22
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  22 SEP 2026 14:46
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -797,9 +797,9 @@ Package hyperref Info: Option `colorlinks' set `true' on input line 35.
 
 (./figures/pipeline_performance.tex)
 Package translations Info: No language package found. I am going to use `englis
-h' as default language. on input line 110.
-LaTeX Font Info:    Trying to load font information for T1+lmr on input line 11
-0.
+h' as default language. on input line 133.
+LaTeX Font Info:    Trying to load font information for T1+lmr on input line 13
+3.
  (/usr/share/texmf/tex/latex/lm/t1lmr.fd
 File: t1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
@@ -807,24 +807,24 @@ File: t1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
 (./chapters/chapter_4_results.aux))
 \openout1 = `main.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 110.
-LaTeX Font Info:    ... okay on input line 110.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 110.
-LaTeX Font Info:    ... okay on input line 110.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 110.
-LaTeX Font Info:    ... okay on input line 110.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 110.
-LaTeX Font Info:    ... okay on input line 110.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 110.
-LaTeX Font Info:    ... okay on input line 110.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 110.
-LaTeX Font Info:    ... okay on input line 110.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 110.
-LaTeX Font Info:    ... okay on input line 110.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 110.
-LaTeX Font Info:    ... okay on input line 110.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 110.
-LaTeX Font Info:    ... okay on input line 110.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 133.
+LaTeX Font Info:    ... okay on input line 133.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 133.
+LaTeX Font Info:    ... okay on input line 133.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 133.
+LaTeX Font Info:    ... okay on input line 133.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 133.
+LaTeX Font Info:    ... okay on input line 133.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 133.
+LaTeX Font Info:    ... okay on input line 133.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 133.
+LaTeX Font Info:    ... okay on input line 133.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 133.
+LaTeX Font Info:    ... okay on input line 133.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 133.
+LaTeX Font Info:    ... okay on input line 133.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 133.
+LaTeX Font Info:    ... okay on input line 133.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -860,18 +860,18 @@ LaTeX Font Info:    ... okay on input line 110.
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-LaTeX Info: Redefining \microtypecontext on input line 110.
-Package microtype Info: Applying patch `item' on input line 110.
-Package microtype Info: Applying patch `toc' on input line 110.
-Package microtype Info: Applying patch `eqnum' on input line 110.
-Package microtype Info: Applying patch `footnote' on input line 110.
+LaTeX Info: Redefining \microtypecontext on input line 133.
+Package microtype Info: Applying patch `item' on input line 133.
+Package microtype Info: Applying patch `toc' on input line 133.
+Package microtype Info: Applying patch `eqnum' on input line 133.
+Package microtype Info: Applying patch `footnote' on input line 133.
 Package microtype Info: Generating PDF output.
 Package microtype Info: Character protrusion enabled (level 2).
 Package microtype Info: Using default protrusion set `alltext'.
 Package microtype Info: Automatic font expansion enabled (level 2),
 (microtype)             stretch: 20, shrink: 20, step: 1, non-selected.
 Package microtype Info: Using default expansion set `alltext-nott'.
-LaTeX Info: Redefining \showhyphens on input line 110.
+LaTeX Info: Redefining \showhyphens on input line 133.
 Package microtype Info: No adjustment of tracking.
 Package microtype Info: No adjustment of interword spacing.
 Package microtype Info: No adjustment of character kerning.
@@ -915,8 +915,8 @@ File: translations-basic-dictionary-english.trsl (english translation file `tra
 nslations-basic-dictionary')
 )
 Package translations Info: loading dictionary `translations-basic-dictionary' f
-or `english'. on input line 110.
-Package hyperref Info: Link coloring ON on input line 110.
+or `english'. on input line 133.
+Package hyperref Info: Link coloring ON on input line 133.
 
 (/usr/share/texlive/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2021-04-02 v2.47 Cross-referencing by name of section
@@ -929,44 +929,44 @@ Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 )
 \c@section@level=\count338
 )
-LaTeX Info: Redefining \ref on input line 110.
-LaTeX Info: Redefining \pageref on input line 110.
-LaTeX Info: Redefining \nameref on input line 110.
+LaTeX Info: Redefining \ref on input line 133.
+LaTeX Info: Redefining \pageref on input line 133.
+LaTeX Info: Redefining \nameref on input line 133.
 
 (./main.out) (./main.out)
 \@outlinefile=\write4
 \openout4 = `main.out'.
 
 LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 1
-12.
+35.
  (/usr/share/texmf/tex/latex/lm/ot1lmr.fd
 File: ot1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
 LaTeX Font Info:    Trying to load font information for OML+lmm on input line 1
-12.
+35.
 
 (/usr/share/texmf/tex/latex/lm/omllmm.fd
 File: omllmm.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
 LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 
-112.
+135.
 
 (/usr/share/texmf/tex/latex/lm/omslmsy.fd
 File: omslmsy.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
 LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 
-112.
+135.
 
 (/usr/share/texmf/tex/latex/lm/omxlmex.fd
 File: omxlmex.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <14.4> on input line 112.
+(Font)              <14.4> on input line 135.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 112.
+(Font)              <10> on input line 135.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 112.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 112
+(Font)              <7> on input line 135.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 135
 .
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
@@ -975,7 +975,7 @@ File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 (/usr/share/texlive/texmf-dist/tex/latex/microtype/mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 112
+LaTeX Font Info:    Trying to load font information for U+msb on input line 135
 .
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
@@ -996,7 +996,7 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.44 ...ion and limitations}{37}{subsection.4.2.7}
+l.51 ...ariance consistency}{41}{subsection.4.2.5}
                                                   % [1
 
 ])
@@ -1028,179 +1028,263 @@ Package microtype Info: Loading generic protrusion settings for font family
 [3
 
 
-] [4] [5] (./figures/ackermann_robot.tex
+] [4] (./figures/ackermann_robot.tex
 LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <5> on input line 53.
-)
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10.95> on input line 170.
- [6] [7] [8] [9]
-(./figures/frame_chain.tex) [10]
-<figures/warehouse_static_01.png, id=398, 847.165pt x 847.165pt>
+) [5] [6] [7] [8] [9] [10] [11]
+(./figures/frame_chain.tex)
+<figures/warehouse_static_01.png, id=432, 847.165pt x 847.165pt>
 File: figures/warehouse_static_01.png Graphic file (type png)
 <use figures/warehouse_static_01.png>
-Package pdftex.def Info: figures/warehouse_static_01.png  used on input line 48
-0.
+Package pdftex.def Info: figures/warehouse_static_01.png  used on input line 62
+9.
 (pdftex.def)             Requested size: 145.68144pt x 145.67075pt.
-<figures/warehouse_objonwallonly.png, id=399, 847.165pt x 847.165pt>
+<figures/warehouse_objonwallonly.png, id=433, 847.165pt x 847.165pt>
 File: figures/warehouse_objonwallonly.png Graphic file (type png)
 <use figures/warehouse_objonwallonly.png>
 Package pdftex.def Info: figures/warehouse_objonwallonly.png  used on input lin
-e 485.
+e 634.
 (pdftex.def)             Requested size: 145.68144pt x 145.67075pt.
-<figures/warehouse_dynamic.png, id=400, 847.165pt x 847.165pt>
+<figures/warehouse_dynamic.png, id=434, 847.165pt x 847.165pt>
 File: figures/warehouse_dynamic.png Graphic file (type png)
 <use figures/warehouse_dynamic.png>
-Package pdftex.def Info: figures/warehouse_dynamic.png  used on input line 490.
+Package pdftex.def Info: figures/warehouse_dynamic.png  used on input line 639.
 
 (pdftex.def)             Requested size: 145.68144pt x 145.67075pt.
-<figures/floor_plain.png, id=405, 845.1575pt x 839.135pt>
+<figures/floor_plain.png, id=439, 845.1575pt x 839.135pt>
 File: figures/floor_plain.png Graphic file (type png)
 <use figures/floor_plain.png>
-Package pdftex.def Info: figures/floor_plain.png  used on input line 520.
+Package pdftex.def Info: figures/floor_plain.png  used on input line 669.
 (pdftex.def)             Requested size: 150.23138pt x 149.15556pt.
-<figures/floor_bayline.png, id=406, 845.1575pt x 839.135pt>
+<figures/floor_bayline.png, id=440, 845.1575pt x 839.135pt>
 File: figures/floor_bayline.png Graphic file (type png)
 <use figures/floor_bayline.png>
-Package pdftex.def Info: figures/floor_bayline.png  used on input line 525.
+Package pdftex.def Info: figures/floor_bayline.png  used on input line 674.
 (pdftex.def)             Requested size: 150.23138pt x 149.15556pt.
-<figures/floor_bayline_detail.png, id=407, 635.37375pt x 722.7pt>
+<figures/floor_bayline_detail.png, id=441, 635.37375pt x 722.7pt>
 File: figures/floor_bayline_detail.png Graphic file (type png)
 <use figures/floor_bayline_detail.png>
-Package pdftex.def Info: figures/floor_bayline_detail.png  used on input line 5
-30.
+Package pdftex.def Info: figures/floor_bayline_detail.png  used on input line 6
+79.
 (pdftex.def)             Requested size: 132.01773pt x 150.16145pt.
- [11 <./figures/warehouse_static_01.png (PNG copy)> <./figures/warehouse_objonw
-allonly.png (PNG copy)> <./figures/warehouse_dynamic.png (PNG copy)>] [12 <./fi
-gures/floor_plain.png (PNG copy)> <./figures/floor_bayline.png (PNG copy)> <./f
-igures/floor_bayline_detail.png (PNG copy)>]
-[13] [14] [15] [16] [17] [18]
-Underfull \hbox (badness 2050) in paragraph at lines 989--992
-[][]\T1/lmr/m/n/12 (+20) Table 3.11[][] de-fines the three es-ti-ma-tors. The E
+ [12]
+<figures/scene_allsensor_000.png, id=457, 845.1575pt x 839.135pt>
+File: figures/scene_allsensor_000.png Graphic file (type png)
+<use figures/scene_allsensor_000.png>
+Package pdftex.def Info: figures/scene_allsensor_000.png  used on input line 76
+1.
+(pdftex.def)             Requested size: 106.98264pt x 106.21043pt.
+<figures/scene_allsensor_001.png, id=458, 845.1575pt x 839.135pt>
+File: figures/scene_allsensor_001.png Graphic file (type png)
+<use figures/scene_allsensor_001.png>
+Package pdftex.def Info: figures/scene_allsensor_001.png  used on input line 76
+6.
+(pdftex.def)             Requested size: 106.98264pt x 106.21043pt.
+<figures/scene_allsensor_002.png, id=459, 845.1575pt x 839.135pt>
+File: figures/scene_allsensor_002.png Graphic file (type png)
+<use figures/scene_allsensor_002.png>
+Package pdftex.def Info: figures/scene_allsensor_002.png  used on input line 77
+1.
+(pdftex.def)             Requested size: 106.98264pt x 106.21043pt.
+<figures/scene_allsensor_003.png, id=460, 845.1575pt x 839.135pt>
+File: figures/scene_allsensor_003.png Graphic file (type png)
+<use figures/scene_allsensor_003.png>
+Package pdftex.def Info: figures/scene_allsensor_003.png  used on input line 77
+6.
+(pdftex.def)             Requested size: 106.98264pt x 106.21043pt.
+<figures/scene_allsensor_004.png, id=461, 845.1575pt x 839.135pt>
+File: figures/scene_allsensor_004.png Graphic file (type png)
+<use figures/scene_allsensor_004.png>
+Package pdftex.def Info: figures/scene_allsensor_004.png  used on input line 78
+3.
+(pdftex.def)             Requested size: 106.98264pt x 106.21043pt.
+<figures/scene_static_nofloortexture_000.png, id=462, 845.1575pt x 839.135pt>
+File: figures/scene_static_nofloortexture_000.png Graphic file (type png)
+<use figures/scene_static_nofloortexture_000.png>
+Package pdftex.def Info: figures/scene_static_nofloortexture_000.png  used on i
+nput line 788.
+(pdftex.def)             Requested size: 106.98264pt x 106.21043pt.
+<figures/scene_static_nofloortexture_001.png, id=463, 845.1575pt x 839.135pt>
+File: figures/scene_static_nofloortexture_001.png Graphic file (type png)
+<use figures/scene_static_nofloortexture_001.png>
+Package pdftex.def Info: figures/scene_static_nofloortexture_001.png  used on i
+nput line 793.
+(pdftex.def)             Requested size: 106.98264pt x 106.21043pt.
+<figures/scene_static_nofloortexture_002.png, id=464, 845.1575pt x 839.135pt>
+File: figures/scene_static_nofloortexture_002.png Graphic file (type png)
+<use figures/scene_static_nofloortexture_002.png>
+Package pdftex.def Info: figures/scene_static_nofloortexture_002.png  used on i
+nput line 798.
+(pdftex.def)             Requested size: 106.98264pt x 106.21043pt.
+<figures/scene_dynamic_nofloortexture_00_000.png, id=465, 845.1575pt x 839.135p
+t>
+File: figures/scene_dynamic_nofloortexture_00_000.png Graphic file (type png)
+<use figures/scene_dynamic_nofloortexture_00_000.png>
+Package pdftex.def Info: figures/scene_dynamic_nofloortexture_00_000.png  used 
+on input line 805.
+(pdftex.def)             Requested size: 106.98264pt x 106.21043pt.
+<figures/scene_dynamic_nofloortexture_00_001.png, id=466, 845.1575pt x 839.135p
+t>
+File: figures/scene_dynamic_nofloortexture_00_001.png Graphic file (type png)
+<use figures/scene_dynamic_nofloortexture_00_001.png>
+Package pdftex.def Info: figures/scene_dynamic_nofloortexture_00_001.png  used 
+on input line 810.
+(pdftex.def)             Requested size: 106.98264pt x 106.21043pt.
+<figures/scene_dynamic_nofloortexture_01_000.png, id=467, 845.1575pt x 839.135p
+t>
+File: figures/scene_dynamic_nofloortexture_01_000.png Graphic file (type png)
+<use figures/scene_dynamic_nofloortexture_01_000.png>
+Package pdftex.def Info: figures/scene_dynamic_nofloortexture_01_000.png  used 
+on input line 815.
+(pdftex.def)             Requested size: 106.98264pt x 106.21043pt.
+<figures/scene_dynamic_nofloortexture_02_000.png, id=468, 845.1575pt x 839.135p
+t>
+File: figures/scene_dynamic_nofloortexture_02_000.png Graphic file (type png)
+<use figures/scene_dynamic_nofloortexture_02_000.png>
+Package pdftex.def Info: figures/scene_dynamic_nofloortexture_02_000.png  used 
+on input line 820.
+(pdftex.def)             Requested size: 106.98264pt x 106.21043pt.
+ (./tables/dataset_scenes.tex) [13 <./figures/warehouse_static_01.png (PNG copy
+)> <./figures/warehouse_objonwallonly.png (PNG copy)> <./figures/warehouse_dyna
+mic.png (PNG copy)>] [14] [15 <./figures/floor_plain.png (PNG copy)> <./figures
+/floor_bayline.png (PNG copy)> <./figures/floor_bayline_detail.png (PNG copy)>]
+ [16 <./figures/scene_allsensor_000.png (PNG copy)> <./figures/scene_allsensor_
+001.png (PNG copy)> <./figures/scene_allsensor_002.png (PNG copy)> <./figures/s
+cene_allsensor_003.png (PNG copy)> <./figures/scene_allsensor_004.png (PNG copy
+)> <./figures/scene_static_nofloortexture_000.png (PNG copy)> <./figures/scene_
+static_nofloortexture_001.png (PNG copy)> <./figures/scene_static_nofloortextur
+e_002.png (PNG copy)> <./figures/scene_dynamic_nofloortexture_00_000.png (PNG c
+opy)> <./figures/scene_dynamic_nofloortexture_00_001.png (PNG copy)> <./figures
+/scene_dynamic_nofloortexture_01_000.png (PNG copy)> <./figures/scene_dynamic_n
+ofloortexture_02_000.png (PNG copy)>] [17]
+[18] (./figures/orb_pipeline.tex) [19] (./figures/vins_pipeline.tex) [20]
+[21] [22]
+Underfull \hbox (badness 2050) in paragraph at lines 1358--1361
+[][]\T1/lmr/m/n/12 (+20) Table 3.18[][] de-fines the three es-ti-ma-tors. The E
 KF car-ries the pla-nar state
  []
 
-[19]
-Underfull \hbox (badness 5578) in paragraph at lines 1114--1114
+[23] [24] [25]
+Underfull \hbox (badness 5578) in paragraph at lines 1564--1564
 []|\T1/lmr/m/n/10.95 (+20) Place-recognition, loop, merge, and global-
  []
 
-[20] [21] [22] [23])
-Underfull \hbox (badness 2828) in paragraph at lines 1327--117
+[26] [27] [28] [29] [30] [31])
+Underfull \hbox (badness 2828) in paragraph at lines 1890--140
 \T1/lmr/m/n/12 (+20) The prin-ci-pal ev-i-dence com-prises \T1/lmtt/m/n/12 READ
 ME.md\T1/lmr/m/n/12 (+20) ; the four \T1/lmtt/m/n/12 MEMORY_CLAUDE/README.
  []
 
-[24] [25] [26]
+[32] [33]
 \openout2 = `chapters/chapter_4_results.aux'.
 
  (./chapters/chapter_4_results.tex
 Chapter 4.
-[27
+[34
 
 
 
 
-] [28] [29] [30] [31]
+] [35] [36] [37] [38]
 <../../../output/compare/simulation/exp-estimator-baseline/proprio_trajectories
-_dataset_allsensor_001_light.png, id=555, 578.16pt x 578.16pt>
+_dataset_allsensor_001_light.png, id=685, 578.16pt x 578.16pt>
 File: ../../../output/compare/simulation/exp-estimator-baseline/proprio_traject
 ories_dataset_allsensor_001_light.png Graphic file (type png)
 <use ../../../output/compare/simulation/exp-estimator-baseline/proprio_trajecto
 ries_dataset_allsensor_001_light.png>
 Package pdftex.def Info: ../../../output/compare/simulation/exp-estimator-basel
-ine/proprio_trajectories_dataset_allsensor_001_light.png  used on input line 38
-5.
+ine/proprio_trajectories_dataset_allsensor_001_light.png  used on input line 41
+9.
 (pdftex.def)             Requested size: 373.3035pt x 373.30292pt.
- [32] [33 <../../../output/compare/simulation/exp-estimator-baseline/proprio_tr
-ajectories_dataset_allsensor_001_light.png>] [34]
+ [39 <../../../output/compare/simulation/exp-estimator-baseline/proprio_traject
+ories_dataset_allsensor_001_light.png>] [40] [41]
 <../../../output/compare/simulation/exp-estimator-baseline/proprio_covariance_d
-ataset_allsensor_001_light.png, id=585, 939.51pt x 650.43pt>
+ataset_allsensor_001_light.png, id=713, 939.51pt x 650.43pt>
 File: ../../../output/compare/simulation/exp-estimator-baseline/proprio_covaria
 nce_dataset_allsensor_001_light.png Graphic file (type png)
 <use ../../../output/compare/simulation/exp-estimator-baseline/proprio_covarian
 ce_dataset_allsensor_001_light.png>
 Package pdftex.def Info: ../../../output/compare/simulation/exp-estimator-basel
-ine/proprio_covariance_dataset_allsensor_001_light.png  used on input line 575.
+ine/proprio_covariance_dataset_allsensor_001_light.png  used on input line 609.
 
 (pdftex.def)             Requested size: 455.24411pt x 315.17035pt.
 
-[35] [36 <../../../output/compare/simulation/exp-estimator-baseline/proprio_cov
-ariance_dataset_allsensor_001_light.png>] [37] [38]
-<../../../output/yolo_eval/summary_light.png, id=611, 859.21pt x 343.684pt>
+[42 <../../../output/compare/simulation/exp-estimator-baseline/proprio_covarian
+ce_dataset_allsensor_001_light.png>] [43] [44] [45]
+<../../../output/yolo_eval/summary_light.png, id=755, 859.21pt x 343.684pt>
 File: ../../../output/yolo_eval/summary_light.png Graphic file (type png)
 <use ../../../output/yolo_eval/summary_light.png>
 Package pdftex.def Info: ../../../output/yolo_eval/summary_light.png  used on i
-nput line 771.
+nput line 973.
 (pdftex.def)             Requested size: 455.24411pt x 182.09921pt.
-<../../../output/yolo_eval/dyn_00_001/overlay/01116.jpg, id=612, 1284.8pt x 722
+<../../../output/yolo_eval/dyn_00_001/overlay/01116.jpg, id=756, 1284.8pt x 722
 .7pt>
 File: ../../../output/yolo_eval/dyn_00_001/overlay/01116.jpg Graphic file (type
  jpg)
 <use ../../../output/yolo_eval/dyn_00_001/overlay/01116.jpg>
 Package pdftex.def Info: ../../../output/yolo_eval/dyn_00_001/overlay/01116.jpg
-  used on input line 780.
+  used on input line 982.
 (pdftex.def)             Requested size: 455.24411pt x 256.06956pt.
- [39 <../../../output/yolo_eval/summary_light.png>] [40 <../../../output/yolo_e
+ [46] [47 <../../../output/yolo_eval/summary_light.png> <../../../output/yolo_e
 val/dyn_00_001/overlay/01116.jpg>]
-<../../../output/yolo_eval/classification_confusion_light.png, id=625, 699.0115
+<../../../output/yolo_eval/classification_confusion_light.png, id=769, 699.0115
 pt x 340.0705pt>
 File: ../../../output/yolo_eval/classification_confusion_light.png Graphic file
  (type png)
 <use ../../../output/yolo_eval/classification_confusion_light.png>
 Package pdftex.def Info: ../../../output/yolo_eval/classification_confusion_lig
-ht.png  used on input line 827.
+ht.png  used on input line 1032.
 (pdftex.def)             Requested size: 455.24411pt x 221.47908pt.
- [41
+ [48
 
  <../../../output/yolo_eval/classification_confusion_light.png>]
-Underfull \hbox (badness 2846) in paragraph at lines 867--867
+Underfull \hbox (badness 2846) in paragraph at lines 1072--1072
 []|\T1/lmr/m/n/10.95 (+20) ORB+YOLO ex-po-sure
  []
 
 
-Underfull \hbox (badness 2050) in paragraph at lines 871--875
+Underfull \hbox (badness 2050) in paragraph at lines 1076--1080
 \T1/lmr/m/n/10.95 (+20) steps. Me-dian affected-step frac-tions are
  []
 
 
-Underfull \hbox (badness 3646) in paragraph at lines 871--875
+Underfull \hbox (badness 3646) in paragraph at lines 1076--1080
 \T1/lmr/m/n/10.95 (+20) VINS+YOLO), and 26.9% (ORB+YOLO).
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 878--878
+Underfull \hbox (badness 10000) in paragraph at lines 1083--1083
 []|\T1/lmr/m/n/10.95 (+20) Static ORB has an
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 878--878
+Underfull \hbox (badness 10000) in paragraph at lines 1083--1083
 \T1/lmr/m/n/10.95 (+20) iso-lated initialization-
  []
 
 
-Underfull \hbox (badness 1953) in paragraph at lines 882--886
+Underfull \hbox (badness 1953) in paragraph at lines 1087--1091
 []|\T1/lmr/m/n/10.95 (+20) The two static re-peat sum-maries omit fi-
  []
 
 
-Underfull \hbox (badness 1024) in paragraph at lines 886--886
+Underfull \hbox (badness 1024) in paragraph at lines 1091--1091
 []|\T1/lmr/m/n/10.95 (+20) ORB base-line/filter in-
  []
 
-<../../../output/compare/relogged_20260916/anomaly_diagnostics_light.png, id=63
-4, 1084.05pt x 614.295pt>
+<../../../output/compare/relogged_20260916/anomaly_diagnostics_light.png, id=77
+9, 1084.05pt x 614.295pt>
 File: ../../../output/compare/relogged_20260916/anomaly_diagnostics_light.png G
 raphic file (type png)
 <use ../../../output/compare/relogged_20260916/anomaly_diagnostics_light.png>
 Package pdftex.def Info: ../../../output/compare/relogged_20260916/anomaly_diag
-nostics_light.png  used on input line 899.
+nostics_light.png  used on input line 1104.
 (pdftex.def)             Requested size: 455.24411pt x 257.97401pt.
-[42] [43 <../../../output/compare/relogged_20260916/anomaly_diagnostics_light.p
-ng>] (./tables/rpe_summary.tex) [44] (./tables/rpe_sweep.tex)
+[49] [50 <../../../output/compare/relogged_20260916/anomaly_diagnostics_light.p
+ng>] (./tables/rpe_summary.tex) (./tables/rpe_sweep.tex) [51]
 (./tables/trajectory_per_run.tex) (./tables/example_run_summary.tex)
 <../../../output/compare/relogged_20260916/simulation/dataset_dynamic_nofloorte
-xture_00_000/logging_20260916_01/compare_light.png, id=666, 1011.78pt x 1127.41
+xture_00_000/logging_20260916_01/compare_light.png, id=813, 1011.78pt x 1127.41
 2pt>
 File: ../../../output/compare/relogged_20260916/simulation/dataset_dynamic_nofl
 oortexture_00_000/logging_20260916_01/compare_light.png Graphic file (type png)
@@ -1209,79 +1293,79 @@ oortexture_00_000/logging_20260916_01/compare_light.png Graphic file (type png)
 ortexture_00_000/logging_20260916_01/compare_light.png>
 Package pdftex.def Info: ../../../output/compare/relogged_20260916/simulation/d
 ataset_dynamic_nofloortexture_00_000/logging_20260916_01/compare_light.png  use
-d on input line 1093.
+d on input line 1298.
 (pdftex.def)             Requested size: 455.24411pt x 444.2861pt.
-<../../../output/compare/relogged_20260916/robustness_light.png, id=668, 1011.7
+<../../../output/compare/relogged_20260916/robustness_light.png, id=815, 1011.7
 8pt x 339.669pt>
 File: ../../../output/compare/relogged_20260916/robustness_light.png Graphic fi
 le (type png)
 <use ../../../output/compare/relogged_20260916/robustness_light.png>
 Package pdftex.def Info: ../../../output/compare/relogged_20260916/robustness_l
-ight.png  used on input line 1115.
+ight.png  used on input line 1320.
 (pdftex.def)             Requested size: 455.24411pt x 152.83408pt.
- [45]
-[46] [47 <../../../output/compare/relogged_20260916/simulation/dataset_dynamic_
-nofloortexture_00_000/logging_20260916_01/compare_light.png>]
-<../../../output/compare/relogged_20260916/capacity_resources_light.png, id=688
+<../../../output/compare/relogged_20260916/capacity_resources_light.png, id=817
 , 1011.78pt x 614.295pt>
 File: ../../../output/compare/relogged_20260916/capacity_resources_light.png Gr
 aphic file (type png)
 <use ../../../output/compare/relogged_20260916/capacity_resources_light.png>
 Package pdftex.def Info: ../../../output/compare/relogged_20260916/capacity_res
-ources_light.png  used on input line 1161.
+ources_light.png  used on input line 1366.
 (pdftex.def)             Requested size: 455.24411pt x 276.40207pt.
-<../../../output/compare/relogged_20260916/module_latency_light.png, id=690, 11
+ [52]
+[53] [54 <../../../output/compare/relogged_20260916/simulation/dataset_dynamic_
+nofloortexture_00_000/logging_20260916_01/compare_light.png>] [55 <../../../out
+put/compare/relogged_20260916/robustness_light.png> <../../../output/compare/re
+logged_20260916/capacity_resources_light.png>]
+<../../../output/compare/relogged_20260916/module_latency_light.png, id=845, 11
 56.32pt x 578.16pt>
 File: ../../../output/compare/relogged_20260916/module_latency_light.png Graphi
 c file (type png)
 <use ../../../output/compare/relogged_20260916/module_latency_light.png>
 Package pdftex.def Info: ../../../output/compare/relogged_20260916/module_laten
-cy_light.png  used on input line 1182.
+cy_light.png  used on input line 1387.
 (pdftex.def)             Requested size: 455.24411pt x 227.61641pt.
- [48 <../../../output/compare/relogged_20260916/robustness_light.png>] [49 <../
-../../output/compare/relogged_20260916/capacity_resources_light.png> <../../../
-output/compare/relogged_20260916/module_latency_light.png>] [50
+ [56 <../../../output/compare/relogged_20260916/module_latency_light.png>] [57
 
-] [51]
-<../../../output/compare/rtab_map_vs_gt.png, id=724, 1156.32pt x 794.97pt>
+] [58]
+<../../../output/compare/rtab_map_vs_gt.png, id=868, 1156.32pt x 794.97pt>
 File: ../../../output/compare/rtab_map_vs_gt.png Graphic file (type png)
 <use ../../../output/compare/rtab_map_vs_gt.png>
 Package pdftex.def Info: ../../../output/compare/rtab_map_vs_gt.png  used on in
-put line 1406.
+put line 1611.
 (pdftex.def)             Requested size: 455.24411pt x 312.97258pt.
-<../../../output/compare/rtab_map_vs_gt_selfcheck.png, id=727, 1156.32pt x 794.
+<../../../output/compare/rtab_map_vs_gt_selfcheck.png, id=871, 1156.32pt x 794.
 97pt>
 File: ../../../output/compare/rtab_map_vs_gt_selfcheck.png Graphic file (type p
 ng)
 <use ../../../output/compare/rtab_map_vs_gt_selfcheck.png>
 Package pdftex.def Info: ../../../output/compare/rtab_map_vs_gt_selfcheck.png  
-used on input line 1423.
+used on input line 1628.
 (pdftex.def)             Requested size: 455.24411pt x 312.97258pt.
- [52] [53 <../../../output/compare/rtab_map_vs_gt.png>] [54 <../../../output/co
+ [59] [60 <../../../output/compare/rtab_map_vs_gt.png>] [61 <../../../output/co
 mpare/rtab_map_vs_gt_selfcheck.png>]
 LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 1
-450.
+655.
  (/usr/share/texmf/tex/latex/lm/ts1lmr.fd
 File: ts1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
-) [55]
-Underfull \hbox (badness 2865) in paragraph at lines 1504--1504
+)
+Underfull \hbox (badness 2865) in paragraph at lines 1709--1709
 []\T1/lmr/bx/n/17.28 (+20) Loop Clo-sure, Map Merg-ing, and Global-
  []
 
-[56] (./figures/block_colours_static.tex) [57] [58]
-(./tables/block_performance_static_orb.tex) [59]
-(./tables/block_performance_static_vins.tex) [60]
-(./tables/block_performance_static_ekf.tex) [61]
-(./figures/block_colours_dynamic.tex) [62]
-(./tables/block_performance_dynamic_orb.tex) [63]
-(./tables/block_performance_dynamic_vins.tex) [64])
-Underfull \hbox (badness 4024) in paragraph at lines 1793--118
+[62] [63] (./figures/block_colours_static.tex) [64] [65]
+(./tables/block_performance_static_orb.tex) [66]
+(./tables/block_performance_static_vins.tex) [67]
+(./tables/block_performance_static_ekf.tex) [68]
+(./figures/block_colours_dynamic.tex) [69]
+(./tables/block_performance_dynamic_orb.tex) [70]
+(./tables/block_performance_dynamic_vins.tex) [71])
+Underfull \hbox (badness 4024) in paragraph at lines 1998--141
 \T1/lmtt/m/n/12 run _ metrics . csv$\T1/lmr/m/n/12 (+20) , $\T1/lmtt/m/n/12 mod
 ule _ latency _ summary . csv$\T1/lmr/m/n/12 (+20) , $\T1/lmtt/m/n/12 trajector
 y _ metrics . csv$\T1/lmr/m/n/12 (+20) , and
  []
 
-[65
+[72
 
 
 
@@ -1289,23 +1373,23 @@ y _ metrics . csv$\T1/lmr/m/n/12 (+20) , and
 
 
 
-] [66] [67] (./main.aux (./chapters/chapter_3_methodology.aux)
+] [73] [74] (./main.aux (./chapters/chapter_3_methodology.aux)
 (./chapters/chapter_4_results.aux))
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: 82F3E5A621F9D2B03A54D17E5636F8DB;13850.
+(rerunfilecheck)             Checksum: F8B44F9CA46573D69A8A663B7197BF21;14668.
  ) 
 Here is how much of TeX's memory you used:
- 31260 strings out of 480171
- 635105 string characters out of 5894489
- 953542 words of memory out of 5000000
- 48054 multiletter control sequences out of 15000+600000
- 604922 words of font info for 292 fonts, out of 8000000 for 9000
+ 31654 strings out of 480171
+ 643627 string characters out of 5894489
+ 965325 words of memory out of 5000000
+ 48342 multiletter control sequences out of 15000+600000
+ 606938 words of font info for 311 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
- 84i,15n,96p,1138b,1248s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 84i,15n,96p,1386b,1248s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texmf/fonts/enc/dvips/lm/lm-ec.enc}{/usr/share/texmf/fonts/enc/dv
 ips/lm/lm-ts1.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathsy.enc}{/usr/shar
-e/texmf/fonts/enc/dvips/lm/lm-mathex.enc}{/usr/share/texmf/fonts/enc/dvips/lm/l
-m-rm.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathit.enc}</usr/share/texmf/f
+e/texmf/fonts/enc/dvips/lm/lm-rm.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm-ma
+thex.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathit.enc}</usr/share/texmf/f
 onts/type1/public/lm/lmbx10.pfb></usr/share/texmf/fonts/type1/public/lm/lmbx12.
 pfb></usr/share/texmf/fonts/type1/public/lm/lmbx8.pfb></usr/share/texmf/fonts/t
 ype1/public/lm/lmbxi10.pfb></usr/share/texmf/fonts/type1/public/lm/lmex10.pfb><
@@ -1323,10 +1407,10 @@ e/texmf/fonts/type1/public/lm/lmsy6.pfb></usr/share/texmf/fonts/type1/public/lm
 fonts/type1/public/lm/lmtt10.pfb></usr/share/texmf/fonts/type1/public/lm/lmtt12
 .pfb></usr/share/texmf/fonts/type1/public/lm/lmtt8.pfb></usr/share/texlive/texm
 f-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb>
-Output written on main.pdf (68 pages, 3060098 bytes).
+Output written on main.pdf (75 pages, 3388805 bytes).
 PDF statistics:
- 1046 PDF objects out of 1200 (max. 8388607)
- 847 compressed objects within 9 object streams
- 204 named destinations out of 1000 (max. 500000)
- 74813 words of extra memory for PDF output out of 89155 (max. 10000000)
+ 1200 PDF objects out of 1200 (max. 8388607)
+ 948 compressed objects within 10 object streams
+ 251 named destinations out of 1000 (max. 500000)
+ 74897 words of extra memory for PDF output out of 89155 (max. 10000000)
 

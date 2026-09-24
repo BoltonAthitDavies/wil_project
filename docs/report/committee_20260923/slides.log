@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  19 SEP 2026 11:23
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  20 SEP 2026 21:45
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1110,56 +1110,62 @@ Overfull \vbox (3.02159pt too high) detected at line 113
 
 [5
 
-] [6
-
 ]
-Overfull \vbox (2.94957pt too high) detected at line 166
+Overfull \vbox (0.40247pt too high) detected at line 145
  []
 
-[7
+[6
 
-] [8
+] [7
+
+]
+Overfull \vbox (2.94957pt too high) detected at line 198
+ []
+
+[8
 
 ] [9
 
 ] [10
 
+] [11
+
 ]
-Overfull \vbox (55.45436pt too high) detected at line 264
+Overfull \vbox (55.45436pt too high) detected at line 296
  []
 
-[11
+[12
 
-] [12
+] [13
 
 ]
-Underfull \hbox (badness 1087) in paragraph at lines 309--309
+Underfull \hbox (badness 1087) in paragraph at lines 341--341
 \T1/cmss/m/n/10 tion; both ide-al-i-sa-tions cur-rently
  []
 
 
-Overfull \hbox (64.42259pt too wide) in paragraph at lines 309--309
+Overfull \hbox (64.42259pt too wide) in paragraph at lines 341--341
 [][]  
  []
 
 
-Overfull \vbox (10.99721pt too high) detected at line 309
+Overfull \vbox (10.99721pt too high) detected at line 341
  []
 
-[13
-
-] [14
+[14
 
 ] [15
+
+] [16
 
 ]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\translate ' on input line 335.
+(hyperref)                removing `\translate ' on input line 367.
 
-[16
+[17
 
-] [17
+] [18
 
 ]
 \tf@nav=\write6
@@ -1176,10 +1182,10 @@ Package rerunfilecheck Info: File `slides.out' has not changed.
 (rerunfilecheck)             Checksum: 5BCEA9CF7D2D9AECE7CAC4018E9F6C5B;81.
  ) 
 Here is how much of TeX's memory you used:
- 29815 strings out of 480171
- 641152 string characters out of 5894489
+ 29820 strings out of 480171
+ 641202 string characters out of 5894489
  857340 words of memory out of 5000000
- 47154 multiletter control sequences out of 15000+600000
+ 47157 multiletter control sequences out of 15000+600000
  495150 words of font info for 83 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
  101i,13n,111p,1805b,1067s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1202,10 +1208,10 @@ live2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsx1440.600pk></usr/share/texli
 ve/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/tex
 mf-dist/fonts/type1/public/amsfonts/cm/cmss10.pfb></usr/share/texlive/texmf-dis
 t/fonts/type1/public/amsfonts/cm/cmsy8.pfb>
-Output written on slides.pdf (17 pages, 163952 bytes).
+Output written on slides.pdf (18 pages, 168010 bytes).
 PDF statistics:
- 614 PDF objects out of 1000 (max. 8388607)
- 160 compressed objects within 2 object streams
- 36 named destinations out of 1000 (max. 500000)
+ 632 PDF objects out of 1000 (max. 8388607)
+ 167 compressed objects within 2 object streams
+ 38 named destinations out of 1000 (max. 500000)
  51 words of extra memory for PDF output out of 10000 (max. 10000000)
 

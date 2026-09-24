@@ -1,0 +1,53 @@
+% ORB-SLAM3 pipeline, drawn to show WHERE the semantic mask enters.
+% The single point of the figure: the mask is applied to candidate keypoints
+% BEFORE octree distribution, which is why the per-level quota can redistribute
+% onto surviving static regions. Green is built here, grey is upstream
+% ORB-SLAM3, blue-grey is the optional detector path.
+\begin{tikzpicture}[
+  font=\footnotesize,
+  node distance=6mm,
+  box/.style={draw, rounded corners, align=center, minimum height=8mm,
+    text width=26mm, inner sep=1.6mm, fill=implemented},
+  up/.style={box, fill=gray!12},
+  det/.style={box, fill=external},
+  io/.style={box, fill=gray!5, draw=gray!60},
+  flow/.style={-{Latex[length=2mm]}, thick},
+  opt/.style={flow, dashed},
+  lbl/.style={font=\scriptsize, inner sep=1pt}
+]
+  % --- inputs
+  \node[io]  at (0,   1.5) (stereo) {stereo pair\\\SI{30}{\hertz}};
+  \node[io]  at (0,  -1.5) (imu)    {IMU\\\SI{200}{\hertz}};
+  \node[det] at (0,   4.2) (yolo)   {YOLO detector\\(optional)};
+
+  % --- wrapper, built here
+  \node[box] at (4.2, 1.5) (sync)  {approx-time sync\\\SI{0.02}{\second} slop};
+  \node[box] at (8.2, 1.5) (queue) {one-frame queue\\older frame dropped};
+  \node[box] at (4.2, 4.2) (match) {nearest-in-time match\\$\le\SI{0.15}{\second}$};
+  \node[box] at (8.2, 4.2) (mask)  {expand \SI{8}{px}, clip,\\rasterize 8-bit mask};
+
+  % --- upstream core
+  \node[up]  at (12.4, 1.5) (track) {\texttt{TrackStereo()}\\worker thread};
+  \node[up]  at (12.4, 4.2) (extr)  {ORB extractor\\candidate keypoints};
+  \node[up]  at (16.6, 4.2) (octree){octree\\distribution};
+  \node[up]  at (16.6, 1.5) (ba)    {local mapping,\\loop closing};
+  \node[io]  at (16.6,-1.5) (out)   {\repo{vio.csv}, TF,\\\repo{/orbslam3/pose}};
+
+  \draw[flow] (stereo) -- (sync);
+  \draw[flow] (sync)   -- (queue);
+  \draw[flow] (queue)  -- (track);
+  \draw[flow] (imu)    -| (track.south);
+  \draw[opt]  (yolo)   -- (match);
+  \draw[opt]  (match)  -- (mask);
+  \draw[flow] (track)  -- (extr);
+  \draw[flow] (extr)   -- (octree);
+  \draw[flow] (octree) -- (ba);
+  \draw[flow] (ba)     -- (out);
+
+  % --- the insertion point, which is the reason the figure exists
+  \draw[opt] (mask) -- node[lbl, above=3mm]{mask} (extr);
+  \node[draw=flagred, thick, rounded corners, inner sep=2.2mm, fit=(extr)] (hl) {};
+  \node[lbl, text=flagred, above=1.5mm of hl]
+    {rejected here, \emph{before} distribution};
+
+\end{tikzpicture}

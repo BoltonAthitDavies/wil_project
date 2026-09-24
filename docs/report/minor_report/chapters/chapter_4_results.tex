@@ -115,9 +115,11 @@ worlds; each dataset is read as its own condition.
 
 \begin{table}[htbp]
 \centering
-\caption{Controlled conditions for the estimator comparison. All five estimators
-consume the same two recordings and are scored against the same ground truth over
-the same interval.}
+\caption{Conditions for the estimator comparison. All five estimators consume the
+same five recordings and are scored against the same ground truth over the same
+interval. One factor listed here is \emph{not} controlled and is marked as such:
+the IMU noise model differs systematically between the proprioceptive and visual
+families, and \cref{sec:proprio-tuning} measures what that is worth.}
 \label{tab:proprio-controls}
 \small
 \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.26\textwidth}>{\raggedright\arraybackslash}X}
@@ -137,6 +139,11 @@ Dynamic filter & disabled in every run (\repo{filter=false}) \\
 Replay rate & $0.5\times$ for both visual estimators \\
 Ground truth & \repo{/ground_truth/odometry}, \SI{50}{\hertz}, header stamps \\
 Alignment & rigid $SE(3)$, scale fixed, for cross-system comparison \\
+IMU noise model & \flag{not controlled in this experiment.} The EKF's is measured
+  per bag by \repo{proprio_estimator.py calibrate}; both visual estimators read
+  four constants from \repo{config/wil_sim/stereo_imu.yaml}. The factor is
+  confounded with the estimator here and is separated in
+  \cref{sec:proprio-tuning} \\
 Experimental unit, $n$ & one bag; $n=5$ across \emph{four} worlds. Only
   \texttt{static\_01} plain is repeated, and only twice \\
 Visual configurations & VINS-Fusion; ORB-SLAM3 with loop closing enabled and
@@ -147,16 +154,27 @@ Visual configurations & VINS-Fusion; ORB-SLAM3 with loop closing enabled and
 
 \subsection{Validity}
 
-All ten runs passed their predefined checks. The three baselines completed on
-both bags with the planar assumption holding by a wide margin (maximum tilt
-\SI{0.0018}{\degree} against a \SI{1}{\degree} threshold), the bicycle yaw-rate
-model selected automatically on both, \repo{imu_orientation_used=NO} recorded in
-every run, and the EKF applying 4\,355 and 4\,091 wheel corrections, matching the
-wheel-odometry message counts exactly. Both VINS-Fusion runs processed every
-image received (2\,639 and 2\,478), initialized once in \SI{0.33}{\second}, and
-recorded no resets. Both ORB-SLAM3 runs shut down gracefully with no
-tracking-loss events and inertial initialization at \SI{2.48}{\second} and
-\SI{2.51}{\second}.
+\Cref{tab:proprio-accuracy} rests on thirty-five runs: three proprioceptive
+baselines and the transferred-noise EKF of \cref{sec:proprio-tuning} on each of
+the five bags, VINS-Fusion once per bag, and ORB-SLAM3 twice per bag for the two
+loop-closure configurations. All thirty-five passed their predefined checks.
+
+The proprioceptive baselines completed on all five bags with the planar
+assumption holding by a wide margin---maximum tilt \SIrange{0.0015}{0.0018}{\degree}
+against a \SI{1}{\degree} threshold---with the bicycle yaw-rate model selected
+automatically on every bag, \repo{imu_orientation_used=NO} recorded in every run,
+and the EKF applying 4\,355, 4\,091, 4\,338, 5\,120 and 5\,026 wheel corrections,
+matching the wheel-odometry message counts exactly. VINS-Fusion processed every
+image it received on all five.
+
+\flag{The initialization and reset figures below were extracted for
+\repo{allsensor_000} and \repo{allsensor_001} only and have not been recovered for
+the other three bags:} VINS-Fusion initialized once in \SI{0.33}{\second} with no
+resets, and both ORB-SLAM3 runs shut down gracefully with no tracking-loss events
+and inertial initialization at \SI{2.48}{\second} and \SI{2.51}{\second}. Neither
+\repo{run_metadata.csv} schema records initialization time, reset count or
+tracking-loss events, so these cannot be recovered from the run record and would
+have to be re-read from the console logs.
 
 \begin{queried}[Queried]
 ORB-SLAM3 receives fewer stereo pairs than are available on every dataset, while
@@ -175,7 +193,7 @@ images arriving. What the source does show is an asymmetry in input buffering.
 ORB-SLAM3 subscribes with \repo{rclcpp::SensorDataQoS()}, which is best-effort with
 a depth of five, so a frame arriving while the tracking callback is busy is
 discarded by the middleware and never recorded anywhere; VINS-Fusion subscribes
-with \repo{KeepLast(100).reliable()} and buffers the same burst. \flag{The shortfall
+with \repo{KeepLast(100).reliable()} and buffers the same burst. \moved{The shortfall
 is therefore most consistent with ORB-SLAM3 dropping frames at its own subscriber
 under load, not with loss in transport.} The loop-closure-free runs support that
 reading on three datasets, receiving more pairs than the enabled runs on
@@ -271,7 +289,13 @@ world frames while the baselines start from the ground-truth pose.
 \caption{Estimator comparison on the five \repo{allsensor} bags, which span four
 worlds and both floor conditions; they are not repeats of one another except for
 \repo{allsensor_000} and \repo{allsensor_001}. Bold marks the best aligned ATE of
-each dataset---the EKF on four of five, VINS-Fusion on \repo{allsensor_004}. ``Aligned ATE'' is
+each dataset \emph{as each system was actually configured}---the EKF on four of
+five, VINS-Fusion on \repo{allsensor_004}. That ranking is not tuning-controlled:
+the EKF's noise model is measured from each bag, while both visual systems read
+the hand-set \repo{config/wil_sim/stereo_imu.yaml}. The \emph{EKF @ VSLAM noise}
+rows are the same filter on the same bags with only its four IMU noise terms
+replaced by that file's values; it then loses to VINS-Fusion on all five bags
+(\cref{sec:proprio-tuning}). ``Aligned ATE'' is
 RMSE after a rigid $SE(3)$ fit with scale fixed, the convention used throughout
 this chapter. ``Anchored'' columns are the direct difference from ground truth
 with no alignment and are defined only for the estimators that start from the
@@ -297,6 +321,7 @@ Dataset & World & Estimator & Aligned ATE & Anchored RMS & Anchored final &
  & & ORB-SLAM3 (no LC) & 0.285 & -- & -- & -- & -- \\
  & & \textbf{EKF wheel+IMU} & \textbf{0.190} & 0.281 & 0.122 & \textbf{0.10} &
   $+0.19$ \\
+ & & EKF @ VSLAM noise & 1.313 & 1.980 & 1.443 & 1.23 & $-11.27$ \\
 \midrule
 \repo{allsensor_001} & \texttt{static\_01} & IMU dead reckoning & 12.617 & 14.728 &
   23.741 & 20.99 & $+1.33$ \\
@@ -306,6 +331,7 @@ Dataset & World & Estimator & Aligned ATE & Anchored RMS & Anchored final &
  & & ORB-SLAM3 (no LC) & 0.516 & -- & -- & -- & -- \\
  & & \textbf{EKF wheel+IMU} & \textbf{0.308} & 0.351 & 0.303 & \textbf{0.27} &
   $+0.11$ \\
+ & & EKF @ VSLAM noise & 0.681 & 0.939 & 1.027 & 0.91 & $-9.49$ \\
 \midrule
 \repo{allsensor_002} & \texttt{objonwallonly} & IMU dead reckoning & 13.237 &
   16.359 & 17.728 & 15.39 & $+1.36$ \\
@@ -315,6 +341,7 @@ Dataset & World & Estimator & Aligned ATE & Anchored RMS & Anchored final &
  & & ORB-SLAM3 (no LC) & 1.796 & -- & -- & -- & -- \\
  & & \textbf{EKF wheel+IMU} & \textbf{0.256} & 0.345 & 0.346 & \textbf{0.30} &
   $-0.68$ \\
+ & & EKF @ VSLAM noise & 0.868 & 1.320 & 1.802 & 1.56 & $-20.71$ \\
 \midrule
 \repo{allsensor_003} & \texttt{bayline\_} & IMU dead reckoning & 45.562 & 62.903 &
   74.745 & \flag{53.16} & $-5.84$ \\
@@ -325,6 +352,7 @@ Dataset & World & Estimator & Aligned ATE & Anchored RMS & Anchored final &
  & & ORB-SLAM3 (no LC) & 0.515 & -- & -- & -- & -- \\
  & & \textbf{EKF wheel+IMU} & \textbf{0.423} & 0.668 & 1.240 & \textbf{0.88} &
   $-7.20$ \\
+ & & EKF @ VSLAM noise & 1.230 & 1.574 & 3.037 & 2.16 & $-24.76$ \\
 \midrule
 \repo{allsensor_004} & \texttt{static\_01\_} & IMU dead reckoning & 26.709 & 41.476 &
   48.099 & 33.81 & $-1.35$ \\
@@ -333,6 +361,7 @@ Dataset & World & Estimator & Aligned ATE & Anchored RMS & Anchored final &
  & & ORB-SLAM3 & 1.237 & -- & -- & -- & -- \\
  & & ORB-SLAM3 (no LC) & 0.905 & -- & -- & -- & -- \\
  & & EKF wheel+IMU & 0.494 & 0.776 & 0.831 & 0.58 & $-5.30$ \\
+ & & EKF @ VSLAM noise & 1.583 & 2.650 & 1.836 & 1.29 & $-15.16$ \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -342,18 +371,23 @@ times worse than wheel odometry, and the EKF improves on both single sensors by 
 of magnitude everywhere.
 
 H3's stronger form---that the EKF also beats the visual estimators---holds on four
-of the five datasets but not universally, and the margin is much narrower than the
-three-dataset version of this section reported. \flag{That earlier figure of
-``3.0, 1.2 and 2.2 times'' was computed against ORB-SLAM3 with loop closing
+of the five datasets \emph{as configured}, but it does not survive a control on
+tuning, and that control is now the governing result of this section
+(\cref{sec:proprio-tuning}). Taken at face value the margin is also much narrower
+than the three-dataset version of this section reported. \moved{That earlier figure
+of ``3.0, 1.2 and 2.2 times'' was computed against ORB-SLAM3 with loop closing
 enabled, which is not the best visual result available.} Measured against the best
-visual estimator of each dataset, and using the cross-validated EKF so that no
-in-sample tuning advantage is carried
+visual estimator of each dataset, and using the cross-validated EKF
 (\cref{tab:proprio-xval}), the margins are 1.38, 1.41, 2.53, 1.31 and
 \num{1.13}. On \repo{allsensor_004} the in-sample EKF at \SI{0.494}{\metre} is
 beaten outright by VINS-Fusion at \SI{0.425}{\metre}; only the cross-validated
-figure of \SI{0.377}{\metre} is ahead. The honest statement is that a
-five-state proprioceptive filter is competitive with, and usually better than,
-stereo visual-inertial SLAM in these scenes---not that it dominates it.
+figure of \SI{0.377}{\metre} is ahead. Every one of those margins is smaller than
+the effect of the noise model itself, so none of them should be read as an
+estimator ranking. The claim this section can defend is narrower than either
+version: a five-state proprioceptive filter \emph{whose noise model is calibrated
+per recording} localises more accurately than stereo visual-inertial SLAM
+\emph{running on a hand-set configuration}. The calibration is doing at least as
+much work as the architecture.
 
 Two expectations about scene content are not supported. Clearing the central floor
 did not penalise vision: the visual errors on \repo{allsensor_002} (0.558 and
@@ -639,16 +673,184 @@ answer. Cross-validated it reaches 0.206, 0.263, 0.220, 0.392 and
 best visual estimator of each dataset. Notably the cross-validated figure on
 \repo{allsensor_004} recovers a lead that the in-sample filter did not have.
 
+\begin{queried}[What this control does not cover]
+Exchanging noise models between bags tests whether the filter saw \emph{this}
+recording's answer. It cannot test the asymmetry that matters here, because both
+models are still measured from data: all five bags come from one simulated IMU, so
+the exchanged $\sigma$ values differ by less than a factor of two on every term
+except accelerometer $x$. The visual estimators receive nothing of the kind---they
+read four constants from a file. The control in \cref{sec:proprio-tuning} replaces
+this one.
+\end{queried}
+
+\subsection{Transferring the visual systems' noise model to the EKF}
+\label{sec:proprio-tuning}
+
+\paragraph{Question and hypothesis.}
+Is the EKF's advantage in \cref{tab:proprio-accuracy} an estimator effect or a
+noise-model effect? Stated as a falsifiable hypothesis, \textbf{H4}: the EKF's
+advantage survives being given the visual systems' own IMU noise configuration.
+H4 is falsified if, on that configuration, the EKF's mean aligned ATE over the
+five bags is no better than VINS-Fusion's.
+
+\paragraph{Conditions and controls.}
+The asymmetry is measured against declared, not bag against bag. VINS-Fusion and
+ORB-SLAM3 both read \repo{config/wil_sim/stereo_imu.yaml}, and every one of the
+fifteen visual runs in \cref{tab:proprio-accuracy} records that file in its
+metadata---the five VINS runs \repo{logging_20260916_01}, and the ten ORB runs
+\repo{_01} and \repo{_02}---so a single hand-set configuration stands behind the
+whole visual column. The cheap half of the control is therefore to re-run the
+filter on that same file. It needs no new recording: the EKF reads the bags
+offline.
+
+The independent variable is the four IMU noise terms, at three levels: the
+measured per-bag values, the values \repo{stereo_imu.yaml} declares, and a set of
+one-term-at-a-time ablations between them. Held fixed across every condition are
+the five bags, the ground truth and its interval, the filter code and commit, the
+bicycle yaw-rate model, the \SI{50}{\hertz} wheel-update stride, and the
+alignment convention. The accelerometer and gyroscope biases and the whole wheel
+block stay at their measured values, so the IMU noise model is the only treatment;
+the single exception is the $R$-only ablation described below, which moves the
+wheel yaw-rate $\sigma$ by construction. Converting the file's densities to the
+per-sample $\sigma$ the filter stores ($\sigma = n\sqrt{f}$,
+$f = \SI{200}{\hertz}$) gives a gyroscope term 5.5 to 6.7 times the measured
+value, an accelerometer term between 0.68 and 1.44 times it, and a bias random
+walk ten times it.
+
+\paragraph{Validity and sample count.}
+$n=1$ run per bag per condition, thirty runs in all. The filter is deterministic
+given a bag and a noise model, so repeats would be bit-identical and no
+run-to-run uncertainty can be quoted; the spread reported below is across
+\emph{bags}, not runs, and is given as a range rather than a standard deviation.
+All thirty completed, produced the same pose counts as their measured-noise
+counterparts (17\,416, 16\,364, 17\,350, 20\,477 and 20\,104), applied the same
+number of wheel corrections, and were scored over the same matched interval
+against the same ground truth. The measured-noise condition is the published
+baseline and was not re-run. Re-scoring it through this experiment's own code
+reproduces \cref{tab:proprio-accuracy} to three decimals, which is the check that
+the two paths agree.
+
+\paragraph{Results.}
+Those are the \emph{EKF @ VSLAM noise} rows of \cref{tab:proprio-accuracy}.
+
+The result reverses the section. Mean aligned ATE over the five bags rises from
+\SI{0.334}{\metre} to \SI{1.135}{\metre}, a degradation on every bag without
+exception. Against that figure VINS-Fusion's \SI{0.553}{\metre} wins on
+\emph{five of five}, ORB-SLAM3 without loop closing (\SI{0.804}{\metre}) on four
+of five, and ORB-SLAM3 with loop closing on four of five---its mean of
+\SI{1.854}{\metre} is set by the \repo{allsensor_003} outlier, and its median of
+\SI{0.602}{\metre} is the fairer summary. On the metric this chapter uses
+throughout, run on the tuning the visual systems actually had, both visual systems
+are ahead of the filter.
+
+\Cref{tab:proprio-tuning-ablation} locates the cause. Moving the four terms one at
+a time shows that the gyroscope noise density accounts for essentially all of the
+damage; the accelerometer term is inert and the bias random walk contributes
+little. The density enters the filter twice---as heading process noise in $Q$, and
+in the bias observation's $R$ as $\sigma_{w}^{2} + \sigma_{g}^{2}$. Raising the
+wheel yaw-rate $\sigma$ so that $R$ matches the transferred case exactly while $Q$
+stays measured reproduces the baseline, so the damage is entirely in $Q$. A
+gyroscope density $6.5\times$ too loose inflates the heading process variance
+forty-fold, and because the measurement matrix touches only $v$ and $b_{\omega}$,
+heading can then be corrected only through the $P_{2,3}$ and $P_{2,4}$ cross
+terms---so the wheel yaw-rate residual begins steering heading instead of staying
+confined to the bias. Anchored yaw RMS rises from \SI{1.60}{\degree} to
+\SI{8.67}{\degree}.
+
+Relative pose error confirms the attribution independently, and on a local metric
+that no global alignment can flatter. At $\Delta=\SI{1}{\second}$ the transferred
+model degrades translation from \SIrange{0.100}{0.493}{\metre} and rotation from
+\SIrange{0.285}{2.262}{\degree}; the gyroscope-only ablation reaches
+\SI{0.485}{\metre} and \SI{2.179}{\degree}, almost all of it, while the
+accelerometer ablation is indistinguishable from the measured model to three
+decimals. The $R$-only case is marginally \emph{better} than the measured model
+on all three metrics and on every bag, which says the measured wheel yaw-rate
+$\sigma$ is itself slightly too tight and confirms that the $R$ path is benign
+rather than merely null.
+
+\begin{table}[htbp]
+\centering
+\caption{Which of the four IMU noise terms costs the EKF its accuracy. Each row
+moves one term from its measured value to the one
+\repo{config/wil_sim/stereo_imu.yaml} declares, averaged over the five bags. The
+last row isolates where the gyroscope term acts: it reproduces that term's effect
+on the measurement noise $R$ exactly, by raising the wheel yaw-rate $\sigma$,
+while leaving the process noise $Q$ at its measured value.}
+\label{tab:proprio-tuning-ablation}
+\small
+\begin{tabular}{lrrr}
+\toprule
+EKF, one term moved & Anchored RMS & Aligned ATE & Anchored yaw RMS \\
+ & [\si{\metre}] & [\si{\metre}] & [\si{\degree}] \\
+\midrule
+measured throughout & 0.484 & 0.334 & 1.60 \\
+gyroscope density, $\times 6.5$ & 1.654 & 1.105 & 8.67 \\
+accelerometer density & 0.479 & 0.329 & 1.60 \\
+gyroscope bias random walk, $\times 10$ & 0.654 & 0.452 & 2.97 \\
+all four (\emph{EKF @ VSLAM noise}) & 1.693 & 1.135 & 8.88 \\
+\midrule
+gyroscope density through $R$ only & 0.475 & 0.327 & 1.50 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Interpretation.}
+Two findings survive the control and one does not. ORB-SLAM3's rotational error
+stays at 13.6 to \SI{16.5}{\degree} in every condition, still
+\num{2.4} times worse than the handicapped filter's \SI{6.21}{\degree}, so that
+result is a property of ORB-SLAM3 and not of tuning. The complementary-failure
+mechanism of the two proprioceptive sensors is likewise untouched, since it does
+not depend on which $\sigma$ the filter was given. What does not survive is the
+ranking of the EKF against the visual estimators.
+
+The consistency picture moves the other way, and is worth stating because it is
+the one place the transferred model does better. The EKF's ANEES falls from 64.7
+to 123.2 down to 12.6 to 38.3---still overconfident by more than an order of
+magnitude, but far less so. A loose noise model buys a covariance closer to
+honest at the cost of the estimate itself, which is the textbook trade and is the
+first time this chapter has been able to show it directly.
+
+\paragraph{Limitations.}
+\begin{queried}[What the control does and does not establish]
+\flag{H4 was written down after the exploratory runs had been scored, not
+before.} What is reported here is a post-hoc formalisation of an exploratory
+finding; the decision rule and the direction of the test were fixed before this
+subsection was written, but not before the data was seen. The unanimity---every
+bag, both directions, a mechanism that isolates to one term---is what makes it
+worth reporting at this stage, not a pre-registered test, and a confirmatory
+repeat on bags not used to form the hypothesis is the honest follow-up.
+
+This is also an equal-handicap comparison, not an equal-effort one: both families
+now run on a declared IMU noise that nobody fitted to the data. It establishes
+that the EKF's advantage in \cref{tab:proprio-accuracy} is smaller than the
+tuning difference between the two families, and reverses under it. It does
+\emph{not} establish that the visual systems would win a symmetric comparison.
+The mirror experiment---giving VINS-Fusion and ORB-SLAM3 the measured
+values---requires re-recording and has not been run to a reportable standard; the
+one VINS run whose metadata confirms it diverged (\cref{sec:sim-fidelity}). The
+transfer is not perfectly symmetric in role either: the filter's $\sigma_{g}$ is
+a scalar in a planar five-state model, whereas \repo{gyr_n} feeds three-axis
+pre-integration. Finally, $n=1$ per cell is a property of a deterministic filter
+and not a design choice, but it means the between-bag range is the only
+uncertainty this experiment can report.
+\end{queried}
+
 \subsection{Interpretation and limitations}
 
-Within these two recordings, a five-state planar filter over wheel encoders and a
-gyroscope localises more accurately than either stereo visual-inertial system.
-That is an uncomfortable result for the thesis premise and is reported as
-measured. It does not show that vision is unnecessary; it shows that in this
-condition vision has not yet earned its compute, and that the justification has to
-come from capabilities dead reckoning does not have at all---loop closure,
+Across these five recordings, a five-state planar filter over wheel encoders and a
+gyroscope localises more accurately than either stereo visual-inertial system
+\emph{when its noise model is calibrated per bag and theirs is not}. Under the
+tuning control of \cref{sec:proprio-tuning} that ordering reverses on every bag,
+so the uncomfortable result for the thesis premise is weaker than it first
+appeared: what these bags demonstrate is that the noise model is worth more than
+the architecture over this range, not that dead reckoning outperforms vision. The
+practical reading is unchanged in one respect and sharpened in another. It still
+does not show that vision is unnecessary, and the justification for it still has
+to come from capabilities dead reckoning does not have at all---loop closure,
 relocalization after tracking loss, and the map itself---or from conditions these
-bags do not contain.
+bags do not contain. It now also shows that the visual systems have never been
+tuned to this platform, which is the cheapest remaining source of improvement and
+is the first item of \cref{sec:results-discussion}.
 
 \begin{queried}[Generalisation limit]
 The comparison is confined to \emph{static} scenes. Four worlds and both floor
@@ -779,9 +981,12 @@ this evaluation retained predictions only above a single confidence threshold.
   \centering
   \includegraphics[width=\textwidth]{../../../output/yolo_eval/dyn_00_001/overlay/01116.jpg}
   \caption{Representative validation overlay used before accepting the offline
-  metrics. Green boxes are projected ground truth, red boxes are YOLO
-  predictions, and yellow boxes are occluded or ignored regions. An asterisk
-  marks a ground-truth object classified as moving from its world-pose history.}
+  metrics. Green boxes are projected ground truth and red boxes are YOLO
+  predictions. A \textbf{yellow} box is a ground-truth object that a nearer
+  object covers by more than \SI{70}{\percent}; it is excluded from scoring, so
+  the detector is neither credited for finding it nor penalised for missing it.
+  Only the green boxes are scored. An asterisk marks a ground-truth object
+  classified as moving from its world-pose history.}
   \label{fig:yolo-ground-truth-overlay}
 \end{figure}
 

@@ -1,0 +1,4 @@
+side,condition,precision,recall,f1,n_gt,n_pred,note
+source,train-val as reported,0.958410,0.881970,0.918603,,,/content/datasets/warehouse-1/data.yaml
+target,fixed conf 0.35,0.684121,0.593237,0.635446,62282,58776,published run
+target,ignore convention matched,0.684121,0.381860,0.490137,96758,58776,recall bound only

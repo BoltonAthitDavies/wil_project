@@ -57,20 +57,43 @@
   \ifthenelse{\equal{#1}{noeffect}}{\colorbox{perfnoeffect}{\scriptsize no effect}}{%
   \colorbox{perfnone}{\scriptsize no claim}}}}}
 
-% Queried material. Red marks a result, number or condition that is measured but
-% NOT yet trustworthy as evidence -- an unexplained mechanism, a confound, an
+% Queried material. A query marks a result, number or condition that is measured
+% but NOT yet trustworthy as evidence -- an unexplained mechanism, a confound, an
 % unfair comparison, or a figure whose provenance does not support the use it is
 % being put to. It is deliberately not used for "bad result": a large error that
-% is correctly measured and understood is a finding, not a query. Everything in
-% red needs an action before it can appear in the major report.
+% is correctly measured and understood is a finding, not a query.
+%
+% THE QUERIES NO LONGER RENDER IN THIS DOCUMENT. They are collected into the
+% separate Open concerns document, which script/extract_concerns.py builds by
+% PARSING THIS SOURCE. The markup therefore stays in the chapter files and is
+% suppressed here rather than deleted -- deleting it would leave the concerns
+% document with nothing to extract, and the chapter source is the single record
+% of which passages are queried. To see them in place again, restore the two
+% definitions marked RENDERING below.
 \definecolor{flagred}{HTML}{B00000}
-\newcommand{\flag}[1]{\textcolor{flagred}{#1}}
-% Whole-paragraph query. Sets the paragraph in red behind a bracketed label so it
-% survives greyscale printing, where colour alone would vanish.
+
+% \flag marks a queried VALUE: a table cell, a measured number, a status word,
+% or a fragment inside a sentence. Those cannot be lifted out of the document --
+% removing a table cell leaves a hole in the table, and removing a clause breaks
+% the sentence around it -- so the value stays and only the colour is dropped.
+\newcommand{\flag}[1]{#1}
+% RENDERING: \newcommand{\flag}[1]{\textcolor{flagred}{#1}}
+
+% \moved marks a queried passage that is a COMPLETE, self-contained sentence in
+% running prose, so it can be lifted out without damaging what surrounds it. It
+% renders as nothing here and appears only in the concerns document.
+\newcommand{\moved}[1]{\unskip}
+
+% Whole-paragraph query. Suppressed in this document; extracted in full by
+% script/extract_concerns.py.
 \newenvironment{queried}[1][Questionable]%
-  {\par\addvspace{0.6ex}\begingroup\color{flagred}\noindent
-   \textbf{[#1]}\ \ignorespaces}%
-  {\par\endgroup\addvspace{0.6ex}}
+  {\setbox0\vbox\bgroup}%
+  {\egroup}
+% RENDERING:
+% \newenvironment{queried}[1][Questionable]%
+%   {\par\addvspace{0.6ex}\begingroup\color{flagred}\noindent
+%    \textbf{[#1]}\ \ignorespaces}%
+%   {\par\endgroup\addvspace{0.6ex}}
 
 % Repository paths, identifiers, and commit hashes are typeset verbatim in a
 % typewriter face, but must remain breakable: an unbreakable 40-character hash

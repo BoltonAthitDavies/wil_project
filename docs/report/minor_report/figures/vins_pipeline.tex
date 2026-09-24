@@ -1,0 +1,57 @@
+% VINS-Fusion pipeline, drawn to show that the mask must act at TWO points.
+% The contrast with the ORB figure is the point of both: ORB extracts fresh
+% features every frame, so rejecting candidates at extraction is sufficient.
+% VINS propagates existing KLT tracks, so suppressing new features alone would
+% leave a track that latched onto an object before it was detected still
+% attached to it. Both insertions are therefore required.
+%
+% Layout note: marginalization sits ABOVE the optimizer rather than below it so
+% that the IMU can be routed orthogonally beneath the whole diagram. A straight
+% IMU-to-optimizer line cuts through goodFeaturesToTrack() and the highlight box.
+\begin{tikzpicture}[
+  font=\footnotesize,
+  box/.style={draw, rounded corners, align=center, minimum height=8mm,
+    text width=26mm, inner sep=1.6mm, fill=implemented},
+  up/.style={box, fill=gray!12},
+  det/.style={box, fill=external},
+  ext/.style={box, fill=external},
+  io/.style={box, fill=gray!5, draw=gray!60},
+  flow/.style={-{Latex[length=2mm]}, thick},
+  opt/.style={flow, dashed},
+  lbl/.style={font=\scriptsize, inner sep=1pt}
+]
+  \node[det] at ( 0.0,  4.6) (yolo)   {YOLO detector\\(optional)};
+  \node[box, text width=32mm]
+             at ( 4.8,  4.6) (setmask){\texttt{FeatureTracker::}\\\texttt{setMask()}};
+  \node[up]  at ( 4.8,  2.3) (klt)    {propagate tracks\\pyramidal KLT};
+  \node[up]  at ( 4.8,  0.0) (gftt)   {\texttt{goodFeatures}\\\texttt{ToTrack()}};
+  \node[io]  at ( 0.0,  1.15)(stereo) {stereo pair\\\SI{30}{\hertz}};
+  \node[io]  at ( 0.0, -2.6) (imu)    {IMU\\\SI{200}{\hertz}};
+  \node[up]  at ( 9.8,  1.15)(window) {sliding window\\optimization};
+  \node[up]  at ( 9.8,  3.8) (marg)   {marginalization};
+  \node[io]  at (14.4,  1.15)(out)    {\repo{vio.csv},\\\texttt{world}$\to$\texttt{body}};
+  \node[ext] at (14.4, -2.6) (rtab)   {RTAB-Map\\external back end};
+
+  \draw[flow] (stereo.east) -- (klt.west);
+  \draw[flow] (stereo.east) -- (gftt.west);
+  \draw[flow] (klt.east)    -- (window.west);
+  \draw[flow] (gftt.east)   -- (window.west);
+  % Orthogonal, beneath everything: nothing sits between y=-2.6 and the
+  % optimizer's south face at x=9.8.
+  \draw[flow] (imu)         -| (window.south);
+  \draw[flow] ([xshift=-4mm]window.north) -- ([xshift=-4mm]marg.south);
+  \draw[flow] ([xshift=4mm]marg.south)    -- ([xshift=4mm]window.north);
+  \draw[flow] (window)      -- (out);
+  \draw[flow] (out)         -- (rtab);
+  \draw[opt]  (yolo)        -- (setmask);
+
+  % --- the two insertions, which is the reason the figure exists
+  \draw[opt] (setmask) -- (klt);
+  \node[lbl, right=1mm] at (4.8, 3.45) {\textbf{1} cull};
+  % Down the corridor between the highlight box and the optimizer.
+  \draw[opt] (setmask.east) -- (7.3, 4.6) -- (7.3, 0.0) -- (gftt.east);
+  \node[lbl, right=1mm] at (7.3, 2.6) {\textbf{2} suppress};
+  \node[draw=flagred, thick, rounded corners, inner sep=2.4mm,
+        fit=(klt)(gftt)] (hl) {};
+  \node[lbl, text=flagred, below=1.5mm of hl] {both insertions required};
+\end{tikzpicture}

@@ -1,0 +1,62 @@
+provenance:
+  bag: /home/ambushee/wil_project/dataset/dataset_allsensor_000/dataset_allsensor_000_0.db3
+  generated: '2026-09-17T18:23:22'
+  script: /home/ambushee/wil_project/script/proprio_estimator.py
+  git_commit: 75911867ae35e1e40065b999eff8377f602bdbac
+  note: IMU NOISE OVERRIDDEN from the inflated VSLAM config by script/make_vslam_noise_yaml.py.
+    Biases and the whole wheel block are still the measured values from this bag.
+    Run with --allow-foreign-noise; the transfer IS the experiment.
+  override_preset: inflated
+  override_source: vins_fusion_ros2/config/wil_sim/stereo_imu.yaml
+window:
+  static_start_s: 98.92
+  static_end_s: 99.6
+  static_duration_s: 0.6799999999999926
+  static_imu_samples: 136
+  run_start_s: 98.92
+  run_end_s: 185.98
+  imu_dt_s: 0.0049999999999954525
+  max_tilt_deg: 0.0016350022471177048
+imu:
+  gyro_bias_xyz:
+  - -0.00016423044176760374
+  - 0.000699072586302265
+  - 6.48448627588984e-05
+  gyro_sigma_xyz:
+  - 0.028284271247474763
+  - 0.028284271247474763
+  - 0.028284271247474763
+  gyro_noise_density:
+  - 0.002
+  - 0.002
+  - 0.002
+  accel_bias_xyz:
+  - 0.019064557146793334
+  - 0.02663239492041671
+  - 0.0
+  accel_sigma_xyz:
+  - 0.2828427124747476
+  - 0.2828427124747476
+  - 0.2828427124747476
+  accel_noise_density:
+  - 0.02
+  - 0.02
+  - 0.02
+  gravity_z: 9.780915634765439
+  gyro_z_scale_vs_gt: 0.9990344488522499
+  gyro_z_sigma_vs_gt: 0.00529389677287126
+  accel_x_scale_vs_gt: 1.019912244063815
+  accel_x_sigma_vs_gt: 0.5293510964449639
+  gyro_bias_rw: 0.0001
+  gyro_bias_rw_source: VSLAM config (inflated preset), not measured
+wheel:
+  speed_scale: 1.0002076902391777
+  speed_sigma: 0.04068130046314097
+  yaw_rate_model: bicycle
+  yaw_rate_scale_bicycle: 1.0110056848056748
+  yaw_rate_sigma_bicycle: 0.06587401961518753
+  yaw_rate_scale_differential: 1.2162268514257193
+  yaw_rate_sigma_differential: 0.2359437395451191
+  wheel_radius: 0.0585
+  wheel_base: 0.42
+  wheel_separation: 0.42

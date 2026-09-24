@@ -5,12 +5,18 @@
     python3 script/make_slippery_floor.py --mu 0.7 --world <a.world> --dry-run
 
 WHY THIS EXISTS
-    The shipped simulation has effectively unlimited traction. ODE takes the
-    SMALLER mu of the two contacting surfaces; the wheels declare mu=1, mu2=1 and
-    every ground model declares mu=100, mu2=50, so the contact runs at mu=1.0 --
-    the top of the published dry-clean-concrete range. slip1/slip2 are pinned at
-    0 on every ground model, which disables force-dependent slip entirely, so
-    contact is rigid until Coulomb traction is exceeded.
+    The shipped simulation has effectively unlimited traction. The wheels declare
+    mu=1, mu2=1 and every ground model declares mu=100, mu2=50, both inside
+    <friction><ode> elements -- which is where SDF puts them whatever the engine.
+    The engine here is dartsim, Fortress's default, since no world sets <engine>.
+
+    NOTE slip1/slip2 are an ODE feature that dartsim does not implement. They are
+    pinned at 0 on every ground model, but they would be inert at any value, so
+    --slip below cannot be expected to do anything under this engine. Contact is
+    rigid until Coulomb traction is exceeded.
+
+    Measured outcome, which is what matters: encoder/truth ratios of 0.998 to
+    1.008 over the five allsensor bags.
 
     Measured consequence: integrating rear-wheel angle against true path length
     over the five allsensor bags gives encoder/truth ratios of 0.998 to 1.008.

@@ -43,7 +43,8 @@ DEFAULT_WEIGHTS = os.path.join(WORKSPACE, 'weight', 'best.pt')
 def generate_launch_description():
     default_config = os.path.join(
         get_package_share_directory('orbslam3_ros2'),
-        'config', 'wil_sim', 'stereo_imu_truenoise.yaml')
+        # 'config', 'wil_sim', 'stereo_imu_truenoise.yaml')
+        'config', 'wil_sim', 'stereo_imu.yaml')
     config_file = LaunchConfiguration('config_file')
 
     args = [

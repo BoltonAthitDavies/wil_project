@@ -55,6 +55,30 @@ TWO ERROR CONVENTIONS, BOTH REPORTED
     They are not interchangeable and the aligned figure is always the smaller of the
     two. Quoting one where the other belongs is the easiest way to make this
     baseline look better or worse than it is.
+
+A THIRD CONVENTION: RPE, WHICH NEEDS NEITHER
+    Both conventions above are whole-trajectory statements, and both are therefore
+    dominated by whatever the estimator did worst over the run. For a dead-reckoning
+    baseline that is drift, by construction: wheel odometry can be locally excellent
+    and still finish three metres out, and ATE cannot tell the two apart.
+
+    RPE asks the local question instead -- over the next delta_s seconds, did the
+    estimate move the way the truth moved -- and is immune to the global frame and to
+    accumulated drift alike. It is what separates "this estimator is noisy" from
+    "this estimator is precise but drifts", which is exactly the distinction the
+    complementary-failure finding of section 4.2 rests on. Section 4.5.1 already
+    reports it for the visual campaign; this module adds it here so the two sections
+    use one definition.
+
+    The implementation is vio_metrics.rpe(), unchanged, on the FULL SE(3) poses as
+    written to vio.csv -- not on a planar lift. That choice is forced: section 4.2.7
+    already reports RPE for the EKF noise-transfer ablation via
+    analyse_noise_transfer.score_one(), which uses exactly this path, and a second
+    convention here would make the same estimator carry two different RPE values in
+    one section of the report. The proprioceptive estimators are planar by
+    construction so the distinction costs them nothing; for VINS-Fusion and
+    ORB-SLAM3 it correctly retains out-of-plane error, which is also what
+    section 4.5.1 reports.
 """
 
 import argparse
@@ -88,6 +112,9 @@ THEMES = {
 COLOUR = {"Wheel odometry": "#4fc3f7",
           "IMU dead reckoning": "#e57373",
           "EKF wheel+IMU": "#81c784",
+          # Deliberately a desaturated sibling of the EKF green: it is the SAME
+          # filter, so it must not read as a different estimator.
+          "EKF @ VSLAM noise": "#2e7d5b",
           # Same hues viewer.py and plot_compare.py already use for these two, so a
           # reader moving between the overlay, the comparison figures and this one
           # does not have to re-learn which trail is which.
@@ -102,7 +129,8 @@ COLOUR = {"Wheel odometry": "#4fc3f7",
 # same subtraction would measure the arbitrary offset between two frames, produce a
 # number in the tens of metres, and say nothing about either estimator. Their anchored
 # columns are left empty rather than filled with that.
-ANCHORED_TREES = {"output_wheel", "output_imu", "output_ekf"}
+ANCHORED_TREES = {"output_wheel", "output_imu", "output_ekf",
+                  "output_ekf_vslamcfg"}
 
 
 def load_cov(path):
@@ -180,6 +208,7 @@ def analyse_one(dataset, args):
         if os.path.exists(c):
             a = np.loadtxt(c, delimiter=",", ndmin=2)
             gt = dict(t=a[:, 0] * 1e-9, x=a[:, 1], y=a[:, 2],
+                      p=a[:, 1:4], q=a[:, 4:8],
                       yaw=np.unwrap(2.0 * np.arctan2(a[:, 7], a[:, 4])))
             break
     if gt is None:
@@ -226,6 +255,53 @@ def analyse_one(dataset, args):
                    anchored_max=float(epos.max()),
                    yaw_rms_deg=float(np.degrees(np.sqrt((eyaw ** 2).mean()))),
                    yaw_final_deg=float(np.degrees(abs(eyaw[-1]))))
+
+        # ---- RPE, no alignment of any kind ------------------------------------
+        # Deliberately computed on the RAW estimate against the RAW truth. Aligning
+        # first would be harmless (RPE is invariant to it) but would suggest the
+        # metric depends on the fit, which is the misreading this column exists to
+        # prevent.
+        #
+        # vm.load() rather than the local load_traj(): it returns the same (t, p, q)
+        # that analyse_noise_transfer.score_one() feeds to vm.rpe for the ablation in
+        # section 4.2.7. Same loader, same resampler, same rpe() call, so the EKF row
+        # of this table and the "measured throughout" row of that one are the same
+        # number computed the same way.
+        # NOTE the separate t_r/m_r names. `t` and `m` above are consumed by the
+        # covariance and NEES block below; rebinding either here would silently
+        # rescore consistency against the wrong sample set.
+        rec["rpe"] = {}
+        raw = vm.load(os.path.join(d, "vio.csv"))
+        if raw is not None:
+            t_raw, p_raw, q_raw = raw[0], raw[1], raw[2]
+            m_r = (t_raw >= lo) & (t_raw <= hi)
+            if m_r.sum() >= 10:
+                t_r = t_raw[m_r]
+                p_est, q_est = p_raw[m_r], q_raw[m_r]
+                p_ref = vm.resample(gt["t"], gt["p"], t_r)
+                q_ref = vm.resample_quat(gt["t"], gt["q"], t_r)
+                jump_idx = vm.find_jumps(t_r, p_est)[0]
+                rec["jumps"] = int(len(jump_idx))
+                for dl in vm.RPE_DELTAS:
+                    r = vm.rpe(t_r, p_est, q_est, p_ref, q_ref, delta_s=dl,
+                               jump_idx=jump_idx)
+                    if r is None:
+                        # No pair satisfied the interval -- a short or gappy log,
+                        # not a zero. Left absent so the table prints a dash.
+                        continue
+                    rec["rpe"][dl] = r
+        one = rec["rpe"].get(1.0)
+        if one is not None:
+            # Flat columns for the delta the report quotes in prose. The full sweep
+            # stays in rpe_metrics.csv; this keeps proprio_metrics.csv readable as
+            # one row per estimator.
+            rec["rpe1_trans_rmse"] = float(one["trans_rmse"])
+            rec["rpe1_rot_rmse"] = float(one["rot_rmse"])
+            rec["rpe1_pairs"] = int(one["pairs"])
+            for k_src, k_dst in (("trans_rmse_clean", "rpe1_trans_rmse_clean"),
+                                 ("rot_rmse_clean", "rpe1_rot_rmse_clean")):
+                if one.get(k_src) is not None:
+                    rec[k_dst] = float(one[k_src])
 
         if cov is not None:
             # Interpolate the nine block entries once each, then reshape. Doing the
@@ -449,9 +525,12 @@ def trajectory_figure(recs, dataset, outdir, theme, systems):
 
 def write_csv(path, recs):
     cols = ["dataset", "name", "n", "secs", "anchored_rms", "anchored_max",
-            "anchored_final", "yaw_rms_deg", "yaw_final_deg", "aligned_ate_rms",
+            "anchored_final", "yaw_rms_deg", "yaw_final_deg", "aligned_rot_rms",
+            "aligned_ate_rms",
             "aligned_ate_max", "anees", "anees_pos", "nees_samples", "verdict",
-            "cov1", "cov2", "cov3", "sx_final", "sy_final", "syaw_final_deg"]
+            "cov1", "cov2", "cov3", "sx_final", "sy_final", "syaw_final_deg",
+            "jumps", "rpe1_pairs", "rpe1_trans_rmse", "rpe1_trans_rmse_clean",
+            "rpe1_rot_rmse", "rpe1_rot_rmse_clean"]
     anch = {"anchored_rms", "anchored_max", "anchored_final", "yaw_rms_deg",
             "yaw_final_deg"}
     with open(path, "w") as f:
@@ -467,27 +546,122 @@ def write_csv(path, recs):
             f.write(",".join(cells) + "\n")
 
 
+def write_rpe_csv(path, recs):
+    """The full interval sweep, one row per (dataset, estimator, delta).
+
+    Kept separate from proprio_metrics.csv because it is the only product of this
+    module that is not one row per estimator. Section 9 of the evaluation protocol
+    requires the numbers behind every figure and table to be saved; this is that
+    file for the RPE table.
+    """
+    cols = ["dataset", "name", "delta_s", "pairs", "jumps",
+            "trans_rmse", "trans_median", "rot_rmse", "rot_median",
+            "trans_rmse_clean", "rot_rmse_clean"]
+    with open(path, "w") as f:
+        f.write(",".join(cols) + "\n")
+        for r in recs:
+            for dl in sorted(r.get("rpe", {})):
+                d = r["rpe"][dl]
+                row = dict(dataset=r["dataset"], name=r["name"], delta_s=dl,
+                           jumps=r.get("jumps", ""), **{k: d.get(k) for k in
+                           ("pairs", "trans_rmse", "trans_median", "rot_rmse",
+                            "rot_median", "trans_rmse_clean", "rot_rmse_clean")})
+                cells = []
+                for c in cols:
+                    v = row.get(c)
+                    cells.append("" if v is None else
+                                 ("%.6g" % v) if isinstance(v, float) else str(v))
+                f.write(",".join(cells) + "\n")
+
+
+def write_rpe_tex(path, recs, delta=1.0):
+    """Chapter 4 RPE table at one interval, all estimators, all datasets."""
+    order, seen = [], set()
+    for r in recs:
+        if r["name"] not in seen:
+            seen.add(r["name"]); order.append(r["name"])
+    datasets = []
+    for r in recs:
+        if r["dataset"] not in datasets:
+            datasets.append(r["dataset"])
+    by = {(r["dataset"], r["name"]): r for r in recs}
+
+    def cell(r, key):
+        if r is None:
+            return "---"
+        d = r.get("rpe", {}).get(delta)
+        if d is None or d.get(key) is None:
+            return "---"
+        return "%.3f" % d[key]
+
+    with open(path, "w") as f:
+        w = f.write
+        w("% Generated by script/analyse_proprio.py -- do not edit by hand.\n")
+        w("\\begin{table}[htbp]\n\\centering\n")
+        w("\\caption{Relative pose error at $\\Delta=\\SI{%g}{\\second}$ on the five "
+          "\\repo{allsensor} bags. RPE uses \\emph{no} alignment, so unlike aligned "
+          "ATE it is unaffected by the rigid fit and by accumulated drift; it "
+          "measures only whether the estimate moved as the truth moved over the "
+          "next \\SI{%g}{\\second}. ``Clean'' excludes pairs that span a pose "
+          "discontinuity (a step implying more than \\SI{10}{\\metre\\per\\second}), "
+          "so the difference between the two columns isolates the jump "
+          "contribution. Poses are full $SE(3)$, scored by the same "
+          "\\repo{vio_metrics.rpe} call used for the visual campaign "
+          "(\\cref{sec:rpe}) and for the noise-transfer ablation of "
+          "\\cref{sec:proprio-tuning}, so the three sets of figures are directly "
+          "comparable. Lower is better throughout.}\n" % (delta, delta))
+        w("\\label{tab:proprio-rpe}\n\\small\n")
+        w("\\resizebox{\\textwidth}{!}{%\n")
+        w("\\begin{tabular}{ll rrrrr}\n\\toprule\n")
+        w("Dataset & Estimator & Jumps & \\multicolumn{2}{c}{Translation [\\si{\\metre}]}"
+          " & \\multicolumn{2}{c}{Rotation [\\si{\\degree}]} \\\\\n")
+        w("\\cmidrule(lr){4-5}\\cmidrule(lr){6-7}\n")
+        w(" & & & all pairs & clean & all pairs & clean \\\\\n\\midrule\n")
+        for i, ds in enumerate(datasets):
+            if i:
+                w("\\midrule\n")
+            short = ds.split("/")[-1].replace("dataset_", "")
+            for j, nm in enumerate(order):
+                r = by.get((ds, nm))
+                w("%s & %s & %s & %s & %s & %s & %s \\\\\n" % (
+                    ("\\repo{%s}" % short) if j == 0 else "",
+                    nm.replace("&", "\\&"),
+                    "---" if r is None else str(r.get("jumps", "---")),
+                    cell(r, "trans_rmse"), cell(r, "trans_rmse_clean"),
+                    cell(r, "rot_rmse"), cell(r, "rot_rmse_clean")))
+        w("\\bottomrule\n\\end{tabular}}\n\\end{table}\n")
+
+
 def write_tex(path, recs):
     """Chapter 4 table. booktabs, matching docs/report/minor_report conventions."""
     with open(path, "w") as f:
         f.write("% Generated by script/analyse_proprio.py -- do not edit by hand.\n")
         f.write("\\begin{table}[htbp]\n  \\centering\n")
-        f.write("  \\caption{Non-visual baseline estimators on the "
-                "\\texttt{dataset\\_allsensor} pair. Anchored error is the direct "
-                "difference from ground truth with no alignment; aligned ATE uses the "
-                "SE(3) Umeyama convention applied to the visual estimators elsewhere "
-                "in this chapter. ANEES is the average normalised estimation error "
-                "squared over $n$ decorrelated samples; a consistent filter yields "
-                "3.0.}\n")
+        f.write("  \\caption{Estimators on the \\texttt{dataset\\_allsensor} "
+                "bags. Anchored error is the direct difference from ground truth "
+                "with no alignment; aligned ATE uses the SE(3) Umeyama convention "
+                "applied to the visual estimators elsewhere in this chapter. ANEES "
+                "is the average normalised estimation error squared over $n$ "
+                "decorrelated samples; a consistent filter yields 3.0. "
+                "\\emph{EKF @ VSLAM noise} is the same filter, on the same bags, "
+                "with only its four IMU noise terms replaced by the values "
+                "\\repo{config/wil_sim/stereo_imu.yaml} declares --- the "
+                "config every VINS-Fusion and ORB-SLAM3 run in this table actually "
+                "used. It is included because the EKF's noise model is measured "
+                "per bag from the data while the visual systems read a hand-set "
+                "file, so without it tuning is an uncontrolled variable between the "
+                "two families and the comparison is not like for like.}\n")
         f.write("  \\label{tab:proprio-baseline}\n")
-        f.write("  \\begin{tabular}{llrrrrrl}\n    \\toprule\n")
+        f.write("  \\begin{tabular}{llrrrrrrl}\n    \\toprule\n")
         f.write("    Dataset & Estimator & \\multicolumn{1}{c}{Anch.\\ RMS} & "
                 "\\multicolumn{1}{c}{Anch.\\ final} & \\multicolumn{1}{c}{Aligned ATE} "
-                "& \\multicolumn{1}{c}{Yaw RMS} & \\multicolumn{1}{c}{ANEES} & "
+                "& \\multicolumn{1}{c}{Aligned rot.} "
+                "& \\multicolumn{1}{c}{Anch.\\ yaw} & \\multicolumn{1}{c}{ANEES} & "
                 "Covariance \\\\\n")
         f.write("     & & \\multicolumn{1}{c}{[\\si{\\metre}]} & "
                 "\\multicolumn{1}{c}{[\\si{\\metre}]} & "
                 "\\multicolumn{1}{c}{[\\si{\\metre}]} & "
+                "\\multicolumn{1}{c}{[\\si{\\degree}]} & "
                 "\\multicolumn{1}{c}{[\\si{\\degree}]} & \\multicolumn{1}{c}{[-]} & "
                 "verdict \\\\\n    \\midrule\n")
         last = None
@@ -497,11 +671,13 @@ def write_tex(path, recs):
             last = ds
             ate = r.get("aligned_ate_rms")
             a = r.get("anchored", True)
-            f.write("    %s & %s & %s & %s & %s & %s & %s & %s \\\\\n"
+            rot = r.get("aligned_rot_rms")
+            f.write("    %s & %s & %s & %s & %s & %s & %s & %s & %s \\\\\n"
                     % (show, r["name"],
                        ("%.2f" % r["anchored_rms"]) if a else "--",
                        ("%.2f" % r["anchored_final"]) if a else "--",
                        ("%.2f" % ate) if isinstance(ate, float) else "--",
+                       ("%.2f" % rot) if isinstance(rot, float) else "--",
                        ("%.2f" % r["yaw_rms_deg"]) if a else "--",
                        ("%.1f" % r["anees"]) if np.isfinite(r.get("anees", np.nan))
                        else "--",
@@ -520,6 +696,14 @@ def main():
     ap.add_argument("--no-vio", action="store_true",
                     help="baselines only; omit VINS-Fusion and ORB-SLAM3 even when "
                          "their runs exist for this dataset")
+    ap.add_argument("--no-ekf-vslamcfg", action="store_true",
+                    help="omit the EKF re-run at the VSLAM systems' own IMU noise "
+                         "config. That row exists because the EKF's noise model is "
+                         "MEASURED per bag while VINS and ORB read a hand-set "
+                         "config, which makes tuning an uncontrolled variable "
+                         "between the two families; re-running the filter on the "
+                         "config the visual systems actually used is the half of "
+                         "the control that needs no new logging.")
     ap.add_argument("--vins-run", default="logging_20260916_01",
                     help="VINS run directory to read. Pinned by name, not 'newest', "
                          "so adding a run never silently restates published numbers.")
@@ -539,6 +723,10 @@ def main():
     # exists, because with loop closure its behaviour varies per dataset (0, 2 and 1
     # closures across the first three bags) and the two regimes are not one system.
     args.systems = list(vm.SYSTEMS_PROPRIO)
+    # Immediately after the EKF, so the two tunings of the same filter are adjacent
+    # and the comparison is read before the visual systems are introduced.
+    if not args.no_ekf_vslamcfg:
+        args.systems.append(("EKF @ VSLAM noise", "output_ekf_vslamcfg"))
     if not args.no_vio:
         args.systems.append(("VINS-Fusion", "output_vins", args.vins_run))
         args.systems.append(("ORB-SLAM3", "output_orb", args.orb_run))
@@ -567,6 +755,12 @@ def main():
             if row:
                 r["aligned_ate_rms"] = float(row["rms"])
                 r["aligned_ate_max"] = float(row["max"])
+                # Aligned rotational error. Unlike the anchored yaw column this is
+                # defined for EVERY estimator: the same rigid SE(3) fit that makes
+                # aligned ATE comparable also resolves the visual estimators' own
+                # world-frame orientation, so their orientations become comparable
+                # too. The anchored yaw column stays baseline-only.
+                r["aligned_rot_rms"] = float(row["rot_rms"])
             al = alby.get(r["name"])
             if al is not None:
                 # Kept so the figures can draw the visual systems in the reference
@@ -585,6 +779,10 @@ def main():
             if "anees" in r:
                 print("  ANEES %8.2f (%s, n=%d)"
                       % (r["anees"], r["verdict"], r["nees_samples"]), end="")
+            if "rpe1_trans_rmse" in r:
+                print("  RPE@1s %6.3f m / %5.3f deg (%d pairs, %d jumps)"
+                      % (r["rpe1_trans_rmse"], r["rpe1_rot_rmse"],
+                         r["rpe1_pairs"], r.get("jumps", 0)), end="")
             print()
         for theme in ("light", "dark"):
             figure(recs, ds, outdir, theme)
@@ -595,6 +793,8 @@ def main():
         sys.exit("no baseline runs found -- has proprio_estimator.py been run?")
     write_csv(os.path.join(outdir, "proprio_metrics.csv"), allrecs)
     write_tex(os.path.join(outdir, "proprio_baseline_table.tex"), allrecs)
+    write_rpe_csv(os.path.join(outdir, "proprio_rpe_metrics.csv"), allrecs)
+    write_rpe_tex(os.path.join(outdir, "proprio_rpe_table.tex"), allrecs)
     print("\nwrote %s" % outdir)
     for f in sorted(os.listdir(outdir)):
         print("   %s" % f)

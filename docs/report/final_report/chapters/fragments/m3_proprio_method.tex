@@ -1,0 +1,219 @@
+% Verbatim from minor_report/chapters/chapter_3_methodology.tex lines 1263-1478 (retired report),
+% headings demoted by 1 level(s). Do not edit here; edit the source of the numbers.
+
+The visual estimators were, until the cutoff, scored only against ground truth.
+That establishes how large their error is but not whether it is good, because no
+alternative was measured on the same data. Three non-visual estimators were
+therefore implemented in \repo{script/proprio_estimator.py} to supply a
+dead-reckoning floor: wheel odometry, IMU dead reckoning, and an extended Kalman
+filter fusing the two. They consume only proprioceptive topics and no images.
+
+\subsubsection{Implementation form and why it is offline}
+
+All three read the recorded bag directly and are deterministic functions of it.
+Run as live ROS nodes they would instead depend on replay rate, QoS delivery and
+CPU contention, none of which is a property of the estimator being compared. The
+cost is a stated asymmetry: the visual figures they are compared against were
+produced by live runs, so any timing-induced error is present on one side of the
+comparison only. This is revisited in \cref{sec:results-proprio}.
+
+\subsubsection{Sensor model derived from data}
+
+Every covariance field in the source bags is identically zero---0 of 17\,416 IMU
+messages, 0 of 4\,355 wheel-odometry messages, and 0 of 4\,354 ground-truth
+messages in \repo{dataset_allsensor_000}. Gazebo Fortress does not populate them,
+and \texttt{AckermannSteering} exposes no noise parameter. The noise model is
+consequently measured rather than read, by a \repo{calibrate} step that writes
+\repo{sensor_noise.yaml}; \cref{tab:proprio-noise} gives the result for both bags.
+
+\begin{table}[htbp]
+\centering
+\caption[Sensor noise and scale measured from each bag by \repo{proprio_estimator.py calibrate}.]{Sensor noise and scale measured from each bag by
+\repo{proprio_estimator.py calibrate}. Scales are least-squares gains through the
+origin against ground truth; $\sigma$ values are the residual standard deviations.
+A scale of 1.0 is an unbiased sensor. The bias random walks are assumed, not
+measured, because the longest stationary window is \SI{1.54}{\second}.}
+\label{tab:proprio-noise}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llrrrrrl}
+\toprule
+Group & Quantity & \repo{_000} & \repo{_001} & \repo{_002} & \repo{_003} &
+  \repo{_004} & Units \\
+ & & plain & plain & plain & bayline & bayline & \\
+\midrule
+IMU & gyroscope $z$ bias & $6.48\times10^{-5}$ & $7.75\times10^{-5}$ &
+  $9.28\times10^{-5}$ & $6.09\times10^{-4}$ & $2.58\times10^{-5}$ & \si{\radian\per\second} \\
+ & gyroscope $\sigma$ & $4.36\times10^{-3}$ & $4.24\times10^{-3}$ &
+  $4.81\times10^{-3}$ & $5.03\times10^{-3}$ & $5.15\times10^{-3}$ & \si{\radian\per\second} \\
+ & gyroscope $z$ scale & 0.9990 & 1.0000 & 1.0002 & 1.0002 & 1.0000 & -- \\
+ & accelerometer $x$ bias & 0.0191 & 0.0304 & \flag{0.0683} & 0.0309 & 0.0016 &
+  \si{\metre\per\second\squared} \\
+ & accelerometer $x$ scale & 1.0199 & 1.0249 & \flag{1.0669} & \flag{1.0525} & \flag{1.0465} & -- \\
+ & measured $g$ & 9.7809 & 9.8191 & 9.7827 & 9.8037 & 9.8346 & \si{\metre\per\second\squared} \\
+\midrule
+Wheel & speed scale & 1.0002 & 0.9985 & 1.0005 & 1.0071 & 1.0001 & -- \\
+ & speed $\sigma$ & 0.0407 & 0.0484 & 0.0496 & 0.0607 & 0.0505 & \si{\metre\per\second} \\
+ & yaw-rate scale, bicycle & 1.0110 & 0.9527 & 1.0034 & \flag{0.9375} & \flag{0.9250} & -- \\
+ & yaw-rate $\sigma$, bicycle & 0.0659 & 0.0804 & 0.0705 & 0.1192 & 0.0613 &
+  \si{\radian\per\second} \\
+ & yaw-rate scale, differential & 1.2162 & 1.1442 & 1.2194 & 1.2748 & 1.1404 & -- \\
+ & yaw-rate $\sigma$, differential & 0.2359 & 0.3074 & 0.2620 & 0.3477 & 0.2828 &
+  \si{\radian\per\second} \\
+\midrule
+Window & static duration & 0.68 & 0.58 & 1.54 & 1.04 & \flag{0.52} & \si{\second} \\
+ & maximum tilt & 0.0016 & 0.0018 & 0.0015 & 0.0018 & 0.0017 & \si{\degree} \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+Two consequences follow directly. First, wheel \emph{speed} is essentially
+unbiased on all five bags (scale 1.0002 to 1.0071), so distance travelled is not
+the error source. Second, the rear-wheel differential is a far worse yaw-rate estimator
+than the steering-angle bicycle model---residuals of \SIrange{0.26}{0.35}{\radian\per\second}
+against \numrange{0.061}{0.119}---because the track
+and the wheel base are both \SI{0.42}{\metre} and a solid rear axle slips through
+every turn. The bicycle model is selected automatically and was chosen on all five
+bags.
+
+\subsubsection{The orientation field must not be used}
+
+\texttt{sensor\_msgs/Imu.orientation} in these bags is not an estimate. Measured
+over \repo{dataset_allsensor_000} it equals ground-truth yaw minus exactly
+\SI{90}{\degree}, with residual standard deviation \SI{0.00000}{\degree} and
+\SI{0.00000}{\degree} of drift across \SI{87}{\second}: the plugin publishes the
+true orientation from the simulator's entity-component manager. Consuming it
+would give a ``dead-reckoning'' estimator a perfect attitude reference that no
+real IMU has, and its output would measure ground truth. All three estimators
+therefore integrate \texttt{angular\_velocity.z} instead, which drifts honestly by
+\SI{2.52}{\degree} over \SI{87}{\second} on \repo{allsensor_000} and
+\SI{1.70}{\degree} over \SI{81.8}{\second} on \repo{allsensor_001}. The same check
+on \repo{allsensor_002} again returns a residual standard deviation of
+\SI{0.000000}{\degree} against ground-truth yaw, so the exclusion is not specific
+to the first two recordings. Each run
+records \repo{imu_orientation_used=NO} in its metadata so the exclusion is
+auditable.
+
+\subsubsection{Estimator definitions}
+
+\Cref{tab:proprio-estimators} defines the three estimators. The EKF carries the
+planar state $\mathbf{x}=[p_x,p_y,\theta,v,b_\omega]^{\top}$, predicted at the
+\SI{200}{\hertz} IMU rate and corrected at \SI{50}{\hertz} by the wheels.
+
+\begin{table}[htbp]
+\centering
+\caption[Implemented non-visual estimators.]{Implemented non-visual estimators. ``Anchoring'' refers to the initial
+pose: dead reckoning has no global reference, so all three start from the
+ground-truth pose at their first sample, and this is recorded as an alignment
+decision rather than treated as neutral.}
+\label{tab:proprio-estimators}
+\small
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.15\textwidth}>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}X}
+\toprule
+Estimator & Inputs & State & Correction \\
+\midrule
+Wheel odometry & rear wheel speeds, steering angles (\SI{1}{\kilo\hertz}) &
+  $[p_x,p_y,\theta]$ & none; $\mathbf{P}$ grows without bound \\
+IMU dead reckoning & gyroscope $z$, accelerometer $x$ (\SI{200}{\hertz}) &
+  $[p_x,p_y,\theta,v]$ & none \\
+EKF wheel + IMU & both of the above & $[p_x,p_y,\theta,v,b_\omega]$ & wheel speed
+  corrects $v$; $(\omega_{\text{gyro}}-\omega_{\text{wheel}})$ corrects
+  $b_\omega$ \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsubsection{EKF formulation}
+\label{sec:ekf-formulation}
+
+\paragraph{State and inputs.} The filter carries five planar states,
+\begin{equation}
+  \mathbf{x} = \begin{bmatrix}p_x & p_y & \theta & v & b_\omega\end{bmatrix}^{\top},
+  \label{eq:ekf-state}
+\end{equation}
+where $b_\omega$ is the gyroscope $z$ bias. Roll and pitch stay within
+\SI{0.002}{\degree} across every recording, so a full 15-state inertial
+formulation would spend nine states on quantities this platform does not have,
+and their covariances would be unobservable noise in the consistency test that
+motivates the experiment.
+
+The IMU is not a measurement here: it drives the prediction. Bias-corrected yaw
+rate and longitudinal acceleration act as the input,
+\begin{equation}
+  \omega = \omega_{\text{gyro}} - b_\omega, \qquad a = a_x - b_a,
+  \label{eq:ekf-input}
+\end{equation}
+with $b_a$ a constant measured during calibration rather than a tracked state.
+Propagation uses the midpoint heading $\theta_m = \theta + \tfrac{1}{2}\omega\,\Delta t$,
+which matters over \SI{117}{\metre} of driving:
+\begin{align}
+  p_x &\mathrel{+}= v\cos\theta_m\,\Delta t + \tfrac{1}{2}a\cos\theta_m\,\Delta t^2, \notag\\
+  p_y &\mathrel{+}= v\sin\theta_m\,\Delta t + \tfrac{1}{2}a\sin\theta_m\,\Delta t^2, \notag\\
+  v   &\mathrel{+}= a\,\Delta t, \qquad \theta \mathrel{+}= \omega\,\Delta t.
+  \label{eq:ekf-propagate}
+\end{align}
+
+\paragraph{Covariance and process noise.} With $\mathbf{F}=\partial f/\partial
+\mathbf{x}$ and $\mathbf{G}$ mapping the noise inputs into the state,
+\begin{equation}
+  \mathbf{P} \leftarrow \mathbf{F}\mathbf{P}\mathbf{F}^{\top}
+    + \mathbf{G}\,\mathrm{diag}(\sigma_a^2,\ \sigma_g^2,\ \sigma_{b}^2)\,\mathbf{G}^{\top}.
+  \label{eq:ekf-predict}
+\end{equation}
+The non-trivial entries are
+$F_{13}=-v\sin\theta_m\Delta t$, $F_{14}=\cos\theta_m\Delta t$,
+$F_{23}=v\cos\theta_m\Delta t$, $F_{24}=\sin\theta_m\Delta t$ and
+$F_{35}=-\Delta t$; the last couples bias error directly into heading, which is
+what makes $b_\omega$ worth estimating. In $\mathbf{G}$, accelerometer noise
+enters position as $\tfrac{1}{2}\cos\theta_m\Delta t^2$ and speed as $\Delta t$,
+gyroscope noise enters heading as $\Delta t$, and the bias row carries
+$\sqrt{\Delta t}$ rather than $\Delta t$ because a random walk accumulates as
+$\sqrt{t}$.
+
+Both IMU noise terms are therefore \emph{process} noise. Nothing from the IMU
+appears in $\mathbf{R}$, because the IMU propagates the state rather than
+observing it.
+
+\paragraph{Measurement.} The wheels correct at \SI{50}{\hertz} with
+\begin{equation}
+  \mathbf{z} = \begin{bmatrix}v_{\text{wheel}} \\
+    \omega_{\text{gyro}} - \omega_{\text{wheel}}\end{bmatrix}, \qquad
+  \mathbf{H} = \begin{bmatrix}0&0&0&1&0\\ 0&0&0&0&1\end{bmatrix}, \qquad
+  \mathbf{R} = \mathrm{diag}\!\left(\sigma_{v,w}^2,\ \sigma_{\omega,w}^2+\sigma_g^2\right).
+  \label{eq:ekf-update}
+\end{equation}
+The second variance is a sum because that observation is a \emph{difference} of
+two noisy sensors and inherits both. The update uses the Joseph form,
+\begin{equation}
+  \mathbf{P} \leftarrow (\mathbf{I}-\mathbf{K}\mathbf{H})\mathbf{P}
+    (\mathbf{I}-\mathbf{K}\mathbf{H})^{\top} + \mathbf{K}\mathbf{R}\mathbf{K}^{\top},
+  \label{eq:ekf-joseph}
+\end{equation}
+symmetrised afterwards. The shorter $(\mathbf{I}-\mathbf{K}\mathbf{H})\mathbf{P}$
+does not reliably stay positive definite across the roughly \num{16000} updates
+in a run, and here the covariance is itself the measurement under test, so it
+cannot be allowed to decay.
+
+\paragraph{Where the numbers come from.} $\sigma_a$ and $\sigma_g$ are measured
+from the recording by the calibration pass (\cref{tab:proprio-noise}), not taken
+from a datasheet, because every covariance field in these bags is identically
+zero. $\sigma_{v,w}$ and $\sigma_{\omega,w}$ likewise come from the wheel stream
+against ground truth. \moved{$\sigma_b$, the bias random walk, is assumed rather
+than measured: the longest stationary window in any recording is
+\SI{1.54}{\second} and an Allan-variance estimate needs minutes.}
+
+\subsubsection{Why the bias, and not the heading, is observed}
+
+The EKF's second measurement is deliberately an observation of the \emph{gyroscope
+bias} and not of heading. Integrating the wheel yaw rate into a heading and
+correcting $\theta$ with it would reproduce the wheel estimator inside the filter
+and inherit its unbounded drift. Treating the instantaneous rate difference as an
+observation of $b_\omega$ keeps each sensor supplying what it measures well: the
+wheels know rate, the gyroscope knows change, and neither knows absolute heading,
+so heading remains unobservable and its variance correctly continues to grow. The
+update uses the Joseph form, which keeps $\mathbf{P}$ symmetric and positive
+definite across the roughly 16\,000 updates in a run.
+
+Measured scale errors are recorded but never divided out. Correcting them would
+mean calibrating the estimator with the ground truth it is about to be scored
+against; the scale error is a real property of encoder odometry and is retained.

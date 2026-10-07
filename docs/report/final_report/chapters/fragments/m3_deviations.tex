@@ -1,0 +1,44 @@
+% Verbatim from minor_report/chapters/chapter_3_methodology.tex lines 1845-1885 (retired report),
+% headings demoted by 0 level(s). Do not edit here; edit the source of the numbers.
+
+Material deviations from the originally proposed method are given in
+\cref{tab:deviations}. They are differences between the proposal and the system
+that exists, not failures: each is recorded so that no proposal capability is read
+into the implemented pipeline.
+
+\begin{table}[htbp]
+\centering
+\caption[Planned-versus-implemented deviations at the reporting cutoff.]{Planned-versus-implemented deviations at the reporting cutoff. ``Added''
+marks work not present in the original proposal.}
+\label{tab:deviations}
+\small
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.19\textwidth}>{\raggedright\arraybackslash}p{0.28\textwidth}>{\raggedright\arraybackslash}X l}
+\toprule
+Component & Proposed & Implemented & Status \\
+\midrule
+Semantic segmentation & pixel masks, as in the reference RY-SLAM approach &
+  three-class bounding boxes, no motion gate & deviation \\
+Dynamic rejection point & not specified & ORB-SLAM3 rejects before octree
+  distribution; VINS-Fusion also removes persistent KLT tracks & implemented \\
+Estimator coupling & shared output representation & two independent estimators,
+  not one fused estimator & deviation \\
+RTAB-Map correction & integrated back end & separate process consuming external
+  TF odometry; correction never injected into estimator state & deviation \\
+Real-robot evaluation & metric accuracy against ground truth &
+  calibration-limited, no independent trajectory truth & \flag{blocked} \\
+Metric infrastructure & resource, throughput, uncertainty, manifests &
+  partially implemented; RPE now complete & \flag{incomplete} \\
+Relocalization and merging & robust arbitrary-start localization, aliasing
+  rejection, extend-mode validation, front-end global optimization, multi-session
+  merging & partially verified relocalization only & planned \\
+Non-visual baseline & not proposed & wheel, IMU and EKF estimators with a
+  data-derived noise model (\cref{sec:proprio-method}) & added \\
+Covariance consistency & not proposed & NEES and $\sigma$-coverage testing for the
+  non-visual estimators & added \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+These deviations define the actual system at the reporting cutoff. Chapter~4
+must report only measurements satisfying the validity rules above, while failed,
+excluded, and retracted runs remain in a clearly labelled diagnostic record.

@@ -1,0 +1,73 @@
+% Verbatim from minor_report/chapters/chapter_3_methodology.tex lines 1142-1211 (retired report),
+% headings demoted by 0 level(s). Do not edit here; edit the source of the numbers.
+
+VINS-Fusion uses stereo features and inertial measurements in a sliding-window
+nonlinear estimator. The ROS wrapper synchronizes the raw image topics and uses
+separate callback groups for images, IMU, feature messages, and detections. The
+simulation configuration processes every image (\repo{image_skip: 1}), uses two
+cameras and IMU, fixes simulated extrinsics, targets \SI{25}{\hertz} feature
+publication, and uses 10-pixel keyframe parallax. Image queues were increased to
+100 and the IMU queue to 2,000 to reduce losses during initialization and backlog.
+
+VINS cannot use only the ORB strategy because it propagates existing features
+with pyramidal KLT optical flow and detects new features only for replenishment.
+A feature attached to an object before detection could otherwise persist after
+masking. The implementation initializes \texttt{FeatureTracker::setMask()} from
+the YOLO mask. Tracks in zero-valued regions fail the retention test, while the
+same mask is passed to \texttt{goodFeaturesToTrack()} to suppress new points. The
+count of persistent tracks removed in dynamic regions is accumulated as a
+mechanism diagnostic.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{\textwidth}{!}{\input{figures/vins_pipeline}}
+  \caption[VINS-Fusion pipeline and its two semantic-mask insertion points.]{VINS-Fusion pipeline and its two semantic-mask insertion points.
+  Because the front end propagates existing KLT tracks and only detects new
+  features to replenish them, suppressing new detections alone is insufficient:
+  a track that attached to an object before it was detected would survive
+  masking. Tracks in masked regions must therefore also be culled (1) while the
+  same mask suppresses replenishment (2). Contrast \cref{fig:orb-pipeline},
+  where re-extraction every frame makes a single insertion sufficient. The count
+  of persistent tracks removed is logged as a mechanism diagnostic --- the
+  counter that read zero in all twelve filtered runs.}
+  \label{fig:vins-pipeline}
+\end{figure}
+
+\begin{table}[htbp]
+\centering
+\caption[VINS-Fusion simulation configuration at the cutoff, from \repo{vins_fusion_ros2/config/wil_sim/stereo_imu.yaml}.]{VINS-Fusion simulation configuration at the cutoff, from
+\repo{vins_fusion_ros2/config/wil_sim/stereo_imu.yaml}. Inertial noise densities
+are in \cref{tab:imu-noise-assumed}.}
+\label{tab:vins-params}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.26\textwidth}l>{\raggedright\arraybackslash}X}
+\toprule
+Parameter & Value & Role \\
+\midrule
+\repo{num_of_cam} / \repo{imu} & 2 / 1 & stereo-inertial \\
+\repo{image_skip} & 1 & every image processed \\
+\repo{max_cnt} & 150 & tracked-feature budget \\
+\repo{min_dist} & \SI{30}{px} & minimum feature separation \\
+\repo{freq} & \SI{25}{\hertz} & target feature publication \\
+\repo{keyframe_parallax} & \SI{10}{px} & keyframe decision \\
+\repo{F_threshold} & 1.0 & RANSAC fundamental-matrix gate \\
+\repo{max_solver_time} & \SI{0.08}{\second} & Ceres budget per update \\
+\repo{max_num_iterations} & 100 & Ceres iteration cap \\
+\repo{estimate_extrinsic} & 0 & simulated extrinsics held fixed \\
+\repo{estimate_td} & 0 & camera--IMU delay held at \SI{0}{\second} \\
+\repo{g_norm} & \SI{9.8}{\metre\per\second\squared} & matches the world's gravity \\
+Image queue & 100 & raised to survive initialization backlog \\
+IMU queue & \num{2000} & raised for the same reason \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+VINS writes the optimized state after each estimator update to \repo{vio.csv} and
+broadcasts \texttt{world~$\rightarrow$~body} using configurable frame names. The
+ROS \repo{output_path} parameter overrides the YAML path, recursively creates
+missing directories, and reports an explicit error if \repo{vio.csv} cannot be
+opened. This behaviour is an uncommitted worktree change at the cutoff. Evidence
+is in \repo{vins_fusion_ros2/src/vins_estimator.cpp},
+\repo{vins_fusion_ros2/vins/src/featureTracker/feature_tracker.cpp}, and
+\repo{vins_fusion_ros2/vins/src/estimator/estimator.cpp}.

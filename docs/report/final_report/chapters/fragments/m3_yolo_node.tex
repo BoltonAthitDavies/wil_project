@@ -1,0 +1,37 @@
+% Verbatim from minor_report/chapters/chapter_3_methodology.tex lines 1483-1516 (retired report),
+% headings demoted by 0 level(s). Do not edit here; edit the source of the numbers.
+
+The semantic front end is a standalone Python ROS~2 node using Ultralytics. The
+project checkpoint is \repo{weight/best.pt}, a custom detector for \texttt{bin},
+\texttt{box}, and \texttt{bucket}, fine-tuned from \repo{yolo26m.pt} using
+640-pixel inputs. It produces bounding boxes, not segmentation masks. The stock
+\repo{yolo26n.pt} and \repo{yolo26m.pt} files are not project-trained models and
+are not evidence of custom training.
+
+At startup, the node resolves requested classes against checkpoint metadata,
+warms the model with three dummy images, and selects CUDA when available. Current
+defaults are confidence 0.35, NMS IoU 0.5, and image size 640. Only the left image
+is processed. Each \texttt{Detection2DArray} preserves the source image header,
+so nearest-timestamp selection measures sensor-time correspondence rather than
+inference-completion time. Empty arrays distinguish a valid frame with no
+detections from detector failure.
+
+The detector intentionally remains outside stereo synchronization. A three-input
+image/image/detection synchronizer would discard pairs whenever inference lagged.
+The implemented design continues without filtering if no recent detection exists.
+Filtered runs write \repo{yolo_mask.csv} with timestamp, box count, coverage,
+match state, detection age, and rejection status.
+
+Offline evaluation in \repo{script/yolo_eval.py} transforms Gazebo model poses and
+collision-mesh vertices into the left-camera frame to form projected truth boxes.
+Object speed over \SI{0.05}{\metre\per\second} defines the moving subset.
+Predictions are greedily matched by class at IoU 0.5. Heavily occluded truth boxes
+and predictions covered by known but unlabeled box-like scenery are ignored at
+stated thresholds. Outputs are per-frame \repo{yolo_eval.csv}, per-detection
+\repo{yolo_detections.csv}, and overlays. Overlays are inspected before aggregate
+metrics because invalid pose stamps, centimetre mesh units, or malformed camera
+transforms can produce plausible but invalid numbers.
+
+The current semantic rule assumes all selected-class detections are dynamic. No
+optical-flow, stereo-depth, or world-motion gate is implemented, and axis-aligned
+boxes also remove background pixels. These are explicit method limitations.

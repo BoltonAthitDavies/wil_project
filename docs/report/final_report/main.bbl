@@ -1,0 +1,67 @@
+\begin{thebibliography}{10}
+
+\bibitem{cadena2016}
+Cesar Cadena, Luca Carlone, Henry Carrillo, Yasir Latif, Davide Scaramuzza,
+  Jos{\'e} Neira, Ian Reid, and John~J. Leonard.
+\newblock Past, present, and future of simultaneous localization and mapping:
+  Toward the robust-perception age.
+\newblock {\em IEEE Transactions on Robotics}, 32(6):1309--1332, 2016.
+
+\bibitem{campos2021}
+Carlos Campos, Richard Elvira, Juan~J. G{\'o}mez~Rodr{\'i}guez, Jos{\'e} M.~M.
+  Montiel, and Juan~D. Tard{\'o}s.
+\newblock {ORB-SLAM3}: An accurate open-source library for visual,
+  visual-inertial, and multi-map {SLAM}.
+\newblock {\em IEEE Transactions on Robotics}, 37(6):1874--1890, 2021.
+
+\bibitem{qin2018vins}
+Tong Qin, Peiliang Li, and Shaojie Shen.
+\newblock {VINS-Mono}: A robust and versatile monocular visual-inertial state
+  estimator.
+\newblock {\em IEEE Transactions on Robotics}, 34(4):1004--1020, 2018.
+
+\bibitem{labbe2019}
+Mathieu Labb{\'e} and Fran{\c{c}}ois Michaud.
+\newblock {RTAB-Map} as an open-source lidar and visual simultaneous
+  localization and mapping library for large-scale and long-term online
+  operation.
+\newblock {\em Journal of Field Robotics}, 36(2):416--446, 2019.
+
+\bibitem{chen2025}
+X.~Chen, S.~Li, S.~Ren, and J.~Wang.
+\newblock {RY-SLAM}: A robust {YOLO}-based real-time visual {SLAM} solution for
+  dynamic environments.
+\newblock In {\em 2025 International Conference on Virtual Reality and
+  Visualization (ICVRV)}. IEEE, 2025.
+
+\bibitem{saputra2018}
+Muhamad Risqi~U. Saputra, Andrew Markham, and Niki Trigoni.
+\newblock Visual {SLAM} and structure from motion in dynamic environments: A
+  survey.
+\newblock {\em ACM Computing Surveys}, 51(2):1--36, 2018.
+
+\bibitem{bmw2024}
+{BMW Group}.
+\newblock Autonomous driverless transport vehicle navigates precisely through
+  {BMW} {Group} {Plant} {Regensburg} press plant.
+\newblock BMW Group PressClub video PF0009726,
+  \url{https://www.press.bmwgroup.com/global/video/detail/PF0009726/}, 2024.
+
+\bibitem{qin2018td}
+Tong Qin and Shaojie Shen.
+\newblock Online temporal calibration for monocular visual-inertial systems.
+\newblock In {\em 2018 IEEE/RSJ International Conference on Intelligent Robots
+  and Systems (IROS)}, pages 3662--3669, 2018.
+
+\bibitem{kanso2025}
+H.~Kanso, A.~Singh, E.~El~Zarif, N.~Almohammed, J.~Mounsef, N.~Maalouf, and
+  B.~Arain.
+\newblock Semantic {SLAM}: A comprehensive survey of methods and applications.
+\newblock {\em Intelligent Systems with Applications}, 28:200591, 2025.
+
+\bibitem{keith2024}
+R.~Keith and H.~M. La.
+\newblock Review of autonomous mobile robots for the warehouse environment,
+  2024.
+
+\end{thebibliography}

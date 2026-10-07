@@ -1,0 +1,45 @@
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {1.1}{\ignorespaces Scope of the project within the AMR navigation loop.}}{2}{figure.caption.8}%
+\contentsline {figure}{\numberline {1.2}{\ignorespaces Top view of the mock warehouse test field on the first floor of the Gensurv building.}}{3}{figure.caption.9}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {2.1}{\ignorespaces The eight principal wastes of lean manufacturing.}}{4}{figure.caption.11}%
+\contentsline {figure}{\numberline {2.2}{\ignorespaces Three warehouse robots with different navigation technologies: the orange robot uses QR-code navigation, the pallet truck in the centre uses SLAM navigation without floor infrastructure, and the white robot uses magnetic-tape guidance.}}{5}{figure.caption.12}%
+\contentsline {figure}{\numberline {2.3}{\ignorespaces An autonomous driverless transport vehicle navigating precisely in the BMW Group press plant at Regensburg.}}{6}{figure.caption.13}%
+\contentsline {figure}{\numberline {2.4}{\ignorespaces The indirect (feature-based) method common to SLAM systems: a front end producing pseudo-measurements and loop-closure constraints, and a back end performing geometric SLAM by factor-graph optimisation\nobreakspace {}\cite {cadena2016}.\relax }}{6}{figure.caption.14}%
+\contentsline {figure}{\numberline {2.5}{\ignorespaces Main components of ORB-SLAM3: the tracking, local mapping and loop and map-merging threads around the Atlas multi-map representation and the DBoW2 keyframe database\nobreakspace {}\cite {campos2021}.\relax }}{7}{figure.caption.15}%
+\contentsline {figure}{\numberline {2.6}{\ignorespaces Main components of monocular VINS: measurement preprocessing, initialisation, sliding-window visual-inertial odometry with relocalization, and global pose-graph optimisation and reuse\nobreakspace {}\cite {qin2018vins}.\relax }}{8}{figure.caption.19}%
+\contentsline {figure}{\numberline {2.7}{\ignorespaces Main components of RTAB-Map: sensor synchronisation, short-term and working memory, long-term memory, loop-closure and proximity detection, graph optimisation and global map assembly\nobreakspace {}\cite {labbe2019}.\relax }}{10}{figure.caption.25}%
+\contentsline {figure}{\numberline {2.8}{\ignorespaces Architecture of RY-SLAM: a YOLOv8-seg dynamic-object detection stage feeding a semantic mask into the ORB-SLAM3 tracking thread ahead of the Atlas multi-map system\nobreakspace {}\cite {chen2025}.\relax }}{14}{figure.caption.30}%
+\contentsline {figure}{\numberline {2.9}{\ignorespaces Detail of the semantic-segmentation framework in RY-SLAM and its multi-threaded operation: ONNX Runtime inference producing the dynamic mask, the neighbourhood test that deletes feature points, and the viewer outputs\nobreakspace {}\cite {chen2025}.}}{14}{figure.caption.31}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Implemented experimental architecture.}}{18}{figure.caption.33}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Pipeline\nobreakspace {}1, YOLO26 + ORB-SLAM3, as designed: stereo images and IMU are synchronised, tracked and passed to local mapping, loop closing and the Atlas map; the detector's boxes enter the tracking stage.}}{20}{figure.caption.34}%
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Pipeline\nobreakspace {}2, YOLO26 + VINS + RTAB-Map, as designed: VINS tracking, initialisation and sliding-window optimisation produce odometry, RTAB-Map builds the map from that odometry and the stereo images.}}{20}{figure.caption.35}%
+\contentsline {figure}{\numberline {3.4}{\ignorespaces ORB-SLAM3 pipeline and the semantic-mask insertion point.}}{22}{figure.caption.37}%
+\contentsline {figure}{\numberline {3.5}{\ignorespaces VINS-Fusion pipeline and its two semantic-mask insertion points.}}{24}{figure.caption.39}%
+\contentsline {figure}{\numberline {3.6}{\ignorespaces Simulated Ackermann platform, drawn to scale from the model definition.}}{28}{figure.caption.42}%
+\contentsline {figure}{\numberline {3.7}{\ignorespaces Coordinate-frame contract used by the composed RTAB-Map pipeline.}}{33}{figure.caption.55}%
+\contentsline {figure}{\numberline {3.8}{\ignorespaces Baked occupancy truth of the three large-warehouse object arrangements, each \SI {42.2}{\metre } square at \SI {0.05}{\metre } per cell with origin $(-21.1,-21.1)$\nobreakspace {}m.}}{34}{figure.caption.56}%
+\contentsline {figure}{\numberline {3.9}{\ignorespaces The two recorded floor conditions, rendered across the full \SI {42.2}{\metre } floor at \SI {0.05}{\metre } per pixel.}}{34}{figure.caption.57}%
+\contentsline {figure}{\numberline {3.10}{\ignorespaces Every simulation dataset as a scene: floor treatment, object layout and ground-truth route in one view.}}{36}{figure.caption.59}%
+\contentsline {figure}{\numberline {3.11}{\ignorespaces Dimensions of the mock AMR used to test the navigation system: \SI {57}{\centi \metre } long, \SI {40.5}{\centi \metre } wide and \SI {47.5}{\centi \metre } high to the top of the sensor mast.\relax }}{40}{figure.caption.63}%
+\contentsline {figure}{\numberline {3.12}{\ignorespaces Hardware components of the mock AMR: steering servo and traction motor, BLDC drive and microcontroller on CAN, the NRU-51V computer, power supply, the AC-IMX390 stereo pair and IMU, and the Wi-Fi link to the smartphone joystick.}}{40}{figure.caption.64}%
+\contentsline {figure}{\numberline {3.13}{\ignorespaces Dimensions of the AC-IMX390 camera family in millimetres; the H190 variant at the bottom is the one used.\relax }}{41}{figure.caption.65}%
+\contentsline {figure}{\numberline {3.14}{\ignorespaces The Neousys NRU-51V (NVIDIA Jetson Xavier NX), showing the four FAKRA camera ports.\relax }}{42}{figure.caption.67}%
+\contentsline {figure}{\numberline {3.15}{\ignorespaces Dimensions of the Neousys NRU-51V in millimetres.\relax }}{42}{figure.caption.68}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Estimator comparison on \repo {dataset_allsensor_001}, world frame.}}{63}{figure.caption.97}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Error against claimed uncertainty for \repo {dataset_allsensor_001}.}}{66}{figure.caption.103}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Per-dataset and pooled detector scores and box-area coverage.}}{71}{figure.caption.119}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Representative validation overlay used before accepting the offline metrics.}}{71}{figure.caption.120}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Object-class confusion conditional on class-agnostic IoU association.}}{72}{figure.caption.123}%
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Run-level anomaly diagnostics.}}{76}{figure.caption.129}%
+\contentsline {figure}{\numberline {4.7}{\ignorespaces Representative repeated-run trajectory diagnostic for \repo {dataset_dynamic_nofloortexture_00_000/logging_20260916_01}, in the same visual format as the existing comparison figures.}}{80}{figure.caption.138}%
+\contentsline {figure}{\numberline {4.8}{\ignorespaces Per-run robustness and keyframe observations for the dynamic datasets.}}{81}{figure.caption.139}%
+\contentsline {figure}{\numberline {4.9}{\ignorespaces Raw dynamic-run capacity and process-resource values.}}{81}{figure.caption.142}%
+\contentsline {figure}{\numberline {4.10}{\ignorespaces Module-latency distributions for dynamic datasets.}}{82}{figure.caption.143}%
+\contentsline {figure}{\numberline {4.11}{\ignorespaces Dense-map evaluation of \repo {map/map_tiny.db}.}}{87}{figure.caption.156}%
+\contentsline {figure}{\numberline {4.12}{\ignorespaces The same database scored against the run that built it, \repo {dataset/dataset_map_tiny}.}}{88}{figure.caption.157}%
+\contentsline {figure}{\numberline {4.13}{\ignorespaces Per-block performance in the \textbf {static} condition, over the five \repo {allsensor} datasets.}}{92}{figure.caption.164}%
+\contentsline {figure}{\numberline {4.14}{\ignorespaces Per-block performance in the \textbf {dynamic} condition, over the twelve relogged dynamic runs of each estimator.}}{96}{figure.caption.168}%
+\addvspace {10\p@ }

@@ -1,0 +1,131 @@
+% Chapter 5.  Conclusions are stated only as strongly as the filled slots of
+% Chapter 4 allow; every claim points back to the slot that holds its evidence.
+\chapter[CONCLUSION AND RECOMMENDATIONS]{Conclusion and Recommendations}
+\label{chap:conclusion}
+
+This project set out to replace infrastructure-based navigation with a
+vision-based pipeline that stays accurate when the warehouse changes, and to
+decide between two ways of building it. At the reporting cutoff the pipeline
+exists in both forms, the four experiments that judge it are defined for both
+domains, and the four simulation slots hold results. The four real-robot slots
+do not. The conclusions below are therefore conclusions about the simulated
+warehouse, and each is bounded by the validity limits recorded beside it in
+\cref{chap:results}.
+
+\section{Conclusions by Experiment}
+\label{sec:conclusions}
+
+\subsection{Experiment 1: is vision earning its place?}
+
+On five static recordings, a five-state wheel-plus-gyroscope EKF whose noise
+model is calibrated per recording localises to \SIrange{0.19}{0.49}{\metre}
+aligned ATE, ahead of stereo visual-inertial SLAM running on a hand-set
+configuration on four of five recordings (\cref{tab:proprio-accuracy}). That
+ordering is not a property of the architectures: giving the filter the visual
+systems' own inertial noise model degrades it on every recording and puts
+VINS-Fusion ahead on all five (\cref{sec:proprio-tuning}). The defensible
+conclusion is narrower than either reading: over this range the noise model is
+worth more than the estimator, and the visual systems have never been tuned to
+this platform. Two results survive the control. The proprioceptive sensors fail
+in complementary ways, the IMU holding heading and losing position, the wheels
+the reverse, and the EKF is better than either in both quantities because it
+observes the gyroscope bias rather than the heading
+(\cref{sec:h1-falsified}). And every dead-reckoning covariance is overconfident
+by about two orders of magnitude (\cref{tab:proprio-covariance}). Against the
+project's target of \SI{0.05}{\metre} ATE, no estimator qualifies; against the
+\SI{1.5}{\metre} RPE target at \SI{1}{\second}, all of them do in static
+scenes. The comparison is confined to static, encoder-equipped recordings and
+to a floor on which the wheels effectively cannot slip.
+
+\subsection{Experiment 2: how good is the detector?}
+
+The three-class detector is reliable at naming and unreliable at finding:
+pooled precision 0.684, moving-object recall 0.591, conditional class F1 0.995
+over 9\,860 frames (\cref{tab:yolo-performance,tab:yolo-classification}). It
+misses about \SI{41}{\percent} of the moving objects that are scored, and
+\SI{62}{\percent} if every occluded or tiny object is counted; that miss rate is
+the ceiling on any filtering benefit downstream. The ground truth is projected
+simulator geometry rather than annotation, which makes the boxes tighter and the
+scored subset easier than a human-labelled set, and no average precision is
+reported because a single confidence threshold was retained.
+
+\subsection{Experiment 3: does filtering help?}
+
+The question the project is named for has no valid answer yet. Sixty-six runs
+exist, fully instrumented, but the VINS-Fusion filter never activated, eleven
+of twelve ORB-SLAM3 treatment pairs received different input, and the scripted
+dynamic worlds were found to be an invalid testbed, so every dynamic-scene
+trajectory is withheld as a finding (\cref{sec:trajectory-results}). This is
+untested, not tested and failed. The static runs do establish two things: the
+two front ends reach medians of \SI{0.370}{\metre} and \SI{0.454}{\metre}
+aligned ATE, and ORB-SLAM3's eleven-fold rotational penalty is produced by one
+or two discrete events near inertial initialisation, not by its steady-state
+tracking (\cref{sec:rpe}). Neither front end keeps up with the frame rate at the
+replay rate used, and they hide that deficit differently, one by dropping
+frames and one by queueing them (\cref{sec:block-performance}).
+
+\subsection{Experiment 4: is the map usable?}
+
+Where tracking is sound, the mapping pipeline is: the tiny-warehouse map is
+\SI{96.6}{\percent} precise in what it marks occupied, recovers
+\SI{89.5}{\percent} of the surfaces it observed, and contains no blind cells and
+\SI{0.7}{\percent} proven false obstacles along an independently driven route
+(\cref{tab:map-geometry,tab:map-drivability}). The whole-building recall of
+\SI{67.2}{\percent} is route coverage, not mapping failure. The drivability half
+of that result is dated, because its independent route is lost. On the large
+warehouse the attempt failed through tracking loss in repetitive structure,
+before the back end was exercised, and its artifacts were not retained.
+
+\section{Limitations and Threats to Validity}
+\label{sec:limitations}
+
+The limitations of \cref{tab:limitations} carry over without softening. The
+ones that bound the conclusions above most tightly are these. Every result is
+from one laptop at one replay rate, so nothing here is evidence of real-time
+capability on the NRU-51V. The proprioceptive baseline exists only for static,
+encoder-equipped, near-slip-free recordings, with $n=5$ across four worlds and
+no condition repeated more than twice. ORB-SLAM3's run-to-run spread is
+unmeasured and its loop-closure configuration is absent from the run manifest,
+so its loop-closure results cannot be attributed. The detector is scored against
+projected geometry with exemptions the training convention lacks. The dynamic
+worlds move props kinematically and so do not pose the problem the project
+poses. And no real-robot slot is filled: the rig's calibration has a
+placeholder translation and a reused intrinsic set, and no recording carries
+motion-capture truth, wheel odometry or varied illumination.
+
+\section{Recommendations and Next Steps}
+\label{sec:recommendations}
+
+\textbf{Fill the four real-robot slots, in the order the simulation results
+suggest.} First calibrate the real camera--IMU pair and record the
+motion-capture reference with the wheel and steering topics bridged, which
+unlocks Experiments~1 and~3 at once and yields the first measured noise model of
+the real IMU. Then annotate a frame subset under the three illumination levels
+for Experiment~2, and survey the site into a reference grid for Experiment~4.
+The integrated live test of \cref{sec:vio-filter-method}, both pipelines at
+\SI{1.5}{\metre\per\second} under scheduled lighting change with the dynamic
+variable triggered at each zone transfer, is the run that turns the eight-slot
+table into a comparison.
+
+\textbf{Give Experiment~3 a valid test before repeating it.} Repair the
+detection-to-VINS integration and prove it by the removed-track counter;
+input-match the ORB-SLAM3 treatment pairs by reducing filtered-mode latency;
+rebuild the dynamic worlds with physically simulated props; and record the
+\repo{allsensor} topics in a dynamic world so that the proprioceptive baseline
+extends to the condition that matters.
+
+\textbf{Tune the visual systems to the platform.} The cheapest remaining
+improvement is a measured inertial noise model for the visual estimators; the
+one attempt so far was bimodal, better on four of five recordings and divergent
+on three of ten runs, and needs a proper stationary recording behind it.
+
+\textbf{Record every behaviour-changing switch in the run manifest}, repeat
+every nondeterministic configuration at least three times, and retain the
+artifacts of failed attempts; the large-map failure and the lost drivability
+route are both results the project cannot presently audit.
+
+\textbf{Future direction.} Integrated relocalization against a saved map,
+global pose-graph optimisation with loop-closure constraints, and alignment and
+merging of maps across sessions remain future work, to be taken up only once the
+front end tracks reliably in repeated structure; path planning stays outside the
+project.

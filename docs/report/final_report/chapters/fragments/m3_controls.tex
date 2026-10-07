@@ -1,0 +1,31 @@
+% Verbatim from minor_report/chapters/chapter_3_methodology.tex lines 1816-1843 (retired report),
+% headings demoted by 0 level(s). Do not edit here; edit the source of the numbers.
+
+The following controls govern future experiments and acceptance of historical
+results:
+\begin{enumerate}
+  \item Record absolute bag and exact \texttt{.world} file, treatment,
+    configuration, commands, clock and replay rate, hardware, dependencies, and
+    relevant repository commits.
+  \item Use a unique output directory and retain failed runs with failure labels.
+  \item Run paired treatments independently on the same sensor data and compare
+    only their common valid interval.
+  \item Record inputs, outputs, initialization, dropped frames, resets, tracking
+    loss, warnings, and exclusion reasons.
+  \item Validate camera order, transport, timestamps, metric scale, and every
+    rigid transform before analysis.
+  \item Inspect representative detector and map overlays before aggregate scores.
+  \item Repeat nondeterministic RTAB-Map processing and report valid-run count;
+    do not interpret differences within run-to-run variation as algorithmic.
+  \item Keep estimator, back end, filtering, environment dynamics, floor texture,
+    domain, and hardware separate unless their interaction is the declared factor.
+  \item Record every switch that changes estimator behaviour in the run manifest,
+    not only those the launch file exposes. Loop-closing and global-bundle-adjustment
+    state are currently absent from \repo{run_metadata.csv}, so two ORB-SLAM3 runs
+    of the same dataset in opposite configurations produce manifests that differ
+    only in identifier and timestamp.
+  \item Repeat every configuration of a nondeterministic estimator at least three
+    times and report median and spread. ORB-SLAM3 is multi-threaded and its
+    run-to-run variation on identical input is presently unmeasured, which places
+    a floor on the differences that can be attributed to any factor.
+\end{enumerate}

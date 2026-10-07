@@ -1,0 +1,92 @@
+% Verbatim from minor_report/chapters/chapter_3_methodology.tex lines 1047-1135 (retired report),
+% headings demoted by 0 level(s). Do not edit here; edit the source of the numbers.
+
+
+The project provides a purpose-built ROS~2 Humble wrapper around the pinned
+ORB-SLAM3 core. Approximate-time synchronization pairs left and right images with
+a \SI{0.02}{\second} slop. Raw and compressed transports are supported. Image
+callbacks place stereo pairs in a one-frame queue; a worker thread calls
+\texttt{TrackStereo()} so blocking visual tracking does not starve the
+\SI{200}{\hertz} IMU subscription. If tracking falls behind, the older pending
+image is discarded and the drop count is reported.
+
+With \repo{filter:=false}, no detection subscription is created and an empty mask
+passes through the patched interfaces. With filtering enabled, a bounded buffer
+is searched for the detection closest in source-image time, accepted only within
+\SI{0.15}{\second}. Boxes are expanded by eight pixels, clipped to the image, and
+rasterized to an 8-bit mask in which 255 retains a feature and zero rejects it. A
+mask covering more than 0.8 of the frame is discarded as a safety measure.
+
+The mask passes through \texttt{System}, \texttt{Tracking}, and \texttt{Frame} to
+the ORB extractor. Candidate keypoints are tested before octree distribution, so
+the per-level feature quota can be redistributed across surviving static regions.
+At each pyramid level, the implemented boundary rule rejects a candidate when at
+least five samples in a $3\times3$ neighbourhood are dynamic. Only left-camera
+features are masked because ORB-SLAM3 establishes stereo matches from left
+keypoints to right candidates.
+
+The current simulation YAML requests \num{1500} ORB features, eight pyramid
+levels, a 1.2 scale factor, initial FAST threshold 20, and fallback threshold 7;
+\cref{tab:orb-params} collects these. An earlier draft of this section reported
+\num{1000} and attributed \num{1500} to a superseded engineering note. That was
+backwards: \repo{ORBextractor.nFeatures} is \num{1500} in the committed
+configuration, and no uncommitted change touches it. No controlled feature-count
+or FAST-threshold sweep is complete.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{\textwidth}{!}{\input{figures/orb_pipeline}}
+  \caption[ORB-SLAM3 pipeline and the semantic-mask insertion point.]{ORB-SLAM3 pipeline and the semantic-mask insertion point. Green is
+  built by this project, grey is the pinned upstream core, blue the optional
+  detector path. The mask is applied to candidate keypoints \emph{before} octree
+  distribution, which is what allows the per-level feature quota to redistribute
+  onto surviving static regions rather than simply shrink. A candidate is
+  rejected when at least five samples of its $3\times3$ neighbourhood are
+  dynamic, and only the left camera is masked, because ORB-SLAM3 forms stereo
+  matches outwards from left keypoints.}
+  \label{fig:orb-pipeline}
+\end{figure}
+
+\begin{table}[htbp]
+\centering
+\caption[ORB-SLAM3 configuration at the cutoff.]{ORB-SLAM3 configuration at the cutoff. Wrapper values are from
+\repo{orbslam3_ros2/src/}; extractor and IMU values from
+\repo{config/wil_sim/stereo_imu.yaml}. Noise densities are given in
+\cref{tab:imu-noise-assumed} and are not repeated here.}
+\label{tab:orb-params}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.30\textwidth}l>{\raggedright\arraybackslash}X}
+\toprule
+Parameter & Value & Role \\
+\midrule
+\multicolumn{3}{l}{\emph{Wrapper (built here)}} \\
+Stereo sync slop & \SI{0.02}{\second} & approximate-time pairing \\
+Image queue depth & 1 frame & older frame dropped, drop count logged \\
+Detector match window & \SI{0.15}{\second} & nearest in source-image time \\
+Box expansion & \SI{8}{px} & before rasterizing the mask \\
+Mask reject threshold & 0.8 of frame & safety cut-out on runaway coverage \\
+Boundary rule & $\ge 5$ of $3\times3$ & candidate rejected when dynamic \\
+Masked camera & left only & stereo matches form from left keypoints \\
+\midrule
+\multicolumn{3}{l}{\emph{Extractor and core}} \\
+\repo{ORBextractor.nFeatures} & \num{1500} & per-frame feature budget \\
+\repo{ORBextractor.nLevels} & 8 & pyramid levels \\
+\repo{ORBextractor.scaleFactor} & 1.2 & inter-level scale \\
+\repo{ORBextractor.iniThFAST} & 20 & initial corner threshold \\
+\repo{ORBextractor.minThFAST} & 7 & fallback threshold \\
+\repo{Stereo.ThDepth} & 90.0 & close/far stereo split \\
+\repo{IMU.Frequency} & \SI{200}{\hertz} & preintegration rate \\
+\repo{loopClosing} & 1 & \flag{comment in the same file says ``set to 0
+  deliberately''} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The wrapper publishes \repo{/orbslam3/odometry}, \repo{/orbslam3/pose}, and TF
+after valid tracking. It writes the common 11-column trajectory format directly
+and flushes each row. Repository evidence is located in
+\repo{orbslam3_ros2/src/orbslam3_node.cpp},
+\repo{orbslam3_ros2/src/slam_wrapper.cpp},
+\repo{orbslam3_ros2/src/trajectory_writer.cpp}, and
+\repo{orbslam3_ros2/config/wil_sim/stereo_imu.yaml}.

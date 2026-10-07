@@ -1,0 +1,60 @@
+% Verbatim from minor_report/chapters/chapter_3_methodology.tex lines 45-101 (retired report),
+% headings demoted by 0 level(s). Do not edit here; edit the source of the numbers.
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.30\textwidth}
+                  >{\raggedright\arraybackslash}p{0.23\textwidth}
+                  >{\raggedright\arraybackslash}p{0.39\textwidth}}
+\caption{Implementation status at the reporting cutoff.}
+\label{tab:implementation-status}\\
+\toprule
+Component & Status & Scope of evidence \\
+\midrule
+\endfirsthead
+\toprule
+Component & Status & Scope of evidence \\
+\midrule
+\endhead
+Warehouse simulation and controlled worlds & \status{Implemented; verified} &
+Static, dynamic, textured-floor, and featureless-floor world and launch files are
+present. \\
+ORB-SLAM3 ROS~2 stereo-inertial wrapper & \status{Implemented; verified in
+simulation} & Live topics, worker-thread tracking, TF, and common trajectory
+output are implemented. \\
+ORB-SLAM3 semantic filtering & \status{Implemented; mechanism verified} &
+Detector messages reach the tracker and masked ORB candidates are rejected before
+octree distribution. \\
+VINS-Fusion stereo-inertial estimator & \status{Implemented} & Simulation and
+real-rig configurations, odometry publication, TF, and trajectory output are
+present. \\
+VINS-Fusion semantic filtering & \status{Implemented; mechanism verified} &
+Existing KLT tracks are culled and new features are suppressed in detected
+regions. \\
+Offline YOLO evaluation & \status{Implemented; partially evaluated} &
+Ground-truth projection, IoU matching, per-frame CSV files, and validation
+overlays are present. \\
+RTAB-Map construction and saved-map localization & \status{Implemented; partially
+verified} & Construction and basic read-only localization passed; one tiny-map
+database has been quantitatively evaluated for geometry and drivability
+(\cref{sec:map-quality}). Arbitrary-start aliasing rejection and the
+large-warehouse evaluation have not been done. \\
+RTAB-Map extend and multi-session merging & \status{Implemented at launch level;
+experimentally unverified} & The mode exists, but the planned Level~4 experiment
+has not been completed. \\
+Live VINS-Fusion and RTAB-Map co-execution & \status{Blocked} & VINS diverges under
+the combined workload on the current computer; the mechanism is unresolved. \\
+RPE and complete compute evaluation & \status{Partially implemented} & Front-end,
+back-end, local-mapping, loop-closing, delivery/state, cumulative process CPU,
+and resident-memory records are now logged. RPE was added after the cutoff and
+applied to the campaign (\cref{sec:rpe}). External-process monitoring and the
+repeated hardware matrix remain planned. \\
+\bottomrule
+\end{longtable}
+
+The repository state used for this draft is superproject commit
+\repo{4425a415f624d6a45da1da4f3b2404cbf7914197}. The checked-out submodules are
+VINS-Fusion \repo{4a2223c9e54dfc5d2e94eb2ec1dfc8fd3b8045bb}, RTAB-Map ROS
+\repo{56064e4388f6f3ad6b994dbff98bcc0a41488102}, and the warehouse environment
+\repo{3df54c6e6ec267fad204e208db61c4ab491be410}. The ORB-SLAM3 core is pinned to
+\repo{5c2b00f732775f78836751dba13db25463a0aaa1}. The VINS-Fusion worktree contains
+an uncommitted output-directory creation fix at the cutoff; this must be committed
+or otherwise recorded before a reproducibility release.

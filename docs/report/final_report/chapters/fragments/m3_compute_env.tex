@@ -1,0 +1,56 @@
+% Verbatim from minor_report/chapters/chapter_3_methodology.tex lines 108-160 (retired report),
+% headings demoted by 0 level(s). Do not edit here; edit the source of the numbers.
+
+One machine produced every simulation result in this report.
+\Cref{tab:compute-environment} records it. Each entry was re-read from the
+running system on 20 September 2026 rather than copied forward from the
+engineering log, and all agreed.
+
+\begin{table}[htbp]
+\centering
+\caption[Computing and software environment.]{Computing and software environment. A single laptop produced every
+result reported here; there is no second platform, so no entry below supports a
+cross-hardware comparison.}
+\label{tab:compute-environment}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.20\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}X}
+\toprule
+Component & Version & Role \\
+\midrule
+\multicolumn{3}{l}{\emph{Platform}} \\
+Operating system & Ubuntu 22.04.5 LTS & \\
+Middleware & ROS~2 Humble & \\
+CPU & 16 logical cores & \\
+Memory & \SI{15}{\giga\byte}, no swap & no swap, so memory pressure fails
+  outright rather than degrading \\
+GPU & NVIDIA RTX~3070 Laptop & detector inference only \\
+\midrule
+\multicolumn{3}{l}{\emph{Build toolchain}} \\
+GCC & 11.4.0 & \\
+CMake & 3.22.1 & \\
+OpenCV (system) & 4.5.4 & links both estimators \\
+Pangolin & 0.9.1 & ORB-SLAM3 built out of tree \\
+\midrule
+\multicolumn{3}{l}{\emph{Detector environment}} \\
+PyTorch & 2.5.1+cu121 & \\
+torchvision & 0.20.1+cu121 & \\
+Ultralytics & 8.4.138 & YOLO training and inference \\
+NumPy & 1.26.4 & \\
+OpenCV (Python) & 4.11.0 & \flag{differs from the 4.5.4 the estimators link} \\
+\midrule
+\multicolumn{3}{l}{\emph{Mapping back end}} \\
+\repo{ros-humble-rtabmap} & 0.23.7 & apt core library \\
+RTAB-Map ROS wrappers & project checkout & only packages through
+  \repo{rtabmap_slam} are built \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Two consequences follow from the table rather than from any experiment. The
+proposed Jetson-versus-laptop study has not been instrumented or executed, so
+every timing, throughput and CPU figure in \cref{chap:results} describes this
+machine alone and none supports a hardware comparison. And the detector runs a
+different OpenCV build from the one the estimators link against, which is
+unremarkable for two separate processes but would matter if image handling were
+ever moved across that boundary.

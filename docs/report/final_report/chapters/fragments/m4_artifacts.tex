@@ -1,0 +1,39 @@
+% Verbatim from minor_report/chapters/chapter_4_results.tex lines 1998-2033 (retired report),
+% headings demoted by 0 level(s). Do not edit here; edit the source of the numbers.
+
+The numerical sources for this chapter are
+\path{output/compare/relogged_20260916/run_metrics.csv},
+\path{module_latency_summary.csv}, \path{trajectory_metrics.csv}, and
+\path{pair_validity.csv}. The anomaly evidence is preserved in
+\path{anomaly_catalog.csv} and \path{anomaly_run_metrics.csv}. The reproducible
+offline renderers are \path{script/analyse_relogged_runs.py} and
+\path{script/analyse_relogged_anomalies.py}. The per-run and example-run tables
+in this chapter are typeset from \path{trajectory_metrics.csv} by
+\path{script/make_result_tables.py}, which writes
+\path{report/minor_report/tables/}; they are not hand-entered numbers.
+Dense-map evidence is \path{map/map_tiny.db} with
+\path{output/compare/rtab_map_vs_gt.png} (independent run) and
+\path{rtab_map_vs_gt_selfcheck.png} (build run), produced by
+\path{script/validate_map.py} with the placement measured by
+\path{script/fit_map_pose.py}; the graph counts and the node-pose agreement were
+read from the database read-only. Relative pose error is in
+\path{rpe_metrics.csv} (interval sweep) with the \SI{1}{\second} values carried
+into \path{trajectory_metrics.csv}; both tables are rendered by
+\path{script/make_result_tables.py}. The evaluator prints its metrics to the console
+and writes no machine-readable summary of its own, so both runs are transcribed to
+\path{output/compare/rtab_map_vs_gt_metrics.csv}, with the second run's console
+output preserved verbatim in \path{rtab_map_vs_gt_selfcheck.txt}. The first run's
+console output was not captured and its ground-truth bag no longer exists, so its
+row is transcribed from the engineering record. Offline detector evidence is stored
+below \path{output/yolo_eval/dyn_00_000/}, \path{dyn_00_001/},
+\path{dyn_01_000/}, and \path{dyn_02_000/}; the pooled source is
+\path{summary_metrics.csv}, and the pooled detection association counts are in
+\path{confusion_matrix.csv}. Conditional object-class results are in
+\path{classification_confusion_matrix.csv} and
+\path{classification_metrics.csv}. Its evaluator and summarizer are
+\path{script/yolo_eval.py} and \path{script/summarise_yolo_eval.py}. Light and
+dark figures, including one
+comparison figure for every dataset/repeat group, are stored below
+\path{output/compare/relogged_20260916/}; its \path{ground_truth/} subdirectory
+contains the seven extracted rosbag truth trajectories. Raw estimator directories
+and raw bags were not modified.

@@ -1,0 +1,47 @@
+% Verbatim from minor_report/chapters/chapter_3_methodology.tex lines 1215-1258 (retired report),
+% headings demoted by 0 level(s). Do not edit here; edit the source of the numbers.
+
+RTAB-Map receives front-end odometry through TF and stereo imagery through
+\repo{rtab_camera_shim.py}. The shim reconstructs \texttt{CameraInfo}, decompresses
+the pair, and publishes validated static camera transforms from the common
+simulation calibration. TF was selected over an odometry topic because adding
+high-rate odometry to multi-topic approximate synchronization starved the
+lower-rate images. The cost is that odometry covariance is not supplied to graph
+edge weighting.
+
+The back end uses stereo SGBM (\repo{Stereo/DenseStrategy: 1}), height-based
+ground separation, ray tracing, spatial noise filtering, and odometry-derived
+gravity links. Its measured default depth range is \SI{10}{\metre}. Because the
+featureless floor provides essentially no stereo ground points, ray tracing
+supplies free-space evidence between the sensor and observed obstacles. These
+settings affect occupancy assembly; visual-word loop closure is separate.
+
+Three modes are provided by one launch file:
+\begin{description}
+  \item[construct] starts a new incremental database;
+  \item[extend] opens an existing database, places prior nodes in working memory,
+    and permits new nodes; and
+  \item[localize] disables incremental memory, loads existing nodes, serves the
+    saved map, and can enable \repo{Mem/LocalizationReadOnly}.
+\end{description}
+
+Localization still extracts features from current stereo images and matches
+stored RTAB-Map signatures. Read-only mode prevents database modification; it
+does not disable perception. The outputs are an external
+\texttt{map~$\rightarrow$~odom} correction and \repo{/localization_pose}. Neither
+RTAB-Map features nor corrected poses are injected into ORB-SLAM3's Atlas or
+VINS-Fusion's sliding window.
+
+The composed localization launch raises \repo{RGBD/OptimizeMaxError} from 3.0 to
+10.0 because the default rejected all loop closures proposed with the observed
+VINS drift. This is effective operationally but is not yet proven safe against
+perceptual aliasing in repeated warehouse bays. Occupancy creation is disabled in
+localization mode because the stored map is reused. Live VINS-Fusion and RTAB-Map
+co-execution nevertheless remains blocked on the current machine. Recorded
+\repo{vio.csv} can be replayed as \texttt{odom~$\rightarrow$~vio\_body} for a
+deterministic back-end test, but this is not proof of real-time co-execution.
+
+Evidence is in \repo{rtabmap_ros/rtab_sim.launch.py},
+\repo{rtabmap_ros/rtab_camera_shim.py},
+\repo{aws-robomaker-small-warehouse-world/launch/localization_rtabmap.launch.py},
+and \repo{script/gt_tf_publisher.py}.

@@ -1,0 +1,65 @@
+% Verbatim from minor_report/chapters/chapter_3_methodology.tex lines 1590-1651 (retired report),
+% headings demoted by 0 level(s). Do not edit here; edit the source of the numbers.
+
+\repo{script/vio_metrics.py} associates estimate and reference over their common
+time interval and interpolates the reference at estimator timestamps. A rigid
+Umeyama $SE(3)$ fit maps estimated positions to the reference with scale fixed at
+one. Fixed scale is appropriate for stereo-inertial estimators and preserves
+scale error. Outputs include translational ATE RMSE, maximum and final error,
+rotational geodesic error, path length, overlap duration, pose count, jump count,
+and longest jump-free segment. Optional startup trimming is relative to each
+estimator's first overlapping pose, preventing unequal initialization latency
+from being interpreted as steady-state behaviour.
+
+The older \repo{plot_vio_vs_gt.py} provides a first-pose-aligned diagnostic, but
+headline comparison uses common $SE(3)$ alignment. Real data without independent
+ground truth receives no ATE.
+
+\paragraph{Relative pose error.} RPE was added to \repo{script/vio_metrics.py}
+after the reporting cutoff, on 18 September 2026, and is
+\status{implemented and exercised on the full campaign}. It follows the
+conventional definition: for a pair of poses separated by a fixed interval
+$\Delta$, the error transform is
+\begin{equation}
+  E_i = \left(Q_i^{-1}Q_{i+k}\right)^{-1}\left(P_i^{-1}P_{i+k}\right),
+  \label{eq:rpe}
+\end{equation}
+with $P$ the estimate and $Q$ the reference. Translational RPE is
+$\lVert\operatorname{trans}(E_i)\rVert$ and rotational RPE is the geodesic angle
+of $\operatorname{rot}(E_i)$, the same angle measure used for orientation error
+above.
+
+RPE is reported because it needs \emph{no} global alignment, and that is what
+makes it the appropriate metric for the dynamic runs. A single discontinuity
+re-seats the rigid $SE(3)$ fit, so every subsequent pose inherits the offset and
+ATE describes the jump rather than the tracking. RPE instead asks a local
+question --- over the next $\Delta$ seconds, did the estimate move as the
+reference moved --- and is insensitive to both the global frame and accumulated
+drift. It therefore supersedes the longest-jump-free-segment statistic, which
+answers a similar question through a segment-selection heuristic rather than a
+standard definition.
+
+Four intervals are swept, $\Delta \in \{0.5, 1, 2, 5\}\,\si{\second}$, giving
+an error-versus-interval curve; $\Delta = \SI{1}{\second}$ is the headline value
+and corresponds to roughly \SI{1.4}{\metre} at the simulated robot's cruising
+speed. A pair is admitted only when its realised separation lies within
+\SI{25}{\percent} of $\Delta$, so a gap in the log cannot silently widen the
+interval and inflate the error; the surviving pair count is reported with every
+statistic. Pairs are overlapping, which is the conventional default.
+
+Each statistic is computed twice: over all admissible pairs, and over only those
+pairs that do not span a detected tracking jump. The difference isolates the
+teleport contribution from ordinary local error, mirroring the existing
+separation between global and clean-segment ATE. Both RMSE and median are
+reported, because the dynamic-run distributions are strongly right-skewed and a
+single teleport otherwise sets the RMSE.
+
+The implementation is verified against synthetic trajectories with known answers:
+an estimate identical to the reference returns zero; a constant relative drift of
+\SI{0.1}{\metre\per\second} returns \SI{0.100}{\metre} at
+$\Delta=\SI{1}{\second}$ and \SI{0.200}{\metre} at $\Delta=\SI{2}{\second}$; a
+\SI{2}{\degree\per\second} relative rotation returns \SI{2.00}{\degree} at
+$\Delta=\SI{1}{\second}$; and an injected teleport separates the all-pairs and
+jump-free statistics by the expected pair count. Results are written to
+\repo{rpe_metrics.csv} for the interval sweep, with the
+$\Delta=\SI{1}{\second}$ values carried into \repo{trajectory_metrics.csv}.

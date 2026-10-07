@@ -1,0 +1,325 @@
+% Chapter 4.  Four experiments, each with a simulation slot and a real-robot
+% slot: eight slots.  Every slot follows one order: status; objective; process;
+% dataset; results and analysis; summary; future plan.  Filled slots are
+% verbatim fragments of the retired minor report (chapters/fragments/).  An
+% empty slot carries its status, the reason and the next action, and nothing
+% else -- it never borrows the other domain's numbers.
+\chapter[EXPERIMENTS AND RESULTS]{Experiments and Results}
+\label{chap:results}
+
+\textbf{Reporting cutoff:} 25 September 2026. \Cref{tab:slot-status} gives the
+status of the eight result slots. Four simulation slots hold data; the four
+real-robot slots are planned, for the reason stated in each. Each filled slot
+reports what was measured and its validity limits. Passages whose evidence is
+not yet trustworthy, and the status note of each slot, are collected in the
+separate Open Concerns document (\repo{docs/report/concerns/concerns.pdf}),
+generated from this chapter's source.
+
+\begin{table}[htbp]
+\centering
+\caption{Status of the eight result slots at the reporting cutoff.}
+\label{tab:slot-status}
+\small
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.34\textwidth}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{0.18\textwidth}}
+\toprule
+Experiment & Simulation & Real robot \\
+\midrule
+1. Non-visual baseline and estimator comparison & \status{completed}: five
+  \repo{allsensor} recordings across four worlds & \status{planned} \\
+2. Offline YOLO detector performance & \status{completed}: four dynamic
+  recordings, 9\,860 frames & \status{planned} \\
+3. VIO with dynamic-environment filtering & \status{untested}: 66 runs exist;
+  the hypothesis has no valid test & \status{blocked} \\
+4. Dense map reconstruction and map quality & \status{partial}: tiny map scored;
+  large map \status{failed} & \status{planned} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% =====================================================================
+\section{Experiment 1: Non-Visual Baseline and Estimator Comparison}
+\label{sec:exp1}
+
+\subsection{Simulation}
+\label{sec:results-proprio}
+
+\slotstatus{completed}{Five \repo{dataset_allsensor} recordings spanning four
+worlds and both floor conditions; three proprioceptive estimators, one
+transferred-noise EKF, VINS-Fusion, and ORB-SLAM3 in two loop-closure
+configurations, thirty-five runs, all passing their predefined checks.}
+
+\textbf{Objective.} Establish whether a non-visual estimator provides usable
+localization on the same recordings the visual pipelines consumed, and whether
+each estimator's reported uncertainty describes its error
+(\cref{sec:proprio-method}).
+
+\textbf{Process.} \repo{script/proprio_estimator.py calibrate} measured the
+sensor noise of each bag against ground truth; \repo{run} produced the wheel,
+IMU and EKF trajectories offline; \repo{script/analyse_proprio.py} scored them
+together with the live VINS-Fusion and ORB-SLAM3 runs over the common interval.
+
+\textbf{Dataset.} The five \repo{allsensor} recordings of
+\cref{tab:dataset-registry}, whose scenes, routes and floor treatments are drawn
+in \cref{fig:dataset-scenes} and tabulated in \cref{tab:dataset-scenes}. They
+are the only recordings that carry wheel encoders.
+
+\input{chapters/fragments/m4_exp1_sim}
+
+\paragraph{Summary.} IMU-only dead reckoning drifts by \SIrange{12.6}{45.6}{\metre}
+and wheel odometry by \SIrange{1.0}{3.2}{\metre} of aligned ATE; the EKF stays
+below \SI{0.5}{\metre} on every recording and the visual estimators between
+\SI{0.29}{} and \SI{0.78}{\metre} in their best configuration. The EKF's lead
+over vision is a tuning effect, not an architectural one: with the visual
+systems' own inertial noise model it loses to VINS-Fusion on all five bags. The
+two proprioceptive sensors fail in complementary ways, and every dead-reckoning
+covariance is overconfident by roughly two orders of magnitude. Against the
+project's target of \SI{0.05}{\metre} ATE, no estimator in this slot qualifies.
+
+\paragraph{Future plan.} Feed the VIO pose into the EKF as a third measurement,
+so that the filter takes distance from the wheels, heading from the gyroscope
+and drift correction from vision; and re-run in a realistic environment with
+wheel slip and encoder quantisation, since both idealisations of
+\cref{sec:sim-fidelity} favour dead reckoning.
+
+\subsection{Real robot}
+\label{sec:exp1-real}
+
+\slotstatus{planned}{No real recording carries wheel odometry or joint states,
+and none carries an independent ground truth, so neither the baselines nor
+their scoring can be computed.}
+
+\textbf{Reason.} Of the three real recordings (\cref{tab:dataset-registry}) only
+\repo{dataset_real_000} has inertial data, and none has the
+\repo{/model/.../joint_state} and \repo{odometry} topics the wheel and EKF
+estimators consume. The motion-capture reference of \cref{sec:real-site} has
+not yet been recorded with the robot.
+
+\textbf{Next action.} Bridge the wheel encoder and steering topics on the real
+platform, record the motion-capture trajectory alongside the sensors, and
+repeat the process of \cref{sec:results-proprio} unchanged; the calibration
+pass will then also give the first measured noise model of the real IMU.
+
+% =====================================================================
+\section{Experiment 2: Offline YOLO Detector Performance}
+\label{sec:exp2}
+
+\subsection{Simulation}
+\label{sec:yolo-performance}
+
+\slotstatus{completed}{Four dynamic recordings, 9\,860 left-camera frames,
+scored against projected simulator ground truth at the thresholds of
+\cref{tab:yolo-eval-params}.}
+
+\textbf{Objective.} Measure detector localization and class assignment
+independently of either SLAM integration (\cref{sec:yolo-eval-method}).
+
+\textbf{Process.} \repo{script/yolo_eval.py} projected the collision meshes of
+every prop into \repo{cam0} to form truth boxes, ran the project checkpoint
+\repo{weight/best.pt}, matched predictions greedily by class at IoU 0.5, and
+wrote per-frame and per-detection records; overlays were inspected before the
+aggregates were accepted.
+
+\textbf{Dataset.} The four \repo{dataset_dynamic_nofloortexture} recordings of
+\cref{tab:dataset-registry}.
+
+\input{chapters/fragments/m4_exp2_sim}
+
+\paragraph{Summary.} The detector is reliable at naming and unreliable at
+finding: pooled precision 0.684, moving-object recall 0.591, conditional class
+F1 0.995. The \SI{41}{\percent} of moving objects it misses is the limit any
+downstream filter inherits, and it is computed over the easier, exemption-filtered
+subset; counting every exempt object as a miss gives a recall of 0.382.
+
+\paragraph{Future plan.} Validate the projected ground truth against manual
+annotation on a frame subset; add object velocity from consecutive detections
+so that the mask targets moving objects rather than object classes; and re-run
+on the realistic warehouse environment once it is built.
+
+\subsection{Real robot}
+\label{sec:exp2-real}
+
+\slotstatus{planned}{Real imagery exists but no real ground-truth boxes do.}
+
+\textbf{Reason.} The projected-geometry ground truth of \cref{sec:yolo-gt-projection}
+needs object poses and meshes, which the real site does not provide. The three
+real recordings contain 2\,562 to 3\,405 usable stereo pairs, so the detector
+can be run, but nothing can score it until frames are annotated by hand.
+
+\textbf{Next action.} Annotate a stratified frame subset from
+\repo{dataset_real_000} to \repo{_002} under the three illumination levels of
+\cref{sec:real-site}, run the detector at the same thresholds, and report the
+same metrics as \cref{sec:yolo-performance}; the comparison between projected
+and manual truth planned for the simulation slot then also calibrates the two
+conventions against each other.
+
+% =====================================================================
+\section{Experiment 3: Visual-Inertial Odometry With Dynamic-Environment
+Filtering}
+\label{sec:exp3}
+
+\subsection{Simulation}
+\label{sec:results-validity}
+
+\slotstatus{untested}{Sixty-six runs were completed and are fully instrumented,
+but the filtering hypothesis has no valid test: the VINS-Fusion filter never
+activated, eleven of twelve ORB-SLAM3 treatment pairs are not input-matched, and
+the scripted dynamic worlds were found not to be a valid testbed. This is
+untested, not tested and failed.}
+
+\textbf{Objective.} Determine whether masking dynamic-object features improves
+localization and at what compute cost, and whether tracking survives it
+(\cref{sec:vio-filter-method}).
+
+\textbf{Process.} The relogged campaign of 16 September 2026: both pipelines on
+seven featureless-floor recordings, baseline and filtered treatments as
+separate processes on identical input at $0.5\times$ replay, three repeats per
+condition, scored by \repo{script/vio_metrics.py} and rendered by
+\repo{script/analyse_relogged_runs.py}.
+
+\textbf{Dataset.} The three static and four dynamic
+\repo{nofloortexture} recordings of \cref{tab:dataset-registry}.
+
+\subsubsection{Campaign validity audit}
+\input{chapters/fragments/m4_exp3_validity}
+
+\subsubsection{Observed anomaly catalogue}
+\label{sec:anomaly-catalogue}
+\input{chapters/fragments/m4_exp3_anomalies}
+
+\subsubsection{Trajectory accuracy, plausibility and robustness}
+\label{sec:trajectory-results}
+\input{chapters/fragments/m4_exp3_trajectory}
+
+\subsubsection{Real-time and computational measurements}
+\label{sec:compute-results}
+\input{chapters/fragments/m4_exp3_compute}
+
+\subsubsection{Loop closure, map merging and global-correction evidence}
+\label{sec:global-events}
+\input{chapters/fragments/m4_exp3_loopclosure}
+
+\paragraph{Summary.} In static scenes the two front ends reach a median aligned
+ATE of \SI{0.370}{\metre} (VINS-Fusion) and \SI{0.454}{\metre} (ORB-SLAM3), and
+ORB-SLAM3's large rotational error is produced by one or two discrete
+initialisation-adjacent jumps rather than by its steady-state tracking. The
+dynamic-scene numbers are withheld as findings: every dynamic trajectory is
+locally wrong by more than the distance the robot travels, and the environment
+that produced them is not physical. The core hypothesis therefore has no valid
+test yet, and neither pipeline processes frames as fast as they arrive at the
+replay rate used.
+
+\paragraph{Future plan.} Fix the detection-to-VINS integration so that masked
+tracks are actually culled, verified by the removed-track counter before any
+re-run; reduce ORB-SLAM3+YOLO26 latency so that filtered and unfiltered runs see
+the same frames; and rebuild the dynamic worlds with physically simulated props.
+
+\subsection{Real robot}
+\label{sec:exp3-real}
+
+\slotstatus{blocked}{Real-robot trajectory accuracy cannot be claimed at the
+cutoff: the rig's IMU-to-camera translation is a zero placeholder, the second
+camera reuses the first camera's intrinsics, and no recording carries an
+independent ground truth (\cref{tab:real-rig,tab:deviations}).}
+
+\textbf{Reason.} The three calibration gaps of \cref{sec:real-calibration}
+bound what any real run can show to plausibility and tracking continuity;
+metric ATE and RPE need the motion-capture reference of \cref{sec:real-site},
+which has not been recorded. Runs on \repo{dataset_real_000} are consequently
+not reported here as results.
+
+\textbf{Next action.} Complete the camera--IMU calibration (extrinsic
+translation, per-camera intrinsics), record the motion-capture trajectory, then
+execute the four-step online procedure of \cref{sec:vio-filter-method} for both
+pipelines at the three illumination levels, at
+\SI{1.5}{\metre\per\second}, with the dynamic variable triggered at each zone
+transfer.
+
+% =====================================================================
+\section{Experiment 4: Dense Map Reconstruction and Map-Quality Evaluation}
+\label{sec:exp4}
+
+\subsection{Simulation}
+\label{sec:map-quality}
+
+\slotstatus{partial}{One database, the tiny warehouse, is scored for geometry
+and drivability. The large-warehouse map attempt failed through tracking loss
+and produced no scorable database.}
+
+\textbf{Objective.} Verify that the reconstructed map reflects the physical
+environment and is usable by a planner (\cref{sec:map-eval-method}).
+
+\textbf{Process.} RTAB-Map 0.23.7 built \repo{map/map_tiny.db}; its placement
+was measured by \repo{script/fit_map_pose.py}; geometry and drivability were
+scored by \repo{script/validate_map.py} against the world file and a
+ground-truth route.
+
+\textbf{Dataset.} \repo{dataset_map_tiny} (the build run) and the independent
+route \repo{dataset_static_tiny_repeat}, which no longer exists; and, for the
+large warehouse, \repo{dataset_map_01} (\cref{tab:dataset-registry}).
+
+\input{chapters/fragments/m4_exp4_sim}
+
+\subsubsection{Large-warehouse attempt}
+\label{sec:map-large}
+
+The progress update of 23 September 2026 reports that the large-warehouse map
+attempt \status{failed}: the front end lost tracking in the repetitive bay
+structure of the large world, the estimated pose diverged from the ground-truth
+route within a few time steps of the loss, and the resulting map was not
+scorable. The failure was attributed there to the front end under repeated
+structure, not to the mapping back end.
+\flag{No database, run directory or figure for this attempt is registered in
+the repository at
+the cutoff, so the result is reported on the strength of the progress record
+and cannot yet be audited. The attempt must be repeated with its artifacts
+retained before it is carried into any conclusion.}
+
+\paragraph{Summary.} The mapping pipeline is geometrically sound where tracking
+is sound: on the tiny map, occupied-cell precision is \SI{96.6}{\percent} and
+observed-surface recall \SI{89.5}{\percent}, and the whole-building recall of
+\SI{67.2}{\percent} is route coverage, not mapping failure. The drivability
+half is a dated measurement whose independent route is lost. On the large map
+the pipeline fails through repetitive structure, before the back end is
+exercised.
+
+\paragraph{Future plan.} Study methods robust to repeated features
+(place-recognition gating, geometric verification of loop candidates); enable
+ORB-SLAM3's Atlas so that a tracking loss opens a new sub-map instead of
+corrupting the existing one, merging sub-maps afterwards; and record an
+independent route on both maps and score drivability against it.
+
+\subsection{Real robot}
+\label{sec:exp4-real}
+
+\slotstatus{planned}{No RTAB-Map database has been built from real imagery, and
+no reference geometry of the site exists to score one against.}
+
+\textbf{Reason.} The geometry metric of \cref{sec:map-eval-method} scores
+occupied cells against known collision geometry; the real site has no such
+model yet, and the placement step needs it. The drivability metric needs the
+motion-capture route. Neither input exists at the cutoff.
+
+\textbf{Next action.} Survey the mock warehouse (walls, stacks, walkway) into a
+reference occupancy grid at the same \SI{0.05}{\metre} resolution, build a
+database from a real mapping run, and then score it with the unchanged
+evaluator, using a motion-capture route from a second run for drivability.
+
+% =====================================================================
+\section{Cross-Experiment Discussion, Simulation-to-Real Comparison and
+Limitations}
+\label{sec:results-discussion}
+
+\subsection{Simulation against the real robot}
+
+No simulation-to-real comparison can be drawn at the cutoff, because no
+real-robot slot holds a valid result. What the simulation slots establish for
+the real campaign is the order in which its risks should be retired: the noise
+model matters more than the estimator architecture (\cref{sec:proprio-tuning}),
+so the real IMU must be characterised before any pipeline is tuned; the
+detector's miss rate bounds any filtering benefit (\cref{sec:yolo-performance}),
+so real-image recall must be measured before the filter is judged; and the
+front end, not the back end, is where the large-map failure sits
+(\cref{sec:map-large}), so tracking robustness under repeated bay structure is
+the first mapping risk on the real site.
+
+\input{chapters/fragments/m4_discussion}

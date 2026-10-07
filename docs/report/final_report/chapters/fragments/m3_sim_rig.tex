@@ -1,0 +1,138 @@
+% Verbatim from minor_report/chapters/chapter_3_methodology.tex lines 164-298 (retired report),
+% headings demoted by 0 level(s). Do not edit here; edit the source of the numbers.
+
+The simulated Ackermann robot carries two ideal pinhole cameras and an IMU on a
+forward mast, and is driven through a front-steering, rear-driven four-wheel
+chassis. \Cref{fig:ackermann-robot} gives its dimensioned plan and elevation, and
+\cref{tab:sim-sensor-rig,tab:platform-geometry} list the sensor and platform
+constants. Every value in the figure and both tables is read from
+\repo{aws-robomaker-small-warehouse-world/models/ackermann_robot/model.sdf}, so
+the drawing is to scale rather than illustrative.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{\textwidth}{!}{\input{figures/ackermann_robot}}
+  \caption[Simulated Ackermann platform, drawn to scale from the model definition.]{Simulated Ackermann platform, drawn to scale from the model
+  definition. Distances are in metres relative to \texttt{base\_footprint}. The
+  stereo pair is mounted asymmetrically: \texttt{cam1} sits on the vehicle
+  centreline and \texttt{cam0} is offset \SI{0.0936}{\metre} to its left, so the
+  optical centre of the pair is not the chassis centreline. The wheel base and
+  track are equal at \SI{0.42}{\metre}, which is what makes the rear-wheel
+  differential a poor yaw-rate estimator (\cref{sec:proprio-method}).}
+  \label{fig:ackermann-robot}
+\end{figure}
+
+\begin{table}[htbp]
+\centering
+\caption[Simulated sensor configuration.]{Simulated sensor configuration. Intrinsics are analytic rather than
+calibrated: the simulator renders an exact pinhole camera, so $f_x=f_y$ follow
+from the image width and the horizontal field of view and the distortion
+coefficients are identically zero. The stereo baseline was independently checked
+from positive disparity in a recorded bag rather than taken from the model alone.}
+\label{tab:sim-sensor-rig}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llll}
+\toprule
+Quantity & \texttt{cam0} (left) & \texttt{cam1} (right) & \texttt{imu} \\
+\midrule
+Resolution & $1280\times720$ & $1280\times720$ & -- \\
+Rate & \SI{30}{\hertz} & \SI{30}{\hertz} & \SI{200}{\hertz} \\
+Horizontal FOV & $\pi/2$ rad (\SI{90}{\degree}) & $\pi/2$ rad (\SI{90}{\degree}) & -- \\
+$f_x=f_y$ & 640 & 640 & -- \\
+$(c_x,c_y)$ & $(640,360)$ & $(640,360)$ & -- \\
+Distortion & zero & zero & -- \\
+Position from \texttt{base\_footprint} (m) & $(0.496,0.0936,0.4395)$ &
+  $(0.496,0,0.4395)$ & $(0.338,0,0.192)$ \\
+Position from IMU body (m) & $(0.158,0.0936,0.2475)$ & $(0.158,0,0.2475)$ &
+  $(0,0,0)$ \\
+Stereo baseline & \multicolumn{2}{l}{\SI{0.0936}{\metre}} & -- \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+The fixed camera rotation converts the ROS body convention (forward, left, up) to
+the optical convention (right, down, forward). The VINS simulation configuration
+fixes the extrinsics (\repo{estimate_extrinsic: 0}) and disables temporal-offset
+estimation (\repo{estimate_td: 0}); the assumed inertial noise model is given in
+\cref{tab:imu-noise-assumed}, and the same values are mapped to the ORB-SLAM3
+configuration.
+
+\begin{table}[htbp]
+\centering
+\caption[Inertial noise parameters supplied to the visual-inertial estimators, beside the values measured from the recorded IMU stream in \cref{sec:proprio-method}.]{Inertial noise parameters supplied to the visual-inertial estimators,
+beside the values measured from the recorded IMU stream in
+\cref{sec:proprio-method}. The configured values are inherited estimator defaults,
+not measurements of this simulated IMU; the discrepancy is carried forward as a
+queried item rather than silently reconciled.}
+\label{tab:imu-noise-assumed}
+\small
+\begin{tabular}{llll}
+\toprule
+Parameter & Configured (VINS, ORB) & Measured from bag & Units \\
+\midrule
+\texttt{acc\_n} & 0.02 & \flag{0.0139--0.0294} &
+  m\,s$^{-2}/\sqrt{\mathrm{Hz}}$ \\
+\texttt{gyr\_n} & 0.002 & \flag{0.000300--0.000364} &
+  rad\,s$^{-1}/\sqrt{\mathrm{Hz}}$ \\
+\texttt{acc\_w} & 0.001 & not measurable & m\,s$^{-3}/\sqrt{\mathrm{Hz}}$ \\
+\texttt{gyr\_w} & 0.0001 & not measurable &
+  rad\,s$^{-2}/\sqrt{\mathrm{Hz}}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{queried}[Queried]
+The configured gyroscope noise density is \num{2e-3} whereas the stationary
+windows of the five recorded streams give \numrange{3.00e-4}{3.64e-4}, so the
+configured value is about six times too large. The configured accelerometer
+density of 0.02 sits inside the measured spread but that spread is itself wide,
+\numrange{0.0139}{0.0294} across five bags of the same simulated sensor. Both
+estimators are therefore running on an inertial noise model that does not
+describe this IMU closely. The bias random walks cannot be checked at all: the
+longest stationary interval in any \repo{dataset_allsensor} bag is
+\SI{1.54}{\second} and an Allan-variance estimate needs minutes. No conclusion in
+this report depends on these four numbers, but they should be re-derived from a
+dedicated stationary recording before any tuning claim is made.
+\end{queried}
+
+\begin{queried}[Queried]
+The accelerometer characterisation is not stable across recordings of the same
+simulated sensor. \repo{allsensor_002}, whose stationary window is
+\SI{1.54}{\second} and therefore the best conditioned of the three, returns an $x$
+bias of \SI{0.0683}{\metre\per\second\squared}, against 0.0191 for
+\repo{allsensor_000} and \SI{0.0016}{\metre\per\second\squared} for
+\repo{allsensor_004}, whose window is the shortest at \SI{0.52}{\second}. The
+scale ranges from 1.0199 to 1.0669 over the five. Because the window is short in
+every case, part of this spread is estimator variance rather than a property of
+the sensor, and the accelerometer terms should not be quoted as calibrated
+constants. The gyroscope scale agrees to four decimal places across all five bags;
+its bias does not, varying by a factor of twenty, which is consistent with the
+same window-length problem.
+\end{queried}
+
+\begin{table}[htbp]
+\centering
+\caption[Platform geometry and drivetrain limits used by the wheel-odometry and EKF baselines.]{Platform geometry and drivetrain limits used by the wheel-odometry and
+EKF baselines. \texttt{AckermannSteering} exposes no noise parameter, so the
+simulated encoders and odometry are noise free at source.}
+\label{tab:platform-geometry}
+\small
+\begin{tabular}{llll}
+\toprule
+Quantity & Symbol & Value & Source field \\
+\midrule
+Wheel base (front to rear axle) & $L$ & \SI{0.42}{\metre} & \texttt{wheel\_base} \\
+Track (wheel separation) & $B$ & \SI{0.42}{\metre} & \texttt{wheel\_separation} \\
+Kingpin width & -- & \SI{0.42}{\metre} & \texttt{kingpin\_width} \\
+Wheel radius & $r$ & \SI{0.0585}{\metre} & \texttt{wheel\_radius} \\
+Wheel width & -- & \SI{0.065}{\metre} & wheel \texttt{<length>} \\
+Steering limit & $\delta_{\max}$ & $\pm\SI{0.6109}{\radian}$ & \texttt{steering\_limit} \\
+Chassis mass & -- & \SI{10.1}{\kilogram} & \texttt{base\_footprint} \texttt{<mass>} \\
+Maximum speed & -- & \SI{10}{\metre\per\second} & \texttt{max\_velocity} \\
+Maximum acceleration & -- & \SI{3}{\metre\per\second\squared} & \texttt{max\_acceleration} \\
+Odometry publish rate & -- & \SI{50}{\hertz} & \texttt{odom\_publish\_frequency} \\
+Joint-state publish rate & -- & \SI{1}{\kilo\hertz} & measured from bag \\
+\bottomrule
+\end{tabular}
+\end{table}

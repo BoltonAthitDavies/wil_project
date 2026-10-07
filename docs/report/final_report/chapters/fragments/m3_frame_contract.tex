@@ -1,0 +1,30 @@
+% Verbatim from minor_report/chapters/chapter_3_methodology.tex lines 577-603 (retired report),
+% headings demoted by 0 level(s). Do not edit here; edit the source of the numbers.
+
+Standalone VINS-Fusion publishes \texttt{world~$\rightarrow$~body}. Standalone
+ORB-SLAM3 publishes an estimator-specific world frame. For RTAB-Map integration,
+both publish \texttt{odom~$\rightarrow$~vio\_body}; a measured static transform
+connects \texttt{vio\_body~$\rightarrow$~base\_footprint} by
+$(-0.338,0,-0.192)$~m. RTAB-Map then publishes the external correction
+\texttt{map~$\rightarrow$~odom} (\cref{fig:frame-chain}).
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{\textwidth}{!}{\input{figures/frame_chain}}
+  \caption[Coordinate-frame contract used by the composed RTAB-Map pipeline.]{Coordinate-frame contract used by the composed RTAB-Map pipeline. The
+  dashed connection is a calibration consistency check, not a second pose
+  publisher.}
+  \label{fig:frame-chain}
+\end{figure}
+
+The two independent paths to \texttt{cam0\_optical} provide a runtime calibration
+check: \repo{tf2_echo cam0_undis cam0_optical} must return zero translation and
+the identity quaternion. This check has been measured successfully. It is needed
+because an earlier OpenCV YAML parsing error yielded a plausible translation but
+a non-rigid rotation and invalidated a map-quality campaign.
+
+The standalone simulation ORB launch still labels the estimated IMU-body pose as
+\texttt{base\_footprint}. The composing RTAB-Map launch corrects this by using
+\texttt{vio\_body}; standalone consumers must not assume that the default label is
+the chassis origin. Constant offsets are mostly absorbed by rigid trajectory
+alignment but remain material for map placement and robot-footprint tests.

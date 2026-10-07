@@ -1,0 +1,66 @@
+% Verbatim from minor_report/chapters/chapter_3_methodology.tex lines 1520-1582 (retired report),
+% headings demoted by 0 level(s). Do not edit here; edit the source of the numbers.
+
+
+The sensor source, estimator, optional detector, and viewer start as separate
+processes; launch files do not automatically play bags. Baseline and filtered
+treatments run separately on the same recording, at a replay rate that permits
+comparable input consumption. Competing estimators are not run simultaneously in
+a scientific A/B comparison.
+
+The common trajectory file has no header and uses:
+\begin{center}
+\texttt{t\_ns, px, py, pz, qw, qx, qy, qz, vx, vy, vz}
+\end{center}
+Timestamps are integer nanoseconds from the source header and quaternion order is
+$w,x,y,z$. ORB-SLAM3 writes this representation directly; VINS writes the state
+after nonlinear optimization. Simulation truth is extracted to the same shape by
+\repo{script/extract_gt.py}. The tracker-use record \repo{yolo_mask.csv} remains
+separate from the offline detector score.
+
+\begin{table}[htbp]
+\centering
+\caption{Principal stored artifacts.}
+\label{tab:stored-artifacts}
+\small
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.42\textwidth}X}
+\toprule
+Artifact & Purpose \\
+\midrule
+\repo{<run>/vio.csv} & Estimator trajectory and velocity \\
+\repo{<run>/ground_truth.csv} & Simulation reference trajectory, when available \\
+\repo{<run>/yolo_mask.csv} & Actual mask matching, coverage, and rejection \\
+\repo{<run>/run_metadata.csv} & Resolved configuration and supplied provenance \\
+\repo{<run>/performance.csv} & Per-frame timing, state, delivery, CPU, and memory \\
+\repo{<run>/frontend.csv} and \repo{<run>/backend.csv} & VINS feature-tracking,
+estimator-stage, solver, and state-window diagnostics \\
+\repo{<run>/tracking_frontend.csv} & ORB-SLAM3 tracking-stage timing and feature counts \\
+\repo{<run>/local_mapping.csv} & ORB-SLAM3 keyframe insertion, map-point, and local-BA diagnostics \\
+\repo{<run>/loop_closing.csv} & Place-recognition, loop, merge, and global-correction events \\
+\repo{<run>/run_summary.csv} & Graceful-shutdown validity and robustness totals \\
+\repo{<run>/events.csv} & VINS initialization, reset-cause, and shutdown events \\
+\repo{output/yolo_eval/<experiment>/yolo_eval.csv} & Per-frame detector evaluation \\
+\repo{output/yolo_eval/<experiment>/yolo_detections.csv} & Per-detection matching \\
+\repo{output/yolo_eval/<experiment>/overlay/} & Projection and matching validation \\
+\repo{map/*.db} or \repo{<run>/rtabmap.db} & Persistent RTAB-Map graph and signatures \\
+\repo{output/compare/<domain>/<experiment>/} & Derived figures and summaries \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The current analysis code requires at least ten overlapping samples. Scientific
+acceptance additionally requires the same input interval, successful
+initialization, comparable pose and frame counts, and no unexplained sensor
+starvation. Steps implying over \SI{10}{\metre\per\second} are tracking jumps; an
+indoor estimate with error beyond \SI{50}{\metre} is divergence rather than
+ordinary inaccuracy. Without real-data ground truth, path length and mean speed
+are plausibility diagnostics, not accuracy measurements.
+
+The estimator now records resolved local configuration and optional experiment,
+dataset, world, replay-rate, command, and note fields in
+\repo{run_metadata.csv}. It does not automatically determine bag health,
+repository revisions, complete dependency versions, external-process state, or
+the analyst's exclusion decision. Empty optional fields therefore remain
+incomplete provenance. Historical folders created before this instrumentation
+remain preliminary unless their provenance is recoverable from logs and
+engineering records.

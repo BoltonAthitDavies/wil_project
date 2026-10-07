@@ -1,0 +1,23 @@
+% Verbatim from minor_report/chapters/chapter_3_methodology.tex lines 24-43 (retired report),
+% headings demoted by 0 level(s). Do not edit here; edit the source of the numbers.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{\textwidth}{!}{\input{figures/system_architecture}}
+  \caption[Implemented experimental architecture.]{Implemented experimental architecture. Green blocks are implemented
+  project components, blue denotes the external RTAB-Map back end, and the dashed
+  yellow block is future work. The diagram deliberately does not show a feedback
+  connection from RTAB-Map into either front end because that integration has not
+  been implemented.}
+  \label{fig:system-architecture}
+\end{figure}
+
+As shown in \cref{fig:system-architecture}, the current work contains two related
+but separate evaluation paths. The first measures front-end trajectory behaviour
+with and without semantic feature filtering. The second studies map reconstruction
+and external global correction through RTAB-Map. RTAB-Map's
+\texttt{map~$\rightarrow$~odom} transform does not modify the internal feature map,
+state history, or previously recorded trajectory of ORB-SLAM3 or VINS-Fusion. A
+unified architecture for relocalization, global optimization, and multi-session
+map merging is \status{planned}, not implemented. Path planning is outside the
+present research scope.

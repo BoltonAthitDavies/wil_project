@@ -1,0 +1,215 @@
+% Verbatim from minor_report/chapters/chapter_4_results.tex lines 1115-1326 (retired report),
+% headings demoted by 1 level(s). Do not edit here; edit the source of the numbers.
+
+\begin{queried}[Excluded: dynamic-scene trajectory results]
+Every dynamic-scene trajectory result in this section, and the anomalies A3 and
+A4 that derive from them, are \textbf{withheld as findings} and retained only as
+excluded evidence. The reason is the environment, not the measurement: the
+dynamic worlds move their props along scripted kinematic paths. The props carry
+collision geometry but produce no dynamic response against the robot, nothing
+constrains their speeds or routes to warehouse traffic, and they can occupy the
+same space as the vehicle without consequence. Numbers measured there describe
+the simulation, not the problem the thesis poses.
+
+The runs happened, the artifacts are intact, and the plausibility failures are
+real properties of those recordings, so they are reported below rather than
+deleted --- an excluded measurement that explains a methodological correction is
+worth more in the record than a gap. What must not be done is to read them as
+evidence about estimator behaviour in a dynamic warehouse.
+
+Two consequences follow. The condition this work is named for currently has no
+valid testbed: it is untested, not tested and failed. And the environment becomes
+the leading candidate explanation for the breakdown itself, displacing the
+open question left in \cref{sec:anomaly-catalogue} --- testable by rebuilding the
+worlds with physically simulated props and re-running, which requires no change
+to either estimator.
+
+Unaffected: the static-scene results here, the estimator comparison of
+\cref{sec:results-proprio}, the detector evaluation of
+\cref{sec:yolo-performance} --- prop motion is kinematic, which changes contact
+physics rather than appearance, so detectability and class assignment are
+untouched --- and the map evaluation of \cref{sec:map-quality}.
+\end{queried}
+
+Table~\ref{tab:trajectory-errors} reports medians and IQRs because the dynamic-run
+distributions are strongly skewed. In static scenes, VINS attained a median
+translational ATE RMSE of \SI{0.370}{\metre} and rotational RMSE of
+\SI{1.56}{\degree} over nine valid runs. The nine valid static ORB runs attained
+\SI{0.454}{\metre} and \SI{17.92}{\degree}. The orientation difference is much
+larger than the positional difference and must be retained as a separate result.
+\Cref{sec:rpe} shows that it is produced almost entirely by one or two discrete
+events per run rather than by continuously worse orientation tracking.
+
+\begin{table}[htbp]
+\centering
+\caption[Trajectory error against rosbag ground truth, median (IQR).]{Trajectory error against rosbag ground truth, median (IQR). ``Clean'' is
+ATE RMSE after independently aligning the longest segment without an implied
+speed above \SI{10}{\metre\per\second}. Requested VINS+YOLO values are not
+active-filter measurements.}
+\label{tab:trajectory-errors}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llrrrr}
+\toprule
+Scene & Requested mode & ATE RMSE (m) & Rotation RMSE (deg) & Clean ATE (m) & Jumps \\
+\midrule
+Static & VINS-Fusion & $0.370\;(0.063)$ & $1.56\;(0.98)$ & $0.370\;(0.063)$ & $0\;(0)$ \\
+Static & ORB-SLAM3 & $0.454\;(0.157)$ & $17.92\;(1.72)$ & $0.341\;(0.151)$ & $1\;(1)$ \\
+Dynamic & VINS-Fusion & $724.13\;(823.52)$ & $53.97\;(39.38)$ & $6.80\;(2.57)$ & $1116\;(1157.75)$ \\
+Dynamic & ORB-SLAM3 & $190.48\;(2315.44)$ & $108.29\;(116.13)$ & $1.42\;(0.89)$ & $484\;(418.5)$ \\
+Dynamic & VINS-Fusion+YOLO$^{*}$ & $738.63\;(1251.84)$ & $56.50\;(37.88)$ & $5.91\;(5.53)$ & $1559.5\;(717)$ \\
+Dynamic & ORB-SLAM3+YOLO & $556.05\;(769.39)$ & $138.42\;(60.34)$ & $1.06\;(1.58)$ & $208\;(225.5)$ \\
+\bottomrule
+\multicolumn{6}{l}{$^{*}$Filter requested but no detection frame was matched.}
+\end{tabular}}
+\end{table}
+
+Every dynamic run contains at least one impossible-speed step. Nine of 12
+baseline VINS runs, all 12 baseline ORB runs, 10 of 12 nominal VINS+YOLO runs,
+and all 12 ORB+YOLO runs also exceeded the reference-free mean-speed limit of
+\SI{3}{\metre\per\second}. Peak translational error exceeded \SI{50}{\metre} in
+9, 12, 10, and 10 runs respectively. Global ATE is therefore dominated by
+trajectory breakdown. The clean-segment ATE is substantially smaller, which an
+earlier draft read as evidence that the runs contain locally coherent intervals.
+\Cref{sec:rpe} withdraws that reading: measured directly, the jump-free
+relative error is \SIrange{1.8}{3.8}{\metre} per second, so the estimate is
+locally wrong by more than the distance the robot travels. Aligning a short
+segment absorbs much of that error, which is why clean-segment ATE looked
+reassuring.
+
+The per-repeat values behind those aggregates are given in
+\cref{tab:truth-summary}.
+
+\subsubsection{Relative pose error}
+\label{sec:rpe}
+
+RPE was implemented after the reporting cutoff and applied to the campaign
+without re-running any estimator; \cref{sec:method-trajectory} defines it. It is
+reported here because it needs no global alignment, so unlike ATE it cannot be
+distorted by a single discontinuity re-seating the rigid fit.
+\Cref{tab:rpe-summary} gives the headline interval.
+
+\begin{table}[htbp]
+\centering
+\caption[Relative pose error at $\Delta=\SI{1}{\second}$, median (IQR) over runs.]{Relative pose error at $\Delta=\SI{1}{\second}$, median (IQR) over runs.
+``Jump-free'' excludes pairs spanning a detected tracking jump; the difference
+between the two columns is the teleport contribution. Requested VINS+YOLO values
+are not active-filter measurements.}
+\label{tab:rpe-summary}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\input{tables/rpe_summary}
+\end{table}
+
+Two results follow, and the first corrects this chapter.
+
+\paragraph{The dynamic runs are not locally coherent.} Excluding every pair that
+spans a jump, dynamic translational RPE at $\Delta=\SI{1}{\second}$ is still
+\SIrange{1.8}{3.8}{\metre}. The robot covers about \SI{1.4}{\metre} in that
+second, so between teleports the estimate misstates its own motion by more than
+the distance travelled. Against the static runs, whose jump-free figures are
+\SIrange{0.063}{0.096}{\metre}, dynamic local error is \num{20} to \num{60}
+times worse. The corruption is therefore continuous, not confined to isolated
+steps, and the earlier reading of clean-segment ATE as evidence of local
+coherence does not survive. This was a registered prediction before the metric
+was run, and it failed in the direction that matters.
+
+\begin{table}[htbp]
+\centering
+\caption[Jump-free translational RPE against interval, median over runs, in metres.]{Jump-free translational RPE against interval, median over runs, in
+metres. ``Growth'' is the ratio from \SI{0.5}{\second} to \SI{5}{\second};
+linear accumulation would give \num{10}$\times$ and a pure random walk
+\num{3.2}$\times$.}
+\label{tab:rpe-sweep}
+\small
+\setlength{\tabcolsep}{5pt}
+\input{tables/rpe_sweep}
+\end{table}
+
+\Cref{tab:rpe-sweep} shows why this is one mechanism rather than two. Error grows
+with interval at \numrange{4.5}{6.7}$\times$ over a tenfold increase in
+$\Delta$, and that growth exponent is the same for static and dynamic scenes;
+only the magnitude differs, by roughly \num{40}$\times$. The dynamic runs are
+not failing in a qualitatively different way from the static ones --- they are
+running the same error process far hotter.
+
+\paragraph{ORB-SLAM3's static rotational penalty is entirely jump-localised.}
+Static ORB-SLAM3 carries a rotational ATE of \SI{17.92}{\degree} against
+VINS-Fusion's \SI{1.56}{\degree}, an elevenfold gap that invites the reading
+that ORB-SLAM3 tracks orientation poorly. RPE refutes it. Across the nine static
+ORB runs, all-pairs rotational RPE is \SIrange{9.28}{11.63}{\degree}, but
+jump-free rotational RPE is \SIrange{0.10}{0.66}{\degree} --- at or below
+VINS-Fusion's \SIrange{0.49}{0.69}{\degree} on the same recordings. Every one of
+those runs contains one or two jumps and no more.
+
+The whole rotational gap is thus produced by one or two discrete re-seating
+events per run, not by continuously worse tracking. This gives anomaly~A5 its
+significance: that jump occurs near \SI{2.6}{\second}, immediately before
+inertial initialization completes, and it is predominantly rotational. Between
+those events ORB-SLAM3's orientation tracking is competitive with VINS-Fusion's.
+No causal mechanism is established here --- the association is temporal --- but
+the error is now localized to an event rather than attributed to the estimator's
+steady-state behaviour.
+
+\begin{sidewaystable}[p]
+\centering
+\caption[Truth-based trajectory error for every repeat of the relogged campaign.]{Truth-based trajectory error for every repeat of the relogged
+campaign. Every dataset is a no-floor-texture world, so that shared part of each
+dataset name is omitted. ``ATE'' and ``clean'' are global and
+longest-clean-segment ATE RMSE in metres, ``rot'' is rotational geodesic RMSE in
+degrees, and ``jmp'' counts steps implying more than \SI{10}{\metre\per\second}.
+All 66 runs are operational; two static ORB run summaries have incomplete
+schemas, and only one of 12 ORB baseline/filter pairs passed input matching.
+Static datasets were not run in either filtered mode; those cells are set to --.}
+\label{tab:truth-summary}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\input{tables/trajectory_per_run}
+
+\vspace{1ex}
+\raggedright\footnotesize
+$^{*}$Filter requested but no detection frame was matched in any repeat; these
+columns are not active-filter measurements.
+\end{sidewaystable}
+
+\begin{figure}[htbp]
+  \centering
+  % The summary table belongs with these panels, so it is set inside the float
+  % rather than as a separate table that page-breaking could carry away.
+  {\small\setlength{\tabcolsep}{3pt}\input{tables/example_run_summary}}
+
+  \vspace{0.5ex}
+  {\footnotesize $^{*}$Filter requested but no detection frame was matched.}
+
+  \vspace{2ex}
+  % The image carries its own rendered title, the same summary table, and a
+  % footnote in the top 310 px of 2496; that band is trimmed away because those
+  % numbers are now typeset above.
+  \includegraphics[width=\textwidth, trim={0 0 0 140pt}, clip]{../../../output/compare/relogged_20260916/simulation/dataset_dynamic_nofloortexture_00_000/logging_20260916_01/compare_light.png}
+  \caption[Representative repeated-run trajectory diagnostic for \repo{dataset_dynamic_nofloortexture_00_000/logging_20260916_01}, in the same visual format as the existing comparison figures.]{Representative repeated-run trajectory diagnostic for
+  \repo{dataset_dynamic_nofloortexture_00_000/logging_20260916_01}, in the same
+  visual format as the existing comparison figures. The table gives the
+  per-system summary for this run; ``clean'' is ATE RMSE over the longest
+  jump-free segment. The very large paths and frequent jumps are retained rather
+  than clipped into a favourable view. ATE and rotational errors use the rosbag
+  \repo{/ground_truth/odometry} topic after rigid $SE(3)$ alignment with scale
+  fixed. The nominal VINS+YOLO trace is invalid as a filtering treatment because
+  no masks were matched.}
+  \label{fig:relogged-trajectory-example}
+\end{figure}
+
+Baseline ORB-SLAM3 logged $7.75\pm6.03$ tracking-loss events and
+$9.52\pm6.49$~s of lost tracking per dynamic run (mean $\pm$ sample SD,
+$n=12$). ORB+YOLO logged $9.17\pm3.01$ events and $11.46\pm5.32$~s. VINS logged
+no estimator resets in either requested mode, but the absence of resets does not
+make its trajectories plausible. The event types are estimator-specific and are
+not treated as numerically equivalent.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{../../../output/compare/relogged_20260916/robustness_light.png}
+  \caption[Per-run robustness and keyframe observations for the dynamic datasets.]{Per-run robustness and keyframe observations for the dynamic datasets.
+  Points are experimental runs and black marks are mean $\pm$ sample SD. VINS
+  reset count and ORB tracking-loss count have different semantics. The asterisk
+  identifies the requested VINS filter mode in which no masks were matched.}
+  \label{fig:robustness-results}
+\end{figure}

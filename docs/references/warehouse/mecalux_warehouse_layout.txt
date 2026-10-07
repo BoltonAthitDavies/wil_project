@@ -1,0 +1,112 @@
+Source: https://www.mecalux.com/warehouse-manual/warehouse-design/warehouse-layout
+Fetched: 2026-10-06 (page text extracted from the HTML; figures noted as [image: ...])
+
+Devising a warehouse's layout is the first step in designing an installation. While this may seem like a simple issue, in practice it is difficult to figure out. In this article, it outlines the main factors that need consideration in the design process.  As well, it shows an example of a warehouse layout distributed into six differentiated areas, including warehouse automation.
+Generally speaking, warehouse designers have to work with a space in which certain factors limit the surface area available. This is why the layout has to be carefully planned. When deciding on the internal and external layout of a warehouse, there are three possible scenarios that could necessitate a different assignment of space: the installation of new warehouses, the extension of existing facilities and the reorganisation of those currently operating (even though the last of these options does not involve making extremely important decisions that will affect the development of the business over the medium- to long-term).
+Nonetheless, despite the specific circumstances, the general layout of a facility must cover all these needs:
+- Making the most of the available space
+- Reducing the handling of goods to a minimum
+- Providing easy access to the stored product
+- Having the highest rotation ratio possible
+- Offering maximum flexibility in the positioning of products
+- Controlling the amounts stored
+To achieve these objectives, the first step is to create a warehouse layout, where the design of the warehouse is represented in the form of a plan.
+First and foremost, the created layout must respect the basic rules of good storage mentioned above and avoid areas and points of congestion, facilitate maintenance tasks and establish the resources required to obtain the greatest possible workflows, with the associated reduction in runtimes.
+The following areas must be perfectly defined when designing a layout:
+A. Loading and unloading areas
+B. Reception area
+C. Storage area
+D. Picking area
+E. Dispatch area
+An example of a layout that includes all of these areas is shown below:
+[image: Example of warehouse layout design where all the zones analyzed in this article are kept in mind]
+## Loading and unloading areas (A)
+Loading and unloading areas, which are normally located outside the warehouse or incorporated into it, are those that trucks and vehicles transporting and distributing goods have direct access to.
+In a well-organised warehouse, it is useful to separate these activities from the rest of the installation, allowing sufficient space for loading and unloading. This area can be integrated into the warehouse or be independent.
+[image: Dock with platform attached to a warehouse]
+[image: Dock with intermediate platform in a cold storage installation]
+Dock with platform attached to a warehouse.
+Dock with intermediate platform in a cold storage installation.
+##
+Loading and unloading areas integrated into the warehouse
+If loading and unloading areas are built directly into the sides of the warehouse so that goods are deposited and collected without the need for any detours, it is said that they are integrated into the facility. The main advantage of this is the greater load handling speed, which means it is preferable to non-integrated options if there is sufficient space for it.
+Trucks are connected to the warehouse via the docks and these docks can be:
+- Docks separated by an intermediate platform: They are appropriate when this separation is advisable as determined by the nature of the goods or the need to maintain the internal warehouse environment or when there are safety issues relating to the material stored. A typical example of applying this type of separated dock is for cold chambers, where cold loss could occur if a flush dock is used with an access door and where this must be avoided at all costs. Yet there are many other circumstances in which this design is preferable, particularly when the safety of the warehouse could be compromised.
+- Flush docks: They allow trucks to back right up to the warehouse wall. To avoid affecting the internal environment of the facility, access doors must have, as a minimum, a hermetically sealed system. This seal can be metal or created through the use of a dock shelter.
+[image: Docks with direct access to the inside of the warehouse.]
+Docks with direct access to the inside of the warehouse
+Access points with metal seals have a manual or automated system that operates a flat barrier that can be fixed, folding, or rolling (as shown below). It opens when the lorry backs up to the building, and closes when the vehicle has finished the operation. The internal environment can be more effectively preserved if the closing system is automated.
+In addition to a metal seal, doors with inflatable shelters have a tunnel that encircles the lorry when it is connected to the entrance, so that the internal environment is less compromised by conditions outside.
+[image: Door with an inflatable shelter]
+[image: Sectional door]
+[image: Roll-up door]
+Door with an inflatable shelter.
+Sectional door.
+Roll-up door.
+When this type of loading area is created, the warehouse floor should be above the level where the lorry drives. Loading and unloading areas can also be designed in which lorry are driven into a pit. However, movement and operations are faster if the warehouse is at a higher level instead.
+The necessary height difference can be achieved in several ways; therefore, it is not vital for the warehouse floor to be above ground level. Instead, for example, the area where lorries drive can be at a lower level, creating a gradual descent that avoids the steep ramps which, ultimately, make manoeuvre more difficult and slow down movement.
+[image: View of a dock in a pit.]
+View of a dock in a pit.
+Two different scenarios need to be considered when determining how to achieve this height difference. The first is when lorries accessing the loading and unloading areas are owned by the company. The second is when the lorries used are owned by third parties.
+If only the company’s own lorries are going to use the loading and unloading areas, and the height of the trailer is exactly the same in each case, the difference in level can be established precisely and no further considerations are required.
+However, if the lorries that are going to access these areas are owned by third parties and come from different sources, they will have different trailer heights. So, a system must be created that allows the difference in height to be adjusted.
+Pallet truck.
+In general, an adjustable leveler system is essential because even when the company uses its own fleet, which in theory means there is no variation in the height difference between the vehicles and the dock. In practice, this difference is always present.
+One of the reasons for this is the suspension in the lorries give way over time, either because different loads cause the height of the truck to vary or, more commonly, because eventually the company is obliged to purchase or lease other types of transport. Ultimately, a difference in trailer heights is practically inevitable.
+Mechanical or hydraulic devices can be used to deal with these height differences. Mechanical devices are based on the use of (usually metal) bridges or walkways fitted manually between the dock and the lorry.These elements are used so that forklifts, stacker cranes, and any other mechanical devices used to load and unload vehicles can enter and exit the vehicle.
+Another option is to use the second system mentioned above, which consists of a metal platform with one or more hydraulic cylinders. This platform facilitates access by acting as a ramp,when integrated into the dock itself, or by raising and lowering the truck. The image illustrates the second option, with the platform integrated into the dock.
+[image: Single platform]
+[image: Integrated platform]
+Single platform.
+Integrated platform.
+## Independent loading and unloading areas
+Located away from the warehouse, but within the surrounding area, they operate completely independently of the warehouse itself. They normally consist of a large flat area that the lorries have direct access to, with the lorries positioned so that they can be loaded or unloaded using forklift trucks.
+This option is best used in warehouses where only one of the two functions is carried out, i.e. where goods are loaded or unloaded. This option can achieve the necessary handling speed, as there is no need for the vehicles to back up to the building. So, the time spent positioning them is reduced. In addition, with this option the process of loading and unloading goods is totally independent of the work cycle of the warehouse.
+In these areas, goods in the lorries can be handled through the side or the rear of the vehicle. If using the side of the vehicle, forklift trucks are used to handle the goods, as shown in the image below.
+[image: Forklift handling the goods from the side]
+Forklift handling the goods from the side.
+If, however, the operation is carried out using the rear of the vehicle as shown above, there are two different options. The first is to access the lorry using forklift trucks and ramps, which are normally made from metal and connected to the lorry either manually or mechanically. While there is a wide choice of such products available on the market, at the moment two are most commonly used: modular ramps and those connected to the unloading docks.
+[image: Ramp access]
+Ramp access.
+Modular ramps are metal structures with a non-slip surface which can either be fixed (when using vehicles of all the same height) or mobile (when using vehicles of different heights).
+Ramps connected to the unloading docks are made with a brick or concrete structure, which can also be fixed or variable in height. If variable, their construction is similar to that of the integrated loading and unloading docks described previously.
+The second option for the loading or unloading trucks by the rear is to use roller conveyors.  With this system there is no need for the forklift to enter the trailer to carry out the operations. Instead, rails are installed which allow goods to slide along the inside of the lorry. Movement is generated by pushing a few loads against other ones.
+[image: Automated loading using sliding elements.]
+Automated loading using sliding elements.
+The loading process starts by placing one or more units at the entrance to the vehicle, which are then pushed in by a second group that takes the place previously occupied by the first group. In this way the loads accumulate, one after another, until the trailer of the lorry has been filled.
+## Reception area (B)
+The reception area must be located as independently as possible from the rest of the warehouse, so that it can be used not just for receiving goods, but also for quality-control and sorting.
+[image: Reception area located away from the warehouse installation.]
+Reception area.
+Once it has been ensured that the characteristics and quality of the delivery received matches those of the products ordered, the next stage is to determine where to position the load within the warehouse.
+Depending on the type of warehouse, it may or may not be necessary to transform the units received. If this is necessary, a suitable area must be established for this function. For example, it may be necessary to split the pallets that have arrived into smaller units, remove parts that are strapped together, etc.
+Given the impact that accurate checking and, above all, correct positioning, can have on the future performance of the warehouse, this area must be as large and as separate as possible.
+Currently, almost all products handled in a warehouse come with bar codes that can be read using a scanner. Therefore, once the warehouse’s central computer has identified the units, it can in turn immediately generate the position label for the goods. This label can subsequently be read by a forklift operator or by the scanners of the warehouse’s automated system so that, in both of these cases, they can be positioned in the correct location.
+[image: The RF scanner reads the coded information of the pallet.]
+The RF device reads the coded information on the pallet.
+## Storage area (C)
+A storage area is, strictly speaking, an area used only to store goods.
+Goods can be stored in a number of different ways: directly on the ground; directly on the ground but stacked or in blocks; or on racking units. The choice of one or the other will depend above all on the type of product to be stored, whether it can be stacked, and on the storage quantity and time.
+Storage in stacks involves placing unit loads on top of each other without anything in between them, other than the pallets that support them. This method has the advantage of making better use of space, given that it does not generate unused positions. However, not all materials can be stored like this and it must be remembered that even goods that can be stacked have their limits in terms of strength and, therefore, have a maximum stacking height. The main disadvantage of this system is that it does not allow for access to the loads, and a load can only be accessed by first removing all the loads on top of it.
+The use of stacking is mainly limited to two types of load: those with great internal strength, and those in rigid packaging. Goods with great internal strength, such as ceramic bricks, concrete blocks, etc., can be stored directly, at times even without the need for pallets or other support systems. Other goods, such as feed, cements, and aggregates in general, which are stored in sacks, can also be stored in this way thanks to their resistance to compression, although pallets or other support systems are required for their proper handling.
+- Rigid packaging, such as cardboard, wooden or plastic boxes, can be stacked in this way without problems, although the rigidity and resistance of these packages will determine the number of units that can be stacked, and therefore the height of the stack.
+- Racking units must be used when unit loads are not strong enough to be stacked to the required height, or when there is a greater need to access the product.
+Goods are stored on racking units by placing them on metal structures, which are basically made up of suitable braced frames and beams. These elements create a multi-cellular structure that generates slots into which unit loads can be placed. As seen in "Storage systems" article, the configuration and layout of these spaces (or compartments) can vary to suit different operations and different needs in terms of the accessibility and accumulation of the load.
+[image: Warehouse of a distribution company.]
+Warehouse of a distribution company.
+## Order picking areas (D)
+These areas are not required in all warehouses, only when outgoing goods must have a configuration or composition that is different to the one they entered with, or when they require any type of modification.
+Areas for preparing orders can be integrated into storage areas, as is the case when picking from rack units. They can also be separate from storage areas, creating specific picking areas, generally with automated or semi-automated systems.
+[image: The image shows an order picking area in a warehouse for faucets and bathroom accessories.]
+The image shows an order picking area in a warehouse for faucets and bathroom accessories.
+## Dispatch areas (E)
+These areas are used for packing orders prepared in the previously described areas. Even if this packing operation is unnecessary, this area also can be used for goods that have to be dispatched and loaded into the delivery or distribution vehicles.
+To ensure the correct speed of movement within the warehouse, these spaces must be designed in a specific location and differentiated from the rest of the installation.
+If separate reception and dispatch areas have been created, these must also have separate loading and unloading areas. If, however, the reception and dispatch are close to each other, a single loading and unloading space can be created. However, this option makes it more difficult to control the flow of goods and the movement of vehicles.
+[image: Warehouse of a distribution company.]
+Warehouse of a distribution company.
+## Service areas (F)
+Part of the warehouse must be assigned to support activities at the facility, such as general and management offices, changing rooms, bathrooms, and the area for recharging the batteries of handling devices.
+The ideal solution is for the management office to be located in the reception and dispatch area and, if possible, between these two areas. This provides greater operability and efficiency in the work of the personnel in this department.
+Changing rooms, bathrooms, and general offices can be located anywhere in the warehouse, although it is more logical to locate these close to the control offices. A good solution for bringing together these resources is to construct a mezzanine over the reception and dispatch area, and to locate these functions there.
+Lastly, the space for recharging the batteries used by handling devices must be isolated and well ventilated, to improve health and safety and avoid any incidents involving operations taking place in this area.

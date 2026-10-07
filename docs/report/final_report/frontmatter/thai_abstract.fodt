@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Thai abstract page of the final report.  Flat ODT so that LibreOffice can
+     typeset Thai (line breaking, CTL shaping) where pdflatex cannot; converted
+     to thai_abstract.pdf by script/build_final_report.sh and placed in the
+     report by frontmatter/abstract.tex.  Font: Norasi 16 pt, the installed
+     stand-in for the template's AngsanaUPC 16 pt.  Margins 3/2/4/2 cm as in
+     the report. -->
+<office:document
+  xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
+  xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0"
+  xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0"
+  xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0"
+  xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0"
+  xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0"
+  office:version="1.2" office:mimetype="application/vnd.oasis.opendocument.text">
+ <office:font-face-decls>
+  <style:font-face style:name="Norasi" svg:font-family="Norasi"/>
+ </office:font-face-decls>
+ <office:styles>
+  <style:default-style style:family="paragraph">
+   <style:paragraph-properties fo:line-height="0.58cm"/>
+   <style:text-properties style:font-name="Norasi" fo:font-size="13pt"
+     style:font-name-complex="Norasi" style:font-size-complex="13pt"
+     fo:language="en" fo:country="US" style:language-complex="th" style:country-complex="TH"/>
+  </style:default-style>
+ </office:styles>
+ <office:automatic-styles>
+  <style:page-layout style:name="pm1">
+   <style:page-layout-properties fo:page-width="21.0cm" fo:page-height="29.7cm"
+     fo:margin-top="3cm" fo:margin-bottom="2cm" fo:margin-left="4cm" fo:margin-right="2cm"/>
+  </style:page-layout>
+  <style:style style:name="Pc" style:family="paragraph">
+   <style:paragraph-properties fo:text-align="center" fo:margin-top="0.6cm" fo:margin-bottom="0.2cm"/>
+  </style:style>
+  <style:style style:name="Pj" style:family="paragraph">
+   <style:paragraph-properties fo:text-align="start" fo:margin-bottom="0.2cm"/>
+  </style:style>
+  <style:style style:name="Pk" style:family="paragraph">
+   <style:paragraph-properties fo:text-align="start" fo:margin-top="0.6cm"/>
+  </style:style>
+  <style:style style:name="Tb" style:family="table">
+   <style:table-properties style:width="15cm" table:align="left"/>
+  </style:style>
+  <style:style style:name="Tb.A" style:family="table-column">
+   <style:table-column-properties style:column-width="3.6cm"/>
+  </style:style>
+  <style:style style:name="Tb.B" style:family="table-column">
+   <style:table-column-properties style:column-width="11.4cm"/>
+  </style:style>
+  <style:style style:name="Tb.cell" style:family="table-cell">
+   <style:table-cell-properties fo:padding="0.03cm" fo:border="none"/>
+  </style:style>
+ </office:automatic-styles>
+ <office:master-styles>
+  <style:master-page style:name="Standard" style:page-layout-name="pm1"/>
+ </office:master-styles>
+ <office:body>
+  <office:text>
+   <table:table table:name="record" table:style-name="Tb">
+    <table:table-column table:style-name="Tb.A"/>
+    <table:table-column table:style-name="Tb.B"/>
+    <table:table-row>
+     <table:table-cell table:style-name="Tb.cell"><text:p>หัวข้อโครงงาน</text:p></table:table-cell>
+     <table:table-cell table:style-name="Tb.cell"><text:p>กระบวนการนำทางด้วยภาพสำหรับหุ่นยนต์เคลื่อนที่อัตโนมัติในคลังสินค้าที่เปลี่ยนแปลงตลอดเวลา</text:p></table:table-cell>
+    </table:table-row>
+    <table:table-row>
+     <table:table-cell table:style-name="Tb.cell"><text:p>หน่วยกิต</text:p></table:table-cell>
+     <table:table-cell table:style-name="Tb.cell"><text:p>6</text:p></table:table-cell>
+    </table:table-row>
+    <table:table-row>
+     <table:table-cell table:style-name="Tb.cell"><text:p>ผู้เขียน</text:p></table:table-cell>
+     <table:table-cell table:style-name="Tb.cell"><text:p>นายบอลตัน อาทิตย์ เดวิส</text:p></table:table-cell>
+    </table:table-row>
+    <table:table-row>
+     <table:table-cell table:style-name="Tb.cell"><text:p>อาจารย์ที่ปรึกษา</text:p></table:table-cell>
+     <table:table-cell table:style-name="Tb.cell"><text:p>ดร.รัตนชัย รมัยธิติมา</text:p></table:table-cell>
+    </table:table-row>
+    <table:table-row>
+     <table:table-cell table:style-name="Tb.cell"><text:p>หลักสูตร</text:p></table:table-cell>
+     <table:table-cell table:style-name="Tb.cell"><text:p>วิศวกรรมศาสตรบัณฑิต</text:p></table:table-cell>
+    </table:table-row>
+    <table:table-row>
+     <table:table-cell table:style-name="Tb.cell"><text:p>สาขาวิชา</text:p></table:table-cell>
+     <table:table-cell table:style-name="Tb.cell"><text:p>วิศวกรรมหุ่นยนต์และระบบอัตโนมัติ</text:p></table:table-cell>
+    </table:table-row>
+    <table:table-row>
+     <table:table-cell table:style-name="Tb.cell"><text:p>คณะ</text:p></table:table-cell>
+     <table:table-cell table:style-name="Tb.cell"><text:p>สถาบันวิทยาการหุ่นยนต์ภาคสนาม</text:p></table:table-cell>
+    </table:table-row>
+    <table:table-row>
+     <table:table-cell table:style-name="Tb.cell"><text:p>ปีการศึกษา</text:p></table:table-cell>
+     <table:table-cell table:style-name="Tb.cell"><text:p>2569</text:p></table:table-cell>
+    </table:table-row>
+   </table:table>
+   <text:p text:style-name="Pc">บทคัดย่อ</text:p>
+   <text:p text:style-name="Pj">หุ่นยนต์เคลื่อนที่อัตโนมัติในคลังสินค้าปัจจุบันนำทางด้วยไลดาร์สองมิติร่วมกับคิวอาร์โค้ด ซึ่งมีต้นทุนติดตั้งสูงและปรับเปลี่ยนได้ยากเมื่อผังคลังสินค้าเปลี่ยนไป โครงงานนี้พัฒนาและประเมินกระบวนการนำทางด้วยภาพ โดยผสานระบบระบุตำแหน่งและสร้างแผนที่ด้วยภาพจากกล้องสเตอริโอและหน่วยวัดความเฉื่อยเข้ากับตัวตรวจจับวัตถุ YOLO ซึ่งคัดจุดเด่นบนวัตถุเคลื่อนย้ายได้ออกก่อนการประมาณตำแหน่ง และเปรียบเทียบไปป์ไลน์สองรูปแบบ ได้แก่ ORB-SLAM3 ที่ปฏิเสธจุดเด่นตามผลตรวจจับ และ VINS-Fusion ที่ตัดเส้นทางจุดเด่นคงค้างแล้วส่งต่อให้ RTAB-Map สร้างแผนที่ การประเมินจัดเป็นการทดลองสี่รายการ แต่ละรายการทำทั้งในสถานการณ์จำลองและบนหุ่นยนต์จริง ได้แก่ การเปรียบเทียบตัวประมาณค่าพื้นฐานที่ไม่ใช้ภาพ การประเมินตัวตรวจจับวัตถุแบบออฟไลน์ การประเมินการวัดระยะทางด้วยภาพและความเฉื่อยร่วมกับการกรองวัตถุพลวัต และการประเมินคุณภาพแผนที่</text:p>
+   <text:p text:style-name="Pj">ณ วันตัดยอดรายงาน การทดลองในสถานการณ์จำลองทั้งสี่รายการเสร็จสิ้น ส่วนการทดลองบนหุ่นยนต์จริงยังอยู่ในแผน จากข้อมูลบันทึกฉากคงที่ห้าชุด ตัวกรองคาลมานขยายที่รวมล้อและไจโรสโคปให้ค่าความคลาดเคลื่อนเส้นทางสัมบูรณ์ 0.19 ถึง 0.49 เมตร ดีกว่าไปป์ไลน์ด้วยภาพทั้งสองตามค่าตั้งที่ใช้ แต่ลำดับกลับด้านในทุกชุดข้อมูลเมื่อให้ตัวกรองใช้แบบจำลองสัญญาณรบกวนชุดเดียวกับระบบภาพ แสดงว่าแบบจำลองสัญญาณรบกวนมีผลมากกว่าสถาปัตยกรรม ตัวตรวจจับวัตถุให้ความแม่นยำรวม 0.684 และความครบถ้วนของวัตถุเคลื่อนที่ 0.591 โดยจำแนกประเภทถูกต้อง 0.996 สมมติฐานการกรองวัตถุพลวัตยังไม่ได้รับการทดสอบที่ใช้ได้ เนื่องจากตัวกรองของ VINS-Fusion ไม่ทำงาน คู่ทดลองของ ORB-SLAM3 ได้รับข้อมูลนำเข้าไม่เท่ากัน และโลกจำลองพลวัตยังไม่เป็นสนามทดสอบที่ใช้ได้ แผนที่ RTAB-Map ของคลังสินค้าขนาดเล็กถูกต้องทางเรขาคณิต (ความแม่นยำร้อยละ 96.6 ความครบถ้วนของพื้นผิวที่สังเกตได้ร้อยละ 89.5) และใช้ขับผ่านเส้นทางอิสระได้ ส่วนแผนที่คลังสินค้าขนาดใหญ่ล้มเหลวจากการสูญเสียการติดตามในโครงสร้างที่ซ้ำกัน</text:p>
+   <text:p text:style-name="Pk">คำสำคัญ : การตรวจจับวัตถุ / การระบุตำแหน่งและสร้างแผนที่ด้วยภาพ / คลังสินค้าพลวัต / ตัวกรองคาลมานขยาย / หุ่นยนต์เคลื่อนที่อัตโนมัติ</text:p>
+  </office:text>
+ </office:body>
+</office:document>

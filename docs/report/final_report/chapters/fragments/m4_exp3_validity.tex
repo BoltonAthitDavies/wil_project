@@ -1,0 +1,69 @@
+% Verbatim from minor_report/chapters/chapter_4_results.tex lines 12-77 (retired report),
+% headings demoted by 0 level(s). Do not edit here; edit the source of the numbers.
+
+The relogged campaign contains 66 estimator runs across seven featureless-floor
+simulation datasets. Each condition was requested three times. The four dynamic
+datasets contain baseline and nominal YOLO-filtered folders for both estimators
+($4\times3\times4=48$ runs). The three static datasets contain baseline
+ORB-SLAM3 and VINS-Fusion runs ($3\times3\times2=18$ runs). All directories
+contain a trajectory, metadata, process-performance records, module records, and
+a graceful-shutdown summary.
+
+The validity audit distinguishes an operational estimator run from a valid
+treatment comparison. All 66 runs initialized and produced usable log rows.
+Two ORB-SLAM3 runs---\repo{dataset_static_nofloortexture_000/logging_20260916_02}
+and \repo{logging_20260916_03}---have incomplete \repo{run_summary.csv} schemas:
+their final inertial and map counters are absent. Their frame-level
+\repo{performance.csv} records nevertheless reach \repo{imu_initialized=1},
+\repo{inertial_ba1=1}, and \repo{inertial_ba2=1}, while
+\repo{local_mapping.csv} records mapping activity. They are therefore retained
+as operational runs; the missing summary fields are reported as a logging
+anomaly rather than interpreted as estimator failure.
+
+\begin{table}[htbp]
+\centering
+\caption[Relogged experiment progress and validity.]{Relogged experiment progress and validity. ``Operational'' requires
+graceful shutdown, estimator initialization, at least ten processed frames, and
+a trajectory. Treatment validity additionally requires the intended filter to be
+active and paired input counts and durations to differ by no more than 5\%.}
+\label{tab:run-validity}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.15\textwidth}rrrr>{\raggedright\arraybackslash}X}
+\toprule
+Run family & Attempted & Complete & Operational & Valid pairs & Interpretation \\
+\midrule
+Static baseline & 18 & 18 & 18 & -- & two incomplete ORB summaries \\
+Dynamic baseline & 24 & 24 & 24 & -- & descriptive estimator logs \\
+Dynamic ORB+YOLO & 12 & 12 & 12 & 1 of 12 & 11 input-mismatched pairs \\
+Dynamic VINS+YOLO & 12 & 12 & 12 & 0 of 12 & filter inactive in every run \\
+\midrule
+Total & 66 & 66 & 66 & 1 treatment pair & preliminary campaign \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Ground truth was extracted directly from each exact-name dataset rosbag's
+\repo{/ground_truth/odometry} topic and associated with every repeat using source
+header timestamps. Dataset association follows the containing folder name, not
+the path recorded in \repo{run_metadata.csv}. The PC copies were used for
+\repo{dataset_dynamic_nofloortexture_01_000} and
+\repo{dataset_static_nofloortexture_001}; the other five bags were read from the
+removable drive. That split was not a preference: both drive copies are
+unreadable despite carrying complete metadata, as recorded in
+\cref{tab:dataset-registry}. Each estimate is aligned to truth by a
+rigid $SE(3)$ fit with scale fixed. Translational ATE RMSE and rotational geodesic
+RMSE can therefore be reported. Relative pose error was added to the analysis
+module after the cutoff and is reported in \cref{sec:rpe}; it required no
+estimator re-runs.
+
+The nominal VINS+YOLO treatment did not pass the mechanism check. Although its
+metadata says \repo{filter=true}, all 12 runs report zero matched detection
+frames, zero nonzero mask coverage, and zero removed dynamic tracks. These runs
+remain useful for operational and compute inspection but cannot test semantic
+filtering. ORB+YOLO recorded 9,706 matched and 10,764 missed detector frames over
+20,470 mask-use rows, with no rejected masks. Its median mask coverage was zero
+(IQR 0.0798), reflecting many frames without a used mask. Eleven of its 12
+baseline/filter pairs differed in received image count by more than 5\%; only one
+pair satisfies the predefined pairing rule. Consequently, no cross-treatment
+accuracy conclusion is made.

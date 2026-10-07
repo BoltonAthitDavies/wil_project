@@ -1,0 +1,43 @@
+% Verbatim from minor_report/chapters/chapter_3_methodology.tex lines 534-573 (retired report),
+% headings demoted by 0 level(s). Do not edit here; edit the source of the numbers.
+
+The real configuration is summarised in \cref{tab:real-rig}. Its calibration is
+materially weaker than the simulated rig's, and the weaknesses are load bearing
+rather than cosmetic.
+
+\begin{table}[htbp]
+\centering
+\caption[Real sensor rig, and the calibration status of each quantity.]{Real sensor rig, and the calibration status of each quantity. Only the
+first three rows are measured; the remainder are approximations or placeholders
+that bound what can be claimed from real-robot data.}
+\label{tab:real-rig}
+\small
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.26\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}X}
+\toprule
+Quantity & Value & Status \\
+\midrule
+Stereo resolution & $1920\times1080$ fisheye & measured \\
+Stereo baseline & \SI{0.093604}{\metre} & measured \\
+IMU stream & \repo{/hwt101ct_yaw_publisher} & separate RealSense source \\
+Camera model (ORB-SLAM3) & \texttt{KannalaBrandt8} & configured \\
+Camera model (VINS) & project fisheye files & configured \\
+Second-camera intrinsics & reuse of the first camera & \flag{approximation} \\
+IMU-to-camera rotation & observational support & partial \\
+IMU-to-camera translation & zero & \flag{placeholder} \\
+Stationary $\lVert a\rVert$ & \SI{9.2642}{\metre\per\second\squared} &
+  \flag{measured, deviates from \num{9.81}} \\
+Extrinsic estimation (VINS) & \repo{estimate_extrinsic: 1} & online \\
+Time-offset estimation (VINS) & \repo{estimate_td: 1} & online \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The real IMU-to-camera rotation has observational support, but its translation is
+a zero placeholder. The stationary accelerometer magnitude is recorded as
+\SI{9.2642}{\metre\per\second\squared}, rather than
+\SI{9.81}{\metre\per\second\squared}. VINS-Fusion uses the observed magnitude as
+\repo{g_norm}; the ORB-SLAM3 real inertial launch rescales acceleration by
+$9.81/9.2642$. These treatments make the configurations internally consistent but
+do not replace an independent camera--IMU calibration. Real trajectories can be
+inspected for plausibility and tracking continuity, but metric accuracy cannot be
+claimed without independent ground truth and improved extrinsic calibration.

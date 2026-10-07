@@ -1,0 +1,24 @@
+1. Loading and Unloading Areas
+These areas provide direct access for transport vehicles and can be configured in two main ways:
+
+    -Integrated Docks: Built directly into the warehouse structure to speed up load handling.
+
+        -Flush docks allow trucks to back right up to the wall, often using metal seals or inflatable shelters to preserve the warehouse's internal climate.
+
+        -Intermediate platforms are used when separation is needed for safety or temperature control (such as in cold storage).
+
+        -Because truck trailer heights vary, these docks heavily rely on mechanical or hydraulic adjustable leveler systems to bridge the height gap.
+
+    -Independent Areas: Located outside the main building on a large flat area. This keeps loading/unloading completely separate from the main warehouse work cycle. Goods are typically handled from the side using forklifts, or from the rear using metal ramps or automated roller conveyors that slide goods in and out of the trailer.
+
+2. Reception Area
+The reception area should operate as independently as possible from the rest of the warehouse. It is not just a drop-off point; it is dedicated to quality control and sorting. Here, staff ensure that the delivered products match the order specifications before determining where the load will be positioned inside the main facility.
+
+3. Storage, Picking, and Dispatch Areas
+While the first half of the manual focuses heavily on receiving, the complete layout relies on the flow into the remaining three zones:
+
+    -Storage Area: The core space where goods are housed based on their required rotation and handling needs.
+
+    -Picking Area: The dedicated zone where individual items are picked and orders are prepped.
+
+    -Dispatch Area: The final staging zone where prepared orders are consolidated and staged for outgoing transport.

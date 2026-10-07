@@ -1,0 +1,164 @@
+\contentsline {chapter}{ABSTRACT}{ii}{section*.1}%
+\contentsline {chapter}{THAI ABSTRACT}{iii}{section*.2}%
+\contentsline {chapter}{ACKNOWLEDGEMENTS}{iv}{chapter*.3}%
+\contentsline {chapter}{CONTENTS}{v}{}
+\contentsline {chapter}{LIST OF TABLES}{viii}{section*.4}%
+\contentsline {chapter}{LIST OF FIGURES}{x}{section*.5}%
+\contentsline {chapter}{LIST OF SYMBOLS}{xii}{chapter*.6}%
+\contentsline {chapter}{LIST OF TECHNICAL VOCABULARY AND ABBREVIATIONS}{xiii}{chapter*.7}%
+\vspace {6pt}\noindent \textbf {CHAPTER}\par 
+\contentsline {chapter}{\numberline {1}INTRODUCTION}{1}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Background and Significance}{1}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Objectives}{1}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Expected Benefits}{2}{section.1.3}%
+\contentsline {section}{\numberline {1.4}Scope}{2}{section.1.4}%
+\contentsline {section}{\numberline {1.5}Work Plan}{2}{section.1.5}%
+\contentsline {chapter}{\numberline {2}THEORY AND RELATED WORK}{4}{chapter.2}%
+\contentsline {section}{\numberline {2.1}AMR Navigation Systems}{4}{section.2.1}%
+\contentsline {subsection}{\numberline {2.1.1}Logistics management and the historical bottleneck}{4}{subsection.2.1.1}%
+\contentsline {subsection}{\numberline {2.1.2}The era of automated guided vehicles (AGVs)}{5}{subsection.2.1.2}%
+\contentsline {subsection}{\numberline {2.1.3}The transition to autonomous mobile robots (AMRs)}{5}{subsection.2.1.3}%
+\contentsline {section}{\numberline {2.2}Visual Simultaneous Localization and Mapping (Visual SLAM)}{5}{section.2.2}%
+\contentsline {subsection}{\numberline {2.2.1}Components of a visual SLAM system}{6}{subsection.2.2.1}%
+\contentsline {subsection}{\numberline {2.2.2}ORB-SLAM3}{7}{subsection.2.2.2}%
+\contentsline {subsubsection}{Tightly-coupled visual-inertial SLAM}{7}{subsubsection*.16}%
+\contentsline {subsubsection}{Atlas: multi-map system and place recognition}{8}{subsubsection*.17}%
+\contentsline {subsubsection}{Abstract camera representation for wide-angle lenses}{8}{subsubsection*.18}%
+\contentsline {subsection}{\numberline {2.2.3}VINS (Visual-Inertial System)}{8}{subsection.2.2.3}%
+\contentsline {subsubsection}{IMU pre-integration}{9}{subsubsection*.20}%
+\contentsline {subsubsection}{Robust estimator initialisation}{9}{subsubsection*.21}%
+\contentsline {subsubsection}{Tightly-coupled sliding-window optimisation}{9}{subsubsection*.22}%
+\contentsline {subsubsection}{Marginalisation for real-time load control}{9}{subsubsection*.23}%
+\contentsline {subsubsection}{Online temporal calibration}{10}{subsubsection*.24}%
+\contentsline {subsection}{\numberline {2.2.4}RTAB-Map back end and memory management}{10}{subsection.2.2.4}%
+\contentsline {subsubsection}{Memory partitioning modelled on human memory}{10}{subsubsection*.26}%
+\contentsline {subsubsection}{Memory transfer and weighting heuristics}{11}{subsubsection*.27}%
+\contentsline {subsubsection}{Memory-constrained graph optimisation}{11}{subsubsection*.28}%
+\contentsline {section}{\numberline {2.3}Real-Time Object Detection}{11}{section.2.3}%
+\contentsline {subsection}{\numberline {2.3.1}The role of object detection in semantic understanding}{11}{subsection.2.3.1}%
+\contentsline {subsection}{\numberline {2.3.2}The YOLO (You Only Look Once) network architecture}{11}{subsection.2.3.2}%
+\contentsline {subsection}{\numberline {2.3.3}Performance evaluation and edge-processor limits}{13}{subsection.2.3.3}%
+\contentsline {section}{\numberline {2.4}RY-SLAM: A Robust YOLO-Based Real-Time Visual SLAM Solution for Dynamic Environments}{13}{section.2.4}%
+\contentsline {subsection}{\numberline {2.4.1}Concept and architecture of RY-SLAM}{13}{subsection.2.4.1}%
+\contentsline {subsection}{\numberline {2.4.2}Dynamic feature masking mechanism}{13}{subsection.2.4.2}%
+\contentsline {subsection}{\numberline {2.4.3}Relevance to this project}{15}{subsection.2.4.3}%
+\contentsline {chapter}{\numberline {3}METHODOLOGY}{16}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Problem, Requirements and Scope}{16}{section.3.1}%
+\contentsline {section}{\numberline {3.2}System Architecture}{17}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Control-loop view and data rates}{17}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.2}Semantic visual SLAM data flow}{17}{subsection.3.2.2}%
+\contentsline {subsection}{\numberline {3.2.3}The two navigation pipelines compared}{19}{subsection.3.2.3}%
+\contentsline {section}{\numberline {3.3}The Pipelines as Implemented}{20}{section.3.3}%
+\contentsline {subsection}{\numberline {3.3.1}Dynamic feature masking}{20}{subsection.3.3.1}%
+\contentsline {subsection}{\numberline {3.3.2}ORB-SLAM3 and semantic feature rejection}{21}{subsection.3.3.2}%
+\contentsline {subsection}{\numberline {3.3.3}VINS-Fusion front end}{22}{subsection.3.3.3}%
+\contentsline {subsection}{\numberline {3.3.4}RTAB-Map mapping and localization back end}{24}{subsection.3.3.4}%
+\contentsline {subsection}{\numberline {3.3.5}YOLO detector node, mask construction and synchronisation}{26}{subsection.3.3.5}%
+\contentsline {section}{\numberline {3.4}Simulation Platform}{26}{section.3.4}%
+\contentsline {subsection}{\numberline {3.4.1}Computing and software environment}{26}{subsection.3.4.1}%
+\contentsline {subsection}{\numberline {3.4.2}Simulated sensor rig and platform}{28}{subsection.3.4.2}%
+\contentsline {subsection}{\numberline {3.4.3}Simulation fidelity and its limits}{30}{subsection.3.4.3}%
+\contentsline {paragraph}{Inertial measurement.}{30}{paragraph*.46}%
+\contentsline {paragraph}{Wheel encoders.}{31}{paragraph*.48}%
+\contentsline {paragraph}{Physics engine and solver.}{31}{paragraph*.49}%
+\contentsline {paragraph}{Contact friction, and why the encoder is flattered.}{31}{paragraph*.51}%
+\contentsline {paragraph}{Noise models supplied to the estimators.}{32}{paragraph*.53}%
+\contentsline {subsection}{\numberline {3.4.4}Coordinate-frame contract}{33}{subsection.3.4.4}%
+\contentsline {subsection}{\numberline {3.4.5}Simulation environments and controlled factors}{33}{subsection.3.4.5}%
+\contentsline {subsection}{\numberline {3.4.6}Dataset registry}{35}{subsection.3.4.6}%
+\contentsline {section}{\numberline {3.5}Real Platform}{38}{section.3.5}%
+\contentsline {subsection}{\numberline {3.5.1}AMR mobile robot testbed}{38}{subsection.3.5.1}%
+\contentsline {subsection}{\numberline {3.5.2}Sensors and computing unit}{38}{subsection.3.5.2}%
+\contentsline {subsection}{\numberline {3.5.3}Real sensor rig and calibration limits}{42}{subsection.3.5.3}%
+\contentsline {subsection}{\numberline {3.5.4}Test site and experimental variables}{44}{subsection.3.5.4}%
+\contentsline {section}{\numberline {3.6}The Four Experiments}{44}{section.3.6}%
+\contentsline {subsection}{\numberline {3.6.1}Experiment 1: Non-visual baseline and estimator comparison}{45}{subsection.3.6.1}%
+\contentsline {subsubsection}{Implementation form and why it is offline}{45}{subsubsection*.71}%
+\contentsline {subsubsection}{Sensor model derived from data}{45}{subsubsection*.72}%
+\contentsline {subsubsection}{The orientation field must not be used}{46}{subsubsection*.74}%
+\contentsline {subsubsection}{Estimator definitions}{46}{subsubsection*.75}%
+\contentsline {subsubsection}{EKF formulation}{46}{subsubsection*.77}%
+\contentsline {paragraph}{State and inputs.}{46}{paragraph*.78}%
+\contentsline {paragraph}{Covariance and process noise.}{47}{paragraph*.79}%
+\contentsline {paragraph}{Measurement.}{47}{paragraph*.80}%
+\contentsline {paragraph}{Where the numbers come from.}{48}{paragraph*.81}%
+\contentsline {subsubsection}{Why the bias, and not the heading, is observed}{48}{subsubsection*.82}%
+\contentsline {subsection}{\numberline {3.6.2}Experiment 2: Offline YOLO detector performance}{48}{subsection.3.6.2}%
+\contentsline {paragraph}{Constructing the ground-truth boxes}{48}{paragraph*.83}%
+\contentsline {paragraph}{What this convention costs}{49}{paragraph*.85}%
+\contentsline {subsection}{\numberline {3.6.3}Experiment 3: Visual-inertial odometry with dynamic-environment filtering}{49}{subsection.3.6.3}%
+\contentsline {subsection}{\numberline {3.6.4}Experiment 4: Dense map reconstruction and map-quality evaluation}{51}{subsection.3.6.4}%
+\contentsline {section}{\numberline {3.7}Evaluation Metrics and Analysis}{52}{section.3.7}%
+\contentsline {subsection}{\numberline {3.7.1}Trajectory evaluation}{52}{subsection.3.7.1}%
+\contentsline {paragraph}{Relative pose error.}{52}{paragraph*.86}%
+\contentsline {subsection}{\numberline {3.7.2}Computational performance}{53}{subsection.3.7.2}%
+\contentsline {subsection}{\numberline {3.7.3}Collection protocol, validity and stored artifacts}{53}{subsection.3.7.3}%
+\contentsline {subsection}{\numberline {3.7.4}Reproducibility controls}{55}{subsection.3.7.4}%
+\contentsline {section}{\numberline {3.8}Planned Versus Implemented}{55}{section.3.8}%
+\contentsline {chapter}{\numberline {4}EXPERIMENTS AND RESULTS}{58}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Experiment 1: Non-Visual Baseline and Estimator Comparison}{58}{section.4.1}%
+\contentsline {subsection}{\numberline {4.1.1}Simulation}{58}{subsection.4.1.1}%
+\contentsline {subsubsection}{Question, hypotheses, and conditions}{58}{subsubsection*.91}%
+\contentsline {subsubsection}{Validity}{59}{subsubsection*.93}%
+\contentsline {subsubsection}{Accuracy results}{60}{subsubsection*.95}%
+\contentsline {subsubsection}{Falsification of H1, and the drift mechanism}{62}{subsubsection*.98}%
+\contentsline {subsubsection}{Covariance consistency}{64}{subsubsection*.101}%
+\contentsline {subsubsection}{Cross-validation of the EKF noise model}{65}{subsubsection*.104}%
+\contentsline {subsubsection}{Transferring the visual systems' noise model to the EKF}{67}{subsubsection*.106}%
+\contentsline {paragraph}{Question and hypothesis.}{67}{paragraph*.107}%
+\contentsline {paragraph}{Conditions and controls.}{67}{paragraph*.108}%
+\contentsline {paragraph}{Validity and sample count.}{67}{paragraph*.109}%
+\contentsline {paragraph}{Results.}{67}{paragraph*.110}%
+\contentsline {paragraph}{Interpretation.}{68}{paragraph*.112}%
+\contentsline {paragraph}{Limitations.}{68}{paragraph*.113}%
+\contentsline {subsubsection}{Interpretation and limitations}{68}{subsubsection*.114}%
+\contentsline {paragraph}{Summary.}{69}{paragraph*.115}%
+\contentsline {paragraph}{Future plan.}{69}{paragraph*.116}%
+\contentsline {subsection}{\numberline {4.1.2}Real robot}{69}{subsection.4.1.2}%
+\contentsline {section}{\numberline {4.2}Experiment 2: Offline YOLO Detector Performance}{69}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}Simulation}{69}{subsection.4.2.1}%
+\contentsline {subsubsection}{Bounding-Box Detection and Localization}{70}{subsubsection*.117}%
+\contentsline {subsubsection}{Object-Class Assignment Conditional on Localization}{72}{subsubsection*.121}%
+\contentsline {paragraph}{Summary.}{72}{paragraph*.124}%
+\contentsline {paragraph}{Future plan.}{73}{paragraph*.125}%
+\contentsline {subsection}{\numberline {4.2.2}Real robot}{73}{subsection.4.2.2}%
+\contentsline {section}{\numberline {4.3}Experiment 3: Visual-Inertial Odometry With Dynamic-Environment Filtering}{73}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}Simulation}{73}{subsection.4.3.1}%
+\contentsline {subsubsection}{Campaign validity audit}{73}{subsubsection*.126}%
+\contentsline {subsubsection}{Observed anomaly catalogue}{74}{subsubsection*.128}%
+\contentsline {subsubsection}{Trajectory accuracy, plausibility and robustness}{75}{subsubsection*.130}%
+\contentsline {subsubsection}{Relative pose error}{77}{subsubsection*.132}%
+\contentsline {paragraph}{The dynamic runs are not locally coherent.}{77}{paragraph*.134}%
+\contentsline {paragraph}{ORB-SLAM3's static rotational penalty is entirely jump-localised.}{77}{paragraph*.136}%
+\contentsline {subsubsection}{Real-time and computational measurements}{78}{subsubsection*.140}%
+\contentsline {subsubsection}{Loop closure, map merging and global-correction evidence}{82}{subsubsection*.144}%
+\contentsline {paragraph}{Summary.}{82}{paragraph*.145}%
+\contentsline {paragraph}{Future plan.}{82}{paragraph*.146}%
+\contentsline {subsection}{\numberline {4.3.2}Real robot}{83}{subsection.4.3.2}%
+\contentsline {section}{\numberline {4.4}Experiment 4: Dense Map Reconstruction and Map-Quality Evaluation}{83}{section.4.4}%
+\contentsline {subsection}{\numberline {4.4.1}Simulation}{83}{subsection.4.4.1}%
+\contentsline {subsubsection}{Question, scope, and conditions}{83}{subsubsection*.147}%
+\contentsline {subsubsection}{Map placement as a validity precondition}{83}{subsubsection*.149}%
+\contentsline {subsubsection}{Graph and database summary}{84}{subsubsection*.150}%
+\contentsline {subsubsection}{Geometry against the world file}{85}{subsubsection*.152}%
+\contentsline {subsubsection}{Drivability against the true route}{85}{subsubsection*.154}%
+\contentsline {subsubsection}{Interpretation and limitations}{86}{subsubsection*.158}%
+\contentsline {subsubsection}{Planned extension to the large warehouse}{89}{subsubsection*.159}%
+\contentsline {subsubsection}{Large-warehouse attempt}{89}{subsubsection*.160}%
+\contentsline {paragraph}{Summary.}{89}{paragraph*.161}%
+\contentsline {paragraph}{Future plan.}{89}{paragraph*.162}%
+\contentsline {subsection}{\numberline {4.4.2}Real robot}{89}{subsection.4.4.2}%
+\contentsline {section}{\numberline {4.5}Cross-Experiment Discussion, Simulation-to-Real Comparison and Limitations}{90}{section.4.5}%
+\contentsline {subsection}{\numberline {4.5.1}Simulation against the real robot}{90}{subsection.4.5.1}%
+\contentsline {subsection}{\numberline {4.5.2}Where each pipeline is weak, block by block}{90}{subsection.4.5.2}%
+\contentsline {paragraph}{Where the criteria come from.}{90}{paragraph*.163}%
+\contentsline {chapter}{\numberline {5}CONCLUSION AND RECOMMENDATIONS}{101}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Conclusions by Experiment}{101}{section.5.1}%
+\contentsline {subsection}{\numberline {5.1.1}Experiment 1: is vision earning its place?}{101}{subsection.5.1.1}%
+\contentsline {subsection}{\numberline {5.1.2}Experiment 2: how good is the detector?}{101}{subsection.5.1.2}%
+\contentsline {subsection}{\numberline {5.1.3}Experiment 3: does filtering help?}{101}{subsection.5.1.3}%
+\contentsline {subsection}{\numberline {5.1.4}Experiment 4: is the map usable?}{102}{subsection.5.1.4}%
+\contentsline {section}{\numberline {5.2}Limitations and Threats to Validity}{102}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Recommendations and Next Steps}{102}{section.5.3}%
+\contentsline {chapter}{REFERENCES}{104}{section*.172}%
+\contentsline {chapter}{CURRICULUM VITAE}{105}{chapter*.174}%

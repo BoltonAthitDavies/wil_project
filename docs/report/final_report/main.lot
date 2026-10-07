@@ -1,0 +1,61 @@
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {1.1}{\ignorespaces Work plan for the 2026 (B.E.\ 2569) academic year.}}{3}{table.caption.10}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {2.1}{\ignorespaces Comparison of object-detection model architectures.\relax }}{12}{table.caption.29}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {3.1}{\ignorespaces The four experiments and the architecture block each one tests.\relax }}{17}{table.caption.32}%
+\contentsline {table}{\numberline {3.2}{\ignorespaces Implementation status at the reporting cutoff.\relax }}{18}{table.3.2}%
+\contentsline {table}{\numberline {3.3}{\ignorespaces Design comparison of the two pipeline architectures, as proposed.\relax }}{21}{table.caption.36}%
+\contentsline {table}{\numberline {3.4}{\ignorespaces ORB-SLAM3 configuration at the cutoff.}}{23}{table.caption.38}%
+\contentsline {table}{\numberline {3.5}{\ignorespaces VINS-Fusion simulation configuration at the cutoff, from \repo {vins_fusion_ros2/config/wil_sim/stereo_imu.yaml}.}}{25}{table.caption.40}%
+\contentsline {table}{\numberline {3.6}{\ignorespaces Computing and software environment.}}{27}{table.caption.41}%
+\contentsline {table}{\numberline {3.7}{\ignorespaces Simulated sensor configuration.}}{28}{table.caption.43}%
+\contentsline {table}{\numberline {3.8}{\ignorespaces Inertial noise parameters supplied to the visual-inertial estimators, beside the values measured from the recorded IMU stream in \cref {sec:proprio-method}.}}{29}{table.caption.44}%
+\contentsline {table}{\numberline {3.9}{\ignorespaces Platform geometry and drivetrain limits used by the wheel-odometry and EKF baselines.}}{29}{table.caption.45}%
+\contentsline {table}{\numberline {3.10}{\ignorespaces Noise injected by the simulator, from the \repo {<imu>} and \repo {<camera>} sensor blocks of the robot model.}}{30}{table.caption.47}%
+\contentsline {table}{\numberline {3.11}{\ignorespaces Gazebo physics configuration, identical in all 26 world files.}}{31}{table.caption.50}%
+\contentsline {table}{\numberline {3.12}{\ignorespaces Measured wheel slip on the five multi-sensor recordings.}}{32}{table.caption.52}%
+\contentsline {table}{\numberline {3.13}{\ignorespaces What the visual estimators are configured to expect, against what the simulator injects.}}{32}{table.caption.54}%
+\contentsline {table}{\numberline {3.14}{\ignorespaces Ground models and the floor conditions they produce.}}{35}{table.caption.58}%
+\contentsline {table}{\numberline {3.15}{\ignorespaces What each dataset contains.}}{37}{table.caption.60}%
+\contentsline {table}{\numberline {3.16}{\ignorespaces Controlled experimental factors available in the simulation environment, with the levels realised at the reporting cutoff.}}{38}{table.caption.61}%
+\contentsline {table}{\numberline {3.17}{\ignorespaces Complete dataset registry at the reporting cutoff, across both storage locations.}}{39}{table.caption.62}%
+\contentsline {table}{\numberline {3.18}{\ignorespaces Specification of the AC-IMX390-H190 camera.\relax }}{41}{table.caption.66}%
+\contentsline {table}{\numberline {3.19}{\ignorespaces Summary of the hardware technical specification.\relax }}{43}{table.caption.69}%
+\contentsline {table}{\numberline {3.20}{\ignorespaces Real sensor rig, and the calibration status of each quantity.}}{43}{table.caption.70}%
+\contentsline {table}{\numberline {3.21}{\ignorespaces Sensor noise and scale measured from each bag by \repo {proprio_estimator.py calibrate}.}}{46}{table.caption.73}%
+\contentsline {table}{\numberline {3.22}{\ignorespaces Implemented non-visual estimators.}}{47}{table.caption.76}%
+\contentsline {table}{\numberline {3.23}{\ignorespaces Parameters of the detection evaluation.}}{50}{table.caption.84}%
+\contentsline {table}{\numberline {3.24}{\ignorespaces Principal stored artifacts.\relax }}{54}{table.caption.87}%
+\contentsline {table}{\numberline {3.25}{\ignorespaces Planned-versus-implemented deviations at the reporting cutoff.}}{56}{table.caption.88}%
+\contentsline {table}{\numberline {3.26}{\ignorespaces Original objectives (\cref {sec:objectives}) against the work reported here.\relax }}{56}{table.caption.89}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {4.1}{\ignorespaces Status of the eight result slots at the reporting cutoff.\relax }}{58}{table.caption.90}%
+\contentsline {table}{\numberline {4.2}{\ignorespaces Conditions for the estimator comparison.}}{59}{table.caption.92}%
+\contentsline {table}{\numberline {4.3}{\ignorespaces Loop-closing activity in the enabled ORB-SLAM3 configuration (\repo {logging_20260916_01}).}}{60}{table.caption.94}%
+\contentsline {table}{\numberline {4.4}{\ignorespaces Estimator comparison on the five \repo {allsensor} bags, which span four worlds and both floor conditions; they are not repeats of one another except for \repo {allsensor_000} and \repo {allsensor_001}.}}{61}{table.caption.96}%
+\contentsline {table}{\numberline {4.5}{\ignorespaces Wheel-odometry heading drift against the fitted yaw-rate scale.}}{62}{table.caption.99}%
+\contentsline {table}{\numberline {4.6}{\ignorespaces The EKF's heading error follows the quality of the wheel yaw rate it uses to observe its gyroscope bias.}}{64}{table.caption.100}%
+\contentsline {table}{\numberline {4.7}{\ignorespaces Covariance consistency of the non-visual estimators.}}{65}{table.caption.102}%
+\contentsline {table}{\numberline {4.8}{\ignorespaces EKF accuracy with an in-sample and an out-of-sample noise model.}}{66}{table.caption.105}%
+\contentsline {table}{\numberline {4.9}{\ignorespaces Which of the four IMU noise terms costs the EKF its accuracy.}}{68}{table.caption.111}%
+\contentsline {table}{\numberline {4.10}{\ignorespaces Offline YOLO performance against projected Gazebo object ground truth.}}{70}{table.caption.118}%
+\contentsline {table}{\numberline {4.11}{\ignorespaces Object-class assignment conditional on successful IoU association, pooled across the four dynamic datasets.\relax }}{72}{table.caption.122}%
+\contentsline {table}{\numberline {4.12}{\ignorespaces Relogged experiment progress and validity.}}{74}{table.caption.127}%
+\contentsline {table}{\numberline {4.13}{\ignorespaces Anomaly catalogue for the relogged campaign.}}{75}{table.4.13}%
+\contentsline {table}{\numberline {4.14}{\ignorespaces Trajectory error against rosbag ground truth, median (IQR).}}{76}{table.caption.131}%
+\contentsline {table}{\numberline {4.15}{\ignorespaces Relative pose error at $\Delta =\SI {1}{\second }$, median (IQR) over runs.}}{77}{table.caption.133}%
+\contentsline {table}{\numberline {4.16}{\ignorespaces Jump-free translational RPE against interval, median over runs, in metres.}}{78}{table.caption.135}%
+\contentsline {table}{\numberline {4.17}{\ignorespaces Truth-based trajectory error for every repeat of the relogged campaign.}}{79}{table.caption.137}%
+\contentsline {table}{\numberline {4.18}{\ignorespaces Dynamic-run capacity and resource measurements, mean $\pm $ sample SD, $n=12$ per row.}}{81}{table.caption.141}%
+\contentsline {table}{\numberline {4.19}{\ignorespaces Conditions for the dense-map evaluation.}}{84}{table.caption.148}%
+\contentsline {table}{\numberline {4.20}{\ignorespaces Stored contents of \repo {map/map_tiny.db}.}}{84}{table.caption.151}%
+\contentsline {table}{\numberline {4.21}{\ignorespaces Occupied-cell geometry of \repo {map/map_tiny.db} against \repo {small_warehouse_static_tinymap.world} at \SI {0.25}{\metre } tolerance.\relax }}{85}{table.caption.153}%
+\contentsline {table}{\numberline {4.22}{\ignorespaces Drivability of \repo {map/map_tiny.db} under the true $0.83\times 0.50$\nobreakspace {}m nav2 footprint, evaluated against two different routes.}}{86}{table.caption.155}%
+\contentsline {table}{\numberline {4.23}{\ignorespaces Per-block evidence for \textbf {ORB-SLAM3} in the static condition, \cref {fig:blockperf-static}.}}{93}{table.caption.165}%
+\contentsline {table}{\numberline {4.24}{\ignorespaces Per-block evidence for \textbf {VINS-Fusion} in the static condition, \cref {fig:blockperf-static}.}}{94}{table.caption.166}%
+\contentsline {table}{\numberline {4.25}{\ignorespaces Per-block evidence for the \textbf {EKF wheel\,+\,IMU} baseline, \cref {fig:blockperf-static}.}}{95}{table.caption.167}%
+\contentsline {table}{\numberline {4.26}{\ignorespaces Per-block evidence for \textbf {ORB-SLAM3} in the dynamic condition, \cref {fig:blockperf-dynamic}.}}{97}{table.caption.169}%
+\contentsline {table}{\numberline {4.27}{\ignorespaces Per-block evidence for \textbf {VINS-Fusion} in the dynamic condition, \cref {fig:blockperf-dynamic}.}}{98}{table.caption.170}%
+\contentsline {table}{\numberline {4.28}{\ignorespaces Limitations of the results reported in this chapter, and what each one prevents.}}{100}{table.caption.171}%
+\addvspace {10\p@ }

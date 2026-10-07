@@ -1,0 +1,297 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\@writefile{toc}{\contentsline {chapter}{\numberline {3}METHODOLOGY}{16}{chapter.3}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\newlabel{chap:methodology}{{3}{16}{METHODOLOGY}{chapter.3}{}}
+\newlabel{chap:methodology@cref}{{[chapter][3][]3}{[1][16][]16}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.1}Problem, Requirements and Scope}{16}{section.3.1}\protected@file@percent }
+\newlabel{sec:problem-scope}{{3.1}{16}{Problem, Requirements and Scope}{section.3.1}{}}
+\newlabel{sec:problem-scope@cref}{{[section][1][3]3.1}{[1][16][]16}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.2}System Architecture}{17}{section.3.2}\protected@file@percent }
+\newlabel{sec:architecture}{{3.2}{17}{System Architecture}{section.3.2}{}}
+\newlabel{sec:architecture@cref}{{[section][2][3]3.2}{[1][16][]17}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.1}Control-loop view and data rates}{17}{subsection.3.2.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.1}{\ignorespaces The four experiments and the architecture block each one tests.\relax }}{17}{table.caption.32}\protected@file@percent }
+\newlabel{tab:experiment-map}{{3.1}{17}{The four experiments and the architecture block each one tests.\relax }{table.caption.32}{}}
+\newlabel{tab:experiment-map@cref}{{[table][1][3]3.1}{[1][17][]17}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.2}Semantic visual SLAM data flow}{17}{subsection.3.2.2}\protected@file@percent }
+\gdef \LT@i {\LT@entry 
+    {1}{140.0387pt}\LT@entry 
+    {1}{110.16019pt}\LT@entry 
+    {1}{178.44836pt}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.1}{\ignorespaces Implemented experimental architecture.}}{18}{figure.caption.33}\protected@file@percent }
+\newlabel{fig:system-architecture}{{3.1}{18}{Implemented experimental architecture}{figure.caption.33}{}}
+\newlabel{fig:system-architecture@cref}{{[figure][1][3]3.1}{[1][17][]18}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.2}{\ignorespaces Implementation status at the reporting cutoff.\relax }}{18}{table.3.2}\protected@file@percent }
+\newlabel{tab:implementation-status}{{3.2}{18}{Implementation status at the reporting cutoff.\relax }{table.3.2}{}}
+\newlabel{tab:implementation-status@cref}{{[table][2][3]3.2}{[1][17][]18}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.3}The two navigation pipelines compared}{19}{subsection.3.2.3}\protected@file@percent }
+\newlabel{sec:pipelines-compared}{{3.2.3}{19}{The two navigation pipelines compared}{subsection.3.2.3}{}}
+\newlabel{sec:pipelines-compared@cref}{{[subsection][3][3,2]3.2.3}{[1][19][]19}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.2}{\ignorespaces Pipeline\nobreakspace  {}1, YOLO26 + ORB-SLAM3, as designed: stereo images and IMU are synchronised, tracked and passed to local mapping, loop closing and the Atlas map; the detector's boxes enter the tracking stage.}}{20}{figure.caption.34}\protected@file@percent }
+\newlabel{fig:pipeline1}{{3.2}{20}{Pipeline~1, YOLO26 + ORB-SLAM3, as designed: stereo images and IMU are synchronised, tracked and passed to local mapping, loop closing and the Atlas map; the detector's boxes enter the tracking stage}{figure.caption.34}{}}
+\newlabel{fig:pipeline1@cref}{{[figure][2][3]3.2}{[1][20][]20}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.3}{\ignorespaces Pipeline\nobreakspace  {}2, YOLO26 + VINS + RTAB-Map, as designed: VINS tracking, initialisation and sliding-window optimisation produce odometry, RTAB-Map builds the map from that odometry and the stereo images.}}{20}{figure.caption.35}\protected@file@percent }
+\newlabel{fig:pipeline2}{{3.3}{20}{Pipeline~2, YOLO26 + VINS + RTAB-Map, as designed: VINS tracking, initialisation and sliding-window optimisation produce odometry, RTAB-Map builds the map from that odometry and the stereo images}{figure.caption.35}{}}
+\newlabel{fig:pipeline2@cref}{{[figure][3][3]3.3}{[1][20][]20}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.3}The Pipelines as Implemented}{20}{section.3.3}\protected@file@percent }
+\newlabel{sec:pipelines-implemented}{{3.3}{20}{The Pipelines as Implemented}{section.3.3}{}}
+\newlabel{sec:pipelines-implemented@cref}{{[section][3][3]3.3}{[1][20][]20}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.1}Dynamic feature masking}{20}{subsection.3.3.1}\protected@file@percent }
+\newlabel{sec:masking-formal}{{3.3.1}{20}{Dynamic feature masking}{subsection.3.3.1}{}}
+\newlabel{sec:masking-formal@cref}{{[subsection][1][3,3]3.3.1}{[1][20][]20}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.3}{\ignorespaces Design comparison of the two pipeline architectures, as proposed.\relax }}{21}{table.caption.36}\protected@file@percent }
+\newlabel{tab:pipeline-comparison}{{3.3}{21}{Design comparison of the two pipeline architectures, as proposed.\relax }{table.caption.36}{}}
+\newlabel{tab:pipeline-comparison@cref}{{[table][3][3]3.3}{[1][20][]21}}
+\newlabel{eq:boxes}{{3.1}{21}{Dynamic feature masking}{equation.3.3.1}{}}
+\newlabel{eq:boxes@cref}{{[equation][1][3]3.1}{[1][20][]21}}
+\newlabel{eq:mask-test}{{3.2}{21}{Dynamic feature masking}{equation.3.3.2}{}}
+\newlabel{eq:mask-test@cref}{{[equation][2][3]3.2}{[1][21][]21}}
+\newlabel{eq:static-set}{{3.3}{21}{Dynamic feature masking}{equation.3.3.3}{}}
+\newlabel{eq:static-set@cref}{{[equation][3][3]3.3}{[1][21][]21}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.2}ORB-SLAM3 and semantic feature rejection}{21}{subsection.3.3.2}\protected@file@percent }
+\newlabel{sec:orb-method}{{3.3.2}{21}{ORB-SLAM3 and semantic feature rejection}{subsection.3.3.2}{}}
+\newlabel{sec:orb-method@cref}{{[subsection][2][3,3]3.3.2}{[1][21][]21}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.4}{\ignorespaces ORB-SLAM3 pipeline and the semantic-mask insertion point.}}{22}{figure.caption.37}\protected@file@percent }
+\newlabel{fig:orb-pipeline}{{3.4}{22}{ORB-SLAM3 pipeline and the semantic-mask insertion point}{figure.caption.37}{}}
+\newlabel{fig:orb-pipeline@cref}{{[figure][4][3]3.4}{[1][22][]22}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.3}VINS-Fusion front end}{22}{subsection.3.3.3}\protected@file@percent }
+\newlabel{sec:vins-rtab-method}{{3.3.3}{22}{VINS-Fusion front end}{subsection.3.3.3}{}}
+\newlabel{sec:vins-rtab-method@cref}{{[subsection][3][3,3]3.3.3}{[1][22][]22}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.4}{\ignorespaces ORB-SLAM3 configuration at the cutoff.}}{23}{table.caption.38}\protected@file@percent }
+\newlabel{tab:orb-params}{{3.4}{23}{ORB-SLAM3 configuration at the cutoff}{table.caption.38}{}}
+\newlabel{tab:orb-params@cref}{{[table][4][3]3.4}{[1][22][]23}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.5}{\ignorespaces VINS-Fusion pipeline and its two semantic-mask insertion points.}}{24}{figure.caption.39}\protected@file@percent }
+\newlabel{fig:vins-pipeline}{{3.5}{24}{VINS-Fusion pipeline and its two semantic-mask insertion points}{figure.caption.39}{}}
+\newlabel{fig:vins-pipeline@cref}{{[figure][5][3]3.5}{[1][24][]24}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.4}RTAB-Map mapping and localization back end}{24}{subsection.3.3.4}\protected@file@percent }
+\newlabel{sec:rtab-method}{{3.3.4}{24}{RTAB-Map mapping and localization back end}{subsection.3.3.4}{}}
+\newlabel{sec:rtab-method@cref}{{[subsection][4][3,3]3.3.4}{[1][24][]24}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.5}{\ignorespaces VINS-Fusion simulation configuration at the cutoff, from \repo {vins_fusion_ros2/config/wil_sim/stereo_imu.yaml}.}}{25}{table.caption.40}\protected@file@percent }
+\newlabel{tab:vins-params}{{3.5}{25}{VINS-Fusion simulation configuration at the cutoff, from \repo {vins_fusion_ros2/config/wil_sim/stereo_imu.yaml}}{table.caption.40}{}}
+\newlabel{tab:vins-params@cref}{{[table][5][3]3.5}{[1][24][]25}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.5}YOLO detector node, mask construction and synchronisation}{26}{subsection.3.3.5}\protected@file@percent }
+\newlabel{sec:yolo-method}{{3.3.5}{26}{YOLO detector node, mask construction and synchronisation}{subsection.3.3.5}{}}
+\newlabel{sec:yolo-method@cref}{{[subsection][5][3,3]3.3.5}{[1][26][]26}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.4}Simulation Platform}{26}{section.3.4}\protected@file@percent }
+\newlabel{sec:sim-platform}{{3.4}{26}{Simulation Platform}{section.3.4}{}}
+\newlabel{sec:sim-platform@cref}{{[section][4][3]3.4}{[1][26][]26}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.1}Computing and software environment}{26}{subsection.3.4.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.6}{\ignorespaces Computing and software environment.}}{27}{table.caption.41}\protected@file@percent }
+\newlabel{tab:compute-environment}{{3.6}{27}{Computing and software environment}{table.caption.41}{}}
+\newlabel{tab:compute-environment@cref}{{[table][6][3]3.6}{[1][26][]27}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.2}Simulated sensor rig and platform}{28}{subsection.3.4.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3.6}{\ignorespaces Simulated Ackermann platform, drawn to scale from the model definition.}}{28}{figure.caption.42}\protected@file@percent }
+\newlabel{fig:ackermann-robot}{{3.6}{28}{Simulated Ackermann platform, drawn to scale from the model definition}{figure.caption.42}{}}
+\newlabel{fig:ackermann-robot@cref}{{[figure][6][3]3.6}{[1][28][]28}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.7}{\ignorespaces Simulated sensor configuration.}}{28}{table.caption.43}\protected@file@percent }
+\newlabel{tab:sim-sensor-rig}{{3.7}{28}{Simulated sensor configuration}{table.caption.43}{}}
+\newlabel{tab:sim-sensor-rig@cref}{{[table][7][3]3.7}{[1][28][]28}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.8}{\ignorespaces Inertial noise parameters supplied to the visual-inertial estimators, beside the values measured from the recorded IMU stream in \cref  {sec:proprio-method}.}}{29}{table.caption.44}\protected@file@percent }
+\newlabel{tab:imu-noise-assumed}{{3.8}{29}{Inertial noise parameters supplied to the visual-inertial estimators, beside the values measured from the recorded IMU stream in \cref {sec:proprio-method}}{table.caption.44}{}}
+\newlabel{tab:imu-noise-assumed@cref}{{[table][8][3]3.8}{[1][28][]29}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.9}{\ignorespaces Platform geometry and drivetrain limits used by the wheel-odometry and EKF baselines.}}{29}{table.caption.45}\protected@file@percent }
+\newlabel{tab:platform-geometry}{{3.9}{29}{Platform geometry and drivetrain limits used by the wheel-odometry and EKF baselines}{table.caption.45}{}}
+\newlabel{tab:platform-geometry@cref}{{[table][9][3]3.9}{[1][28][]29}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.3}Simulation fidelity and its limits}{30}{subsection.3.4.3}\protected@file@percent }
+\newlabel{sec:sim-fidelity}{{3.4.3}{30}{Simulation fidelity and its limits}{subsection.3.4.3}{}}
+\newlabel{sec:sim-fidelity@cref}{{[subsection][3][3,4]3.4.3}{[1][28][]30}}
+\@writefile{toc}{\contentsline {paragraph}{Inertial measurement.}{30}{paragraph*.46}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.10}{\ignorespaces Noise injected by the simulator, from the \repo {<imu>} and \repo {<camera>} sensor blocks of the robot model.}}{30}{table.caption.47}\protected@file@percent }
+\newlabel{tab:injected-noise}{{3.10}{30}{Noise injected by the simulator, from the \repo {<imu>} and \repo {<camera>} sensor blocks of the robot model}{table.caption.47}{}}
+\newlabel{tab:injected-noise@cref}{{[table][10][3]3.10}{[1][30][]30}}
+\@writefile{toc}{\contentsline {paragraph}{Wheel encoders.}{31}{paragraph*.48}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Physics engine and solver.}{31}{paragraph*.49}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.11}{\ignorespaces Gazebo physics configuration, identical in all 26 world files.}}{31}{table.caption.50}\protected@file@percent }
+\newlabel{tab:physics-setup}{{3.11}{31}{Gazebo physics configuration, identical in all 26 world files}{table.caption.50}{}}
+\newlabel{tab:physics-setup@cref}{{[table][11][3]3.11}{[1][31][]31}}
+\@writefile{toc}{\contentsline {paragraph}{Contact friction, and why the encoder is flattered.}{31}{paragraph*.51}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.12}{\ignorespaces Measured wheel slip on the five multi-sensor recordings.}}{32}{table.caption.52}\protected@file@percent }
+\newlabel{tab:measured-slip}{{3.12}{32}{Measured wheel slip on the five multi-sensor recordings}{table.caption.52}{}}
+\newlabel{tab:measured-slip@cref}{{[table][12][3]3.12}{[1][32][]32}}
+\@writefile{toc}{\contentsline {paragraph}{Noise models supplied to the estimators.}{32}{paragraph*.53}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.13}{\ignorespaces What the visual estimators are configured to expect, against what the simulator injects.}}{32}{table.caption.54}\protected@file@percent }
+\newlabel{tab:configured-vs-injected}{{3.13}{32}{What the visual estimators are configured to expect, against what the simulator injects}{table.caption.54}{}}
+\newlabel{tab:configured-vs-injected@cref}{{[table][13][3]3.13}{[1][32][]32}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.4}Coordinate-frame contract}{33}{subsection.3.4.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3.7}{\ignorespaces Coordinate-frame contract used by the composed RTAB-Map pipeline.}}{33}{figure.caption.55}\protected@file@percent }
+\newlabel{fig:frame-chain}{{3.7}{33}{Coordinate-frame contract used by the composed RTAB-Map pipeline}{figure.caption.55}{}}
+\newlabel{fig:frame-chain@cref}{{[figure][7][3]3.7}{[1][33][]33}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.5}Simulation environments and controlled factors}{33}{subsection.3.4.5}\protected@file@percent }
+\newlabel{sec:environments-datasets}{{3.4.5}{33}{Simulation environments and controlled factors}{subsection.3.4.5}{}}
+\newlabel{sec:environments-datasets@cref}{{[subsection][5][3,4]3.4.5}{[1][33][]33}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.8}{\ignorespaces Baked occupancy truth of the three large-warehouse object arrangements, each \SI {42.2}{\metre } square at \SI {0.05}{\metre } per cell with origin $(-21.1,-21.1)$\nobreakspace  {}m.}}{34}{figure.caption.56}\protected@file@percent }
+\newlabel{fig:warehouse-maps}{{3.8}{34}{Baked occupancy truth of the three large-warehouse object arrangements, each \SI {42.2}{\metre } square at \SI {0.05}{\metre } per cell with origin $(-21.1,-21.1)$~m}{figure.caption.56}{}}
+\newlabel{fig:warehouse-maps@cref}{{[figure][8][3]3.8}{[1][33][]34}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.9}{\ignorespaces The two recorded floor conditions, rendered across the full \SI {42.2}{\metre } floor at \SI {0.05}{\metre } per pixel.}}{34}{figure.caption.57}\protected@file@percent }
+\newlabel{fig:floor-treatments}{{3.9}{34}{The two recorded floor conditions, rendered across the full \SI {42.2}{\metre } floor at \SI {0.05}{\metre } per pixel}{figure.caption.57}{}}
+\newlabel{fig:floor-treatments@cref}{{[figure][9][3]3.9}{[1][34][]34}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.14}{\ignorespaces Ground models and the floor conditions they produce.}}{35}{table.caption.58}\protected@file@percent }
+\newlabel{tab:floor-variants}{{3.14}{35}{Ground models and the floor conditions they produce}{table.caption.58}{}}
+\newlabel{tab:floor-variants@cref}{{[table][14][3]3.14}{[1][34][]35}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.6}Dataset registry}{35}{subsection.3.4.6}\protected@file@percent }
+\newlabel{sec:dataset-registry}{{3.4.6}{35}{Dataset registry}{subsection.3.4.6}{}}
+\newlabel{sec:dataset-registry@cref}{{[subsection][6][3,4]3.4.6}{[1][35][]35}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.10}{\ignorespaces Every simulation dataset as a scene: floor treatment, object layout and ground-truth route in one view.}}{36}{figure.caption.59}\protected@file@percent }
+\newlabel{fig:dataset-scenes}{{3.10}{36}{Every simulation dataset as a scene: floor treatment, object layout and ground-truth route in one view}{figure.caption.59}{}}
+\newlabel{fig:dataset-scenes@cref}{{[figure][10][3]3.10}{[1][35][]36}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.15}{\ignorespaces What each dataset contains.}}{37}{table.caption.60}\protected@file@percent }
+\newlabel{tab:dataset-scenes}{{3.15}{37}{What each dataset contains}{table.caption.60}{}}
+\newlabel{tab:dataset-scenes@cref}{{[table][15][3]3.15}{[1][35][]37}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.16}{\ignorespaces Controlled experimental factors available in the simulation environment, with the levels realised at the reporting cutoff.}}{38}{table.caption.61}\protected@file@percent }
+\newlabel{tab:controlled-factors}{{3.16}{38}{Controlled experimental factors available in the simulation environment, with the levels realised at the reporting cutoff}{table.caption.61}{}}
+\newlabel{tab:controlled-factors@cref}{{[table][16][3]3.16}{[1][35][]38}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.5}Real Platform}{38}{section.3.5}\protected@file@percent }
+\newlabel{sec:real-platform}{{3.5}{38}{Real Platform}{section.3.5}{}}
+\newlabel{sec:real-platform@cref}{{[section][5][3]3.5}{[1][38][]38}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5.1}AMR mobile robot testbed}{38}{subsection.3.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5.2}Sensors and computing unit}{38}{subsection.3.5.2}\protected@file@percent }
+\newlabel{RF1}{39}
+\@writefile{lot}{\contentsline {table}{\numberline {3.17}{\ignorespaces Complete dataset registry at the reporting cutoff, across both storage locations.}}{39}{table.caption.62}\protected@file@percent }
+\newlabel{tab:dataset-registry}{{3.17}{39}{Complete dataset registry at the reporting cutoff, across both storage locations}{table.caption.62}{}}
+\newlabel{tab:dataset-registry@cref}{{[table][17][3]3.17}{[1][35][]39}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.11}{\ignorespaces Dimensions of the mock AMR used to test the navigation system: \SI {57}{\centi \metre } long, \SI {40.5}{\centi \metre } wide and \SI {47.5}{\centi \metre } high to the top of the sensor mast.\relax }}{40}{figure.caption.63}\protected@file@percent }
+\newlabel{fig:amr-dimensions}{{3.11}{40}{Dimensions of the mock AMR used to test the navigation system: \SI {57}{\centi \metre } long, \SI {40.5}{\centi \metre } wide and \SI {47.5}{\centi \metre } high to the top of the sensor mast.\relax }{figure.caption.63}{}}
+\newlabel{fig:amr-dimensions@cref}{{[figure][11][3]3.11}{[1][38][]40}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.12}{\ignorespaces Hardware components of the mock AMR: steering servo and traction motor, BLDC drive and microcontroller on CAN, the NRU-51V computer, power supply, the AC-IMX390 stereo pair and IMU, and the Wi-Fi link to the smartphone joystick.}}{40}{figure.caption.64}\protected@file@percent }
+\newlabel{fig:amr-hardware}{{3.12}{40}{Hardware components of the mock AMR: steering servo and traction motor, BLDC drive and microcontroller on CAN, the NRU-51V computer, power supply, the AC-IMX390 stereo pair and IMU, and the Wi-Fi link to the smartphone joystick}{figure.caption.64}{}}
+\newlabel{fig:amr-hardware@cref}{{[figure][12][3]3.12}{[1][38][]40}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.13}{\ignorespaces Dimensions of the AC-IMX390 camera family in millimetres; the H190 variant at the bottom is the one used.\relax }}{41}{figure.caption.65}\protected@file@percent }
+\newlabel{fig:camera-dimensions}{{3.13}{41}{Dimensions of the AC-IMX390 camera family in millimetres; the H190 variant at the bottom is the one used.\relax }{figure.caption.65}{}}
+\newlabel{fig:camera-dimensions@cref}{{[figure][13][3]3.13}{[1][38][]41}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.18}{\ignorespaces Specification of the AC-IMX390-H190 camera.\relax }}{41}{table.caption.66}\protected@file@percent }
+\newlabel{tab:camera-spec}{{3.18}{41}{Specification of the AC-IMX390-H190 camera.\relax }{table.caption.66}{}}
+\newlabel{tab:camera-spec@cref}{{[table][18][3]3.18}{[1][38][]41}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.14}{\ignorespaces The Neousys NRU-51V (NVIDIA Jetson Xavier NX), showing the four FAKRA camera ports.\relax }}{42}{figure.caption.67}\protected@file@percent }
+\newlabel{fig:nru51v-photo}{{3.14}{42}{The Neousys NRU-51V (NVIDIA Jetson Xavier NX), showing the four FAKRA camera ports.\relax }{figure.caption.67}{}}
+\newlabel{fig:nru51v-photo@cref}{{[figure][14][3]3.14}{[1][42][]42}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.15}{\ignorespaces Dimensions of the Neousys NRU-51V in millimetres.\relax }}{42}{figure.caption.68}\protected@file@percent }
+\newlabel{fig:nru51v-dimensions}{{3.15}{42}{Dimensions of the Neousys NRU-51V in millimetres.\relax }{figure.caption.68}{}}
+\newlabel{fig:nru51v-dimensions@cref}{{[figure][15][3]3.15}{[1][42][]42}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5.3}Real sensor rig and calibration limits}{42}{subsection.3.5.3}\protected@file@percent }
+\newlabel{sec:real-calibration}{{3.5.3}{42}{Real sensor rig and calibration limits}{subsection.3.5.3}{}}
+\newlabel{sec:real-calibration@cref}{{[subsection][3][3,5]3.5.3}{[1][42][]42}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.19}{\ignorespaces Summary of the hardware technical specification.\relax }}{43}{table.caption.69}\protected@file@percent }
+\newlabel{tab:hardware-spec}{{3.19}{43}{Summary of the hardware technical specification.\relax }{table.caption.69}{}}
+\newlabel{tab:hardware-spec@cref}{{[table][19][3]3.19}{[1][42][]43}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.20}{\ignorespaces Real sensor rig, and the calibration status of each quantity.}}{43}{table.caption.70}\protected@file@percent }
+\newlabel{tab:real-rig}{{3.20}{43}{Real sensor rig, and the calibration status of each quantity}{table.caption.70}{}}
+\newlabel{tab:real-rig@cref}{{[table][20][3]3.20}{[1][42][]43}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5.4}Test site and experimental variables}{44}{subsection.3.5.4}\protected@file@percent }
+\newlabel{sec:real-site}{{3.5.4}{44}{Test site and experimental variables}{subsection.3.5.4}{}}
+\newlabel{sec:real-site@cref}{{[subsection][4][3,5]3.5.4}{[1][44][]44}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.6}The Four Experiments}{44}{section.3.6}\protected@file@percent }
+\newlabel{sec:experiments}{{3.6}{44}{The Four Experiments}{section.3.6}{}}
+\newlabel{sec:experiments@cref}{{[section][6][3]3.6}{[1][44][]44}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6.1}Experiment 1: Non-visual baseline and estimator comparison}{45}{subsection.3.6.1}\protected@file@percent }
+\newlabel{sec:proprio-method}{{3.6.1}{45}{Experiment 1: Non-visual baseline and estimator comparison}{subsection.3.6.1}{}}
+\newlabel{sec:proprio-method@cref}{{[subsection][1][3,6]3.6.1}{[1][44][]45}}
+\@writefile{toc}{\contentsline {subsubsection}{Implementation form and why it is offline}{45}{subsubsection*.71}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Sensor model derived from data}{45}{subsubsection*.72}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.21}{\ignorespaces Sensor noise and scale measured from each bag by \repo {proprio_estimator.py calibrate}.}}{46}{table.caption.73}\protected@file@percent }
+\newlabel{tab:proprio-noise}{{3.21}{46}{Sensor noise and scale measured from each bag by \repo {proprio_estimator.py calibrate}}{table.caption.73}{}}
+\newlabel{tab:proprio-noise@cref}{{[table][21][3]3.21}{[1][45][]46}}
+\@writefile{toc}{\contentsline {subsubsection}{The orientation field must not be used}{46}{subsubsection*.74}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Estimator definitions}{46}{subsubsection*.75}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{EKF formulation}{46}{subsubsection*.77}\protected@file@percent }
+\newlabel{sec:ekf-formulation}{{3.6.1}{46}{EKF formulation}{subsubsection*.77}{}}
+\newlabel{sec:ekf-formulation@cref}{{[subsection][1][3,6]3.6.1}{[1][46][]46}}
+\@writefile{toc}{\contentsline {paragraph}{State and inputs.}{46}{paragraph*.78}\protected@file@percent }
+\newlabel{eq:ekf-state}{{3.4}{46}{State and inputs}{equation.3.6.4}{}}
+\newlabel{eq:ekf-state@cref}{{[equation][4][3]3.4}{[1][46][]46}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.22}{\ignorespaces Implemented non-visual estimators.}}{47}{table.caption.76}\protected@file@percent }
+\newlabel{tab:proprio-estimators}{{3.22}{47}{Implemented non-visual estimators}{table.caption.76}{}}
+\newlabel{tab:proprio-estimators@cref}{{[table][22][3]3.22}{[1][46][]47}}
+\newlabel{eq:ekf-input}{{3.5}{47}{State and inputs}{equation.3.6.5}{}}
+\newlabel{eq:ekf-input@cref}{{[equation][5][3]3.5}{[1][46][]47}}
+\newlabel{eq:ekf-propagate}{{3.6}{47}{State and inputs}{equation.3.6.6}{}}
+\newlabel{eq:ekf-propagate@cref}{{[equation][6][3]3.6}{[1][47][]47}}
+\@writefile{toc}{\contentsline {paragraph}{Covariance and process noise.}{47}{paragraph*.79}\protected@file@percent }
+\newlabel{eq:ekf-predict}{{3.7}{47}{Covariance and process noise}{equation.3.6.7}{}}
+\newlabel{eq:ekf-predict@cref}{{[equation][7][3]3.7}{[1][47][]47}}
+\@writefile{toc}{\contentsline {paragraph}{Measurement.}{47}{paragraph*.80}\protected@file@percent }
+\newlabel{eq:ekf-update}{{3.8}{47}{Measurement}{equation.3.6.8}{}}
+\newlabel{eq:ekf-update@cref}{{[equation][8][3]3.8}{[1][47][]47}}
+\newlabel{eq:ekf-joseph}{{3.9}{47}{Measurement}{equation.3.6.9}{}}
+\newlabel{eq:ekf-joseph@cref}{{[equation][9][3]3.9}{[1][47][]47}}
+\@writefile{toc}{\contentsline {paragraph}{Where the numbers come from.}{48}{paragraph*.81}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Why the bias, and not the heading, is observed}{48}{subsubsection*.82}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6.2}Experiment 2: Offline YOLO detector performance}{48}{subsection.3.6.2}\protected@file@percent }
+\newlabel{sec:yolo-eval-method}{{3.6.2}{48}{Experiment 2: Offline YOLO detector performance}{subsection.3.6.2}{}}
+\newlabel{sec:yolo-eval-method@cref}{{[subsection][2][3,6]3.6.2}{[1][48][]48}}
+\@writefile{toc}{\contentsline {paragraph}{Constructing the ground-truth boxes}{48}{paragraph*.83}\protected@file@percent }
+\newlabel{sec:yolo-gt-projection}{{3.6.2}{48}{Constructing the ground-truth boxes}{paragraph*.83}{}}
+\newlabel{sec:yolo-gt-projection@cref}{{[subsection][2][3,6]3.6.2}{[1][48][]48}}
+\newlabel{eq:pinhole}{{3.10}{49}{Constructing the ground-truth boxes}{equation.3.6.10}{}}
+\newlabel{eq:pinhole@cref}{{[equation][10][3]3.10}{[1][49][]49}}
+\@writefile{toc}{\contentsline {paragraph}{What this convention costs}{49}{paragraph*.85}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6.3}Experiment 3: Visual-inertial odometry with dynamic-environment filtering}{49}{subsection.3.6.3}\protected@file@percent }
+\newlabel{sec:vio-filter-method}{{3.6.3}{49}{Experiment 3: Visual-inertial odometry with dynamic-environment filtering}{subsection.3.6.3}{}}
+\newlabel{sec:vio-filter-method@cref}{{[subsection][3][3,6]3.6.3}{[1][49][]49}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.23}{\ignorespaces Parameters of the detection evaluation.}}{50}{table.caption.84}\protected@file@percent }
+\newlabel{tab:yolo-eval-params}{{3.23}{50}{Parameters of the detection evaluation}{table.caption.84}{}}
+\newlabel{tab:yolo-eval-params@cref}{{[table][23][3]3.23}{[1][49][]50}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6.4}Experiment 4: Dense map reconstruction and map-quality evaluation}{51}{subsection.3.6.4}\protected@file@percent }
+\newlabel{sec:map-eval-method}{{3.6.4}{51}{Experiment 4: Dense map reconstruction and map-quality evaluation}{subsection.3.6.4}{}}
+\newlabel{sec:map-eval-method@cref}{{[subsection][4][3,6]3.6.4}{[1][51][]51}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.7}Evaluation Metrics and Analysis}{52}{section.3.7}\protected@file@percent }
+\newlabel{sec:evaluation-method}{{3.7}{52}{Evaluation Metrics and Analysis}{section.3.7}{}}
+\newlabel{sec:evaluation-method@cref}{{[section][7][3]3.7}{[1][52][]52}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.7.1}Trajectory evaluation}{52}{subsection.3.7.1}\protected@file@percent }
+\newlabel{sec:method-trajectory}{{3.7.1}{52}{Trajectory evaluation}{subsection.3.7.1}{}}
+\newlabel{sec:method-trajectory@cref}{{[subsection][1][3,7]3.7.1}{[1][52][]52}}
+\@writefile{toc}{\contentsline {paragraph}{Relative pose error.}{52}{paragraph*.86}\protected@file@percent }
+\newlabel{eq:rpe}{{3.11}{52}{Relative pose error}{equation.3.7.11}{}}
+\newlabel{eq:rpe@cref}{{[equation][11][3]3.11}{[1][52][]52}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.7.2}Computational performance}{53}{subsection.3.7.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.7.3}Collection protocol, validity and stored artifacts}{53}{subsection.3.7.3}\protected@file@percent }
+\newlabel{sec:collection-validity}{{3.7.3}{53}{Collection protocol, validity and stored artifacts}{subsection.3.7.3}{}}
+\newlabel{sec:collection-validity@cref}{{[subsection][3][3,7]3.7.3}{[1][53][]53}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.24}{\ignorespaces Principal stored artifacts.\relax }}{54}{table.caption.87}\protected@file@percent }
+\newlabel{tab:stored-artifacts}{{3.24}{54}{Principal stored artifacts.\relax }{table.caption.87}{}}
+\newlabel{tab:stored-artifacts@cref}{{[table][24][3]3.24}{[1][53][]54}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.7.4}Reproducibility controls}{55}{subsection.3.7.4}\protected@file@percent }
+\newlabel{sec:reproducibility-deviations}{{3.7.4}{55}{Reproducibility controls}{subsection.3.7.4}{}}
+\newlabel{sec:reproducibility-deviations@cref}{{[subsection][4][3,7]3.7.4}{[1][55][]55}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.8}Planned Versus Implemented}{55}{section.3.8}\protected@file@percent }
+\newlabel{sec:deviations}{{3.8}{55}{Planned Versus Implemented}{section.3.8}{}}
+\newlabel{sec:deviations@cref}{{[section][8][3]3.8}{[1][55][]55}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.25}{\ignorespaces Planned-versus-implemented deviations at the reporting cutoff.}}{56}{table.caption.88}\protected@file@percent }
+\newlabel{tab:deviations}{{3.25}{56}{Planned-versus-implemented deviations at the reporting cutoff}{table.caption.88}{}}
+\newlabel{tab:deviations@cref}{{[table][25][3]3.25}{[1][55][]56}}
+\@writefile{lot}{\contentsline {table}{\numberline {3.26}{\ignorespaces Original objectives (\cref  {sec:objectives}) against the work reported here.\relax }}{56}{table.caption.89}\protected@file@percent }
+\newlabel{tab:objective-status}{{3.26}{56}{Original objectives (\cref {sec:objectives}) against the work reported here.\relax }{table.caption.89}{}}
+\newlabel{tab:objective-status@cref}{{[table][26][3]3.26}{[1][55][]56}}
+\@setckpt{chapters/chapter_3_methodology}{
+\setcounter{page}{58}
+\setcounter{equation}{11}
+\setcounter{enumi}{10}
+\setcounter{enumii}{0}
+\setcounter{enumiii}{0}
+\setcounter{enumiv}{0}
+\setcounter{footnote}{0}
+\setcounter{mpfootnote}{0}
+\setcounter{part}{0}
+\setcounter{chapter}{3}
+\setcounter{section}{8}
+\setcounter{subsection}{0}
+\setcounter{subsubsection}{0}
+\setcounter{paragraph}{0}
+\setcounter{subparagraph}{0}
+\setcounter{figure}{15}
+\setcounter{table}{26}
+\setcounter{LT@tables}{1}
+\setcounter{LT@chunks}{3}
+\setcounter{parentequation}{0}
+\setcounter{r@tfl@t}{1}
+\setcounter{caption@flags}{2}
+\setcounter{continuedfloat}{0}
+\setcounter{lofdepth}{1}
+\setcounter{lotdepth}{1}
+\setcounter{AM@survey}{0}
+\setcounter{Item}{30}
+\setcounter{Hfootnote}{0}
+\setcounter{bookmark@seq@number}{67}
+\setcounter{section@level}{0}
+}

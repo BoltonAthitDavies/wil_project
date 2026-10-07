@@ -1,0 +1,16 @@
+% Verbatim from minor_report/chapters/chapter_3_methodology.tex lines 1799-1811 (retired report),
+% headings demoted by 0 level(s). Do not edit here; edit the source of the numbers.
+
+Both estimator processes write per-frame \repo{performance.csv} files. These
+record processing time, delivery and backlog counters, tracking or solver state,
+initialization and reset evidence, pose and keyframe accounting, cumulative
+process CPU time, monotonic wall time, and resident memory. VINS additionally
+records feature-front-end and estimator-back-end stages; ORB-SLAM3 records its
+tracking front end, local mapping, place recognition, loop closure, map merging,
+and global bundle-adjustment events. CPU utilization and throughput can therefore
+be derived over explicit wall-time intervals. The measurements are process-local
+and exclude Gazebo, rosbag, RViz, RTAB-Map, and the separate YOLO process.
+Synchronized whole-system monitoring and the repeated Jetson/laptop matrix
+remain \status{planned}. Module timings from asynchronous stages are reported as
+separate distributions and are not added as if they formed one serial critical
+path.

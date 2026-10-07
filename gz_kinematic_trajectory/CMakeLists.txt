@@ -7,6 +7,12 @@ add_library(KinematicTrajectory SHARED KinematicTrajectory.cc)
 target_link_libraries(KinematicTrajectory
   PRIVATE ignition-gazebo6::ignition-gazebo6 ignition-plugin1::register)
 
+# World-level system: carriers that pick loads up, carry them and set them down
+# (see LogisticsScheduler.cc). Same kinematic mechanism, same install path.
+add_library(LogisticsScheduler SHARED LogisticsScheduler.cc)
+target_link_libraries(LogisticsScheduler
+  PRIVATE ignition-gazebo6::ignition-gazebo6 ignition-plugin1::register)
+
 # gz-sim's SystemLoader always searches ~/.ignition/gazebo/plugins, so installing
 # there makes the plugin resolvable with no IGN_GAZEBO_SYSTEM_PLUGIN_PATH and no
 # sudo. `cmake --build build --target install-local` refreshes it after a rebuild.
@@ -14,4 +20,6 @@ add_custom_target(install-local
   COMMAND ${CMAKE_COMMAND} -E make_directory $ENV{HOME}/.ignition/gazebo/plugins
   COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:KinematicTrajectory>
           $ENV{HOME}/.ignition/gazebo/plugins/
-  DEPENDS KinematicTrajectory)
+  COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:LogisticsScheduler>
+          $ENV{HOME}/.ignition/gazebo/plugins/
+  DEPENDS KinematicTrajectory LogisticsScheduler)

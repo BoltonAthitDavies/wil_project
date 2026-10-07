@@ -1,6 +1,6 @@
 ---
 name: wil-thesis-evaluation
-description: Design, instrument, analyze, and document reproducible experiments and LaTeX advisor progress reports for WiL semantic visual-SLAM, comparing ORB-SLAM3 and VINS/RTAB-Map in static, dynamic, and real warehouse conditions. Use when preparing data-collection scripts, evaluation plots, result tables, diagrams, or preliminary methodology and results updates for this workspace.
+description: Design, instrument, analyze, and document reproducible experiments and the LaTeX final project report for WiL semantic visual-SLAM, comparing ORB-SLAM3 and VINS/RTAB-Map in static, dynamic, and real warehouse conditions across four fixed experiments run in simulation and on the real robot. Use when preparing data-collection scripts, evaluation plots, result tables, diagrams, or writing chapters 3 to 5 of the final report for this workspace.
 ---
 
 # WiL Thesis Evaluation
@@ -20,6 +20,24 @@ filtering, environment dynamics, floor texture, illumination, and compute load
 affect localization accuracy, map quality, robustness, and real-time performance.
 Do not reduce the work to producing attractive plots: each result must answer a
 defined research question under controlled conditions.
+
+The work is organised as **exactly four experiments**, fixed by the 23 September
+2026 progress update (`docs/MyThesisInfo/WiL Update Progress-1.pdf`), each located
+on a numbered block of the system-architecture diagram and each run in **two
+domains, simulation and the real robot**, giving eight result slots in total:
+
+| # | Experiment | Architecture block | Question it answers |
+|---|---|---|---|
+| 1 | Non-Visual Baseline and Estimator Comparison | #4 robot odometry / SLAM output | Do the visual pipelines genuinely outperform wheels, IMU, and a wheel+IMU EKF? |
+| 2 | Offline YOLO Detector Performance | #2 object detection | How reliably does the detector find and name warehouse objects, independent of SLAM, and how much of the frame could masking remove? |
+| 3 | Visual-Inertial Odometry With Dynamic Environment Filtering Evaluation | #1 SLAM front end | Does masking dynamic-object features improve localization, at what compute cost, and does tracking survive it? |
+| 4 | Dense Map Reconstruction and Map-Quality Evaluation | #3 SLAM back end / map | Does the reconstructed map reflect the physical environment and is it usable by a route planner? |
+
+Do not add a fifth experiment, merge two, or rename these. New evidence goes into
+one of the eight slots. The project's stated targets are ATE $\le$ 0.05 m and
+RPE($\Delta t$ = 1 s) $\le$ 1.5 m at a robot speed of 1.5 m/s; the real site is
+the Gensurv building first floor, a 10 m by 7 m scope with test Zones A and B on
+a 5-degree slope and scheduled lighting changes.
 
 ### 1.1 Future research direction: integrated localization and mapping
 
@@ -55,6 +73,13 @@ Before designing or interpreting an experiment, read only the sources relevant
 to that experiment:
 
 - Thesis and proposal: `/home/ambushee/wil_project/docs/MyThesisInfo/`
+- **Storytelling reference** (chapter order, the four experiments, per-experiment
+  internal order): `docs/MyThesisInfo/WiL Update Progress-1.pdf`
+- **Content source for chapters 1--3**: `docs/MyThesisInfo/final_report.pdf`
+  (Thai faculty template with the written chapters; figures in
+  `docs/MyThesisInfo/figure/`). **Format source**: the Faculty of Engineering
+  English template, `docs/MyThesisInfo/27.8.67 Template เล่มโครงงาน (Eng Ver.)/`
+  (Section 9.1).
 - Main literature: `/home/ambushee/wil_project/docs/references/`
 - Desired performance figures and tables:
   `/home/ambushee/wil_project/docs/skill/wil result collection info.pdf`
@@ -74,12 +99,13 @@ their caveats, dataset identity, invalid comparisons, and retractions. Current
 code, configuration, raw data, and generated manifests take precedence when they
 demonstrate that an older note is stale.
 
-The existing Chapter 3 in the major report was written as a **planned method
+The existing Chapter 3 in `final_report.pdf` was written as a **planned method
 before implementation**. Use it only for the original intent and research scope.
 Do not copy planned components, procedures, parameters, or capabilities into the
-minor report as though they were implemented. Reconstruct the final methodology
+final report as though they were implemented. Reconstruct the final methodology
 from repository evidence and explicitly identify material differences between
-the plan and the implemented system.
+the plan and the implemented system. Chapters 1 and 2 of that document are
+finished prose: port them, do not rewrite their science.
 
 ## 3. Data and environment registry
 
@@ -92,7 +118,7 @@ the plan and the implemented system.
 - Raw estimator results: `/home/ambushee/wil_project/output/output_*`
 - Offline YOLO evaluation: `/home/ambushee/wil_project/output/yolo_eval/`
 - Analysis products: `/home/ambushee/wil_project/output/compare/`
-- Minor scientific reports: `/home/ambushee/wil_project/docs/report/`
+- Final report LaTeX: `/home/ambushee/wil_project/docs/report/final_report/`
 
 ### 3.2 Known dataset status
 
@@ -403,18 +429,73 @@ template exists, make a requested full report self-contained and compilable; for
 a requested chapter alone, create an includeable `.tex` chapter and clearly state
 which packages or commands its parent document requires.
 
-Use this default organization unless the repository already establishes another:
+The deliverable is the **final project report**, not a progress report. Its
+FORMAT is the Faculty of Engineering English template,
+`docs/MyThesisInfo/27.8.67 Template เล่มโครงงาน (Eng Ver.)/` (manual:
+`เอกสารประกอบ_template ENG.pdf`): outer cover with the KMUTT emblem and
+all-capitals text, title/approval page ending "Copyright reserved", abstract
+page opening with the Project Title / Credits / Candidate / Advisor / Program /
+Field of Study / Faculty / Academic Year block, a THAI ABSTRACT page, ACKNOWLEDGEMENTS,
+CONTENTS with a PAGE column and a CHAPTER group line ("1. INTRODUCTION"),
+LIST OF TABLES / FIGURES with TABLE|FIGURE ... PAGE headers and "(Cont'd)"
+running heads, LIST OF SYMBOLS (symbol, meaning, UNIT), LIST OF TECHNICAL
+VOCABULARY AND ABBREVIATIONS, chapters "CHAPTER n TITLE" 15 pt / 14 / 13 pt
+bold, Times 12 pt, margins 4/2/3/2 cm (left/right/top/bottom), page number
+top right and none on a chapter's first page, "Table x.y" above and "Figure
+x.y" below, REFERENCES in the faculty number system (Author, A.B., year,
+"title," **Journal**, Vol., No., pp.) ordered by first citation, and a
+CURRICULUM VITAE page. Its CONTENT (chapters 1-2) comes from the Thai template
+`docs/MyThesisInfo/final_report.pdf`. Use this organization:
 
 ```text
-docs/report/minor_report/
-|-- main.tex
+docs/report/final_report/
+|-- main.tex                      % Faculty of Engineering English format (above)
+|-- frontmatter/
+|   |-- cover.tex, approval.tex, abstract.tex, acknowledgements.tex, symbols.tex
+|   `-- thai_abstract.fodt        % Thai abstract, typeset by LibreOffice -> .pdf
 |-- chapters/
-|   |-- chapter_3_methodology.tex
-|   `-- chapter_4_results.tex
-|-- figures/
-|-- tables/
-`-- references.bib
+|   |-- chapter_1_introduction.tex   % English rendering of final_report.pdf ch. 1
+|   |-- chapter_2_theory.tex         % English rendering of final_report.pdf ch. 2
+|   |-- chapter_3_methodology.tex    % template hardware/site/procedure + fragments
+|   |-- chapter_4_experiments.tex    % four experiments x two domains, eight slots
+|   |-- chapter_5_conclusion.tex
+|   |-- references.tex               % hand-written thebibliography, faculty format,
+|   |                                % first-citation order (references.bib = record)
+|   |-- curriculum_vitae.tex
+|   `-- fragments/                   % VERBATIM cuts of the retired minor report,
+|                                    % headers say the source line range; edit the
+|                                    % source of a number, never the fragment
+|-- figures/                      % minor-report figures + figures/template/ (PDF images,
+|                                 % kmutt_emblem.png from the template's cover .docx)
+`-- tables/                       % generated tables (block_performance_*, rpe_*, ...)
 ```
+
+Build with `script/build_final_report.sh`: it (1) converts the Thai abstract
+with `soffice --headless` (Norasi 16 pt stands in for AngsanaUPC; pdflatex has
+no Thai font here, LuaLaTeX's font database is broken and `xelatex` is absent),
+(2) runs `latexmk -pdf main.tex` (pdflatex + `mathptmx`), and (3) regenerates
+`docs/report/concerns/concerns.tex` with `script/extract_concerns.py` and
+builds it. `\flag`, `\moved`, `queried` and the eight
+`\slotstatus{<label>}{...}` boxes are SUPPRESSED in the report and moved into
+the concerns document (fragments expanded in place); keep the markup in the
+source, it is the single record of what is queried. fancyhdr here is 3.x: page
+styles must set every field themselves, so the ordinary style is `report`,
+never `fancy`, and chapter openers use the empty `plain`. TOC chapter titles are
+upper-cased through `\chapter[UPPER]{Title}`; the CHAPTER group line is emitted
+from inside `chapter_1_introduction.tex`, not `main.tex`.
+
+**Write the report in English.** Chapters 1 and 2 are translated from the Thai
+template prose, keeping their content, citations and figure references; chapters
+3--5 are written in English from repository evidence. The only Thai page is the
+THAI ABSTRACT (`frontmatter/thai_abstract.fodt`, one page, Norasi 13 pt on a
+0.58 cm pitch -- Norasi's body is far larger than AngsanaUPC's, so 16 pt ran to
+three pages); the cover and approval pages carry no Thai, as in the English
+template. Keep the Thai abstract's wording the author's: it was drafted by the
+assistant and must be read as one's own abstract before submission.
+
+`docs/report/minor_report/` is retired. Do not extend it; reuse its verified
+figures, tables and generated files by copying or by `\input@path`, never by
+re-deriving numbers.
 
 Use native LaTeX structures: `\chapter`/`\section`, `table` with `booktabs`,
 `figure`, `equation`, `\label`, and `\ref` or `\autoref`. Escape repository paths,
@@ -442,104 +523,133 @@ available. Report compilation warnings that affect correctness, cross-references
 citations, or figure placement. Do not silently change scientific content merely
 to make compilation succeed.
 
-## 10. Minor scientific progress report
+## 10. Final project report
 
-Write the minor report as LaTeX source beneath
-`/home/ambushee/wil_project/docs/report/`, following Section 9.1. Its
-primary purpose is to update
-the advisor on the current state of the work. It is **not the final project
-report**, does not need to demonstrate that the proposed system succeeded, and
-must not present preliminary evidence as a final conclusion. It may later inform
-the major report, but its immediate value is an accurate record of implementation
-progress, measured behavior, unresolved problems, and the next research steps.
+Write the final report as English LaTeX source beneath
+`/home/ambushee/wil_project/docs/report/final_report/`, following Section 9.1.
+It replaces the minor progress report. It is the document the project is
+examined on, so it must be complete in structure from the first draft, and
+**honest about which of its eight result slots are filled**: the user has not
+finished collecting results, and an unfilled slot is reported as such, never
+omitted, never padded, and never filled with an expectation of how it will go.
 
-Use a clear reporting cutoff date. At that cutoff, distinguish components and
-experiments as **implemented**, **verified**, **partially verified**, **blocked**,
-**failed**, or **planned**. The report must contain these two main chapters:
+Use a clear reporting cutoff date. At that cutoff label every component and every
+result slot as one of **completed**, **partial**, **untested**, **blocked**,
+**failed**, or **planned**, and keep the label attached wherever the result is
+quoted.
 
 ### Chapter 3: Methodology
 
-Describe **what was actually implemented by the reporting cutoff**, not what was
-originally planned or what is expected to work later.
-Build this chapter from the current repository, configurations, launch files,
-scripts, generated artifacts, and dated engineering records. Use the major
-report's existing Chapter 3 only to explain the original intent or a
-planned-versus-implemented deviation.
+Describe what was actually implemented by the cutoff, in the storytelling order
+of the progress update, so that the four experiments arrive as the natural
+consequence of the design rather than as a list:
 
-Recommended Chapter 3 structure:
+1. `3.1` Problem, requirements and scope: the Gensurv site, the 10 m by 7 m test
+   area, the 1.5 m/s speed, the ATE and RPE targets, the lighting-change
+   conditions, and what is excluded (path planning).
+2. `3.2` System architecture: the block diagram with its data rates (control
+   20 Hz, pose 20 Hz, image 30 Hz simulated / 20 Hz real, bounding boxes
+   30 Hz simulated / 10 Hz real, IMU 200 Hz, wheel odometry 20 Hz), with the four
+   experiment blocks #1--#4 marked on it.
+3. `3.3` The two pipelines as implemented: ORB-SLAM3 with YOLO feature rejection,
+   and VINS-Fusion with persistent-track removal and the RTAB-Map back end, each
+   with its parameter table (the tables on slides 11 and 13 of the progress
+   update are the current values; verify against the config files).
+4. `3.4` Simulation platform: sensor rig, platform geometry, obstacle and floor
+   families, tiny and large maps, and the dataset registry.
+5. `3.5` Real platform: AC-IMX390-H190 stereo cameras on the NRU-51V (Jetson
+   Xavier NX), calibration status and its limits, Zones A and B, and the
+   real-dataset registry including which recordings are unusable and why.
+6. `3.6` The four experiments, one subsection each, in the fixed order of
+   Section 1: objective, process, evaluation metrics, constraints, and the
+   validity rule that decides whether a run counts. State here, once, that every
+   experiment is run in both domains.
+7. `3.7` Evaluation: timestamp association, rigid SE(3) alignment, ATE and RPE
+   definitions, detector matching rules, map scoring, computational measurement,
+   and the run-manifest provenance rules of Section 5.
+8. `3.8` Planned-versus-implemented deviations from the template's original
+   Chapter 3, as a table.
 
-1. `3.1` Progress scope, reporting cutoff, and implemented system overview
-2. `3.2` Hardware, software, sensors, calibration, and coordinate frames
-3. `3.3` Warehouse simulation, real environment, datasets, and controlled factors
-4. `3.4` ORB-SLAM3 pipeline and implemented dynamic-feature filtering
-5. `3.5` VINS-Fusion pipeline, persistent-feature filtering, and RTAB-Map back end
-6. `3.6` YOLO model, detector integration, mask construction, and synchronization
-7. `3.7` Data-collection protocol, run validity checks, and stored artifacts
-8. `3.8` Evaluation metrics, timestamp association, trajectory alignment, map
-   comparison, and computational measurements
-9. `3.9` Reproducibility controls and planned-versus-implemented deviations
+Cite precise repository evidence for every implementation claim. Do not describe
+an unimplemented feature in the present tense.
 
-For implementation claims, cite precise repository evidence such as a source or
-configuration path, parameter name, algorithmic insertion point, or commit. Keep
-literature citations for the scientific origin of methods, while repository
-evidence establishes how this project implemented them. Do not describe an
-unimplemented proposal feature in the present tense.
+### Chapter 4: Experiments and results
 
-### Chapter 4: Experiments and Research Results
+Exactly four sections, in the fixed order, and inside each **two domain
+subsections** -- eight result slots:
 
-Present the experiments attempted so far, validated measurements, failed runs,
-and appropriately cautious interpretation. Weak, negative, or disappointing
-results are valid progress-report findings and must be shown honestly; do not
-select, soften, or omit them to make the system appear successful. At the same
-time, an expectation that results will be poor is not evidence: conclusions must
-still come from measured artifacts.
+```text
+4.1 Experiment 1: Non-Visual Baseline and Estimator Comparison
+    4.1.1 Simulation
+    4.1.2 Real robot
+4.2 Experiment 2: Offline YOLO Detector Performance
+    4.2.1 Simulation
+    4.2.2 Real robot
+4.3 Experiment 3: Visual-Inertial Odometry With Dynamic Environment Filtering
+    4.3.1 Simulation
+    4.3.2 Real robot
+4.4 Experiment 4: Dense Map Reconstruction and Map-Quality Evaluation
+    4.4.1 Simulation
+    4.4.2 Real robot
+4.5 Cross-experiment discussion, simulation-to-real comparison, threats to
+    validity, and limitations
+```
 
-Use validated results for numerical comparisons. Keep invalid or retracted
-measurements out of headline comparison tables, but document them in a clearly
-labeled diagnostic or excluded-results subsection when they explain a discovered
-bug, experimental limitation, or methodological correction.
+Every slot follows the same internal order, which is the order of the progress
+update's per-experiment slides: **status label; objective restated in one
+sentence; process; dataset information (registry table); results as tables and
+figures; analysis; summary; future plan.** A slot with no valid data carries its
+status label, the reason (not yet recorded, recorded but invalid, blocked by
+hardware or calibration), and the exact next action -- and nothing else. Do not
+let an empty slot borrow the other domain's numbers, and do not compare the two
+domains of an experiment until both slots hold valid results.
 
-Recommended Chapter 4 structure, including only subsections supported by actual
-data:
+Status of the eight slots at the 25 September 2026 cutoff, which the report must
+state and the user updates as data arrives:
 
-1. `4.1` Experiment progress matrix: attempted, completed, valid, failed, blocked,
-   and remaining runs
-2. `4.2` Dynamic-object detector and mask-filtering results
-3. `4.3` Localization accuracy and robustness results: ATE, RPE, completeness,
-   initialization, and tracking failures
-4. `4.4` Current separate mapping/SLAM results and any completed loop-closure,
-   relocalization, or lifelong-mapping experiments
-5. `4.5` Real-time performance, latency, throughput, CPU, memory, frames, and
-   keyframes
-6. `4.6` Simulation-to-real or integrated-system results, when valid reference
-   data exists
-7. `4.7` Cross-experiment discussion, comparison with literature, threats to
-   validity, limitations, and implications for the thesis objectives
-8. `4.8` Current conclusions, unresolved questions, corrective actions, and next
-   experiments
+| Experiment | Simulation | Real robot |
+|---|---|---|
+| 1 Baseline / estimators | completed, 5 `allsensor` bags, 4 worlds | planned |
+| 2 YOLO detector | completed, 4 dynamic bags, 9,860 frames | planned |
+| 3 VIO + dynamic filtering | **untested** -- VINS filter never fired, ORB confounded by frame loss; runs exist, hypothesis has no valid test | planned |
+| 4 Dense map | **partial** -- tiny map scored (occupied-cell P 96.6 %, observed-surface R 89.5 %, whole-building R 67.2 %), large map failed through tracking loss with no artifact retained | planned |
 
-Each experiment subsection should follow the same internal order: question and
-hypothesis; conditions and controls; validity/sample count; numerical results;
-figures/tables; interpretation; limitations. This keeps method choices out of the
-results narrative except where a result requires clarification.
+"Untested" and "failed" are reported as findings, with cause where confirmed and
+untested explanations labelled as such. Weak, negative, or disappointing results
+are valid and must not be softened or omitted. Keep invalid or retracted
+measurements out of headline tables but document them in a clearly labelled
+diagnostic subsection when they explain a bug or a methodological correction.
 
-Make the advisor update easy to act on. State explicitly:
+### Chapter 5: Conclusions and recommendations
 
-- what changed or was implemented since the previous update;
-- what evidence now exists and how strong it is;
-- which outcomes were poor, failed, or inconclusive;
-- confirmed root causes versus untested explanations;
-- blockers, technical debt, and threats to validity;
-- the next experiment or engineering action, its purpose, and any decision or
-  guidance needed from the advisor.
+1. Conclusions per experiment, each tied to its research question and to the
+   ATE / RPE targets of Section 1, stated only as strongly as the filled slots
+   allow.
+2. Limitations and threats to validity, carried over from `4.5` without
+   softening.
+3. Recommendations and next steps: the remaining plan items (integrated live test
+   in both domains at 1.5 m/s under lighting change; metric collection; report
+   completion), and the future direction of Section 1.1 -- integrated
+   relocalization, global optimization and map merging -- listed as future until
+   repository code and validated experiments show otherwise, with path planning
+   excluded.
 
-List integrated relocalization, global optimization, and map merging as a future
-direction until repository code and validated experiments demonstrate otherwise.
-Explain that its intended contribution is a unified navigation-state and map
-input, while path planning itself is excluded.
+### Back matter
+
+- **References**: hand-written `chapters/references.tex` in the faculty number
+  system and format, listed in order of first citation (figure-caption citations
+  count, and the List of Figures is read before the chapters); the template's
+  two uncited entries come last. `references.bib` is kept only as the record.
+  Add a primary source for every algorithm the text relies on.
+- **No appendix.** The report carries none (user decision, 25 September 2026);
+  file-level provenance of the numbers stays in the run manifests and the
+  `output/compare/` trees, cited inline where a value is quoted.
+- **Curriculum Vitae** (`chapters/curriculum_vitae.tex`, the template's layout:
+  NAME, Date of Birth, EDUCATIONAL RECORD, SCHOLARSHIP/RESEARCH GRANT,
+  EMPLOYMENT RECORD, PUBLICATION): name, degree and placement only; personal
+  details are the author's to fill and are flagged, never invented.
 
 Separate observations from interpretations. Use cautious causal language unless
-the experiment isolates the cause. Report negative, null, failed, and excluded
-runs transparently. Do not reuse a numerical result without its dataset, units,
-conditions, sample count, and uncertainty. Cite primary literature for theoretical
-claims and project artifacts for local measurements.
+the experiment isolates the cause. Do not reuse a numerical result without its
+dataset, units, conditions, sample count, and uncertainty. Cite primary
+literature for theoretical claims and project artifacts for local measurements.

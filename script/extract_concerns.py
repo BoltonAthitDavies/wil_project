@@ -1,14 +1,20 @@
 #!/usr/bin/env python3
-"""Collect every flagged passage from the minor report into a standalone PDF.
+"""Collect every flagged passage and result-slot status of the final report
+into a standalone PDF.
 
     python3 script/extract_concerns.py
     latexmk -pdf docs/report/concerns/concerns.tex
 
 WHAT IT COLLECTS
-    Two markers, both defined in minor_report/main.tex:
+    Three markers, all defined in final_report/main.tex:
 
       \\begin{queried}[Label] ... \\end{queried}   a whole queried paragraph
       \\flag{...}                                 an inline queried fragment
+      \\slotstatus{label}{...}                    a result slot's status box
+
+    Chapter files \\input verbatim fragments (chapters/fragments/); those are
+    expanded in place before harvesting so that every item is filed under the
+    heading it actually sits beneath in the report.
 
     Their shared meaning, from main.tex: a result, number or condition that is
     measured but NOT yet trustworthy as evidence -- an unexplained mechanism, a
@@ -17,11 +23,13 @@ WHAT IT COLLECTS
     is correctly measured and understood is a finding, not a concern.
 
 WHY A SEPARATE DOCUMENT
-    In the report each flag sits beside the claim it qualifies, which is where it
-    belongs -- a caveat separated from its result is how results get misquoted.
-    This document does not remove them from the report; it COPIES them into one
-    place so the whole set can be read as a checklist. Before a review it answers
-    "what do I not yet stand behind?" in one pass instead of 68 pages.
+    The final report is the examined document, and its author asked that the
+    red queries and the status boxes be MOVED out of it: main.tex keeps the
+    markup but renders \\flag as plain text, \\moved and queried blocks as
+    nothing, and \\slotstatus as nothing, so the chapter source stays the single
+    record of what is queried while the report reads clean. This document is
+    where those passages are read, as one checklist: "what do I not yet stand
+    behind?" in one pass instead of 125 pages.
 
 CONTEXT
     An inline \\flag{6.481} means nothing alone, so each one is quoted inside its
@@ -40,9 +48,13 @@ import re
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-REPORT = os.path.join(ROOT, 'docs', 'report', 'minor_report')
-CHAPTERS = [('Chapter 3 --- Methodology', 'chapters/chapter_3_methodology.tex'),
-            ('Chapter 4 --- Results', 'chapters/chapter_4_results.tex')]
+REPORT = os.path.join(ROOT, 'docs', 'report', 'final_report')
+CHAPTERS = [('Front matter', 'frontmatter/acknowledgements.tex'),
+            ('Chapter 3 --- Methodology', 'chapters/chapter_3_methodology.tex'),
+            ('Chapter 4 --- Experiments and Results', 'chapters/chapter_4_experiments.tex'),
+            ('Chapter 5 --- Conclusions', 'chapters/chapter_5_conclusion.tex'),
+            ('Back matter', 'chapters/curriculum_vitae.tex')]
+FRAGMENT_INPUT = re.compile(r'\\input\{(chapters/fragments/[^}]*)\}')
 OUT_DIR = os.path.join(ROOT, 'docs', 'report', 'concerns')
 
 # The colour legend is meta, not a concern; it is reproduced as the preamble
@@ -164,15 +176,37 @@ def clean(body):
     return body.strip()
 
 
+def expand_fragments(text):
+    """Inline every \\input of a verbatim fragment. Other \\inputs (tables,
+    TikZ figures) are left for clean() to neutralise."""
+    def sub(m):
+        frag = os.path.join(REPORT, m.group(1))
+        if not frag.endswith('.tex'):
+            frag += '.tex'
+        return open(frag).read()
+    return FRAGMENT_INPUT.sub(sub, text)
+
+
 def harvest(path):
-    text = open(path).read()
+    text = expand_fragments(open(path).read())
     heads = headings(text)
     items, spans = [], []
+
+    # Result-slot status boxes: \\slotstatus{label}{text}. The report renders
+    # them as nothing; here each is listed under the slot it opens.
+    for m in re.finditer(r'\\slotstatus\{([a-z]+)\}\{', text):
+        end = match_brace(text, m.end() - 1)
+        spans.append((m.start(), end))
+        sec, sub = context_of(m.start(), heads)
+        items.append(dict(kind='status', label=m.group(1), sec=sec, sub=sub,
+                          body=clean(text[m.end():end - 1]), pos=m.start()))
 
     for m in re.finditer(r'\\begin\{queried\}(\[([^]]*)\])?', text):
         end = text.index('\\end{queried}', m.end())
         label = (m.group(2) or 'Queried').strip()
         spans.append((m.start(), end))
+        if any(a <= m.start() <= b for a, b in spans[:-1]):
+            continue  # a query quoted inside a status box
         if label in SKIP_LABELS:
             continue
         sec, sub = context_of(m.start(), heads)
@@ -221,6 +255,9 @@ def report_preamble():
     src = open(os.path.join(REPORT, 'main.tex')).read()
     pre = src[:src.index('\\begin{document}')]
     pre = re.sub(r'(?m)^\\documentclass.*$', '', pre)
+    # The report's page style is chapter-based; this document has no chapters.
+    pre = re.sub(r'(?m)^\\titlespacing\*\{\\chapter\}.*$', '', pre)
+    pre = re.sub(r'\\titleformat\{\\chapter\}\[block\][^\n]*\n[^\n]*\n[^\n]*\n', '', pre)
     for cmd in ('title', 'author', 'date'):
         while True:
             m = re.search(r'\\%s\s*\{' % cmd, pre)
@@ -235,9 +272,9 @@ def report_preamble():
     return before + pre + after
 
 
-PREAMBLE_HEAD = r"""\documentclass[11pt,a4paper]{article}
+PREAMBLE_HEAD = r"""\documentclass[11pt,a4paper,notitlepage]{report}
 % Generated by script/extract_concerns.py -- do not edit by hand.
-% The preamble below is inherited verbatim from minor_report/main.tex so that
+% The preamble below is inherited verbatim from final_report/main.tex so that
 % every macro the extracted passages use is defined the same way here.
 """
 
@@ -252,6 +289,10 @@ PREAMBLE_TAIL = r"""
 % was built to carry.
 \renewcommand{\flag}[1]{\textcolor{flagred}{#1}}
 \renewcommand{\moved}[1]{\textcolor{flagred}{#1}}
+\renewcommand{\slotstatus}[2]{%
+  \fcolorbox{black!40}{st#1}{\parbox{\dimexpr\textwidth-2\fboxsep-2\fboxrule}{%
+    \textbf{Status: #1.}\ #2}}}
+\pagestyle{plain}
 % Cross-reference targets live in the report, so a reference is printed, not
 % resolved -- a dangling \cref would either fail or print a wrong number.
 \newcommand{\reportref}[1]{\textcolor{gray}{[\texttt{\detokenize{#1}}]}}
@@ -268,8 +309,9 @@ PREAMBLE_TAIL = r"""
 \thispagestyle{empty}
 
 \noindent
-Every passage the minor progress report marks as \flag{queried}, collected into
-one list. @@COUNT@@ items, from @@SOURCE@@.
+Every passage the final report marks as \flag{queried}, and the status of each
+of its eight result slots, collected into one list. @@COUNT@@ items, from
+@@SOURCE@@.
 
 \medskip
 \noindent
@@ -281,10 +323,11 @@ measured and understood is a finding, not a concern.
 
 \medskip
 \noindent
-These passages remain in the report beside the claims they qualify, which is
-where they belong. This document copies rather than moves them, so the whole set
-can be read as a checklist. References such as \reportref{sec:example} point into
-the report.
+The report's source still carries every one of these passages beside the claim
+it qualifies, but the report no longer renders them: queries are typeset as
+plain text or dropped, and the status boxes are dropped. This document is where
+they are read. References such as \reportref{sec:example} point into the
+report.
 
 \medskip
 \hrule
@@ -304,11 +347,15 @@ def emit(all_items, stamp, sources):
         out.append('\n\\section*{%s}\n' % chapter)
         last = None
         for i, it in enumerate(items, 1):
-            where = it['sub'] or it['sec'] or ''
+            where = (('%s: %s' % (it['sec'], it['sub'])) if it['sec'] and it['sub']
+                     else (it['sub'] or it['sec'] or ''))
             if where != last:
                 out.append('\n\\subsection*{%s}\n' % where)
                 last = where
-            if it['kind'] == 'row':
+            if it['kind'] == 'status':
+                out.append('\\noindent\\textbf{%d.}\\quad \\slotstatus{%s}{%s}\n\n'
+                           % (i, it['label'], it['body']))
+            elif it['kind'] == 'row':
                 out.append('\\noindent\\textbf{%d.}\\quad \\emph{table row:} %s\n\n'
                            % (i, it['span']))
             elif it['kind'] == 'block':
@@ -334,14 +381,14 @@ def main():
         all_items[title] = items
         total += len(items)
         blocks = sum(1 for i in items if i['kind'] == 'block')
-        print('%-28s %2d blocks + %2d inline = %2d'
-              % (rel.split('/')[-1], blocks, len(items) - blocks, len(items)))
+        stat = sum(1 for i in items if i['kind'] == 'status')
+        print('%-30s %2d status + %2d blocks + %2d inline = %2d'
+              % (rel.split('/')[-1], stat, blocks, len(items) - blocks - stat, len(items)))
 
     os.makedirs(OUT_DIR, exist_ok=True)
     stamp = datetime.date.today().strftime('%d %B %Y')
     target = os.path.join(OUT_DIR, 'concerns.tex')
-    open(target, 'w').write(emit(all_items, stamp,
-                                 'the minor progress report'))
+    open(target, 'w').write(emit(all_items, stamp, 'the final report'))
     print('wrote %s (%d items)' % (os.path.relpath(target, ROOT), total))
     return 0
 

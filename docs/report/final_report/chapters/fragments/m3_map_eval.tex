@@ -1,0 +1,23 @@
+% Verbatim from minor_report/chapters/chapter_3_methodology.tex lines 1776-1795 (retired report),
+% headings demoted by 0 level(s). Do not edit here; edit the source of the numbers.
+
+RTAB-Map grids are placed in the Gazebo world using one fixed rigid world-to-map
+transform measured by \repo{script/fit_map_pose.py}. It is constant for a database;
+the live \texttt{map~$\rightarrow$~odom} drift correction is not reused for map
+placement.
+
+\repo{script/validate_map.py} rasterizes world collision geometry and evaluates
+occupied cells at a stated tolerance. It reports occupied-cell precision,
+whole-world and observed-region recall, false obstacles under the true
+$0.83\times0.50$~m footprint, unmapped footprint poses, and clearance. Graph
+evaluation records neighbour, global-closure, local-space, and gravity links.
+Localization additionally requires time to first fix, accepted and rejected
+matches, database checksums before and after read-only operation, pose continuity,
+and known-world bounds. Finite covariance or a localization status message alone
+does not establish correctness.
+
+At the cutoff this evaluation has been applied to one database,
+\repo{map/map_tiny.db}, against
+\repo{small_warehouse_static/small_warehouse_static_tinymap.world}. The
+equivalent large-warehouse evaluation is \status{planned} and no database for
+it exists; results are reported in \cref{sec:map-quality}.

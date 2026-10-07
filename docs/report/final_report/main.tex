@@ -1,0 +1,272 @@
+% Final project report -- Vision-Based Navigation Pipeline for AMRs in a
+% Dynamic Warehouse.  Format follows the KMUTT thesis-writing manual
+% (docs/MyThesisInfo/1. คู่มือการเขียนวิทยานิพนธ์-cr.มจธ.pdf), English edition:
+% Times 12 pt body, 15/14/13 pt bold headings, 40/20/30/20 mm margins, page
+% numbers top right, no number on a chapter's first page, "Table x.y" above and
+% "Figure x.y" below.  Build with:  latexmk -pdf main.tex
+%
+% The chapters were assembled as follows.  Chapters 1 and 2 are English
+% renderings of the Thai template docs/MyThesisInfo/final_report.pdf.  Chapter
+% 3 fuses that template's planned method with the implemented methodology of
+% docs/report/minor_report (retired); Chapter 4 re-cuts the minor report's
+% results into the four fixed experiments, each with a simulation and a
+% real-robot slot; Chapter 5 is new.  There is no appendix.
+\documentclass[12pt,a4paper,oneside]{report}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{mathptmx}            % Times text and maths, as the manual requires
+\usepackage[scaled=0.92]{helvet}
+\usepackage{courier}
+\usepackage{geometry}
+\usepackage{microtype}
+\usepackage{setspace}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{enumitem}
+\usepackage[table]{xcolor}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ifthen}
+\usepackage{siunitx}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,fit,positioning,shapes.geometric}
+\usepackage{rotating}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{caption}
+\usepackage{tocloft}
+\usepackage[nottoc,notbib]{tocbibind}
+\usepackage{pdfpages}
+\PassOptionsToPackage{hyphens}{url}\usepackage{url}
+\usepackage{hyperref}
+\def\UrlBreaks{\do\-\do\/\do\.\do\_\do\?\do\=}
+\usepackage[nameinlink,noabbrev]{cleveref}
+
+% ---------------------------------------------------------------- page layout
+\geometry{a4paper, left=40mm, right=20mm, top=30mm, bottom=20mm,
+  headheight=54pt, headsep=4mm}
+\singlespacing
+\setlength{\parskip}{0.45em}
+\setlength{\parindent}{0pt}
+\setlength{\emergencystretch}{3em}
+\raggedbottom
+
+% fancyhdr 3.x: \fancyhead inside \fancypagestyle acts globally when the
+% style is selected with \pagestyle, and the built-in "fancy" style resets
+% nothing.  Every style used here therefore sets all its fields itself, and the
+% ordinary page style is our own "report", never "fancy".
+\renewcommand{\headrulewidth}{0pt}
+\fancypagestyle{report}{\fancyhf{}\fancyhead[R]{\thepage}}
+% The manual: no page number on the first page of a chapter.  Front-matter
+% pages (abstract, contents, lists) do carry theirs, as the template shows.
+\fancypagestyle{plain}{\fancyhf{}}
+% Continuation pages of the contents and lists repeat their heading and the
+% column labels, as "CONTENTS (Cont'd)" / "PAGE" in the template.
+\newcommand{\contheader}[2]{%
+  \fancypagestyle{cont#1}{\fancyhf{}%
+    \fancyhead[C]{\parbox[b]{\textwidth}{\hfill\thepage\\[6pt]
+      \centering\bfseries\fontsize{15}{18}\selectfont #2 (Cont'd)\\[2pt]
+      \normalsize\bfseries\hfill PAGE}}}}
+\pagestyle{report}
+\contheader{toc}{CONTENTS}
+\contheader{lot}{LIST OF TABLES}
+\contheader{lof}{LIST OF FIGURES}
+
+% ---------------------------------------------------------------- headings
+% CHAPTER n TITLE, centred, 15 pt bold; sections 14 pt bold; subsections 13 pt.
+\titleformat{\chapter}[block]
+  {\centering\bfseries\fontsize{15}{18}\selectfont}
+  {CHAPTER \thechapter}{0.6em}{\MakeUppercase}
+\titlespacing*{\chapter}{0pt}{0pt}{18pt}
+\titleformat{\section}
+  {\bfseries\fontsize{14}{17}\selectfont}{\thesection}{0.8em}{}
+\titlespacing*{\section}{0pt}{14pt}{6pt}
+\titleformat{\subsection}
+  {\bfseries\fontsize{13}{16}\selectfont}{\thesubsection}{0.8em}{}
+\titlespacing*{\subsection}{0pt}{10pt}{4pt}
+\titleformat{\subsubsection}
+  {\bfseries\fontsize{12}{15}\selectfont}{\thesubsubsection}{0.8em}{}
+\titlespacing*{\subsubsection}{0pt}{8pt}{3pt}
+\titleformat{\paragraph}[runin]{\bfseries}{}{0pt}{}
+\titlespacing*{\paragraph}{0pt}{6pt}{0.6em}
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{2}
+
+% Unnumbered chapters of the front and back matter, same face as numbered ones.
+\newcommand{\frontchapter}[1]{%
+  \chapter*{#1}\thispagestyle{report}\addcontentsline{toc}{chapter}{#1}%
+  \markboth{#1}{#1}}
+
+% ---------------------------------------------------------------- captions
+\captionsetup{labelsep=space, labelfont=bf, font=small, justification=justified,
+  singlelinecheck=false}
+\captionsetup[table]{position=above, skip=4pt}
+\captionsetup[figure]{position=below, skip=6pt}
+
+% ---------------------------------------------------------------- contents
+\renewcommand{\contentsname}{CONTENTS}
+\renewcommand{\listtablename}{LIST OF TABLES}
+\renewcommand{\listfigurename}{LIST OF FIGURES}
+\renewcommand{\bibname}{REFERENCES}
+\renewcommand{\cftchapfont}{\bfseries}
+\renewcommand{\cftchappagefont}{\bfseries}
+\renewcommand{\cftchapaftersnum}{.}
+\setlength{\cftbeforechapskip}{6pt}
+\setlength{\cfttabnumwidth}{3.2em}
+\setlength{\cftfignumwidth}{3.2em}
+% Titles centred at 15 pt, then the column label(s) on their own line.
+\renewcommand{\cfttoctitlefont}{\hfill\bfseries\fontsize{15}{18}\selectfont}
+\renewcommand{\cftlottitlefont}{\hfill\bfseries\fontsize{15}{18}\selectfont}
+\renewcommand{\cftloftitlefont}{\hfill\bfseries\fontsize{15}{18}\selectfont}
+\renewcommand{\cftaftertoctitle}{\hfill\mbox{}\par\vspace{4pt}\noindent\normalsize\bfseries\hfill PAGE}
+\renewcommand{\cftafterlottitle}{\hfill\mbox{}\par\vspace{4pt}\noindent\normalsize\bfseries TABLE\hfill PAGE}
+\renewcommand{\cftafterloftitle}{\hfill\mbox{}\par\vspace{4pt}\noindent\normalsize\bfseries FIGURE\hfill PAGE}
+\setlength{\cftaftertoctitleskip}{8pt}
+\setlength{\cftafterlottitleskip}{8pt}
+\setlength{\cftafterloftitleskip}{8pt}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!45!black,
+  urlcolor=blue!55!black,
+  citecolor=blue!45!black,
+  pdftitle={Vision-Based Navigation Pipeline for AMRs in a Dynamic Warehouse},
+  pdfauthor={Bolton Athit Davies}
+}
+\setlist{nosep}
+\sisetup{range-phrase=--, range-units=single}
+
+% ---------------------------------------------------------------- colours
+\definecolor{implemented}{HTML}{D9EAD3}
+\definecolor{external}{HTML}{D9EAF7}
+\definecolor{blocked}{HTML}{F4CCCC}
+\definecolor{planned}{HTML}{FFF2CC}
+
+% Per-block performance verdicts for the pipeline diagrams of section 4.5.
+% GENERATED by script/block_performance.py into figures/block_colours_<cond>.tex.
+\definecolor{perfgood}{HTML}{A5D6A7}
+\definecolor{perfpoor}{HTML}{FFCDD2}
+\definecolor{perfnoeffect}{HTML}{D9EAF7}
+\definecolor{perfnone}{HTML}{FFF2CC}
+\newcommand{\perfmark}[1]{%
+  \ifthenelse{\equal{#1}{good}}{\colorbox{perfgood}{\scriptsize good}}{%
+  \ifthenelse{\equal{#1}{poor}}{\colorbox{perfpoor}{\scriptsize poor}}{%
+  \ifthenelse{\equal{#1}{noeffect}}{\colorbox{perfnoeffect}{\scriptsize no effect}}{%
+  \colorbox{perfnone}{\scriptsize no claim}}}}}
+
+% ---------------------------------------------------------------- queries
+% A query marks a measured value or passage that is not yet trustworthy as
+% evidence: an unexplained mechanism, a confound, an unfair comparison, or a
+% figure whose provenance does not support the use it is put to.  It is not a
+% "bad result" marker.
+%
+% THE QUERIES DO NOT RENDER IN THIS DOCUMENT.  They are moved into the separate
+% Open Concerns document, docs/report/concerns/concerns.tex, which
+% script/extract_concerns.py builds by PARSING THIS SOURCE.  The markup stays in
+% the chapter files and is suppressed here rather than deleted: the source is
+% the single record of what is queried.  To see them in place again, restore
+% the definitions marked RENDERING.
+\definecolor{flagred}{HTML}{B00000}
+% \flag marks a queried VALUE (a cell, a number, a clause): it stays, uncoloured.
+\newcommand{\flag}[1]{#1}
+% RENDERING: \newcommand{\flag}[1]{\textcolor{flagred}{#1}}
+% \moved marks a complete queried sentence: lifted out, appears only in concerns.
+\newcommand{\moved}[1]{\unskip}
+% RENDERING: \newcommand{\moved}[1]{#1}
+% Whole-paragraph query: suppressed here, extracted in full.
+\newenvironment{queried}[1][Questionable]%
+  {\setbox0\vbox\bgroup}%
+  {\egroup}
+% RENDERING:
+% \newenvironment{queried}[1][Questionable]%
+%   {\par\addvspace{0.6ex}\begingroup\color{flagred}\noindent
+%    \textbf{[#1]}\ \ignorespaces}%
+%   {\par\endgroup\addvspace{0.6ex}}
+
+% ---------------------------------------------------------------- result slots
+% Each of the eight result slots of Chapter 4 opens with its status.  The six
+% labels are the ones the reporting protocol fixes: completed, partial,
+% untested, blocked, failed, planned.
+\definecolor{stcompleted}{HTML}{A5D6A7}
+\definecolor{stpartial}{HTML}{FFF2CC}
+\definecolor{stuntested}{HTML}{FFD8A8}
+\definecolor{stblocked}{HTML}{FFCDD2}
+\definecolor{stfailed}{HTML}{FFCDD2}
+\definecolor{stplanned}{HTML}{E0E0E0}
+% The boxes are MOVED to the Open Concerns document (see the queries above):
+% here \slotstatus renders nothing, and the slot's status is read from table 4.1.
+\newcommand{\slotstatus}[2]{}
+% RENDERING:
+% \newcommand{\slotstatus}[2]{%
+%   \par\noindent\fcolorbox{black!40}{st#1}{\parbox{\dimexpr\textwidth-2\fboxsep-2\fboxrule}{%
+%     \textbf{Status: #1.}\ #2}}\par\medskip}
+\newcommand{\status}[1]{\textbf{#1}}
+
+% ---------------------------------------------------------------- \repo
+% Repository paths, identifiers and commit hashes in typewriter, breakable at
+% path separators first and only reluctantly elsewhere.
+\newcommand{\wilsoftbreak}{\penalty4000\relax}
+\ExplSyntaxOn
+\tl_new:N \l__wil_repo_tl
+\NewDocumentCommand{\repo}{m}
+  {
+    \group_begin:
+      \tl_set:Nx \l__wil_repo_tl { \tl_to_str:n {#1} }
+      \regex_replace_all:nnN { ([a-zA-Z0-9]) } { \1 \c{wilsoftbreak} }
+        \l__wil_repo_tl
+      \regex_replace_all:nnN { ([/_.]) } { \1 \c{allowbreak} }
+        \l__wil_repo_tl
+      \texttt { \tl_use:N \l__wil_repo_tl }
+    \group_end:
+  }
+\ExplSyntaxOff
+
+% \pipelinefig and block styles for the per-block performance diagrams.
+\input{figures/pipeline_performance}
+
+% ======================================================================
+\begin{document}
+
+% ---------------------------------------------------------------- front matter
+\pagenumbering{roman}
+\input{frontmatter/cover}
+\input{frontmatter/approval}
+\input{frontmatter/abstract}
+\input{frontmatter/acknowledgements}
+
+\clearpage
+\pdfbookmark{Contents}{contents}
+% First page of each list: number only; later pages: the (Cont'd) heading.
+\tocloftpagestyle{report}
+\addtocontents{toc}{\protect\contentsline{chapter}{CONTENTS}{\thepage}{}}
+\pagestyle{conttoc}\tableofcontents
+\clearpage
+\pagestyle{contlot}\listoftables
+\clearpage
+\pagestyle{contlof}\listoffigures
+\clearpage
+\pagestyle{report}
+\input{frontmatter/symbols}
+
+% ---------------------------------------------------------------- body
+\clearpage
+\pagenumbering{arabic}
+\include{chapters/chapter_1_introduction}
+\include{chapters/chapter_2_theory}
+\include{chapters/chapter_3_methodology}
+\include{chapters/chapter_4_experiments}
+\include{chapters/chapter_5_conclusion}
+
+% ---------------------------------------------------------------- back matter
+\clearpage
+\phantomsection\addcontentsline{toc}{chapter}{REFERENCES}
+\input{chapters/references}
+
+\include{chapters/curriculum_vitae}
+
+\end{document}

@@ -1,0 +1,79 @@
+% LIST OF SYMBOLS (symbol, meaning, unit) and LIST OF TECHNICAL VOCABULARY AND
+% ABBREVIATIONS, in the two layouts of the Faculty of Engineering template.
+\frontchapter{LIST OF SYMBOLS}
+
+\noindent
+\begin{tabular}{@{}p{0.14\textwidth}p{0.62\textwidth}p{0.20\textwidth}@{}}
+\textbf{SYMBOL} & & \textbf{UNIT} \\[4pt]
+$a$, $a_x$ & longitudinal acceleration measured by the IMU & m\,s$^{-2}$ \\
+$B$ & wheel track (lateral wheel separation) & m \\
+$B_k$ & the $k$-th detected bounding box $\{x_k,y_k,w_k,h_k,c_k,P_k\}$ & -- \\
+$b_a$, $b_g$, $b_\omega$ & accelerometer, gyroscope and yaw-rate biases & m\,s$^{-2}$, rad\,s$^{-1}$ \\
+$\Delta$ & relative-pose-error interval & s \\
+$\mathbf{e}$ & estimation error vector $[\Delta x,\Delta y,\Delta\theta]$ & m, m, rad \\
+$E_i$ & relative pose error transform at pose $i$ & -- \\
+$\mathbf{F}$, $\mathbf{G}$ & state-transition and noise-input Jacobians & -- \\
+$\mathcal{F}_{\mathrm{static}}$ & set of image features surviving the dynamic mask & -- \\
+$f_x$, $f_y$, $c_x$, $c_y$ & pinhole intrinsics & pixel \\
+$g$ & gravitational acceleration & m\,s$^{-2}$ \\
+$\mathbf{H}$ & measurement matrix & -- \\
+$\mathbf{K}$ & Kalman gain & -- \\
+$L$ & wheel base & m \\
+$n$ & number of experimental units (recordings) & -- \\
+$\mathbf{P}$ & state covariance & -- \\
+$P$, $Q$ & estimated and reference pose sequences (RPE definition) & -- \\
+$p_x$, $p_y$ & planar position & m \\
+$\mathbf{Q}$, $\mathbf{R}$ & process- and measurement-noise covariances & -- \\
+$R$, $T$ & rotation matrix and rigid transform & -- \\
+$r$ & wheel radius & m \\
+$\sigma$ & standard deviation of the quantity it subscripts & as subscript \\
+$\theta$, $\theta_m$ & heading and midpoint heading & rad \\
+$\tau$ & bias correlation time & s \\
+$v$ & longitudinal speed & m\,s$^{-1}$ \\
+$\omega$ & yaw rate & rad\,s$^{-1}$ \\
+$\mathbf{x}$ & EKF state $[p_x,p_y,\theta,v,b_\omega]^{\top}$ & -- \\
+$\chi$ & VINS sliding-window state vector & -- \\
+\end{tabular}
+
+\clearpage
+\frontchapter{LIST OF TECHNICAL VOCABULARY AND ABBREVIATIONS}
+
+\noindent
+\begin{tabular}{@{}p{0.16\textwidth}@{\ =\ }p{0.78\textwidth}@{}}
+AGV & Automated Guided Vehicle \\
+AMR & Autonomous Mobile Robot \\
+ANEES & Average Normalised Estimation Error Squared \\
+AP, mAP & Average Precision, mean Average Precision \\
+ATE & Absolute Trajectory Error \\
+BA & Bundle Adjustment \\
+CPU, GPU & Central / Graphics Processing Unit \\
+DoF & Degrees of Freedom \\
+EKF & Extended Kalman Filter \\
+FOV, HFOV & (Horizontal) Field of View \\
+FN, FP, TP & False Negative, False Positive, True Positive \\
+GT & Ground Truth \\
+IMU & Inertial Measurement Unit \\
+IoU & Intersection over Union \\
+IQR & Interquartile Range \\
+KLT & Kanade--Lucas--Tomasi optical-flow tracker \\
+LC & Loop Closure \\
+LiDAR & Light Detection and Ranging \\
+LTM, STM, WM & Long-Term, Short-Term and Working Memory (RTAB-Map) \\
+MAP & Maximum a Posteriori \\
+NEES & Normalised Estimation Error Squared \\
+NMS & Non-Maximum Suppression \\
+QoS & Quality of Service (ROS~2 middleware) \\
+RMSE & Root-Mean-Square Error \\
+ROS & Robot Operating System \\
+RPE & Relative Pose Error \\
+RSS & Resident Set Size \\
+RTAB-Map & Real-Time Appearance-Based Mapping \\
+SfM & Structure from Motion \\
+SGBM & Semi-Global Block Matching \\
+SLAM & Simultaneous Localization and Mapping \\
+TF & ROS transform tree \\
+VIO & Visual-Inertial Odometry \\
+VINS & Visual-Inertial System (VINS-Mono / VINS-Fusion) \\
+YOLO & You Only Look Once object detector \\
+\end{tabular}
+\clearpage

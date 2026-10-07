@@ -1,0 +1,16 @@
+% Verbatim from minor_report/chapters/chapter_4_results.tex lines 1712-1724 (retired report),
+% headings demoted by 0 level(s). Do not edit here; edit the source of the numbers.
+
+The expanded ORB logs now expose back-end events. Baseline ORB-SLAM3 recorded six
+loop closures: two in each repeat of
+\repo{dataset_static_nofloortexture_002}. Each of those runs also recorded two
+global bundle-adjustment executions. One baseline dynamic run
+(\repo{dataset_dynamic_nofloortexture_02_000/logging_20260916_03}) and one
+ORB+YOLO run
+(\repo{dataset_dynamic_nofloortexture_01_000/logging_20260916_02}) recorded a map
+merge. These counters demonstrate that the native ORB back-end paths executed;
+they do not demonstrate that the resulting corrections were correct. The
+failed trajectory-plausibility checks and the absence of an event-aligned
+before/after counterfactual prevent a correction-benefit claim. RTAB-Map reconstruction remains a separate pipeline and is not exercised by
+this relogged campaign; its dense-map evidence is reported independently in
+\cref{sec:map-quality}, on a different world and database.

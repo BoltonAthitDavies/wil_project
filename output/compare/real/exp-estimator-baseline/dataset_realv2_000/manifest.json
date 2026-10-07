@@ -1,0 +1,248 @@
+{
+  "experiment_id": "exp-estimator-baseline",
+  "domain": "real",
+  "dataset": "dataset_realv2_000",
+  "generated": "2026-10-06T15:55:30",
+  "command": "script/eval_real_gt.py --dataset dataset_realv2_000 --dataset dataset_realv2_001 --run logging_20260916_03 --lever-arm 0.00,0.00,-0.092 --lever-arm-assumed --fit-lever-arm",
+  "git_superproject": "4e7eb3fb64e9",
+  "python": "3.10.12",
+  "numpy": "2.2.6",
+  "host": "ambushee-Katana-GF66-11UG",
+  "bag": {
+    "path": "/home/ambushee/wil_project/dataset/dataset_realv2_000/dataset_realv2_000_0.db3",
+    "size_bytes": 1188388864,
+    "first_message_robotclock_s": 1789378270.5507057,
+    "duration_s": 35.186316192,
+    "message_count": 14422,
+    "wheel_topic": "/feedback/velocity",
+    "wheel_messages": 1758
+  },
+  "ground_truth": {
+    "path": "/home/ambushee/wil_project/dataset/gt/dataset_realv2_000",
+    "sha256": "c146433e529b447d88f17b8c984e68eba26787bcaacf9bbfd3381cc9c6a85a2f",
+    "header": [
+      "Date Time",
+      "Recorded Time (sec.)",
+      "X (cm.)",
+      "Y (cm.)"
+    ],
+    "samples": 228,
+    "duration_s": 34.3717,
+    "median_dt_s": 0.136099999999999,
+    "max_gap_s": 0.4001,
+    "max_step_m": 0.06215645416205789,
+    "path_m": 6.044354104573268,
+    "first_stamp": "Thu 10/01/2026 03:11:51 PM",
+    "last_stamp": "Thu 10/01/2026 03:12:25 PM",
+    "checks": {
+      "samples_ok": true,
+      "gap_ok": true,
+      "step_ok": true,
+      "duration_ok": true
+    },
+    "valid": true,
+    "units": "centimetres converted to metres",
+    "dimensions": 2,
+    "heading": false
+  },
+  "time_alignment": {
+    "offset_s": -2.423500543371552,
+    "source": "wheel-speed correlation",
+    "ok": true,
+    "curves": {
+      "wheel /feedback/velocity": {
+        "offset_s": -2.423500543371552,
+        "peak_r": 0.9962439420350041,
+        "second_peak_r": 0.8674245930032072
+      },
+      "VINS-Fusion": {
+        "offset_s": -0.09767316724481383,
+        "peak_r": 0.344404438658077,
+        "second_peak_r": 0.33040745368528174
+      },
+      "ORB-SLAM3": {
+        "offset_s": -1.6983129962854095,
+        "peak_r": 0.6266302929207108,
+        "second_peak_r": 0.5507229583707934
+      }
+    },
+    "search_s": [
+      -5.0,
+      20.0
+    ],
+    "step_s": 0.01
+  },
+  "method": {
+    "alignment": "rigid SE(2), scale fixed (vio_metrics.umeyama on z=0 points)",
+    "association": "estimate linearly interpolated at tracker samples; nearest estimate sample within 0.15 s",
+    "rpe": "translational, relative displacements in the aligned frame, pairs within 25 % of delta",
+    "lever_arm": {
+      "forward_m": 0.0,
+      "left_m": 0.0,
+      "up_m": -0.092,
+      "measured": false,
+      "assumed": true
+    },
+    "trim_start_s": 0.0,
+    "jump_speed_mps": 10.0,
+    "diverged_m": 50.0
+  },
+  "runs": {
+    "VINS-Fusion": {
+      "dir": "/home/ambushee/wil_project/output/output_vins/real/dataset_realv2_000/logging_20260916_03",
+      "status": "completed (provisional: lever arm assumed, not measured)",
+      "reasons": [],
+      "body_axes": {
+        "forward": "z",
+        "confidence": 18.25663583545605
+      },
+      "run_metadata": {
+        "pipeline": "vins_fusion_ros2",
+        "experiment_id": "logging_20260916_03",
+        "dataset_path": "/home/ambushee/wil_project/dataset/dataset_realv2_000",
+        "world_path": "/home/ambushee/wil_project/dataset/dataset_realv2_000",
+        "run_command": "",
+        "run_notes": "VINS logging validation",
+        "config_file": "/home/ambushee/wil_project/vins_fusion_ros2/config/wil/stereo_imu.yaml",
+        "output_path": "/home/ambushee/wil_project/output/output_vins/real/dataset_realv2_000/logging_20260916_03",
+        "image0_topic": "/cam0/image_raw",
+        "image1_topic": "/cam1/image_raw",
+        "imu_topic": "/hwt101ct_yaw_publisher",
+        "world_frame_id": "world",
+        "body_frame_id": "body",
+        "camera_frame_id": "camera",
+        "filter": "false",
+        "use_sim_time": "false",
+        "use_imu": "true",
+        "use_stereo": "true",
+        "image_skip": "1",
+        "max_solver_iterations": "100",
+        "max_solver_time_s": "0.080000",
+        "replay_rate": "0.500000",
+        "det_max_age_s": "0.150000",
+        "mask_dilate_px": "8",
+        "max_mask_fraction": "0.800000",
+        "start_wall_time_unix_ns": "1790910065190919720"
+      },
+      "run_summary": {
+        "shutdown_status": "graceful",
+        "images_received": "1054",
+        "images_enqueued": "1054",
+        "image_frames_enqueued": "1054",
+        "external_feature_frames_received": "0",
+        "images_processed": "1054",
+        "frontend_rows": "1054",
+        "backend_rows": "1054",
+        "images_skipped_before_backend": "0",
+        "imu_messages_received": "7021",
+        "imu_samples_used": "8068",
+        "poses_written": "1043",
+        "keyframes": "361",
+        "initialization_events": "1",
+        "initialization_time_s": "0.333029",
+        "resets": "0",
+        "imu_gap_resets": "0",
+        "failure_resets": "0",
+        "failure_detection_enabled": "0",
+        "solver_calls": "1044",
+        "outliers_removed": "7722",
+        "dynamic_points_dropped": "0"
+      },
+      "ate_offset_sensitivity": {
+        "-0.2": 1.4175881748129768,
+        "-0.1": 1.421133914334043,
+        "+0.1": 1.4291332220797623,
+        "+0.2": 1.4324377096654202
+      },
+      "fitted_lever_arm": {
+        "forward_m": 0.02367494194968426,
+        "left_m": -0.7346147498866542,
+        "ate_rmse_with_fit": 1.3626514036846065
+      }
+    },
+    "ORB-SLAM3": {
+      "dir": "/home/ambushee/wil_project/output/output_orb/real/dataset_realv2_000/logging_20260916_03",
+      "status": "partial (provisional: lever arm assumed, not measured)",
+      "reasons": [
+        "1 estimator reset(s) (local_mapping_bad_imu)",
+        "tracking loss 0.10 s"
+      ],
+      "body_axes": {
+        "forward": "z",
+        "confidence": 10.489619237274479
+      },
+      "run_metadata": {
+        "pipeline": "orbslam3_ros2",
+        "experiment_id": "logging_20260916_03",
+        "dataset_path": "/home/ambushee/wil_project/dataset/dataset_realv2_000",
+        "world_path": "/home/ambushee/wil_project/dataset/dataset_realv2_000",
+        "run_command": "",
+        "run_notes": "baseline logging validation",
+        "config_file": "/home/ambushee/wil_project/install/orbslam3_ros2/share/orbslam3_ros2/config/wil/stereo_imu.yaml",
+        "vocabulary_file": "/home/ambushee/wil_project/thirdparty/ORB_SLAM3/Vocabulary/ORBvoc.txt",
+        "output_path": "/home/ambushee/wil_project/output/output_orb/real/dataset_realv2_000/logging_20260916_03",
+        "image0_topic": "/cam0/image_raw",
+        "image1_topic": "/cam1/image_raw",
+        "imu_topic": "/hwt101ct_yaw_publisher",
+        "image_transport": "compressed",
+        "world_frame_id": "orbslam3_world",
+        "body_frame_id": "imu_link",
+        "use_imu": "true",
+        "filter": "false",
+        "publish_tf": "true",
+        "replay_rate": "0.500000",
+        "sync_slop_s": "0.020000",
+        "det_max_age_s": "0.150000",
+        "mask_dilate_px": "8",
+        "max_mask_fraction": "0.800000",
+        "start_wall_time_unix_ns": "1790909270873588840"
+      },
+      "run_summary": {
+        "shutdown_status": "graceful",
+        "stereo_pairs_received": "817",
+        "stereo_pairs_processed": "606",
+        "decode_failures": "0",
+        "imu_messages_received": "7020",
+        "queue_dropped_frames": "211",
+        "imu_starved_frames": "0",
+        "poses_written": "604",
+        "tracking_state_changes": "4",
+        "tracking_loss_events": "1",
+        "tracking_loss_duration_s": "0.100283",
+        "initialization_time_s": "0.127829",
+        "tracking_initialization_time_s": "0.127829",
+        "imu_initialization_time_s": "2.660226",
+        "imu_initialized": "1",
+        "inertial_ba1": "1",
+        "inertial_ba2": "1",
+        "keyframes_created": "94",
+        "keyframes_in_final_map": "57",
+        "map_points_in_final_map": "2817",
+        "local_mapping_keyframes": "93",
+        "local_ba_executions": "89",
+        "local_ba_aborts": "0",
+        "place_recognition_checks": "92",
+        "loop_closures": "0",
+        "map_merges": "0",
+        "global_ba_executions": "0",
+        "global_ba_aborts": "0",
+        "active_map_reset_requests": "1",
+        "last_reset_reason": "local_mapping_bad_imu",
+        "detection_frames_matched": "0",
+        "detection_frames_missed": "0",
+        "masks_rejected": "0"
+      },
+      "ate_offset_sensitivity": {
+        "-0.2": 0.7795764537274262,
+        "-0.1": 0.7805267475616242,
+        "+0.1": 0.7807156921740424,
+        "+0.2": 0.7827365548920301
+      },
+      "fitted_lever_arm": {
+        "forward_m": 0.793041796842467,
+        "left_m": -0.4004310544107909,
+        "ate_rmse_with_fit": 0.5940572133419186
+      }
+    }
+  }
+}

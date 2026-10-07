@@ -1,0 +1,137 @@
+% Verbatim from minor_report/chapters/chapter_3_methodology.tex lines 910-1043 (retired report),
+% headings demoted by 0 level(s). Do not edit here; edit the source of the numbers.
+
+Datasets are held in two places and the registry must cover both: the workspace
+tree \repo{dataset/} and a removable drive mounted at
+\repo{/media/ambushee/32E4AAB1E4AA772F/}, whose simulation bags sit under
+\repo{dataset/} and whose real-robot recordings sit at its root.
+\Cref{tab:dataset-registry} lists all eighteen recordings across both locations.
+Six exist in one place only on the drive, seven in the workspace only, and three
+are held in both.
+
+\begin{sidewaystable}[p]
+\centering
+\caption[Complete dataset registry at the reporting cutoff, across both storage locations.]{Complete dataset registry at the reporting cutoff, across both storage
+locations. The \texttt{bayline} families carry a textured floor; every other
+simulation entry is featureless. ``WS'' is the workspace tree \repo{dataset/} and ``FD'' the removable
+drive; a size is given where that location holds a copy. ``Prop.'' marks the
+proprioceptive group (\repo{/model/ackermann_robot_001/joint_state} and
+\repo{/model/ackermann_robot_001/odometry}); ``IMU'' counts inertial messages,
+on \repo{/imu} for simulation and \repo{/hwt101ct_yaw_publisher} for the real
+rig. Durations are rosbag wall-clock recording durations: the simulator ran below
+real time, so a bag's sim-time span is shorter than the figure shown. Integrity
+was checked by opening each SQLite store and counting rows against the count its
+\repo{metadata.yaml} declares, not by trusting the metadata.}
+\label{tab:dataset-registry}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{llrrrrcccl}
+\toprule
+Dataset & Family & WS & FD & Dur.\ (s) & Messages & \texttt{/clock} & Truth &
+  Prop. & Integrity \\
+ & & (MB) & (MB) & & & & & & \\
+\midrule
+\repo{dataset_allsensor_000} & static \texttt{\_01} & 689 & -- & 129.3 & 211\,811 &
+  \checkmark & \checkmark & \checkmark & ok \\
+\repo{dataset_allsensor_001} & static \texttt{\_01} & 674 & -- & 126.2 & 198\,873 &
+  \checkmark & \checkmark & \checkmark & ok \\
+\repo{dataset_allsensor_002} & static, wall only & 750 & -- & 105.5 & 215\,528 &
+  \checkmark & \checkmark & \checkmark & ok \\
+\repo{dataset_allsensor_003} & bayline, wall only & 1056 & -- & 141.2 & 255\,699 &
+  \checkmark & \checkmark & \checkmark & ok \\
+\repo{dataset_allsensor_004} & bayline, distributed & 1311 & -- & 168.6 & 253\,942 &
+  \checkmark & \checkmark & \checkmark & ok \\
+\midrule
+\repo{dataset_static_nofloortexture_000} & static & -- & 592 & 101.5 & 118\,597 &
+  \checkmark & \checkmark & -- & ok \\
+\repo{dataset_static_nofloortexture_001} & static & 617 & 1 & 92.0 & 113\,332 &
+  \checkmark & \checkmark & -- & \flag{FD stub, WS ok} \\
+\repo{dataset_static_nofloortexture_002} & static & -- & 688 & 103.3 & 122\,386 &
+  \checkmark & \checkmark & -- & ok \\
+\repo{dataset_static_nofloortexture_objonwallonly} & static, wall only & 648 & -- &
+  110.5 & 114\,523 & \checkmark & \checkmark & -- & ok \\
+\midrule
+\repo{dataset_dynamic_nofloortexture_00_000} & dynamic \texttt{\_00} & -- & 653 &
+  100.3 & 111\,988 & \checkmark & \checkmark & -- & ok \\
+\repo{dataset_dynamic_nofloortexture_00_001} & dynamic \texttt{\_00} & -- & 778 &
+  167.7 & 114\,169 & \checkmark & \checkmark & -- & ok \\
+\repo{dataset_dynamic_nofloortexture_01_000} & dynamic \texttt{\_01} & 713 & 710 &
+  165.4 & 126\,790 & \checkmark & \checkmark & -- & \flag{FD malformed, WS ok} \\
+\repo{dataset_dynamic_nofloortexture_02_000} & dynamic \texttt{\_02} & -- & 758 &
+  172.1 & 134\,995 & \checkmark & \checkmark & -- & ok \\
+\midrule
+\repo{dataset_map_01} & mapping, large & 818 & -- & 193.5 & 152\,291 & \checkmark &
+  \checkmark & -- & ok \\
+\repo{dataset_map_tiny} & mapping, tiny world & 726 & -- & 63.3 & 82\,555 &
+  \checkmark & \checkmark & -- & ok \\
+\midrule
+\repo{dataset_real_000} & real rig & 2964 & 2964 & 116.6 & 36\,166 & -- & -- & -- &
+  ok, 23\,257 IMU \\
+\repo{dataset_real_001} & real rig & -- & 2099 & 85.5 & 9\,629 & -- & -- & -- &
+  \flag{0 IMU messages} \\
+\repo{dataset_real_002} & real rig & -- & 2869 & 113.5 & 12\,682 & -- & -- & -- &
+  \flag{0 IMU messages} \\
+\bottomrule
+\end{tabular}
+\end{sidewaystable}
+
+The seven featureless-floor simulation bags of the relogged campaign
+(\cref{sec:results-validity}) are the static and dynamic families listed above;
+five were read from the drive and two from the workspace, for the reason recorded
+next.
+
+\begin{queried}[Data integrity]
+Two drive copies are unreadable while presenting a complete, plausible
+\repo{metadata.yaml}. \repo{dataset_static_nofloortexture_001} is a
+\SI{524288}{\byte} stub whose metadata nevertheless declares 113\,332 messages,
+and \repo{dataset_dynamic_nofloortexture_01_000} is \SI{710}{\mega\byte}---within
+\SI{0.4}{\percent} of its workspace counterpart---with a valid SQLite header but a
+store that reports \emph{database disk image is malformed} on any query. Both have
+intact workspace copies, which is why those two datasets were read from the
+workspace in the relogged campaign.
+
+The general lesson is recorded as a control rather than an incident:
+\repo{metadata.yaml} is written when recording begins and does not describe what
+survived, so message counts, durations and topic lists copied from it are not
+evidence that a bag is intact. Storage health must be established by opening the
+SQLite store and counting rows, which is now part of the pre-experiment inspection
+in \cref{sec:collection-validity}.
+\end{queried}
+
+\begin{queried}[Scope limit]
+Only the five \repo{dataset_allsensor} bags carry wheel encoders and wheel
+odometry; the other thirteen recordings omit those topics entirely. The
+proprioceptive baseline of \cref{sec:results-proprio} therefore cannot be computed
+for any dynamic condition, for the mapping bags, or for the real rig, and the
+comparison between proprioception and visual odometry exists only in
+\emph{static, featureless-floor} scenes---the conditions least favourable to
+vision and most favourable to dead reckoning. Extending it requires re-recording
+with the two topics bridged, not new analysis.
+\end{queried}
+
+\begin{queried}[Excluded]
+\repo{dataset_real_001} and \repo{dataset_real_002} are excluded because their
+inertial topic \repo{/hwt101ct_yaw_publisher} contains \emph{zero} messages, so
+neither supports stereo-inertial operation at all. Their image streams are intact
+(2\,562 and 3\,405 pairs), so they remain usable for detector or image-only work.
+\repo{dataset_real_000} is the only real recording with inertial data, at 23\,257
+messages.
+\end{queried}
+
+Historical output folders do not prove that their raw bags remain available or
+valid. Conversely, a dataset is not marked broken merely because its only copy
+lives on the removable drive rather than in the repository; six of the fifteen
+recordings are drive-only and are sound.
+
+Before a new experiment, the bag's absolute path, topics, duration, message
+counts, and storage health are inspected. Each paired comparison uses the same
+recording, and estimators run separately to avoid resource-contention effects.
+Environment, trajectory, calibration, replay rate, image transport,
+initialization treatment, and revision are controlled. A run is excluded if
+input overlap, initialization, processed sample count, or sensor delivery differs
+materially from its paired condition.
+
+Recorded simulation bags used by RTAB-Map contain \texttt{/clock}. They are
+played without rosbag's additional \texttt{--clock} option because competing
+clock sources cause TF time jumps. This choice is made after inspecting each bag,
+not applied as a universal command rule.

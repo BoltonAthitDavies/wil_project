@@ -1,0 +1,231 @@
+% Verbatim from minor_report/chapters/chapter_3_methodology.tex lines 303-530 (retired report),
+% headings demoted by 0 level(s). Do not edit here; edit the source of the numbers.
+
+Every simulation result in this report rests on how faithfully the simulator
+reproduces the sensors and the contact physics. This subsection states what is
+modelled, what is idealised, and in which direction each idealisation biases the
+comparison between the visual and proprioceptive estimators.
+
+\paragraph{Inertial measurement.} \Cref{tab:imu-noise-assumed} reports the noise
+measured from the recorded stream and queries it, because no
+\repo{dataset_allsensor} bag contains a stationary interval long enough for a
+sound estimate. That query can be closed without a new recording: the noise is
+\emph{declared}, not emergent, so the simulator's own configuration is the
+ground truth the measurement was trying to recover.
+
+\Cref{tab:injected-noise} collects what the simulator actually injects, together
+with the measured values and the EuRoC reference. The measured gyroscope range
+brackets the declared value, which corroborates both. The measured accelerometer
+range does not: it is three to seven times the declared figure, and that
+discrepancy is the estimator's rather than the sensor's, because the residual on
+the driving axis carries real longitudinal acceleration that a
+\SI{1.54}{\second} window cannot separate from noise. Prefer the declared values
+wherever a number is needed.
+
+\begin{table}[htbp]
+\centering
+\caption[Noise injected by the simulator, from the \repo{<imu>} and \repo{<camera>} sensor blocks of the robot model.]{Noise injected by the simulator, from the \repo{<imu>} and
+\repo{<camera>} sensor blocks of the robot model. Densities are per-sample
+$\sigma$ divided by $\sqrt{f_s}$ at \SI{200}{\hertz}, in the channel's own units
+per $\sqrt{\si{\hertz}}$. The EuRoC column is the ADIS16448 of that
+benchmark, on which both visual estimators were published.}
+\label{tab:injected-noise}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}X llll}
+\toprule
+Channel (units of $\sigma$) & Declared $\sigma$ & Density & Measured & EuRoC \\
+\midrule
+Gyroscope, per axis (\si{\radian\per\second}) & \num{0.0048} & \num{3.394e-4} &
+  \numrange{3.00e-4}{3.64e-4} & \num{1.70e-4} \\
+Accelerometer, per axis (\si{\metre\per\second\squared}) & \num{0.0566} &
+  \num{4.002e-3} & \flag{\numrange{1.39e-2}{2.94e-2}} & \num{2.00e-3} \\
+Camera, per pixel (normalised intensity) & \num{0.005} & --- & not measured & --- \\
+\midrule
+\multicolumn{5}{l}{\emph{Bias, first-order Gauss--Markov: $\sigma_b$ and
+  correlation time $\tau$}} \\
+Gyroscope bias (\si{\radian\per\second}) & \num{3.8785e-5} &
+  $\tau=\SI{1000}{\second}$ & not measurable & --- \\
+Accelerometer bias (\si{\metre\per\second\squared}) & \num{0.006} &
+  $\tau=\SI{300}{\second}$ & not measurable & --- \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Two readings follow. The simulated IMU is \emph{twice as noisy} as the EuRoC
+reference on both channels, so it is not an optimistic sensor. The camera, at
+about \num{1.3} grey levels out of \num{255} and with no distortion terms, is
+very much cleaner than any real one. Both bias correlation times exceed the
+\SIrange{85}{130}{\second} run lengths, so within a run the bias behaves as a
+slowly varying constant and its instability is never exercised.
+
+The IMU is therefore not optimistic in its noise. Three things are nonetheless
+absent: chassis vibration, which on a real platform is frequently the dominant
+error; scale-factor, cross-axis and $g$-sensitivity errors; and temperature
+drift. The correlation times also exceed the \SIrange{85}{130}{\second} run
+lengths, so within a run the bias behaves as a slowly varying constant and its
+instability is never exercised. Finally, the message's \repo{orientation} field
+carries no noise block at all and is therefore ground truth; no estimator in this
+project consumes it, and none should.
+
+\paragraph{Wheel encoders.} \repo{JointStatePublisher} reports the true solver
+angle. Slip consequently appears as a \emph{discrepancy} rather than an error ---
+the joint angle stays true, so encoder-integrated distance over-reads whenever
+traction breaks, which is exactly a real encoder's behaviour. What is idealised
+is resolution: a physical 1024\,CPR encoder quantises to \SI{6.1e-3}{\radian},
+setting a floor on low-speed velocity estimation that the simulation does not
+have. \repo{script/encoder_sim.py} exists to impose that floor downstream and has
+not been applied to any result in this report.
+
+\paragraph{Physics engine and solver.} \Cref{tab:physics-setup} records the
+simulation's physics configuration, which is identical across all 26 world files.
+Two entries deserve comment because they are easy to misread.
+
+The \repo{<physics>} element declares \repo{type="ignored"}. That is not a
+misconfiguration: in Gazebo Fortress the engine is selected by the physics system
+plugin, not by that attribute, and the attribute is disregarded. No world passes
+an \repo{<engine>} parameter to the plugin, so the engine is Fortress's default,
+\repo{dartsim}. This matters for the friction discussion below, and it is the
+reason \repo{slip1} and \repo{slip2} have no effect.
+
+No solver block is declared anywhere --- no iteration count, no SOR parameter, no
+constraint-force mixing or error-reduction terms. Every one of those therefore
+takes the engine default. A \SI{1}{\milli\second} step is a fine integration
+step for a \SI{1.4}{\metre\per\second} ground vehicle, but the untuned contact
+solver is the part of this setup least able to support a quantitative claim about
+contact behaviour.
+
+\begin{table}[htbp]
+\centering
+\caption[Gazebo physics configuration, identical in all 26 world files.]{Gazebo physics configuration, identical in all 26 world files. Entries
+marked ``engine default'' are not declared anywhere in the project and are
+therefore whatever \repo{dartsim} chooses.}
+\label{tab:physics-setup}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.24\textwidth}>{\raggedright\arraybackslash}p{0.22\textwidth}>{\raggedright\arraybackslash}X}
+\toprule
+Setting & Value & Note \\
+\midrule
+Engine & \repo{dartsim} & Fortress default; no world sets \repo{<engine>} \\
+\repo{<physics type>} & \repo{"ignored"} & disregarded in Fortress; the plugin
+  selects the engine \\
+\repo{max_step_size} & \SI{1}{\milli\second} & \SI{1}{\kilo\hertz} integration \\
+\repo{real_time_factor} & 1 & no deliberate slow-down \\
+\repo{real_time_update_rate} & engine default & not declared \\
+Solver type and iterations & engine default & no \repo{<solver>} block anywhere \\
+CFM / ERP & engine default & no \repo{<constraints>} block anywhere \\
+Gravity & \SI{-9.8}{\metre\per\second\squared} & against ORB-SLAM3's hard-coded
+  \num{9.81}, a \SI{0.1}{\percent} difference \\
+\repo{slip1}, \repo{slip2} & 0 on all grounds & \flag{an ODE feature;
+  \repo{dartsim} does not implement it, so inert at any value} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Achieved real-time factor was not logged during recording, so the table states
+the requested factor rather than the realised one. Replay rate, which is logged,
+is a separate control and is given per experiment in \cref{chap:results}.
+
+\paragraph{Contact friction, and why the encoder is flattered.} The wheels
+declare $\mu=1$, $\mu_2=1$ and every ground model declares $\mu=100$, $\mu_2=50$.
+Both sets sit inside \repo{<friction><ode>} elements, which is where SDF places
+them irrespective of engine, and \repo{dartsim} consumes them
+(\cref{tab:physics-setup}). How it combines two differing coefficients is not
+established here, so the effective value is not asserted; what is measured is the
+outcome in \cref{tab:measured-slip}.
+
+\repo{slip1} and \repo{slip2} are pinned at zero on all three ground models, but
+that is not why force-dependent slip is absent. Those parameters are an ODE
+feature, and \repo{dartsim} does not implement them, so they would be inert at
+any value. Contact is rigid until Coulomb traction is exceeded regardless.
+
+\Cref{tab:measured-slip} gives the consequence, measured rather than assumed, by
+integrating rear-wheel angle against true path length.
+
+\begin{table}[htbp]
+\centering
+\caption[Measured wheel slip on the five multi-sensor recordings.]{Measured wheel slip on the five multi-sensor recordings. The ratio is
+encoder-integrated distance over true path length; above one is slip, below one
+is a rolling-radius error and cannot be slip. Measured by
+\repo{script/check_slip.py}.}
+\label{tab:measured-slip}
+\small
+\begin{tabular}{lrrr}
+\toprule
+Recording & Encoder (m) & Truth (m) & Ratio \\
+\midrule
+\repo{allsensor_000} & 117.12 & 117.05 & 1.0006 \\
+\repo{allsensor_001} & 112.91 & 113.11 & 0.9982 \\
+\repo{allsensor_002} & 115.37 & 115.20 & 1.0015 \\
+\repo{allsensor_003} & 141.68 & 140.61 & 1.0076 \\
+\repo{allsensor_004} & 142.36 & 142.25 & 1.0008 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Slip is present but under \SI{1}{\percent} everywhere, and on
+\repo{allsensor_001} the encoder under-reads, which cannot be slip. Against a
+wheel-odometry drift of \SIrange{2.15}{6.57}{\percent}, slip is therefore not the
+dominant error; the yaw-rate geometry is, as the falsification of H1 establishes.
+
+\begin{queried}[Threat to validity]
+This is a bias with a known direction. The EKF baseline of
+\cref{sec:results-proprio} is evaluated on a floor where the wheels effectively
+cannot slip and with an encoder of unlimited resolution, which is dead
+reckoning's best case. Both idealisations favour the EKF over the visual
+estimators, and neither has been relaxed. The conclusion that a wheel+IMU filter
+outperforms both visual pipelines should be read as holding \emph{under these
+conditions}, not as a general result. \repo{script/make_slippery_floor.py}
+generates ground models at a chosen friction coefficient so that traction can be
+made an experimental factor; \repo{script/encoder_sim.py} imposes a realistic
+quantisation floor. Neither has been used in any result reported here.
+\end{queried}
+
+\paragraph{Noise models supplied to the estimators.} The two are not told the
+truth about the IMU, as \cref{tab:configured-vs-injected} shows.
+
+\begin{table}[htbp]
+\centering
+\caption[What the visual estimators are configured to expect, against what the simulator injects.]{What the visual estimators are configured to expect, against what the
+simulator injects. Both estimators use identical values. Inflating noise above
+datasheet figures is standard practice in visual-inertial odometry and the
+configuration records that intent; the ratios are given so the size of the
+margin is visible.}
+\label{tab:configured-vs-injected}
+\small
+\begin{tabularx}{\textwidth}{llll>{\raggedright\arraybackslash}X}
+\toprule
+Parameter & Configured & Injected & Ratio & Quantity \\
+\midrule
+\repo{gyr_n} & \num{0.002}  & \num{3.394e-4} & \num{5.9}$\times$ &
+  gyroscope noise density \\
+\repo{acc_n} & \num{0.02}   & \num{4.002e-3} & \num{5.0}$\times$ &
+  accelerometer noise density \\
+\repo{gyr_w} & \num{0.0001} & \num{1.735e-6} & \flag{\num{58}$\times$} &
+  gyroscope bias random walk \\
+\repo{acc_w} & \num{0.001}  & \num{4.899e-4} & \num{2.0}$\times$ &
+  accelerometer bias random walk \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The injected bias random walks are the Gauss--Markov driving densities
+$\sigma_b\sqrt{2/\tau}$ implied by \cref{tab:injected-noise}. Inflating noise above datasheet values is
+standard practice in visual-inertial odometry, and the configuration records that
+intent. The EKF baseline, by contrast, derives its noise model by measuring it
+against ground truth from the same recording.
+
+That asymmetry was tested directly rather than left as a caveat. Configurations
+carrying the true injected densities --- \repo{stereo_imu_truenoise.yaml} for
+both estimators --- were run on all five recordings on 18 September 2026, after
+the reporting cutoff. Accuracy improved wherever a run completed: VINS-Fusion on
+four of five, by \SI{43}{\percent} and \SI{32}{\percent} on two of them. But
+three of ten runs diverged outright, reaching \SIrange{111}{3899}{\metre} of
+error with \numrange{516}{1545} tracking jumps, where the inflated configuration
+diverged in none. The behaviour is bimodal rather than graded: surviving runs
+carry zero to three jumps, failed runs hundreds. This confirms the configuration
+comment's own claim that too-large noise degrades gracefully while too-small does
+not, and the inflated setting is retained for every result in this report. These
+runs are recorded as \repo{logging_20260916_03} and are not part of the reported
+campaign.

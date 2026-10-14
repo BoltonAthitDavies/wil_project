@@ -54,7 +54,7 @@ CHAPTERS = [('Front matter', 'frontmatter/acknowledgements.tex'),
             ('Chapter 4 --- Experiments and Results', 'chapters/chapter_4_experiments.tex'),
             ('Chapter 5 --- Conclusions', 'chapters/chapter_5_conclusion.tex'),
             ('Back matter', 'chapters/curriculum_vitae.tex')]
-FRAGMENT_INPUT = re.compile(r'\\input\{(chapters/fragments/[^}]*)\}')
+FRAGMENT_INPUT = re.compile(r'\\input\{(chapters/[^}]*)\}')   # fragments and chapter-level inputs alike
 OUT_DIR = os.path.join(ROOT, 'docs', 'report', 'concerns')
 
 # The colour legend is meta, not a concern; it is reproduced as the preamble

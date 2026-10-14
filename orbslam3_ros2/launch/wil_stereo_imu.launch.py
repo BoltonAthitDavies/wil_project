@@ -26,8 +26,9 @@ from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.conditions import IfCondition
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, PythonExpression
 from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
 
 WORKSPACE = os.path.expanduser('~/wil_project')
 DEFAULT_VOCAB = os.path.join(WORKSPACE, 'thirdparty', 'ORB_SLAM3', 'Vocabulary', 'ORBvoc.txt')
@@ -64,9 +65,24 @@ def generate_launch_description():
             'filter', default_value='false',
             description='RY-SLAM dynamic-object filtering. When true, also starts '
                         'the YOLO detector node. Default false = stock tracker.'),
+        DeclareLaunchArgument(
+            'filter_mode', default_value='class',
+            description="'class' masks every detected box (RY-SLAM). 'motion' "
+                        'masks a box only after the tracker has seen it move: '
+                        'frame k is scored after tracking and frame k+1 inherits '
+                        'the verdict by IoU. Writes motion_votes.csv.'),
+        DeclareLaunchArgument(
+            'dets_csv', default_value='',
+            description='Precomputed detections from script/yolo_precompute.py. '
+                        'When set (with filter:=true) the live detector is NOT '
+                        'started and every frame is masked from the file by its '
+                        'own stamp, so repeat runs mask identical frames. This is '
+                        'the only way a filter ON/OFF comparison is valid on a '
+                        'machine that cannot run the detector in real time.'),
         DeclareLaunchArgument('weights_path', default_value=DEFAULT_WEIGHTS),
         DeclareLaunchArgument(
-            'dynamic_classes', default_value="['bin', 'box', 'bucket']"),
+            # 'auto' = every class the chosen weight knows; see the detector node.
+            'dynamic_classes', default_value="['auto']"),
         DeclareLaunchArgument('publish_debug_image', default_value='false'),
     ]
 
@@ -82,12 +98,12 @@ def generate_launch_description():
             'config_file': config_file,
             'vocabulary_file': LaunchConfiguration('vocabulary_file'),
             'output_path': LaunchConfiguration('output_path'),
-            'experiment_id': LaunchConfiguration('experiment_id'),
-            'dataset_path': LaunchConfiguration('dataset_path'),
-            'world_path': LaunchConfiguration('world_path'),
+            'experiment_id': ParameterValue(LaunchConfiguration('experiment_id'), value_type=str),
+            'dataset_path': ParameterValue(LaunchConfiguration('dataset_path'), value_type=str),
+            'world_path': ParameterValue(LaunchConfiguration('world_path'), value_type=str),
             'replay_rate': LaunchConfiguration('replay_rate'),
-            'run_command': LaunchConfiguration('run_command'),
-            'run_notes': LaunchConfiguration('run_notes'),
+            'run_command': ParameterValue(LaunchConfiguration('run_command'), value_type=str),
+            'run_notes': ParameterValue(LaunchConfiguration('run_notes'), value_type=str),
             'use_viewer': LaunchConfiguration('use_viewer'),
 
             'use_imu': True,
@@ -110,6 +126,8 @@ def generate_launch_description():
             'sync_slop': 0.02,
 
             'filter': LaunchConfiguration('filter'),
+            'dets_csv': ParameterValue(LaunchConfiguration('dets_csv'), value_type=str),
+            'filter_mode': LaunchConfiguration('filter_mode'),
         }],
     )
 
@@ -119,7 +137,10 @@ def generate_launch_description():
         name='dynamic_detector',
         output='screen',
         emulate_tty=True,
-        condition=IfCondition(LaunchConfiguration('filter')),
+        # Live detector only when filtering AND no precomputed file was given.
+        condition=IfCondition(PythonExpression([
+            "'", LaunchConfiguration('filter'), "'.lower() in ('true', '1') and '",
+            LaunchConfiguration('dets_csv'), "' == ''"])),
         parameters=[{
             'use_sim_time': False,
             'weights_path': LaunchConfiguration('weights_path'),

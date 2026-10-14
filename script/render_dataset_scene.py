@@ -146,8 +146,10 @@ def to_px(xy, ppm):
     return np.stack([c, r], axis=1)
 
 
-def render(dataset, ppm, flip='', show_gt=True):
-    world = world_for(dataset)
+def render(dataset, ppm, flip='', show_gt=True, world=None, gt=None):
+    # world/gt override the manifest lookup for a recording that has no run
+    # manifest yet (the caller states the world; it is NOT read from the name)
+    world = world or world_for(dataset)
     if world is None:
         raise SystemExit('no world recorded for %s (looked in run manifests)' % dataset)
 
@@ -192,7 +194,7 @@ def render(dataset, ppm, flip='', show_gt=True):
 
     gt_info = None
     if show_gt:
-        g = gt_for(dataset)
+        g = gt or gt_for(dataset)
         if g is not None:
             a = np.loadtxt(g, delimiter=',', ndmin=2)
             xy = a[:, 1:3]
@@ -224,6 +226,8 @@ def main():
     ap.add_argument('--ppm', type=float, default=20.0)
     ap.add_argument('--flip', default='', choices=['', 'u', 'v', 'uv'])
     ap.add_argument('--no-gt', action='store_true')
+    ap.add_argument('--world', help='absolute .world to draw, for a dataset with no run manifest')
+    ap.add_argument('--gt', help='ground-truth CSV (t_ns,x,y,...) to draw, for a dataset with no run manifest')
     ap.add_argument('--table',
                     help='also write a LaTeX registry table of what was rendered')
     a = ap.parse_args()
@@ -246,7 +250,9 @@ def main():
     rows = []
     for ds, out in targets:
         try:
-            pil, info = render(ds, a.ppm, a.flip, show_gt=not a.no_gt)
+            pil, info = render(ds, a.ppm, a.flip, show_gt=not a.no_gt,
+                               world=a.world if not a.all else None,
+                               gt=a.gt if not a.all else None)
         except SystemExit as e:
             print('  [skip] %s: %s' % (ds, e))
             continue

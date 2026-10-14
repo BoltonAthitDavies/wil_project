@@ -213,6 +213,9 @@ def main() -> None:
     ap.add_argument('--ignore-cover', type=float, default=0.5,
                     help="prediction this covered by unlabelled box-like scenery "
                          "(shelves etc) is ignored rather than counted a FP")
+    ap.add_argument('--score-all', action='store_true',
+                    help='score every CLASS_OF class even if the loaded weights '
+                         'do not know it (counts as guaranteed misses)')
     ap.add_argument('--no-ignore', action='store_true',
                     help="score EVERY ground-truth object and every prediction, "
                          "disabling the small-box, occlusion and unlabelled-"
@@ -242,23 +245,6 @@ def main() -> None:
     tracks, frames = load_bag(a.bag)
     print(f'frames   : {len(frames)}   pose tracks: {len(tracks)}')
 
-    props, ignores = [], []
-    for name, tr in tracks.items():
-        p = G.model_prefix(name)
-        if p:
-            props.append((name, p, G.CLASS_OF[p], tr))
-            continue
-        q = G.ignore_prefix(name)
-        if q:
-            ignores.append((name, q, tr))
-    print(f'GT props : {len(props)}   ignore-region models: {len(ignores)}')
-    if not props:
-        raise SystemExit('no props matched CLASS_OF -- check the model naming')
-
-    robot = tracks.get('ackermann_robot_001')
-    if robot is None:
-        raise SystemExit('ackermann_robot_001 not in pose/info')
-
     from ultralytics import YOLO
     import torch
     model = YOLO(a.weights)
@@ -266,6 +252,41 @@ def main() -> None:
     device = ('cuda:0' if torch.cuda.is_available() else 'cpu') \
         if a.device == 'auto' else a.device
     print(f'model    : {a.weights}  device={device}  classes={list(names.values())}')
+
+    # A GT CLASS THE CHECKPOINT DOES NOT KNOW IS AN IGNORE REGION, NOT A MISS.
+    # Two checkpoints are in play: weight/best.pt (bin/box/bucket) and
+    # weight/runs_1/detect/train/weights/best.pt (those three plus forklift).
+    # Charging the 3-class weight with ten missed pallet jacks per frame would
+    # cost it roughly a fifth of its recall for failing at a task it was never
+    # trained for. Demoting the unknown class instead keeps one command directly
+    # comparable across both weights -- and keeps the detections of a class the
+    # other weight DOES know from landing as false positives. Use --score-all to
+    # force every CLASS_OF entry to be scored regardless.
+    known = set(names.values()) | (set(G.CLASS_OF.values()) if a.score_all else set())
+    demoted = sorted(set(G.CLASS_OF.values()) - known)
+
+    props, ignores = [], []
+    for name, tr in tracks.items():
+        p = G.model_prefix(name)
+        if p:
+            if G.CLASS_OF[p] in known:
+                props.append((name, p, G.CLASS_OF[p], tr))
+            else:
+                ignores.append((name, p, tr))
+            continue
+        q = G.ignore_prefix(name)
+        if q:
+            ignores.append((name, q, tr))
+    print(f'GT props : {len(props)}   ignore-region models: {len(ignores)}')
+    if demoted:
+        print(f'demoted  : {", ".join(demoted)} -- absent from this checkpoint, '
+              f'scored as ignore regions')
+    if not props:
+        raise SystemExit('no props matched CLASS_OF -- check the model naming')
+
+    robot = tracks.get('ackermann_robot_001')
+    if robot is None:
+        raise SystemExit('ackermann_robot_001 not in pose/info')
 
     ov_dir = os.path.join(a.out, 'overlay')
     if a.overlay:
@@ -281,7 +302,7 @@ def main() -> None:
 
     tot = dict(tp=0, fp=0, fn=0, tpm=0, fnm=0, tps=0, fps=0, gt=0, gtm=0, pred=0,
                ign=0, pign=0)
-    eval_classes = sorted(set(G.CLASS_OF.values()) | set(names.values()))
+    eval_classes = sorted(known | set(names.values()))
     confusion = {(gt, pred): 0
                  for gt in eval_classes + ['background']
                  for pred in eval_classes + ['background']}

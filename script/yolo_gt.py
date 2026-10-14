@@ -32,20 +32,31 @@ MODELS = os.path.normpath(os.path.join(WORLD, 'models'))
 # Gazebo model-name prefix -> YOLO class name. All Cluttering variants are one
 # class by decision; the detector was trained that way.
 CLASS_OF = {
-    'aws_robomaker_warehouse_Bucket_01':      'bucket',
-    'aws_robomaker_warehouse_ClutteringA_01': 'box',
-    'aws_robomaker_warehouse_ClutteringC_01': 'box',
-    'aws_robomaker_warehouse_ClutteringD_01': 'box',
-    'aws_robomaker_warehouse_TrashCanC_01':   'bin',
+    'aws_robomaker_warehouse_Bucket_01':       'bucket',
+    'aws_robomaker_warehouse_ClutteringA_01':  'box',
+    'aws_robomaker_warehouse_ClutteringC_01':  'box',
+    'aws_robomaker_warehouse_ClutteringD_01':  'box',
+    'aws_robomaker_warehouse_TrashCanC_01':    'bin',
+    # The 4-class checkpoint (weight/runs_1/detect/train/weights/best.pt) adds
+    # `forklift`, which fires on the AWS pallet jack -- 449 detections in 761
+    # frames at up to 0.96 confidence. It is a real class and gets scored like
+    # one. The 3-class checkpoint does not know it; yolo_eval.py demotes GT
+    # classes absent from the loaded weights to ignore regions, so the same
+    # command stays honest against either weight.
+    'aws_robomaker_warehouse_PalletJackB_01':  'forklift',
 }
 
 
 # Models that are NOT ground truth but DO contain box-like geometry the detector
 # will legitimately fire on. The AWS shelves are modelled loaded with cardboard
-# boxes, and the pallet jack carries a pallet. Scoring a detection there as a
-# false positive would punish the detector for being right about something this
-# ground truth simply does not label, so they become IGNORE regions instead:
-# a prediction landing on one counts as neither a hit nor a miss.
+# boxes. Scoring a detection there as a false positive would punish the detector
+# for being right about something this ground truth simply does not label, so
+# they become IGNORE regions instead: a prediction landing on one counts as
+# neither a hit nor a miss.
+#
+# The pallet jack used to live here. It is now a scored `forklift` class above --
+# it is the one prop the detector was explicitly taught, so hiding it behind an
+# ignore region threw away the only evidence of whether that training worked.
 #
 # (`warehouse_fill` is a directional LIGHT, not geometry -- it turns up in
 # pose/info but has nothing to project.)
@@ -53,7 +64,6 @@ IGNORE_MODELS = (
     'aws_robomaker_warehouse_ShelfD_01',
     'aws_robomaker_warehouse_ShelfE_01',
     'aws_robomaker_warehouse_ShelfF_01',
-    'aws_robomaker_warehouse_PalletJackB_01',
     'aws_robomaker_warehouse_DeskC_01',
 )
 

@@ -22,24 +22,28 @@
 \contentsline {figure}{\numberline {3.8}{\ignorespaces Baked occupancy truth of the three large-warehouse object arrangements, each \SI {42.2}{\metre } square at \SI {0.05}{\metre } per cell with origin $(-21.1,-21.1)$\nobreakspace {}m.}}{34}{figure.caption.56}%
 \contentsline {figure}{\numberline {3.9}{\ignorespaces The two recorded floor conditions, rendered across the full \SI {42.2}{\metre } floor at \SI {0.05}{\metre } per pixel.}}{34}{figure.caption.57}%
 \contentsline {figure}{\numberline {3.10}{\ignorespaces Every simulation dataset as a scene: floor treatment, object layout and ground-truth route in one view.}}{36}{figure.caption.59}%
-\contentsline {figure}{\numberline {3.11}{\ignorespaces Dimensions of the mock AMR used to test the navigation system: \SI {57}{\centi \metre } long, \SI {40.5}{\centi \metre } wide and \SI {47.5}{\centi \metre } high to the top of the sensor mast.\relax }}{40}{figure.caption.63}%
-\contentsline {figure}{\numberline {3.12}{\ignorespaces Hardware components of the mock AMR: steering servo and traction motor, BLDC drive and microcontroller on CAN, the NRU-51V computer, power supply, the AC-IMX390 stereo pair and IMU, and the Wi-Fi link to the smartphone joystick.}}{40}{figure.caption.64}%
-\contentsline {figure}{\numberline {3.13}{\ignorespaces Dimensions of the AC-IMX390 camera family in millimetres; the H190 variant at the bottom is the one used.\relax }}{41}{figure.caption.65}%
-\contentsline {figure}{\numberline {3.14}{\ignorespaces The Neousys NRU-51V (NVIDIA Jetson Xavier NX), showing the four FAKRA camera ports.\relax }}{42}{figure.caption.67}%
-\contentsline {figure}{\numberline {3.15}{\ignorespaces Dimensions of the Neousys NRU-51V in millimetres.\relax }}{42}{figure.caption.68}%
+\contentsline {figure}{\numberline {3.11}{\ignorespaces Plan of the U-shape realistic world: zones, carrier jobs and dock doors, drawn by the generator from the tables that write the world file.}}{39}{figure.caption.62}%
+\contentsline {figure}{\numberline {3.12}{\ignorespaces Plan of the I-shape realistic world, same conventions as the U-shape plan; dispatch docks are on the south wall.}}{40}{figure.caption.63}%
+\contentsline {figure}{\numberline {3.13}{\ignorespaces Baked occupancy truth of the two realistic worlds, same frame and resolution as the earlier arrangements.}}{43}{figure.caption.70}%
+\contentsline {figure}{\numberline {3.14}{\ignorespaces Scene of \repo {dataset_map_realistic}: the U-shape realistic layout and the recorded ground-truth route.}}{45}{figure.caption.72}%
+\contentsline {figure}{\numberline {3.15}{\ignorespaces Dimensions of the mock AMR used to test the navigation system: \SI {57}{\centi \metre } long, \SI {40.5}{\centi \metre } wide and \SI {47.5}{\centi \metre } high to the top of the sensor mast.\relax }}{46}{figure.caption.76}%
+\contentsline {figure}{\numberline {3.16}{\ignorespaces Hardware components of the mock AMR: steering servo and traction motor, BLDC drive and microcontroller on CAN, the NRU-51V computer, power supply, the AC-IMX390 stereo pair and IMU, and the Wi-Fi link to the smartphone joystick.}}{47}{figure.caption.77}%
+\contentsline {figure}{\numberline {3.17}{\ignorespaces Dimensions of the AC-IMX390 camera family in millimetres; the H190 variant at the bottom is the one used.\relax }}{47}{figure.caption.78}%
+\contentsline {figure}{\numberline {3.18}{\ignorespaces The Neousys NRU-51V (NVIDIA Jetson Xavier NX), showing the four FAKRA camera ports.\relax }}{48}{figure.caption.80}%
+\contentsline {figure}{\numberline {3.19}{\ignorespaces Dimensions of the Neousys NRU-51V in millimetres.\relax }}{48}{figure.caption.81}%
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Estimator comparison on \repo {dataset_allsensor_001}, world frame.}}{63}{figure.caption.97}%
-\contentsline {figure}{\numberline {4.2}{\ignorespaces Error against claimed uncertainty for \repo {dataset_allsensor_001}.}}{66}{figure.caption.103}%
-\contentsline {figure}{\numberline {4.3}{\ignorespaces Per-dataset and pooled detector scores and box-area coverage.}}{71}{figure.caption.119}%
-\contentsline {figure}{\numberline {4.4}{\ignorespaces Representative validation overlay used before accepting the offline metrics.}}{71}{figure.caption.120}%
-\contentsline {figure}{\numberline {4.5}{\ignorespaces Object-class confusion conditional on class-agnostic IoU association.}}{72}{figure.caption.123}%
-\contentsline {figure}{\numberline {4.6}{\ignorespaces Run-level anomaly diagnostics.}}{76}{figure.caption.129}%
-\contentsline {figure}{\numberline {4.7}{\ignorespaces Representative repeated-run trajectory diagnostic for \repo {dataset_dynamic_nofloortexture_00_000/logging_20260916_01}, in the same visual format as the existing comparison figures.}}{80}{figure.caption.138}%
-\contentsline {figure}{\numberline {4.8}{\ignorespaces Per-run robustness and keyframe observations for the dynamic datasets.}}{81}{figure.caption.139}%
-\contentsline {figure}{\numberline {4.9}{\ignorespaces Raw dynamic-run capacity and process-resource values.}}{81}{figure.caption.142}%
-\contentsline {figure}{\numberline {4.10}{\ignorespaces Module-latency distributions for dynamic datasets.}}{82}{figure.caption.143}%
-\contentsline {figure}{\numberline {4.11}{\ignorespaces Dense-map evaluation of \repo {map/map_tiny.db}.}}{87}{figure.caption.156}%
-\contentsline {figure}{\numberline {4.12}{\ignorespaces The same database scored against the run that built it, \repo {dataset/dataset_map_tiny}.}}{88}{figure.caption.157}%
-\contentsline {figure}{\numberline {4.13}{\ignorespaces Per-block performance in the \textbf {static} condition, over the five \repo {allsensor} datasets.}}{92}{figure.caption.164}%
-\contentsline {figure}{\numberline {4.14}{\ignorespaces Per-block performance in the \textbf {dynamic} condition, over the twelve relogged dynamic runs of each estimator.}}{96}{figure.caption.168}%
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Estimator comparison on \repo {dataset_allsensor_001}, world frame.}}{68}{figure.caption.110}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Error against claimed uncertainty for \repo {dataset_allsensor_001}.}}{71}{figure.caption.116}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Per-dataset and pooled detector scores and box-area coverage.}}{76}{figure.caption.132}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Representative validation overlay used before accepting the offline metrics.}}{76}{figure.caption.133}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Object-class confusion conditional on class-agnostic IoU association.}}{77}{figure.caption.136}%
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Run-level anomaly diagnostics.}}{81}{figure.caption.142}%
+\contentsline {figure}{\numberline {4.7}{\ignorespaces Representative repeated-run trajectory diagnostic for \repo {dataset_dynamic_nofloortexture_00_000/logging_20260916_01}, in the same visual format as the existing comparison figures.}}{85}{figure.caption.151}%
+\contentsline {figure}{\numberline {4.8}{\ignorespaces Per-run robustness and keyframe observations for the dynamic datasets.}}{86}{figure.caption.152}%
+\contentsline {figure}{\numberline {4.9}{\ignorespaces Raw dynamic-run capacity and process-resource values.}}{86}{figure.caption.155}%
+\contentsline {figure}{\numberline {4.10}{\ignorespaces Module-latency distributions for dynamic datasets.}}{87}{figure.caption.156}%
+\contentsline {figure}{\numberline {4.11}{\ignorespaces Dense-map evaluation of \repo {map/map_tiny.db}.}}{92}{figure.caption.169}%
+\contentsline {figure}{\numberline {4.12}{\ignorespaces The same database scored against the run that built it, \repo {dataset/dataset_map_tiny}.}}{93}{figure.caption.170}%
+\contentsline {figure}{\numberline {4.13}{\ignorespaces Per-block performance in the \textbf {static} condition, over the five \repo {allsensor} datasets.}}{97}{figure.caption.177}%
+\contentsline {figure}{\numberline {4.14}{\ignorespaces Per-block performance in the \textbf {dynamic} condition, over the twelve relogged dynamic runs of each estimator.}}{101}{figure.caption.181}%
 \addvspace {10\p@ }

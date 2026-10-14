@@ -43,7 +43,11 @@ File.version: "1.0"
 # dataset_dynamic_nofloortexture_02_000 logged a genuine merge, so that sequence
 # is not a like-for-like comparison. Restore stock behaviour with 1.
 loopClosing: 1
+# System.SaveAtlasToFile: "warehouse_map"
+# System.LoadAtlasFromFile: "warehouse_map"
 
+# System.SaveAtlasToFile: "warehouse_map_01_dynamic"
+# System.LoadAtlasFromFile: "warehouse_map_01_dynamic"
 #--------------------------------------------------------------------------------------------
 # Cameras
 #--------------------------------------------------------------------------------------------

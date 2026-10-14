@@ -136,6 +136,11 @@ struct TrackResult
   int frame_features{0};
   int map_matches_inliers{0};
   std::string last_reset_reason{"none"};
+  /// Motion-gate census (only when pushStereo was given vote_boxes): per box,
+  /// keypoints inside it and how many ended as pose-optimisation inliers; and
+  /// the same for the background outside every box. Raw counts; the node decides.
+  std::vector<std::pair<int, int>> box_votes;
+  std::pair<int, int> background_vote{0, 0};
 };
 
 class SlamWrapper
@@ -159,9 +164,13 @@ public:
   /// ORB-SLAM3's ORBextractor, which drops the keypoints landing on dynamic
   /// regions. Empty (the default) means no filtering at all -- not "filter
   /// nothing", but the stock upstream code path, bit for bit.
+  ///
+  /// vote_boxes (original image coordinates) asks ORB-SLAM3 for a per-box
+  /// keypoint/inlier census of this frame, returned in TrackResult::box_votes.
   void pushStereo(
     double t, const cv::Mat & left, const cv::Mat & right,
-    const cv::Mat & mask_left = cv::Mat(), const cv::Mat & mask_right = cv::Mat());
+    const cv::Mat & mask_left = cv::Mat(), const cv::Mat & mask_right = cv::Mat(),
+    const std::vector<cv::Rect2f> & vote_boxes = std::vector<cv::Rect2f>());
 
   /// Invoked on the worker thread once per tracked frame. Set before starting.
   void setResultCallback(ResultCallback cb) {callback_ = std::move(cb);}
@@ -170,6 +179,8 @@ public:
   void shutdown();
 
   std::size_t droppedFrames() const {return dropped_.load();}
+  /// Motion gate: minimum map-point age (frames) for a census inlier.
+  void setBoxVoteMinAge(int frames);
   /// Frames skipped because no IMU data covered them (inertial mode only).
   std::size_t starvedFrames() const {return imu_starved_.load();}
   TrackResult evaluationSnapshot() const;
@@ -199,6 +210,7 @@ private:
     /// this frame. cv::Mat copies are refcounted headers, so carrying them
     /// through the queue costs nothing even when a frame is dropped.
     cv::Mat mask_left, mask_right;
+    std::vector<cv::Rect2f> vote_boxes;
     std::chrono::steady_clock::time_point enqueued_at;
   };
 

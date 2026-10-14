@@ -33,6 +33,7 @@
 #include <filesystem>
 #include <iomanip>
 #include <deque>
+#include <map>
 #include <mutex>
 #include <sstream>
 #include <sys/resource.h>
@@ -91,6 +92,13 @@ public:
     filter_ = declare_parameter<bool>("filter", false);
     const auto dets_topic =
       declare_parameter<std::string>("dynamic_dets_topic", "/orbslam3/dynamic_dets");
+    // Precomputed detections (script/yolo_precompute.py). When set, the live
+    // detector is not consulted at all: every frame's boxes are looked up by the
+    // frame's OWN header stamp, so two runs of the same bag mask identical frames
+    // with identical boxes. Without it, whether a frame is masked depends on the
+    // detector keeping within det_max_age of the tracker -- which on this laptop
+    // meant 33% of frames on a warm run and 91% on a cool one.
+    dets_csv_ = declare_parameter<std::string>("dets_csv", "");
     // Detection boxes clip their objects slightly, and a feature ON the silhouette
     // of a moving crate is exactly the one that corrupts the map. Grow them.
     mask_dilate_px_ = declare_parameter<int>("mask_dilate_px", 8);
@@ -109,6 +117,48 @@ public:
     // above the observed maximum, so it only catches a genuinely runaway
     // detection while leaving normal operation consistently filtered.
     max_mask_fraction_ = declare_parameter<double>("max_mask_fraction", 0.8);
+
+    // --- motion gate ---------------------------------------------------------
+    // "class": every detected box is masked (RY-SLAM; a parked forklift loses
+    // its landmarks exactly like a moving one). "motion": a box is masked only
+    // once the tracker has seen it MOVE. The decision lags one frame by
+    // construction -- the mask is applied at feature extraction, before a pose
+    // exists for the frame -- so frame k is scored after tracking (keypoints in
+    // the box that ended as pose-optimisation inliers, against the background
+    // rate) and frame k+1's boxes inherit the verdict by IoU association.
+    // A masked box has no keypoints to re-vote, so "moving" sticks until the
+    // detection chain breaks: bounded cost, equal to class mode for that object.
+    filter_mode_ = declare_parameter<std::string>("filter_mode", "class");
+    if (filter_mode_ != "class" && filter_mode_ != "motion") {
+      throw std::runtime_error("filter_mode must be 'class' or 'motion', got '" + filter_mode_ + "'");
+    }
+    // IoU for associating a box with last frame's voted boxes.
+    motion_iou_ = declare_parameter<double>("motion_iou", 0.3);
+    // Fewer keypoints than this inside a box and the vote is withheld (verdict
+    // inherited). Masked boxes always fall here.
+    motion_min_points_ = declare_parameter<int>("motion_min_points", 15);
+    // Moving when the box's inlier ratio is below this fraction of the
+    // background's. 0.5 = "half as consistent with the ego-motion as the scene".
+    motion_inlier_ratio_ = declare_parameter<double>("motion_inlier_ratio", 0.5);
+    // Policy for a box with no association and no vote yet (first sighting).
+    // false = keep its features for one frame so it can be voted on.
+    motion_unknown_mask_ = declare_parameter<bool>("motion_unknown_mask", false);
+    // A masked box has no keypoints, so a "moving" verdict could never be
+    // revisited and one false vote would spread through IoU association until
+    // every box was masked (observed: 5255 of 6705 box-frames). Every N-th
+    // frame of a chain the box is left unpainted so the tracker re-scores it:
+    // one frame of leakage per N for a true mover, bounded cost either way.
+    motion_revote_frames_ = declare_parameter<int>("motion_revote_frames", 15);
+    // Map points younger than this (frames) do not count as census inliers:
+    // local mapping re-anchors fresh points on a slow mover every keyframe, and
+    // 0.3 s of baseline hides 2 px/frame of motion. 30 = 1 s at 30 Hz.
+    motion_min_point_age_ = declare_parameter<int>("motion_min_point_age", 30);
+    // A box is only judged once its association chain is this old (frames).
+    // The census cannot tell a mover from a static object that has just come
+    // into view -- both have only young map points -- but a box in view for a
+    // second has old points if it is static and none if it moves. Should match
+    // motion_min_point_age.
+    motion_min_box_age_ = declare_parameter<int>("motion_min_box_age", 30);
 
     world_frame_ = declare_parameter<std::string>("world_frame_id", "orbslam3_world");
     body_frame_ = declare_parameter<std::string>("body_frame_id", "base_footprint");
@@ -148,6 +198,7 @@ public:
     cfg.align_first_pose = declare_parameter<bool>("align_first_pose", false);
     cfg.wait_for_imu_init = declare_parameter<bool>("wait_for_imu_init", false);
     slam_ = std::make_unique<SlamWrapper>(cfg);
+    slam_->setBoxVoteMinAge(motion_min_point_age_);
     slam_->setResultCallback([this](const TrackResult & r) {onTrackResult(r);});
 
     if (!output_path.empty()) {
@@ -160,8 +211,18 @@ public:
       // detection was recent enough and the ones whose mask was rejected.
       if (filter_) {
         mask_log_.open(output_path + "/yolo_mask.csv");
+        if (filter_mode_ == "motion") {
+          // One row per box per tracked frame: the raw census and the verdict.
+          // This is what calibrates motion_inlier_ratio against pose/info.
+          votes_log_.open(output_path + "/motion_votes.csv");
+          if (votes_log_) {
+            votes_log_ << "timestamp_ns,box,x0,y0,x1,y1,n_kp,n_inlier,bg_kp,bg_inlier,"
+                          "inherited,verdict,box_age\n";
+          }
+        }
         if (mask_log_) {
-          mask_log_ << "timestamp_ns,n_boxes,mask_coverage,matched,det_age_ms,rejected\n";
+          mask_log_ << "timestamp_ns,n_boxes,mask_coverage,matched,det_age_ms,rejected,"
+                       "n_moving,n_static,n_unknown\n";
           RCLCPP_INFO(get_logger(), "mask log   : %s/yolo_mask.csv", output_path.c_str());
         } else {
           RCLCPP_WARN(get_logger(), "could not open %s/yolo_mask.csv",
@@ -202,6 +263,15 @@ public:
         {"det_max_age_s", std::to_string(det_max_age_)},
         {"mask_dilate_px", std::to_string(mask_dilate_px_)},
         {"max_mask_fraction", std::to_string(max_mask_fraction_)},
+        {"dets_csv", dets_csv_},
+        {"filter_mode", filter_mode_},
+        {"motion_iou", std::to_string(motion_iou_)},
+        {"motion_min_points", std::to_string(motion_min_points_)},
+        {"motion_inlier_ratio", std::to_string(motion_inlier_ratio_)},
+        {"motion_unknown_mask", motion_unknown_mask_ ? "true" : "false"},
+        {"motion_revote_frames", std::to_string(motion_revote_frames_)},
+        {"motion_min_point_age", std::to_string(motion_min_point_age_)},
+        {"motion_min_box_age", std::to_string(motion_min_box_age_)},
         {"start_wall_time_unix_ns", std::to_string(
           std::chrono::duration_cast<std::chrono::nanoseconds>(
             std::chrono::system_clock::now().time_since_epoch()).count())}
@@ -258,7 +328,13 @@ public:
         std::bind(&Orbslam3Node::onStereo, this, std::placeholders::_1, std::placeholders::_2));
     }
 
-    if (filter_) {
+    if (filter_ && !dets_csv_.empty()) {
+      loadDetsCsv(dets_csv_);
+      RCLCPP_INFO(
+        get_logger(), "filter     : ON -- masking from precomputed %s "
+        "(dilate %d px, exact-stamp lookup, nearest within %.0f ms as fallback)",
+        dets_csv_.c_str(), mask_dilate_px_, det_max_age_ * 1e3);
+    } else if (filter_) {
       dets_sub_ = create_subscription<vision_msgs::msg::Detection2DArray>(
         dets_topic, rclcpp::SensorDataQoS(),
         std::bind(&Orbslam3Node::onDetections, this, std::placeholders::_1));
@@ -268,6 +344,12 @@ public:
         dets_topic.c_str(), mask_dilate_px_, det_max_age_ * 1e3);
     } else {
       RCLCPP_INFO(get_logger(), "filter     : off (stock ORB-SLAM3 feature extraction)");
+    }
+    if (filter_) {
+      RCLCPP_INFO(
+        get_logger(), "filter mode: %s%s", filter_mode_.c_str(),
+        filter_mode_ == "motion" ?
+        " (boxes masked only after they are seen to move; verdicts lag one frame)" : "");
     }
 
     if (use_imu_) {
@@ -332,19 +414,36 @@ public:
           "filter was ON but NOT ONE frame matched a detection. Is the detector node "
           "running, and is det_max_age (%.0f ms) long enough for its inference time?",
           det_max_age_ * 1e3);
+      } else if (det_matched_ < (det_matched_ + det_missed_) * 98 / 100) {
+        // A partially masked run is the quiet failure: nothing crashed, the
+        // trajectory looks fine, and the filter was off for a chunk of it.
+        RCLCPP_WARN(
+          get_logger(),
+          "only %.1f%% of frames (%zu of %zu) had a detection to mask with; the "
+          "filter was effectively OFF for the rest. This run is NOT comparable "
+          "with a filter:=false run. Precompute detections with "
+          "script/yolo_precompute.py and pass dets_csv to make it deterministic.",
+          100.0 * det_matched_ / (det_matched_ + det_missed_), det_matched_,
+          det_matched_ + det_missed_);
       }
       if (mask_rejected_ > 0) {
         RCLCPP_WARN(
           get_logger(), "discarded %zu masks for exceeding max_mask_fraction",
           mask_rejected_);
       }
+      if (filter_mode_ == "motion") {
+        RCLCPP_INFO(
+          get_logger(), "motion gate: %zu box-frames voted moving, %zu static (motion_votes.csv)",
+          boxes_voted_moving_, boxes_voted_static_);
+      }
     }
     if (slam_ && slam_->droppedFrames() > 0) {
       RCLCPP_WARN(
         get_logger(),
-        "dropped %zu stereo frames -- tracking could not keep up. "
-        "Replay with `ros2 bag play --rate 0.5` for a clean run.",
-        slam_->droppedFrames());
+        "dropped %zu of %zu stereo frames -- tracking could not keep up. Two runs "
+        "of this bag no longer see the same images, so neither filter ON/OFF nor "
+        "repeat runs are comparable. Lower `ros2 bag play --rate` until this is 0.",
+        slam_->droppedFrames(), stereo_received_.load());
     }
     writeSummary();
   }
@@ -463,6 +562,13 @@ private:
         << "last_reset_reason," << csvEscape(last_result_.last_reset_reason) << '\n'
         << "detection_frames_matched," << det_matched_ << '\n'
         << "detection_frames_missed," << det_missed_ << '\n'
+        << "detection_match_rate," << std::fixed << std::setprecision(4)
+        << (det_matched_ + det_missed_ ?
+          static_cast<double>(det_matched_) / (det_matched_ + det_missed_) : 0.0) << '\n'
+        << "detection_source," << (!filter_ ? "none" : dets_csv_.empty() ? "live" : "file") << '\n'
+        << "filter_mode," << (filter_ ? filter_mode_ : "none") << '\n'
+        << "boxes_voted_moving," << boxes_voted_moving_ << '\n'
+        << "boxes_voted_static," << boxes_voted_static_ << '\n'
         << "masks_rejected," << mask_rejected_ << '\n';
   }
 
@@ -561,14 +667,46 @@ private:
   /// Builds the CV_8UC1 mask for a frame: 255 = static/keep, 0 = dynamic.
   /// Returns an empty Mat when filtering is off, when no detection is recent
   /// enough, or when the result would blank too much of the image.
-  cv::Mat maskFor(double t, const cv::Size & size)
+  cv::Mat maskFor(const builtin_interfaces::msg::Time & stamp, double t, const cv::Size & size)
   {
+    // Always reset: a frame with no detection must not inherit the previous
+    // frame's vote boxes, or its census would be charged to the wrong boxes.
+    vote_boxes_.clear();
     if (!filter_) {
       return cv::Mat();
     }
 
     std::vector<cv::Rect2f> boxes;
-    {
+    if (!dets_file_.empty()) {
+      // Precomputed: the frame's own stamp, exactly. The nearest-within-tolerance
+      // fallback only exists for a re-stamped replay, and it reports a nonzero
+      // age so a run that needed it is visible in yolo_mask.csv.
+      const int64_t ns = stampNs(stamp);
+      auto it = dets_file_.find(ns);
+      double age = 0.0;
+      if (it == dets_file_.end()) {
+        auto up = dets_file_.lower_bound(ns);
+        double best = det_max_age_;
+        for (auto cand : {up, up == dets_file_.begin() ? dets_file_.end() : std::prev(up)}) {
+          if (cand == dets_file_.end()) {
+            continue;
+          }
+          const double a = std::fabs(static_cast<double>(cand->first - ns)) * 1e-9;
+          if (a <= best) {
+            best = a;
+            it = cand;
+          }
+        }
+        if (it == dets_file_.end()) {
+          ++det_missed_;
+          last_ = LogRow{0, 0.0, false, -1.0, false};
+          return cv::Mat();
+        }
+        age = best;
+      }
+      boxes = it->second;
+      last_age_ = age;
+    } else {
       std::lock_guard<std::mutex> lk(dets_mu_);
       double best = det_max_age_;
       const std::vector<cv::Rect2f> * pick = nullptr;
@@ -589,11 +727,67 @@ private:
     }
     ++det_matched_;
 
+    // Motion gate: decide which of this frame's boxes get painted, remember all
+    // of them (with inherited verdicts) for the census that comes back after
+    // tracking, and hand the full list to the tracker as vote boxes.
+    std::size_t n_moving = 0, n_static = 0, n_unknown = 0;
+    vote_boxes_.clear();
+    if (filter_mode_ == "motion") {
+      std::vector<VotedBox> now;
+      now.reserve(boxes.size());
+      {
+        std::lock_guard<std::mutex> lk(votes_mu_);
+        for (const auto & b : boxes) {
+          int verdict = VERDICT_UNKNOWN;
+          int since = 0, age = 0;
+          double best = motion_iou_;
+          for (const auto & pv : prev_votes_) {
+            const double o = iou(b, pv.box);
+            if (o >= best) {
+              best = o;
+              verdict = pv.verdict;
+              since = pv.since_vote + 1;
+              age = pv.chain_age + 1;
+            }
+          }
+          now.push_back(VotedBox{b, verdict, since, age});
+        }
+        inflight_.emplace(t, now);
+        while (inflight_.size() > 30) {
+          inflight_.erase(inflight_.begin());
+        }
+      }
+      std::vector<cv::Rect2f> painted;
+      for (const auto & vb : now) {
+        vote_boxes_.push_back(vb.box);
+        if (vb.verdict == VERDICT_MOVING) {
+          ++n_moving;
+          // Probation frame: leave it unpainted so it can be re-voted.
+          const bool revote = motion_revote_frames_ > 0 &&
+            vb.since_vote >= motion_revote_frames_;
+          if (!revote) {
+            painted.push_back(vb.box);
+          }
+        } else if (vb.verdict == VERDICT_STATIC) {
+          ++n_static;
+        } else {
+          ++n_unknown;
+          if (motion_unknown_mask_) {
+            painted.push_back(vb.box);
+          }
+        }
+      }
+      boxes.swap(painted);
+    }
+    last_.n_moving = n_moving;
+    last_.n_static = n_static;
+    last_.n_unknown = n_unknown;
+
     if (boxes.empty()) {
       // A real "nothing dynamic in this frame" answer. Returning an empty Mat is
       // both correct and cheaper than an all-255 one -- ORBextractor skips the
       // per-keypoint test entirely.
-      last_ = LogRow{0, 0.0, true, last_age_, false};
+      last_ = LogRow{0, 0.0, true, last_age_, false, n_moving, n_static, n_unknown};
       return cv::Mat();
     }
 
@@ -617,7 +811,7 @@ private:
     const double fraction = dynamic_area / static_cast<double>(size.area());
     if (fraction > max_mask_fraction_) {
       ++mask_rejected_;
-      last_ = LogRow{boxes.size(), fraction, true, last_age_, true};
+      last_ = LogRow{boxes.size(), fraction, true, last_age_, true, n_moving, n_static, n_unknown};
       RCLCPP_WARN_THROTTLE(
         get_logger(), *get_clock(), 2000,
         "dynamic mask would cover %.0f%% of the frame (limit %.0f%%) -- ignoring it "
@@ -625,8 +819,110 @@ private:
         fraction * 100.0, max_mask_fraction_ * 100.0);
       return cv::Mat();
     }
-    last_ = LogRow{boxes.size(), fraction, true, last_age_, false};
+    last_ = LogRow{boxes.size(), fraction, true, last_age_, false, n_moving, n_static, n_unknown};
     return mask;
+  }
+
+  static double iou(const cv::Rect2f & a, const cv::Rect2f & b)
+  {
+    const float inter = (a & b).area();
+    const float uni = a.area() + b.area() - inter;
+    return uni > 0.f ? inter / uni : 0.0;
+  }
+
+  /// Census for frame `r.stamp` is back: turn counts into verdicts, make them the
+  /// reference for the next frame's association, and log every box.
+  void applyVotes(const TrackResult & r)
+  {
+    if (filter_mode_ != "motion") {
+      return;
+    }
+    std::lock_guard<std::mutex> lk(votes_mu_);
+    auto it = inflight_.find(r.stamp);
+    if (it == inflight_.end()) {
+      return;                               // frame was dropped before tracking
+    }
+    std::vector<VotedBox> voted = it->second;
+    inflight_.erase(inflight_.begin(), std::next(it));
+    const double bg_ratio = r.background_vote.first > 0 ?
+      static_cast<double>(r.background_vote.second) / r.background_vote.first : 0.0;
+    const int64_t ns = static_cast<int64_t>(std::llround(r.stamp * 1e9));
+    for (std::size_t j = 0; j < voted.size() && j < r.box_votes.size(); ++j) {
+      const int n_kp = r.box_votes[j].first, n_in = r.box_votes[j].second;
+      const int inherited = voted[j].verdict;
+      if (n_kp >= motion_min_points_ && voted[j].chain_age >= motion_min_box_age_) {
+        const double ratio = static_cast<double>(n_in) / n_kp;
+        voted[j].verdict = ratio < motion_inlier_ratio_ * bg_ratio ? VERDICT_MOVING : VERDICT_STATIC;
+        voted[j].since_vote = 0;
+      }
+      if (voted[j].verdict == VERDICT_MOVING) {
+        ++boxes_voted_moving_;
+      } else if (voted[j].verdict == VERDICT_STATIC) {
+        ++boxes_voted_static_;
+      }
+      if (votes_log_) {
+        const auto & b = voted[j].box;
+        votes_log_ << ns << ',' << j << ',' << std::fixed << std::setprecision(1)
+                   << b.x << ',' << b.y << ',' << b.x + b.width << ',' << b.y + b.height << ','
+                   << n_kp << ',' << n_in << ',' << r.background_vote.first << ','
+                   << r.background_vote.second << ',' << inherited << ',' << voted[j].verdict
+                   << ',' << voted[j].chain_age << '\n';
+      }
+    }
+    if (votes_log_) {
+      votes_log_.flush();
+    }
+    prev_votes_.swap(voted);
+  }
+
+  static int64_t stampNs(const builtin_interfaces::msg::Time & t)
+  {
+    return static_cast<int64_t>(t.sec) * 1000000000LL + static_cast<int64_t>(t.nanosec);
+  }
+
+  /// Reads a script/yolo_precompute.py file: '#' provenance lines, a header,
+  /// then one row per box as timestamp_ns,class,score,x0,y0,x1,y1. A frame with
+  /// nothing detected is present with an empty class, so "no boxes" and "frame
+  /// not in file" stay distinguishable -- only the latter counts as missed.
+  void loadDetsCsv(const std::string & path)
+  {
+    std::ifstream in(path);
+    if (!in) {
+      throw std::runtime_error("dets_csv: cannot open " + path);
+    }
+    std::string line;
+    std::size_t n_boxes = 0;
+    while (std::getline(in, line)) {
+      if (line.empty() || line[0] == '#' || line.rfind("timestamp_ns", 0) == 0) {
+        continue;
+      }
+      std::stringstream ss(line);
+      std::string f[7];
+      int i = 0;
+      while (i < 7 && std::getline(ss, f[i], ',')) {
+        ++i;
+      }
+      if (i < 7) {
+        continue;
+      }
+      auto & v = dets_file_[std::stoll(f[0])];
+      if (f[1].empty()) {
+        continue;
+      }
+      const float x0 = std::stof(f[3]), y0 = std::stof(f[4]);
+      const float x1 = std::stof(f[5]), y1 = std::stof(f[6]);
+      if (x1 > x0 && y1 > y0) {
+        v.emplace_back(x0, y0, x1 - x0, y1 - y0);
+        ++n_boxes;
+      }
+    }
+    if (dets_file_.empty()) {
+      throw std::runtime_error("dets_csv: no frames in " + path);
+    }
+    RCLCPP_INFO(
+      get_logger(), "dets_csv   : %zu frames, %zu boxes (%.2f per frame) from %s",
+      dets_file_.size(), n_boxes,
+      static_cast<double>(n_boxes) / dets_file_.size(), path.c_str());
   }
 
   /// One row per frame into yolo_mask.csv. Timestamp is written as integer
@@ -637,13 +933,13 @@ private:
     if (!mask_log_) {
       return;
     }
-    const int64_t ns = static_cast<int64_t>(stamp.sec) * 1000000000LL +
-      static_cast<int64_t>(stamp.nanosec);
+    const int64_t ns = stampNs(stamp);
     mask_log_ << ns << ',' << last_.n_boxes << ','
               << std::fixed << std::setprecision(4) << last_.coverage << ','
               << (last_.matched ? 1 : 0) << ','
               << std::setprecision(1) << (last_.age_s < 0 ? -1.0 : last_.age_s * 1e3)
-              << ',' << (last_.rejected ? 1 : 0) << '\n';
+              << ',' << (last_.rejected ? 1 : 0) << ',' << last_.n_moving << ','
+              << last_.n_static << ',' << last_.n_unknown << '\n';
     // Flush every row. A run is normally ended with Ctrl+C or a kill, neither of
     // which is guaranteed to run this object's destructor, and an unflushed
     // stream loses its tail -- which showed up as a half-written final line that
@@ -681,9 +977,9 @@ private:
     // script/extract_gt.py samples for ground_truth.csv, so no time alignment
     // is needed when comparing the two.
     const double t = stampSeconds(left->header.stamp);
-    const cv::Mat mask = maskFor(t, l->image.size());
+    const cv::Mat mask = maskFor(left->header.stamp, t, l->image.size());
     logMask(left->header.stamp);
-    slam_->pushStereo(t, l->image, r->image, mask);
+    slam_->pushStereo(t, l->image, r->image, mask, cv::Mat(), vote_boxes_);
   }
 
   void onStereoCompressed(
@@ -701,13 +997,14 @@ private:
       return;
     }
     const double t = stampSeconds(left->header.stamp);
-    const cv::Mat mask = maskFor(t, l.size());
+    const cv::Mat mask = maskFor(left->header.stamp, t, l.size());
     logMask(left->header.stamp);
-    slam_->pushStereo(t, l, r, mask);
+    slam_->pushStereo(t, l, r, mask, cv::Mat(), vote_boxes_);
   }
 
   void onTrackResult(const TrackResult & r)
   {
+    applyVotes(r);
     updateTrackingStats(r);
     if (!r.tracking_ok) {
       // Throttled, because NOT_INITIALIZED fires every frame for the first few
@@ -795,6 +1092,9 @@ private:
   rclcpp::Subscription<vision_msgs::msg::Detection2DArray>::SharedPtr dets_sub_;
   std::mutex dets_mu_;
   std::deque<std::pair<double, std::vector<cv::Rect2f>>> dets_;
+  /// Precomputed detections keyed by image header stamp (ns); empty = live mode.
+  std::string dets_csv_;
+  std::map<int64_t, std::vector<cv::Rect2f>> dets_file_;
   /// What maskFor() decided about the frame currently being pushed.
   struct LogRow
   {
@@ -803,8 +1103,34 @@ private:
     bool matched{false};
     double age_s{-1.0};
     bool rejected{false};
+    std::size_t n_moving{0}, n_static{0}, n_unknown{0};
   };
   LogRow last_;
+  // Motion gate state. prev_votes_ is the last tracked frame's boxes with
+  // verdicts; inflight_ holds boxes already pushed but not yet scored, by stamp.
+  static constexpr int VERDICT_UNKNOWN = 0, VERDICT_STATIC = 1, VERDICT_MOVING = 2;
+  struct VotedBox
+  {
+    cv::Rect2f box;
+    int verdict{VERDICT_UNKNOWN};
+    int since_vote{0};   ///< frames since this chain was last actually scored
+    int chain_age{0};    ///< frames this box has been associated through
+  };
+  std::string filter_mode_{"class"};
+  double motion_iou_{0.3};
+  int motion_min_points_{15};
+  double motion_inlier_ratio_{0.5};
+  bool motion_unknown_mask_{false};
+  int motion_revote_frames_{15};
+  int motion_min_point_age_{30};
+  int motion_min_box_age_{30};
+  std::mutex votes_mu_;
+  std::vector<VotedBox> prev_votes_;
+  std::map<double, std::vector<VotedBox>> inflight_;
+  std::vector<cv::Rect2f> vote_boxes_;
+  std::ofstream votes_log_;
+  std::size_t boxes_voted_moving_{0};
+  std::size_t boxes_voted_static_{0};
   double last_age_{-1.0};
   std::ofstream mask_log_;
   std::ofstream performance_log_;

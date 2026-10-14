@@ -276,9 +276,25 @@ insertion point is not sufficient for both.
 \label{sec:environments-datasets}
 \input{chapters/fragments/m3_sim_environment}
 
+\input{chapters/chapter_3_realistic_worlds}
+
 \subsection{Dataset registry}
 \label{sec:dataset-registry}
 \input{chapters/fragments/m3_dataset_registry}
+
+\paragraph{Recordings added after the cutoff.} \Cref{tab:dataset-registry} is
+the registry at 25 September 2026. Three recordings have been added since and
+are listed here so the registry stays complete; none is used by a result slot
+in \cref{chap:results}. \repo{dataset_map_realistic} (8 October 2026) is the
+first recording in the realistic family and is described in
+\cref{sec:realistic-worlds}. \repo{dataset_realv2_000} (\SI{35}{\second}) and
+\repo{dataset_realv2_001} (\SI{96}{\second}) were recorded on the real robot at
+the Gensurv site on 1 October 2026 and are the first real recordings with an
+independent ground truth: a planar optical tracker at about \SI{7}{\hertz},
+stored under \repo{dataset/gt/}. The tracker and the robot keep separate,
+unsynchronised clocks, so the time offset must be estimated per bag before
+scoring (\repo{script/eval_real_gt.py}); that scoring is provisional and is
+not reported in this document.
 
 \section{Real Platform}
 \label{sec:real-platform}

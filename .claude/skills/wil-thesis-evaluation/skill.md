@@ -127,16 +127,28 @@ The following datasets are broken and must not be selected for experiments:
 - `dataset_real_001`
 - `dataset_real_002`
 
-The other named datasets are located in
-`/home/ambushee/wil_project/dataset/`, including:
+The workspace copy `/home/ambushee/wil_project/dataset/` holds only what is in
+active use (8 October 2026):
 
-- `dataset_dynamic_nofloortexture_01_000`
-- `dataset_static_nofloortexture_001`
-- `dataset_real_000`
+- `dataset_map_realistic` -- simulation, 166 s, recorded 8 October 2026 in one of
+  the realistic worlds (Section 3.3). The bag does not say which variant; the run
+  manifest must. Carries `/clock`, both compressed cameras, IMU, ground-truth
+  odometry, joint states and `/world/default/pose/info`.
+- `dataset_realv2_000` -- real robot, Gensurv, 1 October 2026, 35 s, a straight
+  6 m line at constant speed (VIO scale is unobservable on it).
+- `dataset/gt/dataset_realv2_000` and `dataset/gt/dataset_realv2_001` -- the
+  optical tracker's planar ground truth (X, Y in cm, about 7 Hz, no heading, its
+  own time base). The robot clock is unsynchronised with it: the offset must be
+  estimated per bag (`script/eval_real_gt.py`). `/feedback/velocity` on these
+  bags is not metres per second; use its shape only.
 
-Do not mark these workspace copies as broken. Before preparing a run, report the
-resolved absolute path and inspect its topic inventory, duration, message counts,
-and storage health. Never silently replace a requested dataset with another run.
+`dataset_realv2_001` (96 s, a circle) and the earlier simulation bags
+(`dataset_dynamic_nofloortexture_01_000`, `dataset_static_nofloortexture_001`,
+the `allsensor` set, `dataset_real_000`) live on the flash drive, which is not
+always mounted. Do not mark a dataset broken because it is absent from the
+workspace copy. Before preparing a run, report the resolved absolute path and
+inspect its topic inventory, duration, message counts, and storage health. Never
+silently replace a requested dataset with another run.
 
 ### 3.3 World naming
 
@@ -148,6 +160,20 @@ and storage health. Never silently replace a requested dataset with another run.
   tiny geometry despite living in the static family directory. It is the world the
   RTAB-Map dense map (`map/map_tiny.db`) was built and evaluated against. The
   directory name does not determine the scale; the file does.
+
+The **realistic** family (6 October 2026) is generated, never hand-edited:
+`worlds/small_warehouse_dynamic/small_warehouse_dynamic_realistic_nofloortexture.world`
+is a U-shape flow (receiving and dispatch docks on the north wall) and
+`..._realistic_nofloortexture_01.world` an I-shape through flow (dispatch docks on
+the south wall), both from `script/make_realistic_world.py --layout {u,i}` with
+four pallet jacks on pick/carry/drop jobs (the `LogisticsScheduler` gz system) and four
+walking people as gz-sim actors (no collision, not baked, not in `pose/info`).
+`worlds/small_warehouse_static/small_warehouse_static_realistic_nofloortexture{,_01}.world`
+are their static twins from `script/make_static_world.py` (all includes static,
+no traffic plugin). Baked nav2 maps: `maps/baked_dynamic_realistic{,_01}/`, frame
+`--origin -21.1 -21.1 --size 844 844`. The teleop routes recorded in the older
+dynamic worlds do not fit the I-shape world. Design record: warehouse work log
+§28--28e.
 
 Always record the exact `.world` file, not only “small warehouse.” Do not compare
 metrics across different world variants as if they were repeated trials. In
@@ -227,7 +253,7 @@ Current primary artifacts are:
 | Artifact | Meaning | Typical consumer |
 |---|---|---|
 | `vio.csv` | Timestamped estimated trajectory | trajectory metrics and plots |
-| `yolo_mask.csv` | Masks actually used by the tracker | filtering coverage and timing analysis |
+| `yolo_mask.csv` | Masks actually used by the tracker | filtering coverage and timing analysis. A valid filter run has `matched=1` and `det_age_ms=0.0` on every row; `run_summary.csv` `detection_match_rate` < 0.98 or `queue_dropped_frames` > 0 means the run is not comparable with its baseline |
 | `output/yolo_eval/*/yolo_eval.csv` | YOLO predictions matched against projected Gazebo ground truth | precision, recall, IoU, and moving/static analysis |
 | `output/yolo_eval/*/yolo_detections.csv` | Per-detection offline results | threshold, class, and error analysis |
 | `output/yolo_eval/*/overlay/` | Visual GT/prediction overlays | qualitative validation of projections and matching |
@@ -360,9 +386,29 @@ when placing an RTAB-Map grid in the Gazebo-world viewer.
 ros2 launch orbslam3_ros2 wil_sim_stereo_imu.launch.py \
   output_path:=/home/ambushee/wil_project/output/output_orb/simulation/<run-id>
 
-# Dynamic-filter treatment
+# Dynamic-filter treatment. ALWAYS from a precomputed detection file: the live
+# detector runs 1-4 frames behind the tracker on this laptop and the mask was
+# present on 33% of frames on a warm run vs 91% on a cool one (same bag). With
+# dets_csv every frame is masked from its own stamp, repeat runs are identical,
+# and the detector node is not started. Precompute once per bag per weight:
+#   python3 script/yolo_precompute.py dataset/<bag> --weights weight/best.pt \
+#       --out dataset/<bag>/dets_best.csv
 ros2 launch orbslam3_ros2 wil_sim_stereo_imu.launch.py filter:=true \
+  dets_csv:=/home/ambushee/wil_project/dataset/<bag>/dets_best.csv \
+  image_transport:=compressed \
   output_path:=/home/ambushee/wil_project/output/output_orb_yolo/simulation/<run-id>
+
+# Motion-gated treatment: add filter_mode:=motion (boxes are masked only after
+# the tracker has seen them move; writes motion_votes.csv). Calibrate with
+#   python3 script/motion_votes_eval.py dataset/<bag> <run>/motion_votes.csv
+# Three-way A/B = filter:=false | filter:=true (class) | filter_mode:=motion.
+
+# image_transport:=compressed on EVERY bag replay (baseline too). The sim bags
+# carry only /camN/image_raw/compressed; the launch default `raw` only receives
+# anything through leftover `image_transport republish` processes from a VINS
+# session, whose 2.7 MB best-effort raw messages are lost nondeterministically
+# (919 vs 813 pairs in two identical runs) and duplicated when two pairs run.
+# Before any run:  pgrep -fa 'republis[h]'  and kill what you did not start.
 
 # Real rig
 ros2 launch orbslam3_ros2 wil_stereo_imu.launch.py \
@@ -378,11 +424,13 @@ ros2 run vins_fusion_ros2 vins_fusion_ros2_node --ros-args \
   -p output_path:=/home/ambushee/wil_project/output/output_vins/simulation/<run-id> \
   -p use_sim_time:=true
 
-# Simulation dynamic-filter treatment
+# Simulation dynamic-filter treatment -- same dets_csv rule as ORB-SLAM3 (8.3);
+# no detector process needed.
 ros2 run vins_fusion_ros2 vins_fusion_ros2_node --ros-args \
   -p config_file:=/home/ambushee/wil_project/vins_fusion_ros2/config/wil_sim/stereo_imu.yaml \
   -p output_path:=/home/ambushee/wil_project/output/output_vins_yolo/simulation/<run-id> \
-  -p use_sim_time:=true -p filter:=true
+  -p use_sim_time:=true -p filter:=true \
+  -p dets_csv:=/home/ambushee/wil_project/dataset/<bag>/dets_best.csv
 
 # Real rig
 ros2 run vins_fusion_ros2 vins_fusion_ros2_node --ros-args \
@@ -613,6 +661,13 @@ state and the user updates as data arrives:
 | 2 YOLO detector | completed, 4 dynamic bags, 9,860 frames | planned |
 | 3 VIO + dynamic filtering | **untested** -- VINS filter never fired, ORB confounded by frame loss; runs exist, hypothesis has no valid test | planned |
 | 4 Dense map | **partial** -- tiny map scored (occupied-cell P 96.6 %, observed-surface R 89.5 %, whole-building R 67.2 %), large map failed through tracking loss with no artifact retained | planned |
+
+Evidence gathered after the cutoff and not yet in the report (as of 8 October
+2026): the `realv2` real bags were scored against the tracker ground truth on
+6 October (provisional, lever arm assumed zero): 000 both estimators scale-short
+(VINS ATE 1.43 m, ORB 0.76 m); 001 ORB ATE 0.37 m, RPE(1 s) 0.075 m, and the VINS
+001 run failed replay-side and must be re-run. This feeds slot 4.1.2 once the
+offset and lever-arm handling are settled.
 
 "Untested" and "failed" are reported as findings, with cause where confirmed and
 untested explanations labelled as such. Weak, negative, or disappointing results

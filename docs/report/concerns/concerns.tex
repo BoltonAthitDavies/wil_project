@@ -259,7 +259,7 @@
 
 \title{Open Concerns}
 \author{Bolton Athit Davies}
-\date{25 September 2026}
+\date{09 October 2026}
 
 \begin{document}
 \maketitle
@@ -267,7 +267,7 @@
 
 \noindent
 Every passage the final report marks as \flag{queried}, and the status of each
-of its eight result slots, collected into one list. 95 items, from
+of its eight result slots, collected into one list. 98 items, from
 the final report.
 
 \medskip
@@ -429,20 +429,48 @@ before either is used for anything the floor or the object layout bears on.
 
 \medskip
 
+\subsection*{Simulation Platform: Realistic logistics layouts}
+\noindent\textbf{17.\ \flag{[Visual verification]}}\quad The generator-side checks are complete, and the first Gazebo session on
+6 October 2026 found and fixed one defect the checks could not see (a jack
+setting its load down and then stopping on the neighbouring cell, because the
+drop command carried one angle for both the parked load and the approach
+heading). Three things remain to be confirmed by eye in the simulator rather
+than by the checker: that the loads ride on the fork side of the jack, the
+shading of the generated door, trailer and yard meshes, and the open/closed
+state of each door. Until then the worlds are \status{implemented} in geometry
+and \status{partial} in visual verification.
+
+\medskip
+\noindent\textbf{18.}\quad \emph{table row:} Run manifest \textbar{} \flag{none}
+
+\medskip
+\noindent\textbf{19.\ \flag{[Provenance]}}\quad \repo{dataset_map_realistic} was recorded without a run manifest, so its
+world is not recorded anywhere. It was identified from the bag itself: the
+\repo{/world/default/pose/info} stream names 129 models whose numbering and
+composition match the regenerated U-shape world and no other, and every model
+except the robot holds the same pose from the first message to the last. That
+is consistent with the static twin, but also with the dynamic world loaded
+without its traffic plugin, and the bag cannot tell the two apart. The exact
+\texttt{.world} file must be confirmed by the operator and a manifest written
+before the recording is used in any result slot; the identification above is
+evidence, not provenance.
+
+\medskip
+
 \subsection*{Simulation Platform: Dataset registry}
-\noindent\textbf{17.}\quad \emph{table row:} \repo{dataset_static_nofloortexture_001} \textbar{} static \textbar{} 617 \textbar{} 1 \textbar{} 92.0 \textbar{} 113\,332 \textbar{} \checkmark \textbar{} \checkmark \textbar{} -- \textbar{} \flag{FD stub, WS ok}
+\noindent\textbf{20.}\quad \emph{table row:} \repo{dataset_static_nofloortexture_001} \textbar{} static \textbar{} 617 \textbar{} 1 \textbar{} 92.0 \textbar{} 113\,332 \textbar{} \checkmark \textbar{} \checkmark \textbar{} -- \textbar{} \flag{FD stub, WS ok}
 
 \medskip
-\noindent\textbf{18.}\quad \emph{table row:} \repo{dataset_dynamic_nofloortexture_01_000} \textbar{} dynamic \texttt{\_01} \textbar{} 713 \textbar{} 710 \textbar{} 165.4 \textbar{} 126\,790 \textbar{} \checkmark \textbar{} \checkmark \textbar{} -- \textbar{} \flag{FD malformed, WS ok}
+\noindent\textbf{21.}\quad \emph{table row:} \repo{dataset_dynamic_nofloortexture_01_000} \textbar{} dynamic \texttt{\_01} \textbar{} 713 \textbar{} 710 \textbar{} 165.4 \textbar{} 126\,790 \textbar{} \checkmark \textbar{} \checkmark \textbar{} -- \textbar{} \flag{FD malformed, WS ok}
 
 \medskip
-\noindent\textbf{19.}\quad \emph{table row:} \repo{dataset_real_001} \textbar{} real rig \textbar{} -- \textbar{} 2099 \textbar{} 85.5 \textbar{} 9\,629 \textbar{} -- \textbar{} -- \textbar{} -- \textbar{} \flag{0 IMU messages}
+\noindent\textbf{22.}\quad \emph{table row:} \repo{dataset_real_001} \textbar{} real rig \textbar{} -- \textbar{} 2099 \textbar{} 85.5 \textbar{} 9\,629 \textbar{} -- \textbar{} -- \textbar{} -- \textbar{} \flag{0 IMU messages}
 
 \medskip
-\noindent\textbf{20.}\quad \emph{table row:} \repo{dataset_real_002} \textbar{} real rig \textbar{} -- \textbar{} 2869 \textbar{} 113.5 \textbar{} 12\,682 \textbar{} -- \textbar{} -- \textbar{} -- \textbar{} \flag{0 IMU messages}
+\noindent\textbf{23.}\quad \emph{table row:} \repo{dataset_real_002} \textbar{} real rig \textbar{} -- \textbar{} 2869 \textbar{} 113.5 \textbar{} 12\,682 \textbar{} -- \textbar{} -- \textbar{} -- \textbar{} \flag{0 IMU messages}
 
 \medskip
-\noindent\textbf{21.\ \flag{[Data integrity]}}\quad Two drive copies are unreadable while presenting a complete, plausible
+\noindent\textbf{24.\ \flag{[Data integrity]}}\quad Two drive copies are unreadable while presenting a complete, plausible
 \repo{metadata.yaml}. \repo{dataset_static_nofloortexture_001} is a
 \SI{524288}{\byte} stub whose metadata nevertheless declares 113\,332 messages,
 and \repo{dataset_dynamic_nofloortexture_01_000} is \SI{710}{\mega\byte}---within
@@ -459,7 +487,7 @@ SQLite store and counting rows, which is now part of the pre-experiment inspecti
 in \reportref{sec:collection-validity}.
 
 \medskip
-\noindent\textbf{22.\ \flag{[Scope limit]}}\quad Only the five \repo{dataset_allsensor} bags carry wheel encoders and wheel
+\noindent\textbf{25.\ \flag{[Scope limit]}}\quad Only the five \repo{dataset_allsensor} bags carry wheel encoders and wheel
 odometry; the other thirteen recordings omit those topics entirely. The
 proprioceptive baseline of \reportref{sec:results-proprio} therefore cannot be computed
 for any dynamic condition, for the mapping bags, or for the real rig, and the
@@ -469,7 +497,7 @@ vision and most favourable to dead reckoning. Extending it requires re-recording
 with the two topics bridged, not new analysis.
 
 \medskip
-\noindent\textbf{23.\ \flag{[Excluded]}}\quad \repo{dataset_real_001} and \repo{dataset_real_002} are excluded because their
+\noindent\textbf{26.\ \flag{[Excluded]}}\quad \repo{dataset_real_001} and \repo{dataset_real_002} are excluded because their
 inertial topic \repo{/hwt101ct_yaw_publisher} contains \emph{zero} messages, so
 neither supports stereo-inertial operation at all. Their image streams are intact
 (2\,562 and 3\,405 pairs), so they remain usable for detector or image-only work.
@@ -479,7 +507,7 @@ messages.
 \medskip
 
 \subsection*{Real Platform: AMR mobile robot testbed}
-\noindent\textbf{24.}\quad The
+\noindent\textbf{27.}\quad The
 drivetrain is a rear brushless motor (Flipsky 6384) through a BLDC drive with
 a Dynamixel RX-64 steering servo, a GigaDevice GD32407V microcontroller on a CAN
 link to the NRU-51V, an LM2596 regulator from a lithium-polymer pack, and a
@@ -491,49 +519,49 @@ here follows the hardware and should be confirmed by the author.}
 \medskip
 
 \subsection*{Real Platform: Real sensor rig and calibration limits}
-\noindent\textbf{25.}\quad \emph{table row:} Second-camera intrinsics \textbar{} reuse of the first camera \textbar{} \flag{approximation}
+\noindent\textbf{28.}\quad \emph{table row:} Second-camera intrinsics \textbar{} reuse of the first camera \textbar{} \flag{approximation}
 
 \medskip
-\noindent\textbf{26.}\quad \emph{table row:} IMU-to-camera translation \textbar{} zero \textbar{} \flag{placeholder}
+\noindent\textbf{29.}\quad \emph{table row:} IMU-to-camera translation \textbar{} zero \textbar{} \flag{placeholder}
 
 \medskip
-\noindent\textbf{27.}\quad \emph{table row:} Stationary $\lVert a\rVert$ \textbar{} \SI{9.2642}{\metre\per\second\squared} \textbar{} \flag{measured, deviates from \num{9.81}}
+\noindent\textbf{30.}\quad \emph{table row:} Stationary $\lVert a\rVert$ \textbar{} \SI{9.2642}{\metre\per\second\squared} \textbar{} \flag{measured, deviates from \num{9.81}}
 
 \medskip
 
 \subsection*{The Four Experiments: Experiment 1: Non-visual baseline and estimator comparison}
-\noindent\textbf{28.}\quad \emph{table row:} accelerometer $x$ bias \textbar{} 0.0191 \textbar{} 0.0304 \textbar{} \flag{0.0683} \textbar{} 0.0309 \textbar{} 0.0016 \textbar{} \si{\metre\per\second\squared}
+\noindent\textbf{31.}\quad \emph{table row:} accelerometer $x$ bias \textbar{} 0.0191 \textbar{} 0.0304 \textbar{} \flag{0.0683} \textbar{} 0.0309 \textbar{} 0.0016 \textbar{} \si{\metre\per\second\squared}
 
 \medskip
-\noindent\textbf{29.}\quad \emph{table row:} accelerometer $x$ scale \textbar{} 1.0199 \textbar{} 1.0249 \textbar{} \flag{1.0669} \textbar{} \flag{1.0525} \textbar{} \flag{1.0465} \textbar{} --
+\noindent\textbf{32.}\quad \emph{table row:} accelerometer $x$ scale \textbar{} 1.0199 \textbar{} 1.0249 \textbar{} \flag{1.0669} \textbar{} \flag{1.0525} \textbar{} \flag{1.0465} \textbar{} --
 
 \medskip
-\noindent\textbf{30.}\quad \emph{table row:} accelerometer $x$ scale \textbar{} 1.0199 \textbar{} 1.0249 \textbar{} \flag{1.0669} \textbar{} \flag{1.0525} \textbar{} \flag{1.0465} \textbar{} --
+\noindent\textbf{33.}\quad \emph{table row:} accelerometer $x$ scale \textbar{} 1.0199 \textbar{} 1.0249 \textbar{} \flag{1.0669} \textbar{} \flag{1.0525} \textbar{} \flag{1.0465} \textbar{} --
 
 \medskip
-\noindent\textbf{31.}\quad \emph{table row:} accelerometer $x$ scale \textbar{} 1.0199 \textbar{} 1.0249 \textbar{} \flag{1.0669} \textbar{} \flag{1.0525} \textbar{} \flag{1.0465} \textbar{} --
+\noindent\textbf{34.}\quad \emph{table row:} accelerometer $x$ scale \textbar{} 1.0199 \textbar{} 1.0249 \textbar{} \flag{1.0669} \textbar{} \flag{1.0525} \textbar{} \flag{1.0465} \textbar{} --
 
 \medskip
-\noindent\textbf{32.}\quad \emph{table row:} yaw-rate scale, bicycle \textbar{} 1.0110 \textbar{} 0.9527 \textbar{} 1.0034 \textbar{} \flag{0.9375} \textbar{} \flag{0.9250} \textbar{} --
+\noindent\textbf{35.}\quad \emph{table row:} yaw-rate scale, bicycle \textbar{} 1.0110 \textbar{} 0.9527 \textbar{} 1.0034 \textbar{} \flag{0.9375} \textbar{} \flag{0.9250} \textbar{} --
 
 \medskip
-\noindent\textbf{33.}\quad \emph{table row:} yaw-rate scale, bicycle \textbar{} 1.0110 \textbar{} 0.9527 \textbar{} 1.0034 \textbar{} \flag{0.9375} \textbar{} \flag{0.9250} \textbar{} --
+\noindent\textbf{36.}\quad \emph{table row:} yaw-rate scale, bicycle \textbar{} 1.0110 \textbar{} 0.9527 \textbar{} 1.0034 \textbar{} \flag{0.9375} \textbar{} \flag{0.9250} \textbar{} --
 
 \medskip
-\noindent\textbf{34.}\quad \emph{table row:} Window \textbar{} static duration \textbar{} 0.68 \textbar{} 0.58 \textbar{} 1.54 \textbar{} 1.04 \textbar{} \flag{0.52} \textbar{} \si{\second}
+\noindent\textbf{37.}\quad \emph{table row:} Window \textbar{} static duration \textbar{} 0.68 \textbar{} 0.58 \textbar{} 1.54 \textbar{} 1.04 \textbar{} \flag{0.52} \textbar{} \si{\second}
 
 \medskip
-\noindent\textbf{35.}\quad \moved{$\sigma_b$, the bias random walk, is assumed rather
+\noindent\textbf{38.}\quad \moved{$\sigma_b$, the bias random walk, is assumed rather
 than measured: the longest stationary window in any recording is
 \SI{1.54}{\second} and an Allan-variance estimate needs minutes.}
 
 \medskip
 
 \subsection*{Planned Versus Implemented}
-\noindent\textbf{36.}\quad \emph{table row:} Real-robot evaluation \textbar{} metric accuracy against ground truth \textbar{} calibration-limited, no independent trajectory truth \textbar{} \flag{blocked}
+\noindent\textbf{39.}\quad \emph{table row:} Real-robot evaluation \textbar{} metric accuracy against ground truth \textbar{} calibration-limited, no independent trajectory truth \textbar{} \flag{blocked}
 
 \medskip
-\noindent\textbf{37.}\quad \emph{table row:} Metric infrastructure \textbar{} resource, throughput, uncertainty, manifests \textbar{} partially implemented; RPE now complete \textbar{} \flag{incomplete}
+\noindent\textbf{40.}\quad \emph{table row:} Metric infrastructure \textbar{} resource, throughput, uncertainty, manifests \textbar{} partially implemented; RPE now complete \textbar{} \flag{incomplete}
 
 \medskip
 

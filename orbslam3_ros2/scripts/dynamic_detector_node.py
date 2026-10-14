@@ -22,10 +22,13 @@ WHY THE DETECTIONS ARE NOT IN THE STEREO SYNC
     stamp, never now(). Do not "fix" that.
 
 WEIGHT-AGNOSTIC BY DESIGN
-    dynamic_classes is a list of class NAMES, resolved against the model's own
-    names dict at load. Point weights_path at a different .pt and the node adapts;
-    names that the model does not know are reported loudly at startup rather than
-    silently never firing.
+    dynamic_classes defaults to `auto`: whatever the loaded checkpoint was trained
+    to find is what gets masked. Point weights_path at a different .pt and the
+    filter widens or narrows with it -- swapping the 3-class weight for the
+    4-class one picks up `forklift` without touching a launch file. Pass an
+    explicit list of class NAMES to narrow it; those are resolved against the
+    model's own names dict at load, and names the model does not know are
+    reported loudly at startup rather than silently never firing.
 """
 
 from __future__ import annotations
@@ -95,8 +98,24 @@ class DynamicDetectorNode(Node):
         transport = self.declare_parameter("image_transport", "raw").value
         dets_topic = self.declare_parameter(
             "detections_topic", "/orbslam3/dynamic_dets").value
-        wanted = list(self.declare_parameter(
-            "dynamic_classes", ["bin", "box", "bucket"]).value)
+        # WHICH CLASSES COUNT AS DYNAMIC FOLLOWS THE WEIGHT, NOT A HARDCODED LIST.
+        # The default `auto` masks every class the checkpoint was trained on, so
+        # swapping weights/best.pt (bin/box/bucket) for runs_1 (those three plus
+        # forklift) widens the filter by itself. A hardcoded list silently drops
+        # the new class: the node starts, publishes, filters -- and ignores the
+        # one object the retrain was for. Pass an explicit list to narrow it.
+        # The default is the WORD "auto", not an empty list, for two independent
+        # reasons -- both of which are startup crashes, not warnings:
+        #   * launch_ros rejects `[]` as a parameter value outright ("Expected a
+        #     non-empty sequence", evaluate_parameters.py).
+        #   * rclpy infers BYTE_ARRAY from an empty-list default and does NOT
+        #     take the type from the ParameterDescriptor, so any string-array
+        #     override then fails with InvalidParameterTypeException.
+        # An empty list is still accepted if something manages to supply one.
+        wanted = [str(w).strip() for w in (self.declare_parameter(
+            "dynamic_classes", ["auto"]).value or [])]
+        auto_classes = not wanted or (
+            len(wanted) == 1 and wanted[0].lower() in ("auto", "all", "*"))
         self.conf = float(self.declare_parameter("conf", 0.35).value)
         self.iou = float(self.declare_parameter("iou", 0.5).value)
         self.imgsz = int(self.declare_parameter("imgsz", 640).value)
@@ -133,17 +152,32 @@ class DynamicDetectorNode(Node):
         by_name = {str(v).lower(): int(k) for k, v in names.items()}
         self.keep_ids: List[int] = []
         missing: List[str] = []
-        for name in wanted:
-            key = str(name).strip().lower()
-            if key in by_name:
-                self.keep_ids.append(by_name[key])
-            else:
-                missing.append(str(name))
+        if auto_classes:
+            self.keep_ids = sorted(int(k) for k in names)
+        else:
+            for name in wanted:
+                key = name.lower()
+                if key in by_name:
+                    self.keep_ids.append(by_name[key])
+                else:
+                    missing.append(name)
         self.names = names
 
         resolved = ", ".join(f"{names[i]}({i})" for i in self.keep_ids) or "none"
         self.get_logger().info(
-            f"classes    : resolved {len(self.keep_ids)}/{len(wanted)} -- {resolved}")
+            f"classes    : {'auto' if auto_classes else 'explicit'} -- "
+            f"{len(self.keep_ids)} of the model's {len(names)} -- {resolved}")
+        # Only reachable with an explicit list. The model knowing a class you did
+        # NOT ask for is the quiet failure mode: nothing is missing, so the
+        # warning below never fires, and the class is dropped inside ultralytics
+        # before it is ever predicted. Narrowing to a list and then swapping to a
+        # checkpoint with an extra class looks exactly like a working run.
+        unused = [v for k, v in names.items() if int(k) not in self.keep_ids]
+        if unused:
+            self.get_logger().warn(
+                f"model also knows {', '.join(map(str, unused))} -- NOT being "
+                f"masked. Drop dynamic_classes (or set it to ['auto']) to mask "
+                f"everything the weight knows.")
         if missing:
             self.get_logger().warn(
                 f"these dynamic_classes are NOT in the model: {', '.join(missing)} "

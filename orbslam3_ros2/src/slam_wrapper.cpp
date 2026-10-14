@@ -156,9 +156,17 @@ SlamWrapper::drainImuUpTo(double t)
   return out;
 }
 
+void SlamWrapper::setBoxVoteMinAge(int frames)
+{
+  if (slam_) {
+    slam_->SetBoxVoteMinAge(frames);
+  }
+}
+
 void SlamWrapper::pushStereo(
   double t, const cv::Mat & left, const cv::Mat & right,
-  const cv::Mat & mask_left, const cv::Mat & mask_right)
+  const cv::Mat & mask_left, const cv::Mat & mask_right,
+  const std::vector<cv::Rect2f> & vote_boxes)
 {
   {
     std::lock_guard<std::mutex> lk(frame_mu_);
@@ -173,7 +181,8 @@ void SlamWrapper::pushStereo(
       ++dropped_;
     }
     frame_q_.push_back(
-      PendingFrame{t, left, right, mask_left, mask_right, std::chrono::steady_clock::now()});
+      PendingFrame{t, left, right, mask_left, mask_right, vote_boxes,
+        std::chrono::steady_clock::now()});
   }
   frame_cv_.notify_one();
 }
@@ -231,8 +240,19 @@ void SlamWrapper::workerLoop()
     // they were appended last, so every unpatched call site still compiles.
     const auto tracking_start = std::chrono::steady_clock::now();
     const Sophus::SE3f Tcw = slam_->TrackStereo(
-      frame.left, frame.right, frame.t, imu, "", frame.mask_left, frame.mask_right);
+      frame.left, frame.right, frame.t, imu, "", frame.mask_left, frame.mask_right,
+      frame.vote_boxes);
     const auto tracking_end = std::chrono::steady_clock::now();
+    if (!frame.vote_boxes.empty()) {
+      std::vector<ORB_SLAM3::System::BoxVote> votes;
+      ORB_SLAM3::System::BoxVote bg;
+      slam_->GetBoxVotes(votes, bg);
+      r.box_votes.reserve(votes.size());
+      for (const auto & v : votes) {
+        r.box_votes.emplace_back(v.n_kp, v.n_inlier);
+      }
+      r.background_vote = {bg.n_kp, bg.n_inlier};
+    }
 
     r.imu_samples = imu.size();
     r.tracking_ms = std::chrono::duration<double, std::milli>(

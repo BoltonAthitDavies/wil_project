@@ -1,17 +1,27 @@
 import cv2
 import numpy as np
+import av
 from pathlib import Path
 from rosbags.highlevel import AnyReader
 from rosbags.typesys import Stores, get_typestore
 
 # --- Configuration ---
-bagpath = Path('/home/ambushee/wil_project/dataset/yolo_dataset') # Point to the directory containing the .db3
+# bagpath = Path('/home/ambushee/wil_project/dataset/yolo_dataset') # Point to the directory containing the .db3
+# topic_name = '/cam1/image_raw/compressed'      # Replace with your actual topic
+bagpath = Path('/home/ambushee/wil_project/dataset/dataset_map_realistic') # Point to the directory containing the .db3
 topic_name = '/cam1/image_raw/compressed'      # Replace with your actual topic
-output_video = 'output.mp4'
+output_video = '/home/ambushee/wil_project/dataset/dataset_map_realistic/output.mp4'
 fps = 30                                         # Adjust to match your sensor's publish rate
+crf = 18                                         # H.264 quality: lower = better/larger (18 ~ visually lossless, 23 = x264 default)
+preset = 'medium'                                # x264 speed/size trade-off: ultrafast ... veryslow
 # ---------------------
 
-video_writer = None
+# NOTE: OpenCV's bundled FFmpeg has no software H.264 encoder (cv2.VideoWriter
+# with 'avc1'/'H264' fails), so the MP4 is written with PyAV + libx264 instead.
+
+container = None
+stream = None
+n_frames = 0
 
 # 1. Load the default message type definitions for ROS 2
 typestore = get_typestore(Stores.ROS2_HUMBLE)
@@ -44,17 +54,31 @@ with AnyReader([bagpath], default_typestore=typestore) as reader:
         if cv_image is None:
             continue
             
-        # Initialize the VideoWriter on the first frame once dimensions are known
-        if video_writer is None:
+        # Initialize the H.264 encoder on the first frame once dimensions are known
+        if container is None:
             height, width, _ = cv_image.shape
-            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-            video_writer = cv2.VideoWriter(output_video, fourcc, fps, (width, height))
-            print(f"Video dimensions: {width}x{height} at {fps} FPS")
-            
-        video_writer.write(cv_image)
+            # yuv420p (the universally playable H.264 pixel format) needs even dimensions
+            width -= width % 2
+            height -= height % 2
+            container = av.open(output_video, mode='w')
+            stream = container.add_stream('libx264', rate=fps)
+            stream.width = width
+            stream.height = height
+            stream.pix_fmt = 'yuv420p'
+            stream.options = {'crf': str(crf), 'preset': preset}
+            print(f"Video dimensions: {width}x{height} at {fps} FPS (H.264 / libx264, crf={crf}, preset={preset})")
+        
+        cv_image = cv_image[:stream.height, :stream.width]
+        frame = av.VideoFrame.from_ndarray(cv_image, format='bgr24')
+        for packet in stream.encode(frame):
+            container.mux(packet)
+        n_frames += 1
 
-if video_writer is not None:
-    video_writer.release()
-    print(f"Success! Video saved to {output_video}")
+if container is not None:
+    # Flush any frames still buffered inside the encoder
+    for packet in stream.encode():
+        container.mux(packet)
+    container.close()
+    print(f"Success! {n_frames} frames saved to {output_video}")
 else:
     print("No valid images were found to write.")

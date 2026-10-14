@@ -442,3 +442,288 @@ under `/media/ambushee/32E4AAB1E4AA772F/dataset/`. On 2026-09-17 all 66
 `output/output_*/**/run_metadata.csv` files were audited and 15 wrong
 `dataset_path` entries were corrected. All corrected paths existed; no measured
 data or trajectories were edited.
+
+## 12. Making filter runs deterministic — precomputed detections (2026-10-12)
+
+### What went wrong
+
+Two filter-ON runs of `dataset_allsensor_realistic_003`, same code, same config,
+ten minutes apart:
+
+| run | first-window `tracking_ms` | frames with a mask |
+|---|---|---|
+| 13:36 | 96.1 | **33 %** (289 / 875) |
+| 13:46 | 57.4 | **91 %** (2419 / 2663) |
+
+The detector never crashed (launch log: it died only on the user's Ctrl-C). It
+ran a whole number of frames behind the tracker, and `det_max_age = 150 ms`
+accepts four frames (132 ms) and refuses five (165 ms) — `det_age_ms` on matched
+frames is quantised to 33/66/99/132 and never reaches 165. Whenever ORB's own
+per-frame time rose (map growth, or a warm laptop: this machine's
+`package_throttle_total_time` is 17 min and its idle clock 1.48 GHz against a
+4.6 GHz max) the detector slipped to five frames and the mask vanished, writing
+`matched=0, det_age_ms=-1` — the same row a dead detector writes. Mask
+availability tracked `tracking_ms` directly: 98–100 % below 80 ms, 88 % at
+100–120 ms, 68 % at 140–160 ms.
+
+So "filter ON" was a different method every run, and depended on CPU
+temperature. The ten-second `det_matched_ == 0` warning never fired because the
+match was never zero. A partially masked run is the quiet failure.
+
+A second, independent nondeterminism surfaced while testing the fix (see §12.3).
+
+### 12.1 The fix: detections become a file
+
+`script/yolo_precompute.py` runs the weight over every `/cam0` frame of a bag
+once and writes `timestamp_ns,class,score,x0,y0,x1,y1`, one row per box, with a
+row of empty class for frames that had none (so "nothing detected" and "frame
+not in file" stay distinguishable). Provenance (`weights`, `conf`, `iou`,
+`imgsz`, `classes`, `bag`) is a `#` line at the top. ~45 fps on the GPU; a
+3547-frame bag takes 80 s. The class set follows the weight exactly as the live
+node's `auto` does.
+
+Both nodes gained `dets_csv`. When set with `filter=true`:
+- no detection subscription is created and (ORB launch files) the detector
+  process is not spawned — `IfCondition` on `filter and dets_csv == ''`;
+- `maskFor()` looks the frame up by its **exact header stamp**; nearest-within-
+  `det_max_age` is a fallback for a re-stamped replay and reports a nonzero age
+  so a run that needed it is visible in `yolo_mask.csv`;
+- everything downstream (dilation, `max_mask_fraction`, logging) is unchanged.
+
+`run_summary.csv` gains `detection_match_rate` and `detection_source`
+(`none|live|file`). At shutdown the node now warns when the match rate is below
+98 % (the quiet failure above) and the dropped-frames warning states that the
+run is not comparable with anything.
+
+### 12.2 Acceptance test — passed
+
+Two consecutive runs, `realistic_003`, `filter:=true dets_csv:=dets_best.csv
+image_transport:=compressed`, bag at `--rate 0.3` for 200 s wall:
+
+```
+                          run 1     run 2
+stereo_pairs_received      1128      1137
+queue_dropped_frames          0         0
+detection_match_rate     1.0000    1.0000
+det_age_ms (every row)      0.0       0.0
+common stamps              1128  ->  yolo_mask.csv rows that differ: 0
+exclusive stamps              9  ->  all at the window edges (run 2 started earlier)
+```
+
+Identical frames, identical masks, no detector process. Rate 0.3 is what this
+laptop needs for `queue_dropped = 0`; at 1.0 it dropped 39 % and 18 % of pairs in
+the two runs above.
+
+### 12.3 The second trap: stale republishers and the `raw` default
+
+The first acceptance pair FAILED on the frame set — 919 vs 813 pairs over the
+same window, `queue_dropped = 0` in both, 394 stamps present in only one run —
+while the masks on common stamps were already identical. Cause: the sim bags
+carry **only** `/camN/image_raw/compressed`, but `wil_sim_stereo_imu.launch.py`
+defaults `image_transport:=raw`. The node was receiving raw images through two
+`image_transport republish` processes left running from the user's 13:34 VINS
+session. Raw 1280×720 rgb8 is 2.7 MB per message; over best-effort DDS loopback
+that path loses frames nondeterministically, and a second republisher pair on the
+same topics (a later VINS run) delivers every frame twice — the duplicate
+`yolo_mask.csv` rows noted earlier in this record. None of this is visible from
+inside the node.
+
+Rule, now in the evaluation skill: replay into ORB with
+`image_transport:=compressed` (the node decodes JPEG itself, no republisher at
+all), and `pgrep -fa 'republis[h]'` before every run.
+
+### 12.4 Files
+
+| file | change |
+|---|---|
+| `script/yolo_precompute.py` | new |
+| `src/orbslam3_node.cpp` | `dets_csv` param, `loadDetsCsv()`, `stampNs()`, file branch in `maskFor()`, match-rate warning, summary rows |
+| `launch/wil_sim_stereo_imu.launch.py`, `launch/wil_stereo_imu.launch.py` | `dets_csv` arg; detector spawned only when live |
+| `scripts/dynamic_detector_node.py` | `dynamic_classes` default `auto` = every class of the loaded weight (the sentinel is a word, not `[]`: launch_ros rejects an empty sequence and rclpy infers BYTE_ARRAY from an empty default -- both are startup crashes, explained in the node) |
+| `.claude/skills/wil-thesis-evaluation/skill.md` | recipes use `dets_csv` + `image_transport:=compressed` |
+
+Precomputed files for `realistic_003` live next to the bag:
+`dets_best.csv` (3-class: box 11941, bucket 3056, bin 106) and `dets_runs1.csv`
+(4-class: box 10381, bucket 5646, forklift 2893, bin 228).
+
+## 13. Motion-gated masking — `filter_mode:=motion` (2026-10-12/14)
+
+### Why
+
+Class masking (§1–§7) removes every detected bin, box, bucket and forklift,
+moving or not. In `realistic_000` nothing moves, so the filter can only delete
+good landmarks; in `realistic_002/003` ten to twelve props move among ~150
+static ones (see the auto-memory note `realistic-bags-dynamic-content`), so
+most of what the filter removes is still static scenery. IQ-VIO (Zhang et al.
+2023) goes the other way — keeps every feature and distrusts the EKF
+measurement — which protects the fused output but not the map. Neither decides
+per object. This mode does: a box is masked only after the tracker has seen it
+move.
+
+### How it works
+
+The mask is applied inside `ORBextractor`, before a pose exists for the frame,
+so the decision for frame *k* cannot gate frame *k* itself. It gates the next:
+
+1. **Census (fork, `System::TrackStereo(..., voteBoxes)`).** After tracking,
+   count for each box the left keypoints inside it and how many ended the frame
+   as pose-optimisation inliers — a map point that survived `TrackLocalMap`
+   **and has `Observations() > 0`**, i.e. is anchored at a keyframe. The same
+   counts are taken for the background outside every box. Raw counts only;
+   `GetBoxVotes()` returns them, the wrapper carries them in
+   `TrackResult::box_votes`.
+2. **Verdict (node, `applyVotes()`).** `ratio = n_inlier / n_kp`;
+   `moving` if `ratio < motion_inlier_ratio × background_ratio`, else `static`;
+   withheld (verdict inherited) if `n_kp < motion_min_points`.
+3. **Association (node, `maskFor()`).** Each box of frame *k+1* inherits the
+   verdict of the frame-*k* box with the highest IoU ≥ `motion_iou`; otherwise
+   `unknown` (left unpainted unless `motion_unknown_mask`). Only `moving` boxes
+   are painted.
+4. **Re-vote probation.** A painted box has no keypoints, so its verdict could
+   never be revisited. Every `motion_revote_frames` (15) frames of a chain the
+   box is left unpainted for one frame so it is scored again.
+
+Parameters, defaults: `motion_iou` 0.3, `motion_min_points` 8→**15**,
+`motion_inlier_ratio` 0.5, `motion_unknown_mask` false, `motion_revote_frames`
+15. `yolo_mask.csv` gains `n_moving,n_static,n_unknown`; `motion_votes.csv`
+records every box-frame census and verdict; `run_summary.csv` gains
+`filter_mode`, `boxes_voted_moving/static`.
+
+### Calibration tooling
+
+`script/motion_votes_eval.py <bag> motion_votes.csv` projects the true props
+into cam0 at each row's stamp (yolo_eval.py machinery), labels the voted box's
+prop MOVING/STATIC from `pose/info` speed, and prints the verdict-vs-truth
+confusion, the box/background ratio distributions per truth class, and a
+`min_points × ratio` sweep of recall vs false alarm on the same census.
+
+### Run 1 (2026-10-12, defaults, no re-vote, temporal points counted) — FAILED
+
+`realistic_003`, `dets_runs1.csv`, rate 0.3, 1720 frames, match rate 1.0.
+
+```
+truth / verdict   unknown   static   moving
+moving                 22       37      680
+static                 82     1107     5105     <- 81 % of static boxes masked
+none                  128      215      683
+census, voted rows only (n_kp >= 8): moving n=44, static n=1042
+  box/bg inlier ratio   moving: p25 0.25 median 0.78 p75 1.57
+                        static: p10 0.65 median 1.32 p75 1.78
+sweep (recall / false alarm):  ratio 0.25: 0.25 / 0.052   0.5: 0.39 / 0.077   0.75: 0.48 / 0.124
+```
+
+Two faults, one of design and one of signal:
+
+- **Runaway.** With ~5 static boxes per frame, a 5–8 % per-vote false alarm and
+  no way to revisit a painted box, one bad vote spread through IoU association
+  until motion mode had collapsed into class mode by t≈105 s. Fixed by the
+  re-vote probation (step 4).
+- **Weak signal.** The movers in this bag travel 0.17–0.27 m/s ≈ 2 px per frame
+  at 3 m. ORB creates *temporal* map points from the previous frame's stereo
+  depth every frame (`UpdateLastFrame`); 2 px of motion sits inside the
+  projection search window, so a slow mover's temporal points match and count
+  as inliers. Only map points anchored at keyframes — seconds of baseline —
+  expose the motion. Fixed by counting only `Observations() > 0`, which is what
+  `mnMatchesInliers` itself does.
+
+Run 2 (both fixes, `min_points 15`) is recorded below.
+
+### Run 2 (2026-10-14, `motion_20261014_02`: keyframe-anchored census + re-vote, `min_points 15`)
+
+1721 frames, match rate 1.0, 0 drops, 1379 frames painted.
+
+```
+truth / verdict   unknown   static   moving
+moving                 22       78      639
+static                 79     2888     3328     <- 53 % of static boxes masked (was 81 %)
+census, voted rows (n_kp >= 15): moving n=101, static n=2646
+  box/bg inlier ratio   moving: p10 0.00 p25 0.00 median 0.54 p75 1.29
+                        static: p10 0.58 median 1.24 p75 1.60
+sweep (recall / false alarm), min_pts 15:  ratio 0.25 0.37/0.070   0.50 0.49/0.090   0.75 0.59/0.142
+```
+
+Better on both counts, still weak: recall 0.49 at 9 % false alarm against
+VINS's 0.87 at 1.1 % (VINS record §10). A quarter of moving votes are a clean
+0.00; the median is dragged up because local mapping inserts a keyframe every
+~10 frames and re-anchors *fresh* map points on the mover — "keyframe-anchored"
+is only ~0.3 s of baseline, and 0.3 s × 0.2 m/s is still inside the match
+window. Run 3 adds a map-point age floor (`motion_min_point_age`, 30 frames =
+1 s; `System::SetBoxVoteMinAge`), which is what VINS's solved-depth criterion
+implies for free.
+
+Incidental: run 2's first attempt died at launch because `run_notes` contained
+a colon — `launch_ros` YAML-parses every string parameter, so `a: b` becomes a
+dict and the launch aborts. Both launch files now wrap the free-text arguments
+(`experiment_id`, `dataset_path`, `world_path`, `run_command`, `run_notes`,
+`dets_csv`) in `ParameterValue(..., value_type=str)`.
+
+### Run 3 (2026-10-14, `motion_20261014_03`: + map-point age floor 30 frames)
+
+```
+truth / verdict   unknown   static   moving
+moving                 32       62      645
+static               272     2093     3930     <- 62 % of static boxes masked (worse)
+census, voted rows (n_kp >= 15): moving n=85, static n=1968
+  box/bg inlier ratio   moving: p10 0.00 p25 0.00 median 0.00 p75 2.47
+                        static: p10 0.00 p25 0.78 median 1.54 p75 3.23
+sweep, min_pts 15:  ratio 0.25 0.58/0.128   0.50 0.62/0.154   0.75 0.67/0.237
+```
+
+The age floor did what it was meant to on movers — the median is now a clean
+0.00 — and did the same to **static objects that had just come into view**:
+all their map points are young too, so p10 of the static distribution is also
+0.00 and the false alarm rate doubled to 15 %. The background ratio does not
+compensate, because the background still contains long-seen regions. The
+one-frame census cannot distinguish "moving" from "new"; the confound is scene
+novelty, not signal quality.
+
+The node can: a box's IoU association chain already measures how long it has
+been in view. Run 4 adds `motion_min_box_age` (30 frames): a box is judged only
+once its chain is a second old — by then a static box has old points and a
+mover has none. `motion_votes.csv` gains a `box_age` column, and
+`motion_votes_eval.py --min-box-age` restricts the sweep the same way.
+
+### Run 4 (2026-10-14, `motion_20261014_04`: + box chain age 30) — current defaults
+
+```
+truth / verdict   unknown   static   moving
+moving                267       59      413     <- 56 % of moving box-frames masked
+static              1706     2675     1887     <- 30 % of static box-frames masked
+census, voted rows (n_kp >= 15, box_age >= 30): moving n=72, static n=2502
+  box/bg inlier ratio   moving: p10 0.00 p25 0.00 median 0.72 p75 3.32
+                        static: p10 0.72 p25 1.15 median 2.02 p75 3.07
+sweep, min_pts 15:  ratio 0.25 0.35/0.028   0.50 0.43/0.050   0.75 0.50/0.110
+```
+
+Progression of static box-frames wrongly masked: 81 % → 53 % → 62 % → **30 %**;
+per-vote false alarm 7.7 % → 9.0 % → 15.4 % → **5.0 %**; per-vote recall
+0.39 → 0.49 → 0.62 → **0.43**. The chain-age gate removed the novelty false
+alarms the age floor had introduced, at the cost of the recall the age floor
+had bought: a mover's box is only judged after a second in view, and by then
+ORB has often re-matched it to young points that pass the floor.
+
+**Where this leaves ORB-SLAM3 motion mode.** Against class mode (which masks
+100 % of static and 100 % of detected moving boxes), run 4 keeps 70 % of the
+static landmarks class mode throws away while still masking 56 % of the moving
+box-frames. The per-vote discrimination is mediocre (0.43 / 5.0 %) and the
+remaining static masking is inherited stickiness between re-vote probations.
+VINS's census is far cleaner (§10 of its record: 0.62 / 0.8 %) because a solved
+sliding-window depth is a stronger consistency test than a one-frame inlier
+flag. Whether 30 %-of-static / 56 %-of-moving beats 100 % / 100 % for the
+trajectory is exactly what the three-way A/B measures; it is not decidable
+from the census.
+
+Stopped iterating here (four runs). If it is resumed, the next lever is the
+census itself, not the thresholds: an ORB analogue of VINS's criterion would
+be the map point's reprojection residual over its *last N keyframe
+observations* rather than this frame's inlier flag.
+
+### Defaults as recorded
+
+`filter_mode class` · `motion_iou 0.3` · `motion_min_points 15` ·
+`motion_inlier_ratio 0.5` · `motion_unknown_mask false` ·
+`motion_revote_frames 15` · `motion_min_point_age 30` (ORB only) ·
+`motion_min_box_age 30`. Runs: `output/output_orb_yolo/simulation/
+dataset_allsensor_realistic_003/motion_20261014_0{2,3,4}` and
+`output/output_vins_yolo/.../motion_20261014_0{1,4}`, each with
+`motion_votes.csv` and `calibration.txt`.

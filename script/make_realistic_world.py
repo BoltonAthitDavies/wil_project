@@ -70,6 +70,9 @@ HALF = 20.55          # usable interior half-width; the wall faces are at +-20.6
 MARGIN = 0.25         # clearance required between any two static footprints
 ROBOT_HALF = 0.42     # robot half-width, for the route-clearance report
 CARRY = 1.3           # load centre ahead of the carrier while carried, m (fork length)
+PERSON_HALF = 0.35    # half-width of a walking person incl. arm swing, for the lane checks
+PERSON_Z = 1.0        # the stock actor skin's origin is at the pelvis, 1 m up
+PERSON_STEP = 2.0     # waypoint spacing along a leg, keeps the spline straight and the pace even
 
 # z offsets the existing worlds use per model (the meshes do not sit at z = 0)
 Z = {'Bucket_01': 0.029223, 'ClutteringA_01': 0.004223, 'ClutteringC_01': 0.004223,
@@ -524,9 +527,48 @@ CARRIERS_I = [
      rot6('T3', 'T4', 'F3', 'P4', 'P3'), _path_i_picker('F3', 15.34)),
 ]
 
+# ----------------------------------------------------------------- people
+# Walking people are gz-sim <actor>s: the stock Fuel skin (models/
+# aws_robomaker_warehouse_Person_01) on a scripted route, walk clip between
+# stops and stand clip at them. No physics, no collision, cameras see them.
+# Roles and numbers follow the warehouse references and the MiR/Eaton case:
+# a few people on foot in zones where goods are handled by hand, never in the
+# vehicle lanes. Each entry: (key, description, walking speed m/s, start delay
+# s, closed route polyline, stops {point index: (seconds, facing yaw)}).
+# The generator checks every leg against the statics, the carrier corridors
+# and turn sweeps, and the other people, before a world is written.
+HUMANS_U = [
+    ('H1', 'order picker, storage aisle x -6.54', 1.1, 0.0,
+     [(-6.54, 6.0), (-6.54, 0.0), (-6.54, -10.0), (-6.54, -14.0), (-6.54, -5.0), (-6.54, 6.0)],
+     {1: (6.0, PI), 2: (6.0, 0.0), 3: (3.0, -YAW90), 4: (6.0, PI)}),
+    ('H2', 'order picker, storage aisle x -1.98', 1.1, 21.0,
+     [(-1.98, 5.3), (-1.98, -3.0), (-1.98, -13.0), (-1.98, -14.0), (-1.98, -7.0), (-1.98, 5.3)],
+     {1: (6.0, 0.0), 2: (6.0, PI), 3: (3.0, -YAW90), 4: (6.0, 0.0)}),
+    ('H3', 'receiving checker, between the receiving rows', 1.2, 8.0,
+     [(-16.5, 15.4), (-13.7, 15.4), (-5.9, 15.4), (-3.0, 15.4), (-9.8, 15.4), (-16.5, 15.4)],
+     {1: (5.0, -YAW90), 2: (5.0, YAW90), 3: (3.0, PI), 4: (5.0, -YAW90), 0: (4.0, 0.0)}),
+    ('H4', 'dispatch loader, between the dispatch rows', 1.2, 14.0,
+     [(9.5, 15.4), (14.5, 15.4), (18.3, 15.4), (10.5, 15.4), (9.5, 15.4)],
+     {1: (5.0, -YAW90), 2: (4.0, YAW90), 3: (5.0, -YAW90), 0: (3.0, 0.0)}),
+]
+HUMANS_I = [
+    ('H1', 'order picker, storage aisle x -6.54', 1.1, 0.0,
+     [(-6.54, 8.7), (-6.54, 3.0), (-6.54, -5.0), (-6.54, -7.5), (-6.54, 0.0), (-6.54, 8.7)],
+     {1: (6.0, PI), 2: (6.0, 0.0), 3: (3.0, -YAW90), 4: (6.0, PI)}),
+    ('H2', 'order picker, storage aisle x -1.98', 1.1, 21.0,
+     [(-1.98, 8.7), (-1.98, 1.0), (-1.98, -6.5), (-1.98, -7.3), (-1.98, -3.0), (-1.98, 8.7)],
+     {1: (6.0, 0.0), 2: (6.0, PI), 3: (3.0, -YAW90), 4: (6.0, 0.0)}),
+    ('H3', 'receiving checker, west receiving rows', 1.2, 8.0,
+     [(-16.5, 15.4), (-13.7, 15.4), (-5.9, 15.4), (-3.0, 15.4), (-9.8, 15.4), (-16.5, 15.4)],
+     {1: (5.0, -YAW90), 2: (5.0, YAW90), 3: (3.0, PI), 4: (5.0, -YAW90), 0: (4.0, 0.0)}),
+    ('H4', 'receiving checker, east receiving rows', 1.2, 14.0,
+     [(8.0, 15.4), (12.9, 15.4), (17.8, 15.4), (9.0, 15.4), (8.0, 15.4)],
+     {1: (5.0, YAW90), 2: (4.0, -YAW90), 3: (5.0, YAW90), 0: (3.0, 0.0)}),
+]
+
 LAYOUTS = {
     'u': dict(world=WORLD_U, slots=SLOTS_U, empty=EMPTY_U, approach=APPROACH_U,
-              build=build_static_u, carriers=CARRIERS_U,
+              build=build_static_u, carriers=CARRIERS_U, humans=HUMANS_U,
               title='U-shape flow, carrier jobs', bake='baked_dynamic_realistic',
               labels={'RECEIVING DOCK': (-10, 19.4), 'DISPATCH DOCK': (14, 19.4),
                       'pick faces': (-3.4, 12.6), 'cross-aisle C': (-14, 7.2),
@@ -536,7 +578,7 @@ LAYOUTS = {
                       'general office': (15, -17.6), 'mgmt office': (1.9, 19.4),
                       'aisle A': (-11.2, 1), 'aisle B': (5.25, 1)}),
     'i': dict(world=WORLD_I, slots=SLOTS_I, empty=EMPTY_I, approach=APPROACH_I,
-              build=build_static_i, carriers=CARRIERS_I,
+              build=build_static_i, carriers=CARRIERS_I, humans=HUMANS_I,
               title='I-shape (through) flow, carrier jobs', bake='baked_dynamic_realistic_01',
               labels={'RECEIVING DOCK': (-10, 19.4), 'DISPATCH DOCK': (-10, -19.9),
                       'pick faces': (-3.4, -14.6), 'cross-aisle C': (-7, 10.4),
@@ -566,10 +608,11 @@ LAYOUT = 'u'
 
 
 def select_layout(key):
-    global LAYOUT, WORLD, SLOTS, EMPTY, APPROACH, CARRIERS, build_static
+    global LAYOUT, WORLD, SLOTS, EMPTY, APPROACH, CARRIERS, HUMANS, build_static
     lay = LAYOUTS[key]
     LAYOUT = key; WORLD = lay['world']; SLOTS = lay['slots']; EMPTY = lay['empty']
-    APPROACH = lay['approach']; CARRIERS = lay['carriers']; build_static = lay['build']
+    APPROACH = lay['approach']; CARRIERS = lay['carriers']; HUMANS = lay['humans']
+    build_static = lay['build']
 
 
 select_layout('u')
@@ -793,6 +836,150 @@ def route_clearance():
     return out
 
 
+# ------------------------------------------------------------------- people
+def human_steps(h):
+    """A person's script as ('walk', p_a, p_b, yaw_in, yaw_out) and
+    ('stand', p, seconds, yaw) steps. The route is a closed polyline; a stop
+    at a point is a stand with a facing, and a walk leg starts facing the
+    way it arrived (or the stop's facing) and ends facing the way the next
+    leg goes (or the next stop)."""
+    key, desc, speed, delay, route, stops = h
+    assert route[0] == route[-1], '%s: route must be closed' % key
+    n = len(route) - 1
+    heads = [math.atan2(route[i + 1][1] - route[i][1], route[i + 1][0] - route[i][0]) for i in range(n)]
+    steps = []
+    for i in range(n):
+        yaw_in = stops[i][1] if i in stops else heads[i - 1]
+        j = (i + 1) % n
+        yaw_out = stops[j][1] if j in stops else heads[j]
+        if i in stops:
+            steps.append(('stand', route[i], stops[i][0], stops[i][1]))
+        steps.append(('walk', route[i], route[i + 1], yaw_in, yaw_out))
+    return steps
+
+
+def human_report():
+    """Per person: the tightest clearance of the person's swept box to the
+    statics (parked carriers included), to the carriers' corridors and turn
+    sweeps, and to the other people's lanes. People keep out of the vehicle
+    lanes by design, so a carrier overlap blocks the write."""
+    jack = aabb('PalletJackB_01', 0.0, 0.0, 0.0)
+    model_of = {o['name']: o['model'] for o in STATIC}
+    statics = [(aabb(o['model'], o['x'], o['y'], o['yaw']),
+                '%s @ %s (%.1f, %.1f)' % (o['model'], o['zone'], o['x'], o['y'])) for o in STATIC]
+    # carrier corridors (AABB per leg) and turn discs (centre, radius) per waypoint
+    corr, discs = [], []
+    for carrier in CARRIERS:
+        pts = replay(carrier)
+        for (p0, _, _, _, _), (p1, carried, back, pyaw, stand) in zip(pts, pts[1:]):
+            box = jack
+            if carried:
+                lb = aabb(model_of[NAMES[carried]], CARRY, 0.0, -pyaw)
+                box = (min(jack[0], lb[0]), min(jack[1], lb[1]), max(jack[2], lb[2]), max(jack[3], lb[3]))
+            r = max(math.hypot(x, y) for x in (box[0], box[2]) for y in (box[1], box[3]))
+            dx, dy = p1[0] - p0[0], p1[1] - p0[1]
+            L = math.hypot(dx, dy)
+            discs.append((p0, r, carrier[0])); discs.append((p1, r, carrier[0]))
+            if L < 1e-3:
+                continue
+            facing = math.atan2(dy, dx) + (math.pi if back else 0.0)
+            c, sn = math.cos(facing), math.sin(facing)
+            cs = [(px + c * ox - sn * oy, py + sn * ox + c * oy)
+                  for (ox, oy) in ((box[0], box[1]), (box[2], box[1]), (box[0], box[3]), (box[2], box[3]))
+                  for (px, py) in (p0, p1)]
+            corr.append(((min(q[0] for q in cs), min(q[1] for q in cs), max(q[0] for q in cs),
+                          max(q[1] for q in cs)), carrier[0]))
+
+    def gap(a, b):
+        return max(a[0] - b[2], b[0] - a[2], a[1] - b[3], b[1] - a[3])
+
+    def disc_gap(box, centre, r):
+        dx = max(box[0] - centre[0], 0, centre[0] - box[2]); dy = max(box[1] - centre[1], 0, centre[1] - box[3])
+        return math.hypot(dx, dy) - r
+
+    lanes = {}
+    for h in HUMANS:
+        boxes = []
+        for st in human_steps(h):
+            pts = (st[1], st[2]) if st[0] == 'walk' else (st[1],)
+            boxes.append((min(q[0] for q in pts) - PERSON_HALF, min(q[1] for q in pts) - PERSON_HALF,
+                          max(q[0] for q in pts) + PERSON_HALF, max(q[1] for q in pts) + PERSON_HALF))
+        lanes[h[0]] = boxes
+    out = []
+    for h in HUMANS:
+        ws = (1e9, ''); wc = (1e9, ''); wh = (1e9, '')
+        for b in lanes[h[0]]:
+            for sb, name in statics:
+                d = gap(b, sb)
+                if d < ws[0]:
+                    ws = (d, name)
+            for cb, key in corr:
+                d = gap(b, cb)
+                if d < wc[0]:
+                    wc = (d, '%s corridor' % key)
+            for centre, r, key in discs:
+                d = disc_gap(b, centre, r)
+                if d < wc[0]:
+                    wc = (d, '%s turn at (%.1f, %.1f)' % (key, centre[0], centre[1]))
+            for other, obs in lanes.items():
+                if other == h[0]:
+                    continue
+                for ob in obs:
+                    d = gap(b, ob)
+                    if d < wh[0]:
+                        wh = (d, other)
+        out.append((h[0], h[1], ws, wc, wh))
+    return out
+
+
+def actor_block():
+    """The people as <actor> elements: one walk trajectory per leg (its own
+    spline, so legs stay straight), a stand trajectory per stop, yaw turned
+    in place over 0.5 s at the ends of a leg, the loop closed by the route."""
+    mesh = 'model://aws_robomaker_warehouse_Person_01/meshes/%s.dae'
+    out = ['    <!-- ==== people : %d walking actor(s) on checked routes (no collision) ==== -->\n' % len(HUMANS)]
+    for h in HUMANS:
+        key, desc, speed, delay, route, stops = h
+        out.append('    <!-- %s: %s -->\n' % (key, desc))
+        out.append('    <actor name="person_%s">\n' % key)
+        out.append('      <skin>\n        <filename>%s</filename>\n        <scale>1.0</scale>\n      </skin>\n' % (mesh % 'walk'))
+        for clip in ('walk', 'stand'):
+            out.append('      <animation name="%s">\n        <filename>%s</filename>\n        <scale>1.0</scale>\n'
+                       '        <interpolate_x>true</interpolate_x>\n      </animation>\n' % (clip, mesh % clip))
+        out.append('      <script>\n        <loop>true</loop>\n        <delay_start>%.1f</delay_start>\n'
+                   '        <auto_start>true</auto_start>\n' % delay)
+        tid = 0
+        for st in human_steps(h):
+            wps = []
+            if st[0] == 'stand':
+                _, p, secs, yaw = st
+                wps = [(0.0, p, yaw), (secs, p, yaw)]
+                kind = 'stand'
+            else:
+                _, pa, pb, yaw_in, yaw_out = st
+                head = math.atan2(pb[1] - pa[1], pb[0] - pa[0])
+                t = 0.0
+                wps.append((t, pa, yaw_in))
+                if abs(yaw_in - head) > 1e-6:
+                    t += 0.5; wps.append((t, pa, head))
+                L = math.hypot(pb[0] - pa[0], pb[1] - pa[1])
+                n = max(1, int(round(L / PERSON_STEP)))
+                for k in range(1, n + 1):
+                    f = k / n
+                    wps.append((t + f * L / speed, (pa[0] + f * (pb[0] - pa[0]), pa[1] + f * (pb[1] - pa[1])), head))
+                t += L / speed
+                if abs(yaw_out - head) > 1e-6:
+                    t += 0.5; wps.append((t, pb, yaw_out))
+                kind = 'walk'
+            out.append('        <trajectory id="%d" type="%s">\n' % (tid, kind)); tid += 1
+            for tt, (x, y), yaw in wps:
+                out.append('          <waypoint><time>%.2f</time><pose>%.3f %.3f %.2f 0 0 %.4f</pose></waypoint>\n'
+                           % (tt, x, y, PERSON_Z, yaw))
+            out.append('        </trajectory>\n')
+        out.append('      </script>\n    </actor>\n')
+    return ''.join(out)
+
+
 # ------------------------------------------------------------------- output
 INCLUDE = """    <include>
       <uri>model://aws_robomaker_warehouse_%(model)s</uri>
@@ -886,11 +1073,16 @@ def emit():
                                   z=Z[o['model']], yaw=o['yaw'],
                                   static='\n      <static>true</static>' if o['name'] in moved else ''))
     out.append('    <!-- ===== END layout ===== -->\n\n')
+    out.append(actor_block())
+    out.append('\n')
     out.append(tail)
     return ''.join(out)
 
 
-def plot(path):
+def plot(path, report=False):
+    """The plan PNG. report=True is the final-report rendering: the yard band is
+    cropped to the door labels, the title is left to the caption, the legend sits
+    under the map in columns, and the fonts are sized for a page-wide figure."""
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
@@ -902,7 +1094,12 @@ def plot(path):
                'empty pallets': '#8C8C8C', 'general office': '#C44E52',
                'management office': '#E57373', 'traffic': '#212121',
                'dock doors': '#1565C0', 'dock yard': '#B0BEC5'}
-    fig, ax = plt.subplots(figsize=(14.5, 17 if DOORS_BY_LAYOUT[LAYOUT]['south'] else 14))
+    south = bool(DOORS_BY_LAYOUT[LAYOUT]['south'])
+    if report:
+        fig, ax = plt.subplots(figsize=(10, 12.6 if south else 11.4))
+    else:
+        fig, ax = plt.subplots(figsize=(14.5, 17 if south else 14))
+    fs = 9.5 if report else 7
     ax.add_patch(Rectangle((-20.64, -20.64), 41.28, 41.28, fill=False, lw=2, color='k'))
     seen = set()
     for o in STATIC:
@@ -914,35 +1111,50 @@ def plot(path):
     for key, (x, y, _) in SLOTS.items():
         ax.add_patch(Rectangle((x - 1.0, y - 1.0), 2.0, 2.0, fill=False, ls=':', lw=1.0,
                                color='#C62828'))
-        ax.text(x, y, key, ha='center', va='center', fontsize=7, color='#C62828')
+        ax.text(x, y, key, ha='center', va='center', fontsize=fs, color='#C62828')
     styles = {'C1': '#C62828', 'C2': '#AD1457', 'C3': '#EF6C00', 'C4': '#6A1B9A'}
     for carrier in CARRIERS:
         pts = [p[0] for p in replay(carrier)]
         ax.plot([p[0] for p in pts], [p[1] for p in pts], '-', color=styles[carrier[0]],
                 lw=1.0, alpha=0.8, label='%s %s' % (carrier[0], carrier[4]))
+    hstyles = ['#2E7D32', '#1B5E20', '#00695C', '#004D40']
+    for h, col in zip(HUMANS, hstyles):
+        route = h[4]
+        ax.plot([q[0] for q in route], [q[1] for q in route], '--', color=col, lw=1.3, alpha=0.9,
+                label='%s %s (on foot)' % (h[0], h[1]))
+        for i, (secs, yaw) in h[5].items():
+            ax.plot(route[i][0], route[i][1], 'o', color=col, ms=3.5)
+        ax.plot(route[0][0], route[0][1], 'o', mfc='white', mec=col, ms=6)
     for f in sorted(glob.glob(os.path.join(GT_DIR, 'dataset_dynamic_*.csv')))[:1]:
         pts = [(float(r[1]), float(r[2])) for r in csv.reader(open(f))]
         ax.plot([p[0] for p in pts], [p[1] for p in pts], color='k', lw=0.8, alpha=0.5,
                 label='recorded teleop route (dyn_00_000)')
     ax.plot(5.25, 20, 'k^', ms=8, label='robot spawn')
     for txt, (x, y) in LAYOUTS[LAYOUT]['labels'].items():
-        ax.text(x, y, txt, ha='center', va='center', fontsize=8,
+        ax.text(x, y, txt, ha='center', va='center', fontsize=fs + 1,
                 rotation=90 if txt.startswith('aisle') else 0)
     # the wall openings, drawn as gaps in the shell line
     lay = DOORS_BY_LAYOUT[LAYOUT]
     for xc, state in lay['north']:
         ax.add_patch(Rectangle((xc - DOOR_W / 2, YI1 - 0.05), DOOR_W, YO1 - YI1 + 0.1, color='white', zorder=3))
-        ax.text(xc, YO1 + 0.9, 'dock door\n(%s)' % state, ha='center', va='bottom', fontsize=6.5, zorder=4)
+        ax.text(xc, YO1 + 0.9, 'dock door\n(%s)' % state, ha='center', va='bottom', fontsize=fs - 0.5, zorder=4)
     for xc, state in lay['south']:
         ax.add_patch(Rectangle((xc - DOOR_W / 2, -YO1 - 0.05), DOOR_W, YO1 - YI1 + 0.1, color='white', zorder=3))
-        ax.text(xc, -YO1 - 0.9, 'dock door\n(%s)' % state, ha='center', va='top', fontsize=6.5, zorder=4)
-    ax.set_xlim(-21.5, 21.5); ax.set_ylim(-36.5 if lay['south'] else -21.5, 36.5); ax.set_aspect('equal')
+        ax.text(xc, -YO1 - 0.9, 'dock door\n(%s)' % state, ha='center', va='top', fontsize=fs - 0.5, zorder=4)
+    ax.set_xlim(-21.5, 21.5); ax.set_aspect('equal')
     ax.set_xlabel('x [m]'); ax.set_ylabel('y [m]')
-    ax.set_title('%s: %s' % (os.path.basename(WORLD)[:-6], LAYOUTS[LAYOUT]['title']))
-    # legend beside the map, not over it
-    ax.legend(loc='upper left', bbox_to_anchor=(1.02, 1.0), fontsize=8, frameon=False,
-              borderaxespad=0.0)
-    fig.tight_layout(); fig.savefig(path, dpi=130, bbox_inches='tight')
+    if report:
+        top = YO1 + 3.2                       # the door labels, not the whole yard
+        ax.set_ylim(-top if south else -21.5, top)
+        ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.06), fontsize=9, frameon=False,
+                  ncol=3, borderaxespad=0.0)
+    else:
+        ax.set_ylim(-36.5 if south else -21.5, 36.5)
+        ax.set_title('%s: %s' % (os.path.basename(WORLD)[:-6], LAYOUTS[LAYOUT]['title']))
+        # legend beside the map, not over it
+        ax.legend(loc='upper left', bbox_to_anchor=(1.02, 1.0), fontsize=8, frameon=False,
+                  borderaxespad=0.0)
+    fig.tight_layout(); fig.savefig(path, dpi=150 if report else 130, bbox_inches='tight')
     print('plan written to', path)
 
 
@@ -951,6 +1163,8 @@ def main():
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--check', action='store_true', help='run the checks, write nothing')
     ap.add_argument('--plot', action='store_true', help='also write the plan PNG next to the world')
+    ap.add_argument('--plot-report', metavar='PNG',
+                    help='write the report rendering of the plan to PNG and stop (writes no world)')
     ap.add_argument('--layout', choices=sorted(LAYOUTS), default='u',
                     help="u: U-shape flow (docks on the north wall); i: I-shape through flow "
                          "(receiving north, dispatch south), written to the _01 world")
@@ -970,8 +1184,8 @@ def main():
         if slot not in EMPTY and not occ:
             raise SystemExit('slot %s should hold a load' % slot)
     problems = check()
-    print('\n  %d static objects in %d zones, %d carriers' %
-          (len(STATIC), len(set(o['zone'] for o in STATIC)), len(CARRIERS)))
+    print('\n  %d static objects in %d zones, %d carriers, %d people' %
+          (len(STATIC), len(set(o['zone'] for o in STATIC)), len(CARRIERS), len(HUMANS)))
     for p in problems:
         print('  PROBLEM:', p)
     for key, desc, nsteps, (d, leg), (dt, turn) in path_report():
@@ -980,12 +1194,24 @@ def main():
             problems.append('%s corridor overlaps a static object on %s' % (key, leg))
             note += '  <-- OVERLAP'
         print('  %s %-46s %2d steps\n       %s' % (key, desc, nsteps, note))
+    for key, desc, ws, wc, wh in human_report():
+        note = 'statics %.2f m (%s); carriers %.2f m (%s); people %.2f m (%s)' % (ws[0], ws[1], wc[0], wc[1], wh[0], wh[1])
+        if ws[0] < MARGIN:
+            problems.append('%s lane within %.2f m of %s' % (key, MARGIN, ws[1])); note += '  <-- TOO CLOSE'
+        if wc[0] < 0:
+            problems.append('%s lane overlaps %s' % (key, wc[1])); note += '  <-- IN A VEHICLE LANE'
+        if wh[0] < 0:
+            problems.append('%s lane overlaps %s' % (key, wh[1])); note += '  <-- PEOPLE OVERLAP'
+        print('  %s %-46s on foot\n       %s' % (key, desc, note))
     for name, (d, obj, pt) in route_clearance().items():
         flag = '' if d >= ROBOT_HALF + MARGIN else '  <-- tighter than robot half-width + margin'
         print('  route clearance %-42s %.2f m at (%.1f, %.1f) from %s%s'
               % (name, d, pt[0], pt[1], obj, flag))
     if a.plot:
         plot(WORLD[:-6] + '_plan.png')
+    if a.plot_report:
+        plot(a.plot_report, report=True)
+        return 0
     if problems:
         print('\n  not written: fix the problems above')
         return 1

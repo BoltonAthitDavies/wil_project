@@ -22,8 +22,9 @@ from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.conditions import IfCondition
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, PythonExpression
 from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
 
 # The vocabulary is ~145 MB of text built by ../build_orbslam3.sh. It is
 # deliberately NOT installed into the package share dir -- colcon would copy it
@@ -93,14 +94,31 @@ def generate_launch_description():
                         'landing on detected movers. Default false, which is the '
                         'stock tracker bit for bit.'),
         DeclareLaunchArgument(
+            'filter_mode', default_value='class',
+            description="'class' masks every detected box (RY-SLAM). 'motion' "
+                        'masks a box only after the tracker has seen it move: '
+                        'frame k is scored after tracking and frame k+1 inherits '
+                        'the verdict by IoU. Writes motion_votes.csv.'),
+        DeclareLaunchArgument(
+            'dets_csv', default_value='',
+            description='Precomputed detections from script/yolo_precompute.py. '
+                        'When set (with filter:=true) the live detector is NOT '
+                        'started and every frame is masked from the file by its '
+                        'own stamp, so repeat runs mask identical frames. This is '
+                        'the only way a filter ON/OFF comparison is valid on a '
+                        'machine that cannot run the detector in real time.'),
+        DeclareLaunchArgument(
             'weights_path', default_value=DEFAULT_WEIGHTS,
             description='Ultralytics .pt for the detector. Only used with '
                         'filter:=true.'),
         DeclareLaunchArgument(
-            'dynamic_classes', default_value="['bin', 'box', 'bucket']",
-            description='Class NAMES treated as dynamic, resolved against the '
-                        "model's own names dict at load. Names the model does not "
-                        'know are reported at startup.'),
+            'dynamic_classes', default_value="['auto']",
+            description="'auto' (the default) masks every class the chosen "
+                        'weight was trained on, so the filter follows '
+                        'weights_path. Otherwise a list of class NAMES to narrow '
+                        "it to, resolved against the model's own names dict at "
+                        'load; names the model does not know are reported at '
+                        'startup.'),
         DeclareLaunchArgument(
             'publish_debug_image', default_value='false',
             description='Publish /orbslam3/dynamic_debug with the boxes drawn on, '
@@ -122,12 +140,12 @@ def generate_launch_description():
             'config_file': config_file,
             'vocabulary_file': LaunchConfiguration('vocabulary_file'),
             'output_path': LaunchConfiguration('output_path'),
-            'experiment_id': LaunchConfiguration('experiment_id'),
-            'dataset_path': LaunchConfiguration('dataset_path'),
-            'world_path': LaunchConfiguration('world_path'),
+            'experiment_id': ParameterValue(LaunchConfiguration('experiment_id'), value_type=str),
+            'dataset_path': ParameterValue(LaunchConfiguration('dataset_path'), value_type=str),
+            'world_path': ParameterValue(LaunchConfiguration('world_path'), value_type=str),
             'replay_rate': LaunchConfiguration('replay_rate'),
-            'run_command': LaunchConfiguration('run_command'),
-            'run_notes': LaunchConfiguration('run_notes'),
+            'run_command': ParameterValue(LaunchConfiguration('run_command'), value_type=str),
+            'run_notes': ParameterValue(LaunchConfiguration('run_notes'), value_type=str),
             'use_viewer': LaunchConfiguration('use_viewer'),
             'align_first_pose': LaunchConfiguration('align_first_pose'),
 
@@ -162,6 +180,8 @@ def generate_launch_description():
             # subscription and feeds ORB-SLAM3 an empty mask, which its extractor
             # short-circuits -- so the recorded baseline stays reproducible.
             'filter': LaunchConfiguration('filter'),
+            'dets_csv': ParameterValue(LaunchConfiguration('dets_csv'), value_type=str),
+            'filter_mode': LaunchConfiguration('filter_mode'),
         }],
     )
 
@@ -173,7 +193,10 @@ def generate_launch_description():
         name='dynamic_detector',
         output='screen',
         emulate_tty=True,
-        condition=IfCondition(LaunchConfiguration('filter')),
+        # Live detector only when filtering AND no precomputed file was given.
+        condition=IfCondition(PythonExpression([
+            "'", LaunchConfiguration('filter'), "'.lower() in ('true', '1') and '",
+            LaunchConfiguration('dets_csv'), "' == ''"])),
         parameters=[{
             'use_sim_time': True,
             'weights_path': LaunchConfiguration('weights_path'),

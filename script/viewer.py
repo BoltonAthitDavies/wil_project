@@ -113,6 +113,7 @@ import numpy as np
 # disagree about where anything is. A hardcoded footprint table would rot silently.
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import bake_map  # noqa: E402
+import people_script   # the walking people, from the actor scripts
 
 # drive.py is imported, not copied, for the same reason: one definition of the
 # vehicle. It guards its own main() behind __main__, so importing is side-effect
@@ -1063,6 +1064,7 @@ C_PLAN = QColor('#81c784')
 C_GOAL = QColor('#e57373')
 C_ROUTE = QColor('#ba9bf0')
 C_ROBOT = QColor('#ffffff')
+C_PERSON = QColor('#66bb6a')    # walking people, evaluated from the world's actor scripts
 C_GRID = QColor(255, 255, 255, 26)
 C_OK, C_WARN, C_BAD = QColor('#66bb6a'), QColor('#ffa726'), QColor('#ef5350')
 
@@ -1373,6 +1375,13 @@ class MapView(QWidget):
         self.obstacles, self.wall = [], None
         try:
             self.obstacles, self.wall = load_obstacles(args.world)
+            # The walking people (gz <actor>s). gz never writes their animated
+            # pose into the entity state, so the pose feed cannot place them; the
+            # script in the world file can, given the sim clock (people_script).
+            self.people = [] if args.no_people else people_script.load_actors(args.world)
+            if self.people:
+                print('viewer: %d walking people in %s, drawn from their scripts'
+                      % (len(self.people), os.path.basename(args.world)))
             print('[viewer] %d obstacle footprints from %s'
                   % (len(self.obstacles), os.path.basename(args.world)))
         except Exception as e:
@@ -1632,6 +1641,7 @@ class MapView(QWidget):
             route = list(st.route)
             route_prev = st.route_preview
             thumb = st.thumb
+            sim_t = st.sim_t
 
         p.save()
         self._rotate_painter(p)          # world layers turn; the panel below does not
@@ -1657,6 +1667,12 @@ class MapView(QWidget):
             for name, poly, p0 in self.obstacles:
                 if name in live:
                     p.drawPolygon(v.poly(self._live_poly(poly, p0, poses[name])))
+
+        people_at = []
+        for a in getattr(self, 'people', ()):
+            px, py, pyaw, clip = people_script.pose_at(a, sim_t)
+            people_at.append((a.name, px, py, pyaw, clip))
+            self._draw_person(p, px, py, pyaw, clip)
 
         if route_prev is not None and len(route_prev) > 1:
             p.setPen(QPen(C_ROUTE, 3, Qt.DashLine))
@@ -1690,6 +1706,12 @@ class MapView(QWidget):
             for i, (x, y, _) in enumerate(wps):
                 sx, sy = v.rotate_pt(*v.to_screen(x, y))
                 p.drawText(QPointF(sx + 10, sy - 9), str(i + 1))
+        if people_at:
+            p.setFont(self._font)
+            p.setPen(QPen(C_PERSON))
+            for name, x, y, _, clip in people_at:
+                sx, sy = v.rotate_pt(*v.to_screen(x, y))
+                p.drawText(QPointF(sx + 9, sy - 8), name.replace('person_', ''))
 
         if thumb is not None:
             self._draw_thumb(p, thumb)
@@ -1780,6 +1802,19 @@ class MapView(QWidget):
         if ghost:
             p.setPen(QPen(QColor(200, 200, 200)))
             p.drawText(QPointF(a[0] + 12, a[1] - 12), 'no pose (spawn)')
+
+    def _draw_person(self, p, x, y, yaw, clip):
+        """A person as a 0.7 m disc with a facing tick: filled while walking,
+        hollow while standing. Position comes from the actor script and the sim
+        clock, not from the pose feed, which never moves an actor."""
+        v = self.view
+        r = max(3.0, 0.35 * v.ppm)
+        sx, sy = v.to_screen(x, y)
+        p.setPen(QPen(C_PERSON, 2))
+        p.setBrush(QBrush(C_PERSON) if clip == 'walk' else Qt.NoBrush)
+        p.drawEllipse(QPointF(sx, sy), r, r)
+        ex, ey = v.to_screen(x + 0.6 * math.cos(yaw), y + 0.6 * math.sin(yaw))
+        p.drawLine(QPointF(sx, sy), QPointF(ex, ey))
 
     def _draw_thumb(self, p, img):
         h, w = img.shape[:2]
@@ -2449,6 +2484,10 @@ def parse_args(argv):
     ap.add_argument('--map', dest='map_spec', default='none',
                     help="none | ros | path to a map.yaml")
     ap.add_argument('--world', default=WORLD)
+    ap.add_argument('--no-people', action='store_true',
+                    help="do not draw the world's walking people (gz actors). They are "
+                         'placed by evaluating their scripts at the sim clock, because '
+                         'gz never writes an animated actor pose into the pose feed.')
     ap.add_argument('--texture', default=TEXTURE)
     ap.add_argument('--floor-ppm', type=float, default=100.0)
     ap.add_argument('--floor-flip', choices=('none', 'u', 'v', 'uv'), default='none')

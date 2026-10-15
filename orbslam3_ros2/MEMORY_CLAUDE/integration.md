@@ -82,7 +82,7 @@ the include path. Upstream's `build.sh` builds it anyway, which turns its tests 
 those are a known failure and pure disk waste. This is the main reason we do not use
 `build.sh`.
 
-### 3.1 The fork and its four patches
+### 3.1 The fork and its nine patches
 
 Fork: **`BoltonAthitDavies/ORB_SLAM3`**, branch `wil`, pinned at commit
 `5c2b00f`, forked from upstream `UZ-SLAMLab/ORB_SLAM3 @ 4452a3c`. Pinned to a commit
@@ -99,6 +99,14 @@ tree.
 | 3 | `CMakeLists.txt` | cut everything from `# Build examples` | We need only `libORB_SLAM3.so`. The ~20 example executables are disk, build time, and the place where OpenCV-4 incompatibilities (`CV_LOAD_IMAGE_*`) actually bite. |
 | 4 | `include/System.h` | add `Tracking* GetTracker()` | `Frame::GetVelocity()` and `Tracking::mCurrentFrame` are public, but `System::mpTracker` is **private** (`System.h:218`), so the estimated IMU velocity is otherwise unreachable. Used to fill the velocity columns of `vio.csv`. |
 | 5 | `src/Tracking.cc` | `setIntegrated()` on the `n==0` early return | **Upstream bug → SIGSEGV.** Added 2026-09-14; see §7.5. |
+| 6 | `src/Map.cc` | `PreSave()` iterates a snapshot of `mspMapPoints` | **Upstream bug → SIGSEGV at `SaveAtlas`.** The loop body erases from the set it is walking. Added 2026-10-14; see §7.6. |
+| 7 | `src/LoopClosing.cc` | initialise `mpCurrentKF`; `!mbActiveLC` check moved below the queue pop | **Upstream bug → busy-spin, then SIGSEGV** with `loopClosing: 0`. Added 2026-10-15; see §7.7. |
+| 8 | `src/System.cc` | `Shutdown()` stops the Viewer thread (bounded wait) | Upstream left it commented out → crash in GTK at exit with `use_viewer:=true`. Added 2026-10-15; see §7.8. |
+| 9 | `src/Viewer.cc` | `DestroyWindow` on the viewer thread before `SetFinish()` | Companion to (8): Pangolin's window registry otherwise dies in `_dl_fini` with no GL context. Added 2026-10-15; see §7.8. |
+
+Patches (6)–(9) keep the original upstream line as a comment next to the replacement, and
+each is guarded in `build_orbslam3.sh` so it applies once and only to unpatched source. All
+four were dry-run against the fork's committed files on 2026-10-15.
 
 ### 3.2 Upstream oddity, deliberately NOT changed
 
@@ -159,6 +167,12 @@ Symptom if it regresses: links fine, dies at launch with `cannot open shared obj
 file`.
 
 ---
+
+**Third trap, found 2026-10-14: the `require_space` gate is a flat 1500 MB.** It is sized for a
+full `-j8` rebuild and refuses an incremental one that needs ~50 MB. With the object tree cached,
+`cmake --build thirdparty/ORB_SLAM3/build -j2` on the same tree does the identical incremental
+build without the gate — that is how patches (6)–(9) were built at ~1 GB free, each behind a
+watchdog that kills `cc1plus` below 250 MB. The gate should be made proportional to the work.
 
 ## 4. The ROS 2 package
 
@@ -517,6 +531,74 @@ free to drop samples under load. Fatal here rather than merely lossy.
 **Result on the bag that was crashing:** 0 crashes, 0 `Empty IMU measurements`, 0
 `Not preintegrated`, **1999 poses over 116.4 s**, path 13.67 m, no jumps >10 m/s.
 
+### 7.6 `Map::PreSave()` erases from the set it is iterating → SIGSEGV  *(2026-10-14)*
+
+**Symptom:** `System.SaveAtlasToFile` set, run ends `exit -11` at shutdown with **no `.osa`**, but
+only *after* every CSV and both trajectory files are written and `shutdown_status=graceful`
+is logged — the node's own shutdown completes; the crash is inside `SaveAtlas()`.
+
+**Cause (gdb):** `_Rb_tree_increment ← Map::PreSave ← Atlas::PreSave ← System::SaveAtlas`.
+The first loop in `PreSave` range-fors over `mspMapPoints` and calls `EraseObservation()`,
+which at `nObs<=2` calls `SetBadFlag()` → `Map::EraseMapPoint()` → `mspMapPoints.erase(pMP)`
+— the element the iterator stands on. Data dependent: it fires only when some point actually
+falls to ≤2 observations during the save, which is why `dataset_allsensor_realistic_001`
+crashed every time while other sequences had written a healthy 2.7 MB atlas from the same build.
+
+**Fix:** patch (6), iterate a snapshot. Verified: same dataset, exit 0, 36 MB `.osa`.
+
+**Two things the fix does not change.** The `.osa` path is hardcoded `"./" + name + ".osa"`,
+so it lands in the launch cwd, not `output_path`; and the save runs only on graceful shutdown —
+a second Ctrl-C or `kill -9` skips it.
+
+### 7.7 `loopClosing: 0` busy-spins, then reads uninitialised memory  *(2026-10-15)*
+
+Two upstream defects behind the one YAML switch (§10 for what that switch actually controls):
+
+* `LoopClosing::mpCurrentKF` is never initialised. Its only assignment is in
+  `NewDetectCommonRegions()` *after* the `!mbActiveLC` early return, so with loop closing off
+  `Run()` reads heap garbage on every iteration (the fork's `place_recognition` log line
+  null-checks it, which is useless against garbage).
+* The early return sat *before* the queue pop, so the keyframe was never dequeued,
+  `CheckNewKeyFrames()` stayed true and the thread spun at 100 % CPU — **64 254
+  `place_recognition` rows, all `current_keyframe_id = -1`**, on
+  `dataset_allsensor_003/logging_20260916_02`. It also never added to `mpKeyFrameDB`, which
+  starves `Tracking::Relocalization()` of candidates.
+
+Harmless while the garbage happened to be zero. Fatal once a 64 MB `LoadAtlasFromFile` had
+dirtied the heap before `new LoopClosing`: SIGSEGV in `LoopClosing::Run()` 0.2 s after
+`tracking OK`. gdb: `Run()+271`, `mov 0x8(%rax),%rcx` with `rax = 0x60c6`.
+
+**Fix:** patch (7) — initialise the pointer, and move the check below the pop with the same
+add-to-DB / `SetErase` / `return false` body as the three gates that follow it. Verified:
+`loop_closing.csv` now has one row per keyframe with real ids (157 rows, zero `-1`), and
+`place_recognition_checks` is meaningful again.
+
+### 7.8 Crashes at exit with `use_viewer:=true`  *(2026-10-15)*
+
+Two layers, both only reachable once the run otherwise succeeds — every output file is already
+on disk when they fire, so they are cosmetic for data but they break any wrapper that checks
+the exit code.
+
+1. `System::Shutdown()` never stops the Viewer thread: the upstream block that does so is
+   commented out. `Viewer::Run()` is still inside `cv::waitKey()`'s GTK main loop when `main()`
+   returns → SIGSEGV or SIGTRAP in `libgtk-3`/`libcanberra`. Patch (8) re-enables it with a
+   bounded (≤2 s) wait so a wedged viewer can never hang shutdown.
+2. With (8) in place, Pangolin's global `map<string, shared_ptr<PangolinGl>>` is then destroyed
+   by the **main** thread in `_dl_fini` with no current GL context → `glDeleteTextures` faults
+   (`GlFont::~GlFont ← PangolinGl::~PangolinGl ← __do_global_dtors_aux`). Patch (9) calls
+   `cv::destroyAllWindows()` and `pangolin::DestroyWindow("ORB-SLAM3: Map Viewer")` on the
+   viewer thread, before `SetFinish()` releases the main thread.
+
+Verified under gdb with loaded atlas + `loopClosing: 0` + viewer + YOLO filter — the exact
+configuration that crashed — `Inferior 1 exited normally`; viewer-off control exit 0.
+
+**A note on method.** I attributed the §7.6 crash to the viewer before looking, and to
+`loopClosing: 0` after that; both were wrong. Every one of (6)–(9) was then confirmed by
+backtrace before touching source. The recipe is cheap: the launch leaves its params file in
+`/tmp/launch_params_*`, so
+`gdb -batch -ex 'handle SIGINT nostop noprint pass' -ex run -ex 'bt 30' --args install/orbslam3_ros2/lib/orbslam3_ros2/orbslam3_node --ros-args -r __node:=orbslam3 --params-file <it>`
+with the bag played separately reproduces any of them in about a minute.
+
 ### 7.4 Truncated CSV on hard kill
 See §5. `numpy.loadtxt` throws on a ragged file, so one truncated final line
 destroys the whole run's data.
@@ -602,6 +684,13 @@ produce the same `Active map reset` lines.
 
 ---
 
+**Loop closing on the dynamic sets is an unresolved trade-off.** `loopClosing: 0` is
+unambiguously right for `allsensor_003` (§10), but it also disables map merging, and the
+dynamic no-floor-texture sets are exactly where Atlas spawns a second map (5 of 36 runs).
+With closing off that second map can never rejoin the first; with it on, one false positive
+can do what it did to `allsensor_003`. The 63-of-64 rejection rate says the gravity check
+catches most candidates, not all. Decide per condition, and grep `maps` before trusting a run.
+
 ## 10. Behaviour notes worth knowing
 
 **Stopping the robot resets the map — but only before IMU init completes.**
@@ -642,6 +731,45 @@ cross-node time agreement. `True` with no `/clock` leaves the node clock at 0 an
 breaks throttled logging.
 
 ---
+
+**`loopClosing` is the only loop-closing knob in the YAML, and it is not just loop closing.**
+`System.cc` reads it off the raw `FileStorage` as an int (`0`/`1`, not `false`/`true`); absent
+means on. Every threshold — 3 BoW candidates, 3 consecutive confirmations, the 30/50/100 match
+gates, the 0.008 rad roll/pitch gravity check — is hard-coded in `LoopClosing.cc`. The flag
+also disables **map merging** and, until patch (7), left the KeyFrameDatabase empty.
+
+**Measured on `dataset_allsensor_003` (2026-09-18), loop closing ON vs OFF, same bag:**
+
+| | ON | OFF |
+| :-- | :-- | :-- |
+| ATE rmse (SE(3), scale fixed, vs `/ground_truth/odometry`) | **6.481 m** | **0.515 m** |
+| jumps > 1 m in `vio.csv` | 3, largest 29.99 m | 0 |
+| path length | 190.0 m | 142.7 m |
+| closures | 1 (18.69 m correction) | 0 |
+
+527 place-recognition checks → 64 candidates → 63 rejected as `BAD LOOP!!!` by the gravity
+check → **one accepted, and it was false**. Place recognition also costs ~51 ms per keyframe
+even when it finds nothing. What *looks* like "loop detection firing constantly" in the console
+is the 63 rejections, not closures.
+
+**Atlas facts that the YAML does not tell you.**
+
+* Atlas is unconditional (`mpAtlas = new Atlas(0)`); every run uses it. It creates a **second
+  map with its own origin** whenever tracking is lost — no reset is logged, so this is
+  invisible in `run_summary.csv`. 5 of 36 sim runs reached `maps = 2`, all dynamic
+  no-floor-texture. `dynamic_nofloortexture_01_000/logging_20260916_01` glues two frames into
+  one `vio.csv` (131 jumps, one of 452 m; 93 of 413 keyframes kept, no merge): any ATE from it
+  is about frame mismatch, not drift. **Screen `performance.csv` column `maps` before computing
+  ATE.**
+* `System.SaveAtlasToFile` does **not** need loop closing: BoW vectors come from
+  `LocalMapping::ProcessNewKeyFrame`, are serialised with the keyframe, and `Map::PostLoad`
+  rebuilds the database on load.
+* `System.LoadAtlasFromFile` **does**. After loading, `System` calls `mpAtlas->CreateNewMap()`,
+  so the session starts in a fresh map; `Tracking::Relocalization` searches only
+  `GetCurrentMap()`, and merging is the sole bridge to the loaded map — and merging is behind
+  `mbActiveLC`. `LoadAtlasFromFile` + `loopClosing: 0` loads 64 MB and then ignores it.
+* The saved map is whatever the run left: with closing off it carries the run's drift,
+  uncorrected.
 
 ## 11. Results
 
@@ -724,7 +852,9 @@ sustained, no trajectory written. Blocked on calibration (§6.3), not code.
 | Sim stereo-inertial | **verified**, ATE 0.222–0.34 m across runs |
 | Real rig `wil_stereo` | **verified**, full bag, no resets |
 | Real rig `wil_stereo_imu` | **runs** since 2026-09-14 — no crash, 1999 poses on `dataset_real_000`. Still resets 9× for lack of motion (§9 correction), and the IMU→cam translation is still a placeholder. |
-| Pangolin viewer (`use_viewer:=true`) | **untested** — all runs used `false` |
+| Pangolin viewer (`use_viewer:=true`) | **works** since 2026-10-15 (patches 8+9; needs the NVIDIA module to match the userspace driver, else `__GLX_VENDOR_LIBRARY_NAME=mesa`) — but it is software rendering under Mesa and competes with SLAM for cores: look with it, record without it |
+| Atlas save / load | **save verified** (patch 6); load runs (patch 7) but is only useful with `loopClosing: 1` — see §10 |
+| Loop closing on `allsensor_003` | **OFF is 92 % better** (6.481 → 0.515 m ATE); dynamic sets undecided — see §9 |
 | Whether the IMU truly initialises | **unresolved** — see §9 |
 | Real-rig trajectories | **plausible, unverified** — no ground truth exists for these bags |
 
@@ -815,6 +945,28 @@ interface — config keys, transport encodings, QoS, upstream error handling —
 never from ORB-SLAM3's algorithms. And in each case the thing that resolved it was
 reading the source or measuring the data, after at least one wrong guess.
 
+
+### Session 3: 2026-09-18 → 2026-10-15 — loop closing, Atlas, and four crashes at the edges
+
+1. "Loop closing fires too often" turned out to be 63 rejections and one false acceptance;
+   the OFF run the user had already made gave the 92 % ATE improvement in §10. No code change,
+   just `loopClosing: 0` in `wil_sim/stereo_imu.yaml` and a measurement.
+2. Atlas questions led to `SaveAtlasToFile`, which segfaulted (§7.6). I blamed the viewer
+   first — wrong, it crashed with the viewer off too. gdb found the iterator invalidation.
+3. `LoadAtlasFromFile` then crashed 0.2 s into tracking (§7.7). Three variables were stacked
+   (loaded atlas, viewer, YOLO filter); the backtrace said `LoopClosing::Run()`, i.e. none of
+   them directly — the uninitialised pointer that `loopClosing: 0` exposes.
+4. With that fixed, the viewer-on run still died at exit, twice, one layer at a time (§7.8).
+   Each layer was confirmed by backtrace before patching; the A/B against viewer-off was what
+   made the second one unambiguous.
+5. Along the way: the build script's 1500 MB gate blocked a 50 MB incremental build (§3.4),
+   and the NVIDIA driver was upgraded without a reboot, which is why Pangolin could not get a
+   GL context in the first place (`glxinfo` failed identically; `nvidia-smi` reported a
+   driver/library mismatch).
+
+**The pattern held from sessions 1 and 2:** every surprise was at an interface — a YAML flag
+that controls more than its name, a thread nobody stops, a counter that measures a spin loop —
+and every wrong guess was replaced by reading the source or a backtrace, never by a better guess.
 
 ## 14. Evaluation logging status (2026-09-16/17)
 

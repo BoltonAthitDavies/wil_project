@@ -42,12 +42,18 @@ File.version: "1.0"
 # CAUTION: 0 disables place recognition, loop closure AND map merging together.
 # dataset_dynamic_nofloortexture_02_000 logged a genuine merge, so that sequence
 # is not a like-for-like comparison. Restore stock behaviour with 1.
-loopClosing: 1
-# System.SaveAtlasToFile: "warehouse_map"
-# System.LoadAtlasFromFile: "warehouse_map"
+loopClosing: 0
+# System.SaveAtlasToFile: "warehouse_map_realistic"
+# System.LoadAtlasFromFile: "warehouse_map_realistic"
 
-# System.SaveAtlasToFile: "warehouse_map_01_dynamic"
-# System.LoadAtlasFromFile: "warehouse_map_01_dynamic"
+# System.SaveAtlasToFile: "warehouse_map_realistic_01"
+System.LoadAtlasFromFile: "warehouse_map_realistic_01"
+
+# System.SaveAtlasToFile: "warehouse_map_realistic_dynamic"
+# System.LoadAtlasFromFile: "warehouse_map_realistic_dynamic"
+
+# System.SaveAtlasToFile: "warehouse_map_realistic_01_dynamic"
+# System.LoadAtlasFromFile: "warehouse_map_realistic_01_dynamic"
 #--------------------------------------------------------------------------------------------
 # Cameras
 #--------------------------------------------------------------------------------------------

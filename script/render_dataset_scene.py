@@ -133,6 +133,11 @@ def gt_for(dataset):
              for t in ('output_wheel', 'output_imu', 'output_ekf')]
     cands.append(os.path.join(ROOT, 'output', 'compare', 'relogged_20260916',
                               'ground_truth', name + '.csv'))
+    # A bag that has not been through proprio_estimator.py or the relogged
+    # campaign has no copy in either tree. Its extraction then sits beside the bag
+    # itself (script/extract_gt.py), next to dets_best.csv, which is where every
+    # other per-bag derived artifact already lives.
+    cands.append(os.path.join(ROOT, 'dataset', name, 'ground_truth.csv'))
     for c in cands:
         if os.path.exists(c):
             return c

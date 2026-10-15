@@ -1,5 +1,9 @@
 % Verbatim from minor_report/chapters/chapter_3_methodology.tex lines 610-906 (retired report),
 % headings demoted by 0 level(s). Do not edit here; edit the source of the numbers.
+% DEVIATION (14 Oct 2026): fig:dataset-scenes gained a fourth row, the four
+% dataset_allsensor_realistic_* panels, rendered by the same
+% script/render_dataset_scene.py pass that wrote tables/dataset_scenes.tex; its
+% caption gained the sentence on walking people. Nothing else differs.
 
 The principal large warehouse is a \SI{41.2833}{\metre} square environment
 produced by rescaling the AWS warehouse to \SI{1704}{\metre\squared}, while
@@ -214,6 +218,28 @@ while \repo{_000} and \repo{_002} sit in the canonical one, and all three carry
     \includegraphics[width=\textwidth]{figures/scene_dynamic_nofloortexture_02_000.png}\\[0.3ex]
     {\scriptsize \repo{dynamic_02_000}}
   \end{minipage}
+
+  \vspace{1.2ex}
+  \begin{minipage}[t]{0.235\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/scene_allsensor_realistic_000.png}\\[0.3ex]
+    {\scriptsize \repo{realistic_000}}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.235\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/scene_allsensor_realistic_001.png}\\[0.3ex]
+    {\scriptsize \repo{realistic_001}}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.235\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/scene_allsensor_realistic_002.png}\\[0.3ex]
+    {\scriptsize \repo{realistic_002}}
+  \end{minipage}\hfill
+  \begin{minipage}[t]{0.235\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/scene_allsensor_realistic_003.png}\\[0.3ex]
+    {\scriptsize \repo{realistic_003}}
+  \end{minipage}
   \caption[Every simulation dataset as a scene: floor treatment, object layout and ground-truth route in one view.]{Every simulation dataset as a scene: floor treatment, object layout and
   ground-truth route in one view. Grey is open floor; dark polygons are obstacle
   footprints, taken as convex hulls of each collision mesh sliced at robot height,
@@ -222,7 +248,9 @@ while \repo{_000} and \repo{_002} sit in the canonical one, and all three carry
   trace is the recorded \repo{/ground_truth/odometry} route, green marking its
   start and red its end. Moving props are drawn at their authored pose, which is
   where the world file places them at $t=0$; this is a layout figure and does not
-  show where a prop was at any instant during a dynamic recording. \flag{*}~marks a
+  show where a prop was at any instant during a dynamic recording. The four
+  \repo{realistic} datasets' walking people are gz-sim actors without collision
+  geometry and therefore do not appear. \flag{*}~marks a
   dataset whose recorded world no longer exists and whose objects were
   reconstructed---see the note below \cref{tab:dataset-scenes}.}
   \label{fig:dataset-scenes}

@@ -42,8 +42,16 @@ import rclpy
 from rclpy.clock import Clock, ClockType
 from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
-from rclpy.qos import qos_profile_sensor_data
+from rclpy.qos import HistoryPolicy, QoSProfile, ReliabilityPolicy
 from sensor_msgs.msg import CompressedImage, Image
+# Depth 1, not the sensor-data default of 5. Under load the detector would work
+# through a 5-deep backlog and publish boxes for a frame up to 165 ms old, while
+# the tracker (which drops frames) is always on the NEWEST one and refuses
+# anything older than det_max_age (150 ms). With one slot the node always picks
+# up the latest frame: its lag is inference time alone, not inference + backlog.
+LATEST_ONLY = QoSProfile(
+    depth=1, history=HistoryPolicy.KEEP_LAST, reliability=ReliabilityPolicy.BEST_EFFORT)
+
 from vision_msgs.msg import (
     BoundingBox2D,
     Detection2D,
@@ -211,11 +219,11 @@ class DynamicDetectorNode(Node):
         if transport == "compressed":
             self.sub = self.create_subscription(
                 CompressedImage, image_topic + "/compressed",
-                self.on_compressed, qos_profile_sensor_data)
+                self.on_compressed, LATEST_ONLY)
             self.get_logger().info(f"image      : {image_topic}/compressed")
         else:
             self.sub = self.create_subscription(
-                Image, image_topic, self.on_image, qos_profile_sensor_data)
+                Image, image_topic, self.on_image, LATEST_ONLY)
             self.get_logger().info(f"image      : {image_topic}")
 
         self.last_infer = 0.0

@@ -225,6 +225,132 @@ p.write_text(s.replace(old, new, 1))
 PYEOF
         echo "    patched Tracking.cc    (setIntegrated on the n==0 early return)"
     fi
+
+    # (6) Map::PreSave() walks mspMapPoints with a range-for while the body can
+    #     erase from that same set, so saving an atlas segfaults.
+    #
+    #     EraseObservation() takes a point to <=2 observations -> SetBadFlag()
+    #     -> Map::EraseMapPoint() -> mspMapPoints.erase(pMP). That frees the
+    #     red-black-tree node the loop is standing on, and the next ++ faults
+    #     inside std::_Rb_tree_increment. gdb backtrace:
+    #       _Rb_tree_increment <- Map::PreSave <- Atlas::PreSave <- SaveAtlas
+    #
+    #     Only bites when a point really falls to <=2 obs, which is data
+    #     dependent: dataset_allsensor_realistic_001 crashes every run while
+    #     other sequences wrote a healthy .osa from this same build. Symptom is
+    #     exit -11 at shutdown with no .osa, AFTER the node has already written
+    #     its CSVs and reported shutdown_status=graceful.
+    f="$ORB_SRC/src/Map.cc"
+    if grep -q 'for(MapPoint\* pMPi : mspMapPoints)' "$f" && \
+       ! grep -q 'spMapPointsSnapshot' "$f"; then
+        python3 - "$f" <<'PYEOF'
+import pathlib, sys
+p = pathlib.Path(sys.argv[1]); s = p.read_text()
+old = "    int nMPWithoutObs = 0;\n    for(MapPoint* pMPi : mspMapPoints)\n    {"
+new = ("    int nMPWithoutObs = 0;\n"
+       "    // orbslam3_ros2 patch (6): iterate a SNAPSHOT, not the live set --\n"
+       "    // EraseObservation() below can erase from mspMapPoints mid-loop.\n"
+       "    // Original line, kept for reference:\n"
+       "    // for(MapPoint* pMPi : mspMapPoints)\n"
+       "    const std::set<MapPoint*> spMapPointsSnapshot = mspMapPoints;\n"
+       "    for(MapPoint* pMPi : spMapPointsSnapshot)\n    {")
+assert old in s, "Map.cc PreSave loop not found"
+p.write_text(s.replace(old, new, 1))
+PYEOF
+        echo "    patched Map.cc        (PreSave iterates a snapshot)"
+    fi
+
+    # (7) With loopClosing:0, LoopClosing::Run() reads uninitialised memory and
+    #     busy-spins. Two upstream defects behind one YAML switch:
+    #       a. mpCurrentKF is never initialised; its only assignment is after
+    #          the !mbActiveLC early return, so the "place_recognition" log line
+    #          reads heap garbage. Zero by luck on a cold heap (every OFF run
+    #          logged current_keyframe_id=-1); non-zero once LoadAtlasFromFile
+    #          has dirtied the heap -> SIGSEGV on the first keyframe.
+    #       b. the early return sits before the queue pop, so the KF is never
+    #          dequeued, CheckNewKeyFrames() stays true, the thread spins at
+    #          100 % CPU writing junk CSV rows, and mpKeyFrameDB stays empty so
+    #          relocalisation can never find candidates.
+    #     Fix: initialise mpCurrentKF, and move the check below the pop with the
+    #     same add/SetErase/return body as the three gates after it.
+    f="$ORB_SRC/src/LoopClosing.cc"
+    if grep -q 'mpLastCurrentKF = static_cast<KeyFrame\*>(NULL);' "$f" && \
+       ! grep -q 'orbslam3_ros2 patch (7)' "$f"; then
+        python3 - "$f" <<'PYEOF'
+import pathlib, sys
+p = pathlib.Path(sys.argv[1]); s = p.read_text()
+a = "    mpLastCurrentKF = static_cast<KeyFrame*>(NULL);\n"
+assert a in s, "LoopClosing ctor anchor not found"
+s = s.replace(a, a + "    // orbslam3_ros2 patch (7): upstream never initialises mpCurrentKF.\n"
+                     "    mpCurrentKF = static_cast<KeyFrame*>(NULL);\n", 1)
+old = ("    if(!mbActiveLC)\n        return false;\n\n    {\n"
+       "        unique_lock<mutex> lock(mMutexLoopQueue);\n"
+       "        mpCurrentKF = mlpLoopKeyFrameQueue.front();\n"
+       "        mlpLoopKeyFrameQueue.pop_front();\n")
+assert old in s, "NewDetectCommonRegions early return not found"
+new = ("    // orbslam3_ros2 patch (7): early return moved below the pop so the\n"
+       "    // queue drains with loopClosing:0. Original lines, kept for reference:\n"
+       "    // if(!mbActiveLC)\n    //     return false;\n\n    {\n"
+       "        unique_lock<mutex> lock(mMutexLoopQueue);\n"
+       "        mpCurrentKF = mlpLoopKeyFrameQueue.front();\n"
+       "        mlpLoopKeyFrameQueue.pop_front();\n")
+s = s.replace(old, new, 1)
+old2 = "        mpLastMap = mpCurrentKF->GetMap();\n    }\n\n    if(mpLastMap->IsInertial()"
+assert old2 in s, "pop block end not found"
+new2 = ("        mpLastMap = mpCurrentKF->GetMap();\n    }\n\n"
+        "    if(!mbActiveLC)\n    {\n        mpKeyFrameDB->add(mpCurrentKF);\n"
+        "        mpCurrentKF->SetErase();\n        return false;\n    }\n\n    if(mpLastMap->IsInertial()")
+s = s.replace(old2, new2, 1)
+p.write_text(s)
+PYEOF
+        echo "    patched LoopClosing.cc (init mpCurrentKF; drain queue when inactive)"
+    fi
+
+    # (8) System::Shutdown() never stops the Viewer thread -- upstream left the
+    #     block commented out. With use_viewer:=true, Viewer::Run() is still in
+    #     cv::waitKey()'s GTK main loop when main() returns and the process dies
+    #     in libgtk at exit (SIGSEGV/SIGTRAP) after all outputs are written.
+    #     Re-enabled with a bounded (<= 2 s) wait.
+    f="$ORB_SRC/src/System.cc"
+    if grep -q '/\*if(mpViewer)' "$f" && ! grep -q 'orbslam3_ros2 patch (8)' "$f"; then
+        python3 - "$f" <<'PYEOF'
+import pathlib, sys
+p = pathlib.Path(sys.argv[1]); s = p.read_text()
+old = ("    /*if(mpViewer)\n    {\n        mpViewer->RequestFinish();\n"
+       "        while(!mpViewer->isFinished())\n            usleep(5000);\n    }*/\n")
+assert old in s, "System::Shutdown viewer block not found"
+new = ("    // orbslam3_ros2 patch (8): stop the Viewer thread before teardown.\n"
+       "    // Original lines, kept for reference:\n"
+       "    // /*if(mpViewer)\n    // {\n    //     mpViewer->RequestFinish();\n"
+       "    //     while(!mpViewer->isFinished())\n    //         usleep(5000);\n    // }*/\n"
+       "    if(mpViewer)\n    {\n        mpViewer->RequestFinish();\n"
+       "        for(int i = 0; i < 400 && !mpViewer->isFinished(); ++i)\n            usleep(5000);\n    }\n")
+p.write_text(s.replace(old, new, 1))
+PYEOF
+        echo "    patched System.cc      (Shutdown stops the Viewer thread)"
+    fi
+
+    # (9) Companion to (8). Once the Viewer thread can exit, Pangolin's global
+    #     window registry is still destroyed by the MAIN thread in _dl_fini with
+    #     no current GL context -> glDeleteTextures segfaults at process exit.
+    #     Destroy the windows on the viewer thread, before SetFinish().
+    f="$ORB_SRC/src/Viewer.cc"
+    if grep -q 'CreateWindowAndBind("ORB-SLAM3: Map Viewer"' "$f" && \
+       ! grep -q 'orbslam3_ros2 patch (9)' "$f"; then
+        python3 - "$f" <<'PYEOF'
+import pathlib, sys
+p = pathlib.Path(sys.argv[1]); s = p.read_text()
+old = "        if(CheckFinish())\n            break;\n    }\n\n    SetFinish();\n"
+assert s.count(old) == 1, "Viewer::Run tail not found"
+new = ("        if(CheckFinish())\n            break;\n    }\n\n"
+       "    // orbslam3_ros2 patch (9): destroy windows on the GL-owning thread\n"
+       "    // before SetFinish(); pure insertion, no upstream line removed.\n"
+       "    cv::destroyAllWindows();\n"
+       "    pangolin::DestroyWindow(\"ORB-SLAM3: Map Viewer\");\n\n    SetFinish();\n")
+p.write_text(s.replace(old, new, 1))
+PYEOF
+        echo "    patched Viewer.cc      (DestroyWindow on the viewer thread)"
+    fi
 }
 
 stage_orbslam3() {

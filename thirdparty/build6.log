@@ -1,0 +1,6 @@
+
+[1;36m==> ORB-SLAM3 @ 5c2b00f7[0m
+[1;31m[fail] only 1039 MB free on /, need 1500 MB.
+       Free some space and re-run. Big reclaim candidates:
+         du -sh /home/ambushee/wil_project/dataset/*     # 15 GB of bags
+         rm -rf /home/ambushee/wil_project/log/build_*   # old colcon logs[0m

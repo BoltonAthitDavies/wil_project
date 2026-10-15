@@ -66,6 +66,13 @@ def generate_launch_description():
             description='RY-SLAM dynamic-object filtering. When true, also starts '
                         'the YOLO detector node. Default false = stock tracker.'),
         DeclareLaunchArgument(
+            'det_max_age', default_value='0.15',
+            description='Oldest live detection (s) the tracker will still mask '
+                        'with. Raise toward 0.3 when the tracker itself runs '
+                        'slower than ~150 ms/frame (loop closing on this laptop); '
+                        'a box 10 frames stale moves ~10 px at warehouse speeds, '
+                        'inside the 8 px dilation plus box margin.'),
+        DeclareLaunchArgument(
             'filter_mode', default_value='class',
             description="'class' masks every detected box (RY-SLAM). 'motion' "
                         'masks a box only after the tracker has seen it move: '
@@ -128,6 +135,7 @@ def generate_launch_description():
             'filter': LaunchConfiguration('filter'),
             'dets_csv': ParameterValue(LaunchConfiguration('dets_csv'), value_type=str),
             'filter_mode': LaunchConfiguration('filter_mode'),
+            'det_max_age': LaunchConfiguration('det_max_age'),
         }],
     )
 

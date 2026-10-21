@@ -44,6 +44,22 @@ def generate_launch_description():
         DeclareLaunchArgument('run_command', default_value=''),
         DeclareLaunchArgument('run_notes', default_value=''),
         DeclareLaunchArgument('use_viewer', default_value='true'),
+        # Which bag topic is the LEFT camera is a property of the recording, not
+        # of the rig's wiring diagram. Measured with script/check_stereo_side.py:
+        #   dataset_real_000  (2026-09-14): cam1 to cam0's RIGHT (+19 px)  -> defaults
+        #   dataset_realv3_000 (2026-10-20): cam1 to cam0's LEFT  (-33 px)  -> swap
+        # With the pair assigned backwards every correct stereo match triangulates
+        # BEHIND the cameras (1 % in front vs 99 % swapped on realv3), so ORB-SLAM3's
+        # TriangulateMatches rejects them all, the map initialises with 0 points,
+        # and tracking cycles NOT_INITIALIZED -> OK -> LOST every three frames with
+        # ~4000 features extracted per frame. For realv3 bags launch with
+        #   image0_topic:=/cam1/image_raw image1_topic:=/cam0/image_raw
+        # 2026-10-21: OBSOLETE with the new extrinsics in config/wil/*.yaml (cam1 at -X).
+        # Keep the defaults (cam0 = image0) for realv3 and later bags.
+        DeclareLaunchArgument('image0_topic', default_value='/cam0/image_raw',
+                              description='bag topic of the LEFT camera (base name, no /compressed)'),
+        DeclareLaunchArgument('image1_topic', default_value='/cam1/image_raw',
+                              description='bag topic of the RIGHT camera'),
     ]
 
     node = Node(
@@ -73,8 +89,8 @@ def generate_launch_description():
 
             # Base topics WITHOUT the /compressed suffix: image_transport appends
             # it according to the transport below.
-            'image0_topic': '/cam0/image_raw',
-            'image1_topic': '/cam1/image_raw',
+            'image0_topic': LaunchConfiguration('image0_topic'),
+            'image1_topic': LaunchConfiguration('image1_topic'),
             'image_transport': 'compressed',
 
             # In pure stereo there is no separate body frame -- cam0 IS the body,

@@ -443,7 +443,28 @@ under `/media/ambushee/32E4AAB1E4AA772F/dataset/`. On 2026-09-17 all 66
 `dataset_path` entries were corrected. All corrected paths existed; no measured
 data or trajectories were edited.
 
-## 12. Making filter runs deterministic — precomputed detections (2026-10-12)
+## 12. Precomputed detections — IMPLEMENTED, THEN REMOVED (2026-10-12 to 10-16)
+
+> **REMOVED 2026-10-16.** Experiment 3 is a DEPLOYMENT evaluation at replay rate
+> 1.0: the detector running concurrently with the tracker is part of the system
+> under test, and precomputing its output removes exactly the compute cost the
+> experiment measures. `script/yolo_precompute.py`, the `dets_csv` parameter in
+> both nodes, its launch arguments and the auto-discovery were all deleted. The
+> full diff is kept at `MEMORY_CLAUDE/precompute_and_fixes_2026-10-16.patch` if
+> it is ever wanted for a separate, frame-matched methodological study.
+>
+> KEPT, because they are not part of it and remain useful on the live path:
+> `filter_status` in the summaries, the 20 s detector watchdog, the <98 %
+> match-rate warning, and the `dynamic_points_dropped` /
+> `mindistance_points_dropped` split (§12.5). §12.3's stale-republisher finding
+> and the `image_transport:=compressed` rule also stand.
+>
+> What the section below measured is still true and is the reason the deployment
+> arm must report `detection_match_rate` with every result: mask availability on
+> this laptop ranges 1-100 % and declines within a session.
+
+### Original section (historical)
+
 
 ### What went wrong
 

@@ -22,7 +22,7 @@ from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.conditions import IfCondition
-from launch.substitutions import LaunchConfiguration, PythonExpression
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
 
@@ -107,14 +107,6 @@ def generate_launch_description():
                         'frame k is scored after tracking and frame k+1 inherits '
                         'the verdict by IoU. Writes motion_votes.csv.'),
         DeclareLaunchArgument(
-            'dets_csv', default_value='',
-            description='Precomputed detections from script/yolo_precompute.py. '
-                        'When set (with filter:=true) the live detector is NOT '
-                        'started and every frame is masked from the file by its '
-                        'own stamp, so repeat runs mask identical frames. This is '
-                        'the only way a filter ON/OFF comparison is valid on a '
-                        'machine that cannot run the detector in real time.'),
-        DeclareLaunchArgument(
             'weights_path', default_value=DEFAULT_WEIGHTS,
             description='Ultralytics .pt for the detector. Only used with '
                         'filter:=true.'),
@@ -187,7 +179,6 @@ def generate_launch_description():
             # subscription and feeds ORB-SLAM3 an empty mask, which its extractor
             # short-circuits -- so the recorded baseline stays reproducible.
             'filter': LaunchConfiguration('filter'),
-            'dets_csv': ParameterValue(LaunchConfiguration('dets_csv'), value_type=str),
             'filter_mode': LaunchConfiguration('filter_mode'),
             'det_max_age': LaunchConfiguration('det_max_age'),
         }],
@@ -201,10 +192,7 @@ def generate_launch_description():
         name='dynamic_detector',
         output='screen',
         emulate_tty=True,
-        # Live detector only when filtering AND no precomputed file was given.
-        condition=IfCondition(PythonExpression([
-            "'", LaunchConfiguration('filter'), "'.lower() in ('true', '1') and '",
-            LaunchConfiguration('dets_csv'), "' == ''"])),
+        condition=IfCondition(LaunchConfiguration('filter')),
         parameters=[{
             'use_sim_time': True,
             'weights_path': LaunchConfiguration('weights_path'),

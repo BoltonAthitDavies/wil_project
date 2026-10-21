@@ -253,7 +253,7 @@ Current primary artifacts are:
 | Artifact | Meaning | Typical consumer |
 |---|---|---|
 | `vio.csv` | Timestamped estimated trajectory | trajectory metrics and plots |
-| `yolo_mask.csv` | Masks actually used by the tracker | filtering coverage and timing analysis. A valid filter run has `matched=1` and `det_age_ms=0.0` on every row; `run_summary.csv` `detection_match_rate` < 0.98 or `queue_dropped_frames` > 0 means the run is not comparable with its baseline |
+| `yolo_mask.csv` | Masks actually used by the tracker | filtering coverage and timing analysis. `run_summary.csv` / `filter_summary.csv` carry `detection_match_rate` and `filter_status`; quote both beside any filter result, because a low match rate means the filter did not run rather than did not help |
 | `output/yolo_eval/*/yolo_eval.csv` | YOLO predictions matched against projected Gazebo ground truth | precision, recall, IoU, and moving/static analysis |
 | `output/yolo_eval/*/yolo_detections.csv` | Per-detection offline results | threshold, class, and error analysis |
 | `output/yolo_eval/*/overlay/` | Visual GT/prediction overlays | qualitative validation of projections and matching |
@@ -386,15 +386,15 @@ when placing an RTAB-Map grid in the Gazebo-world viewer.
 ros2 launch orbslam3_ros2 wil_sim_stereo_imu.launch.py \
   output_path:=/home/ambushee/wil_project/output/output_orb/simulation/<run-id>
 
-# Dynamic-filter treatment. ALWAYS from a precomputed detection file: the live
-# detector runs 1-4 frames behind the tracker on this laptop and the mask was
-# present on 33% of frames on a warm run vs 91% on a cool one (same bag). With
-# dets_csv every frame is masked from its own stamp, repeat runs are identical,
-# and the detector node is not started. Precompute once per bag per weight:
-#   python3 script/yolo_precompute.py dataset/<bag> --weights weight/best.pt \
-#       --out dataset/<bag>/dets_best.csv
+# Dynamic-filter treatment. filter:=true also starts dynamic_detector_node.py,
+# which runs YOLO live alongside the tracker -- that concurrency is part of the
+# system under test (Experiment 3 is a deployment evaluation at replay rate 1.0).
+# Mask availability therefore varies with machine load: measured 1-100% across
+# repeats, declining within a session as the laptop heats. Report
+# detection_match_rate and filter_status from run_summary.csv beside every
+# result; a run with a low match rate did not filter, it did not "show filtering
+# does not help".
 ros2 launch orbslam3_ros2 wil_sim_stereo_imu.launch.py filter:=true \
-  dets_csv:=/home/ambushee/wil_project/dataset/<bag>/dets_best.csv \
   image_transport:=compressed \
   output_path:=/home/ambushee/wil_project/output/output_orb_yolo/simulation/<run-id>
 
@@ -402,6 +402,7 @@ ros2 launch orbslam3_ros2 wil_sim_stereo_imu.launch.py filter:=true \
 # the tracker has seen them move; writes motion_votes.csv). Calibrate with
 #   python3 script/motion_votes_eval.py dataset/<bag> <run>/motion_votes.csv
 # Three-way A/B = filter:=false | filter:=true (class) | filter_mode:=motion.
+# NOTE the VINS motion census is a documented NEGATIVE result (VINS record §11).
 
 # image_transport:=compressed on EVERY bag replay (baseline too). The sim bags
 # carry only /camN/image_raw/compressed; the launch default `raw` only receives
@@ -424,13 +425,23 @@ ros2 run vins_fusion_ros2 vins_fusion_ros2_node --ros-args \
   -p output_path:=/home/ambushee/wil_project/output/output_vins/simulation/<run-id> \
   -p use_sim_time:=true
 
-# Simulation dynamic-filter treatment -- same dets_csv rule as ORB-SLAM3 (8.3);
-# no detector process needed.
-ros2 run vins_fusion_ros2 vins_fusion_ros2_node --ros-args \
-  -p config_file:=/home/ambushee/wil_project/vins_fusion_ros2/config/wil_sim/stereo_imu.yaml \
-  -p output_path:=/home/ambushee/wil_project/output/output_vins_yolo/simulation/<run-id> \
-  -p use_sim_time:=true -p filter:=true \
-  -p dets_csv:=/home/ambushee/wil_project/dataset/<bag>/dets_best.csv
+# Simulation dynamic-filter treatment. Use the LAUNCH FILE, not `ros2 run`: it
+# starts the detector node and the estimator together, in order, both reading
+# the compressed camera topics directly. Starting the detector by hand is what
+# produced four Experiment 3 runs with matched=0 on 2026-09-16 and more on
+# 2026-10-15/16. Use the SAME launch file for the baseline arm (filter:=false),
+# so the two arms differ only by the variable under test.
+ros2 launch vins_fusion_ros2 wil_sim_vins_filter.launch.py \
+  output_path:=/home/ambushee/wil_project/output/output_vins_yolo/simulation/<bag>/<run-id> \
+  experiment_id:=<run-id> \
+  dataset_path:=<absolute-bag-path> \
+  world_path:=<absolute-world-file>
+# filter:=false for the baseline arm (no detector started, stock VINS).
+# filter_mode:=motion for the motion gate -- a documented NEGATIVE result for
+# VINS, see its engineering record section 11.
+# Then play the bag in ONE other terminal: ros2 bag play <bag> --rate 1.0
+# Afterwards read detection_match_rate and filter_status from
+# filter_summary.csv; a low match rate means the filter did not RUN.
 
 # Real rig
 ros2 run vins_fusion_ros2 vins_fusion_ros2_node --ros-args \
@@ -438,9 +449,12 @@ ros2 run vins_fusion_ros2 vins_fusion_ros2_node --ros-args \
   -p output_path:=/home/ambushee/wil_project/output/output_vins/real/<run-id>
 ```
 
-VINS requires raw images. If a bag contains only compressed images, include the
-two explicit compressed-to-raw republish terminals documented in the VINS
-engineering record.
+VINS decodes compressed images in-process since 2026-10-16
+(`image_transport:=compressed`, the launch default), so **no republish helpers
+are needed for either pipeline**. `republish:=true` restores the old pair only
+for a raw-only source. Still run `pgrep -fa 'republis[h]'` before an experiment
+and kill leftovers: a stale pair from an earlier session publishes onto the same
+raw topics and delivers every frame twice.
 
 ### 8.5 RTAB-Map
 

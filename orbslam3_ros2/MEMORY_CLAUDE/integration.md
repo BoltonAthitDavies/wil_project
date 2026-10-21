@@ -356,6 +356,20 @@ warehouse-appropriate 8.4 m. Same value used in the sim config.
 does. **Untuned.** A ~180° pair may genuinely overlap over a narrower band, and this
 is the first knob to try if fisheye stereo matches look poor.
 
+**Extrinsics re-calibrated 2026-10-21** — `camera_parameters/211026camera1_rot_trans.dat`
+(OpenCV `stereoCalibrate`, `X_cam1 = R·X_cam0 + T`, so the file is `cam1_T_cam0`). Baseline
+**0.089723 m**, 0.9669° (was 0.093604 m, 1.0854°). After the 2026-10-19 remount cam1 is
+physically **left** of cam0, and the user's rule is *cam0 = cam0, cam1 = cam1*: Camera1 := cam0,
+no topic swap. So `Stereo.T_c1_c2` is the **inverse** of the file (cam1 on cam0's −X), unlike
+the old value. That is legal for the KannalaBrandt8 path — `Settings.cc:347` takes
+`b = |t|` and `TriangulateMatches` only requires depth > 0 in both cameras — so the realv3
+"99 % of matches behind the cameras" was stale extrinsics contradicting the rig, not a
+left-first rule; the `image0_topic:=/cam1` swap in the launch comments is retired. The same
+`.dat` feeds VINS as `body_T_cam1 = body_T_cam0 · cam0_T_cam1` in both real-rig files, with
+VINS `stereo.yaml`'s topics returned to cam0/cam1. Old blocks are kept as comments in all four
+files. The `.dat` still records no RMS or image count. Every realv3 ORB result scored before
+this date used the old (and, in `stereo_imu.yaml`, 2 mm-typo'd) baseline and should be re-run.
+
 ### 6.3 Real rig IMU — be precise about which half is missing
 
 **The ROTATION is measured and correct; only the TRANSLATION is a placeholder.**
@@ -598,6 +612,46 @@ backtrace before touching source. The recipe is cheap: the launch leaves its par
 `/tmp/launch_params_*`, so
 `gdb -batch -ex 'handle SIGINT nostop noprint pass' -ex run -ex 'bt 30' --args install/orbslam3_ros2/lib/orbslam3_ros2/orbslam3_node --ros-args -r __node:=orbslam3 --params-file <it>`
 with the bag played separately reproduces any of them in about a minute.
+
+### 7.9 realv3: camera order reversed → map initialises with 0 points  *(2026-10-20)*
+
+**Symptom as reported:** "ORB didn't extract image features at all" on `dataset_realv3_000`.
+**Symptom as measured:** it extracted ~4000 features on every processed frame
+(`tracking_frontend.csv` `features` ≈ 4003–4019), but `map_matches_inliers` was 0 on all 407
+frames and `tracking_state` cycled `1→2→4` (NOT_INITIALIZED → OK → LOST) every three frames — 118
+resets in 43 s, `last_reset_reason = tracking_lost_small_map`. Stereo init printed
+`New Map created with 0 points` 211 times (1 point ×63, 2 points ×11) in the control run.
+
+**Cause.** On this bag cam1 lies to cam0's **left** — `script/check_stereo_side.py`: median
+disparity −33 px, every pair negative — the opposite of `dataset_real_000` (+19 px, 2026-09-14).
+The real configs put Camera2 at +X of Camera1 (`Stereo.T_c1_c2` translation +0.0936 m), so with
+the topics assigned as before every correct stereo correspondence triangulates *behind* the
+cameras and `Frame::ComputeStereoFishEyeMatches` → `KannalaBrandt8::TriangulateMatches`
+(`depth > 0.0001`) rejects it. Node-free check with the config's KB8 intrinsics and `T_c1_c2`
+on 4308 real matches: **1 % in front of both cameras as-is, 99 % swapped** (median depth ~1 m).
+Images are upright, so this is the topic↔side assignment, not an upside-down mount.
+
+**Why the first swap attempt showed nothing.** `image0_topic`/`image1_topic` were hard-coded in
+the launch files' params dict, not declared arguments, so `image0_topic:=...` on the command
+line was silently ignored and the "swapped" run subscribed to the same topics. Both real launch
+files now declare them (defaults unchanged); the install is symlinked, no rebuild.
+
+**Verified in-node (params-file swap, viewer off, same bag):**
+
+| run | init | inliers (median) | frames OK | losses | map points | path |
+| :-- | :-- | :-- | :-- | :-- | :-- | :-- |
+| stereo as-is | 0 points ×211 | 0 | 0 / 584 | 292 | 0 | 0.00 m |
+| stereo swapped | 89 points, once | 242 | 536 / 536 | 0 | 1631 | 3.79 m |
+| stereo-inertial swapped | 85 / 68 / 101 | 262 | 458 / 462 | 3 (early) | 3391, IMU initialised | 5.07 m |
+
+**Procedure for every new real bag:** `python3 script/check_stereo_side.py <bag> 8` first. Negative
+→ launch with `image0_topic:=/cam1/image_raw image1_topic:=/cam0/image_raw`. The VINS real
+configs hard-code the same cam0=left mapping in their yaml and will fail identically.
+
+**Still open from the same bag:** ~55 % of stereo pairs are dropped at `--rate 1.0`
+(1920×1080 fisheye, 2000 features) — replay at 0.5 for comparable runs; and the IMU→camera
+rotation `diag(1,-1,-1)` is consistent with gravity on +Y but gravity cannot distinguish an
+X-flip from a Z-flip (yaw sign), so the inertial run is not yet trustworthy.
 
 ### 7.4 Truncated CSV on hard kill
 See §5. `numpy.loadtxt` throws on a ragged file, so one truncated final line
@@ -855,6 +909,7 @@ sustained, no trajectory written. Blocked on calibration (§6.3), not code.
 | Pangolin viewer (`use_viewer:=true`) | **works** since 2026-10-15 (patches 8+9; needs the NVIDIA module to match the userspace driver, else `__GLX_VENDOR_LIBRARY_NAME=mesa`) — but it is software rendering under Mesa and competes with SLAM for cores: look with it, record without it |
 | Atlas save / load | **save verified** (patch 6); load runs (patch 7) but is only useful with `loopClosing: 1` — see §10 |
 | Loop closing on `allsensor_003` | **OFF is 92 % better** (6.481 → 0.515 m ATE); dynamic sets undecided — see §9 |
+| Real rig `dataset_realv3_000` | **tracks** with the image topics swapped (§7.9): 536/536 frames stereo, 458/462 stereo-inertial. Camera order must be checked per bag. |
 | Whether the IMU truly initialises | **unresolved** — see §9 |
 | Real-rig trajectories | **plausible, unverified** — no ground truth exists for these bags |
 
@@ -963,6 +1018,11 @@ reading the source or measuring the data, after at least one wrong guess.
    and the NVIDIA driver was upgraded without a reboot, which is why Pangolin could not get a
    GL context in the first place (`glxinfo` failed identically; `nvidia-smi` reported a
    driver/library mismatch).
+
+6. 2026-10-20, `dataset_realv3_000`: "no features" was really "no stereo matches". Features were
+   fine; the camera order had flipped after the 10-19 remount. The first swap test proved nothing
+   because the launch ignored the override — a `subscribed:` line caught that. The node-free
+   triangulation count (1 % vs 99 %) then predicted the in-node A/B exactly (§7.9).
 
 **The pattern held from sessions 1 and 2:** every surprise was at an interface — a YAML flag
 that controls more than its name, a thread nobody stops, a counter that measures a spin loop —

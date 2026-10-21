@@ -30,20 +30,22 @@
 \contentsline {figure}{\numberline {3.16}{\ignorespaces Hardware components of the mock AMR: steering servo and traction motor, BLDC drive and microcontroller on CAN, the NRU-51V computer, power supply, the AC-IMX390 stereo pair and IMU, and the Wi-Fi link to the smartphone joystick.}}{47}{figure.caption.77}%
 \contentsline {figure}{\numberline {3.17}{\ignorespaces Dimensions of the AC-IMX390 camera family in millimetres; the H190 variant at the bottom is the one used.\relax }}{47}{figure.caption.78}%
 \contentsline {figure}{\numberline {3.18}{\ignorespaces The Neousys NRU-51V (NVIDIA Jetson Xavier NX), showing the four FAKRA camera ports.\relax }}{48}{figure.caption.80}%
-\contentsline {figure}{\numberline {3.19}{\ignorespaces Dimensions of the Neousys NRU-51V in millimetres.\relax }}{48}{figure.caption.81}%
+\contentsline {figure}{\numberline {3.19}{\ignorespaces Dimensions of the Neousys NRU-51V in millimetres.\relax }}{49}{figure.caption.81}%
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Estimator comparison on \repo {dataset_allsensor_001}, world frame.}}{68}{figure.caption.110}%
-\contentsline {figure}{\numberline {4.2}{\ignorespaces Error against claimed uncertainty for \repo {dataset_allsensor_001}.}}{71}{figure.caption.116}%
-\contentsline {figure}{\numberline {4.3}{\ignorespaces Per-dataset and pooled detector scores and box-area coverage.}}{76}{figure.caption.132}%
-\contentsline {figure}{\numberline {4.4}{\ignorespaces Representative validation overlay used before accepting the offline metrics.}}{76}{figure.caption.133}%
-\contentsline {figure}{\numberline {4.5}{\ignorespaces Object-class confusion conditional on class-agnostic IoU association.}}{77}{figure.caption.136}%
-\contentsline {figure}{\numberline {4.6}{\ignorespaces Run-level anomaly diagnostics.}}{81}{figure.caption.142}%
-\contentsline {figure}{\numberline {4.7}{\ignorespaces Representative repeated-run trajectory diagnostic for \repo {dataset_dynamic_nofloortexture_00_000/logging_20260916_01}, in the same visual format as the existing comparison figures.}}{85}{figure.caption.151}%
-\contentsline {figure}{\numberline {4.8}{\ignorespaces Per-run robustness and keyframe observations for the dynamic datasets.}}{86}{figure.caption.152}%
-\contentsline {figure}{\numberline {4.9}{\ignorespaces Raw dynamic-run capacity and process-resource values.}}{86}{figure.caption.155}%
-\contentsline {figure}{\numberline {4.10}{\ignorespaces Module-latency distributions for dynamic datasets.}}{87}{figure.caption.156}%
-\contentsline {figure}{\numberline {4.11}{\ignorespaces Dense-map evaluation of \repo {map/map_tiny.db}.}}{92}{figure.caption.169}%
-\contentsline {figure}{\numberline {4.12}{\ignorespaces The same database scored against the run that built it, \repo {dataset/dataset_map_tiny}.}}{93}{figure.caption.170}%
-\contentsline {figure}{\numberline {4.13}{\ignorespaces Per-block performance in the \textbf {static} condition, over the five \repo {allsensor} datasets.}}{97}{figure.caption.177}%
-\contentsline {figure}{\numberline {4.14}{\ignorespaces Per-block performance in the \textbf {dynamic} condition, over the twelve relogged dynamic runs of each estimator.}}{101}{figure.caption.181}%
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Estimator comparison on \repo {dataset_allsensor_001}, world frame.}}{69}{figure.caption.111}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Error against claimed uncertainty for \repo {dataset_allsensor_001}.}}{72}{figure.caption.117}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Estimator comparison on every \repo {allsensor} recording, world frame.}}{76}{figure.caption.129}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Real-robot estimates against the optical tracker on \repo {dataset_realv3_000}: aligned trajectories, and error and speed over time.}}{78}{figure.caption.133}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Per-dataset and pooled detector scores and box-area coverage.}}{80}{figure.caption.139}%
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Representative validation overlay used before accepting the offline metrics.}}{80}{figure.caption.140}%
+\contentsline {figure}{\numberline {4.7}{\ignorespaces Object-class confusion conditional on class-agnostic IoU association.}}{81}{figure.caption.143}%
+\contentsline {figure}{\numberline {4.8}{\ignorespaces Run-level anomaly diagnostics.}}{86}{figure.caption.151}%
+\contentsline {figure}{\numberline {4.9}{\ignorespaces Extreme world, static recordings: every repeat, top-down after rigid alignment.}}{88}{figure.caption.155}%
+\contentsline {figure}{\numberline {4.10}{\ignorespaces Extreme world, dynamic recordings: every repeat, all four systems, top-down after rigid alignment.}}{89}{figure.caption.156}%
+\contentsline {figure}{\numberline {4.11}{\ignorespaces Unfiltered estimates on the four realistic-warehouse recordings after rigid alignment.}}{92}{figure.caption.165}%
+\contentsline {figure}{\numberline {4.12}{\ignorespaces Aligned ATE and jump-free RPE of the unfiltered arms by recording.}}{93}{figure.caption.166}%
+\contentsline {figure}{\numberline {4.13}{\ignorespaces Dense-map evaluation of \repo {map/map_tiny.db}.}}{99}{figure.caption.184}%
+\contentsline {figure}{\numberline {4.14}{\ignorespaces The same database scored against the run that built it, \repo {dataset/dataset_map_tiny}.}}{100}{figure.caption.185}%
+\contentsline {figure}{\numberline {4.15}{\ignorespaces Per-block performance in the \textbf {static} condition, over the five \repo {allsensor} datasets.}}{104}{figure.caption.192}%
+\contentsline {figure}{\numberline {4.16}{\ignorespaces Per-block performance in the \textbf {dynamic} condition, over the twelve relogged dynamic runs of each estimator.}}{108}{figure.caption.196}%
 \addvspace {10\p@ }

@@ -26,7 +26,7 @@ from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.conditions import IfCondition
-from launch.substitutions import LaunchConfiguration, PythonExpression
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
 
@@ -58,6 +58,22 @@ def generate_launch_description():
         DeclareLaunchArgument('run_command', default_value=''),
         DeclareLaunchArgument('run_notes', default_value=''),
         DeclareLaunchArgument('use_viewer', default_value='true'),
+        # Which bag topic is the LEFT camera is a property of the recording, not
+        # of the rig's wiring diagram. Measured with script/check_stereo_side.py:
+        #   dataset_real_000  (2026-09-14): cam1 to cam0's RIGHT (+19 px)  -> defaults
+        #   dataset_realv3_000 (2026-10-20): cam1 to cam0's LEFT  (-33 px)  -> swap
+        # With the pair assigned backwards every correct stereo match triangulates
+        # BEHIND the cameras (1 % in front vs 99 % swapped on realv3), so ORB-SLAM3's
+        # TriangulateMatches rejects them all, the map initialises with 0 points,
+        # and tracking cycles NOT_INITIALIZED -> OK -> LOST every three frames with
+        # ~4000 features extracted per frame. For realv3 bags launch with
+        #   image0_topic:=/cam1/image_raw image1_topic:=/cam0/image_raw
+        # 2026-10-21: OBSOLETE with the new extrinsics in config/wil/*.yaml (cam1 at -X).
+        # Keep the defaults (cam0 = image0) for realv3 and later bags.
+        DeclareLaunchArgument('image0_topic', default_value='/cam0/image_raw',
+                              description='bag topic of the LEFT camera (base name, no /compressed)'),
+        DeclareLaunchArgument('image1_topic', default_value='/cam1/image_raw',
+                              description='bag topic of the RIGHT camera'),
         DeclareLaunchArgument(
             'imu_accel_scale', default_value=str(ACCEL_SCALE),
             description='Accelerometer correction; 1.0 once the IMU is recalibrated.'),
@@ -78,14 +94,6 @@ def generate_launch_description():
                         'masks a box only after the tracker has seen it move: '
                         'frame k is scored after tracking and frame k+1 inherits '
                         'the verdict by IoU. Writes motion_votes.csv.'),
-        DeclareLaunchArgument(
-            'dets_csv', default_value='',
-            description='Precomputed detections from script/yolo_precompute.py. '
-                        'When set (with filter:=true) the live detector is NOT '
-                        'started and every frame is masked from the file by its '
-                        'own stamp, so repeat runs mask identical frames. This is '
-                        'the only way a filter ON/OFF comparison is valid on a '
-                        'machine that cannot run the detector in real time.'),
         DeclareLaunchArgument('weights_path', default_value=DEFAULT_WEIGHTS),
         DeclareLaunchArgument(
             # 'auto' = every class the chosen weight knows; see the detector node.
@@ -116,8 +124,8 @@ def generate_launch_description():
             'use_imu': True,
             'imu_accel_scale': LaunchConfiguration('imu_accel_scale'),
 
-            'image0_topic': '/cam0/image_raw',
-            'image1_topic': '/cam1/image_raw',
+            'image0_topic': LaunchConfiguration('image0_topic'),
+            'image1_topic': LaunchConfiguration('image1_topic'),
             # Legacy name: the topic is called /hwt101ct_yaw_publisher for
             # historical reasons but now carries a real 6-axis RealSense IMU at
             # 199.5 Hz. See vins config/wil/stereo_imu.yaml:12-18.
@@ -133,7 +141,6 @@ def generate_launch_description():
             'sync_slop': 0.02,
 
             'filter': LaunchConfiguration('filter'),
-            'dets_csv': ParameterValue(LaunchConfiguration('dets_csv'), value_type=str),
             'filter_mode': LaunchConfiguration('filter_mode'),
             'det_max_age': LaunchConfiguration('det_max_age'),
         }],
@@ -145,10 +152,7 @@ def generate_launch_description():
         name='dynamic_detector',
         output='screen',
         emulate_tty=True,
-        # Live detector only when filtering AND no precomputed file was given.
-        condition=IfCondition(PythonExpression([
-            "'", LaunchConfiguration('filter'), "'.lower() in ('true', '1') and '",
-            LaunchConfiguration('dets_csv'), "' == ''"])),
+        condition=IfCondition(LaunchConfiguration('filter')),
         parameters=[{
             'use_sim_time': False,
             'weights_path': LaunchConfiguration('weights_path'),

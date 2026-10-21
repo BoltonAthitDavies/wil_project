@@ -1,0 +1,271 @@
+diff --git a/orbslam3_ros2/src/orbslam3_node.cpp b/orbslam3_ros2/src/orbslam3_node.cpp
+index 0bc7a82..b7e04c9 100644
+--- a/orbslam3_ros2/src/orbslam3_node.cpp
++++ b/orbslam3_ros2/src/orbslam3_node.cpp
+@@ -49,6 +49,69 @@
+ namespace orbslam3_ros2
+ {
+ 
++/// Looks for a precomputed detection file beside the bag.
++///
++/// WHY THIS EXISTS. The detector is a separate ROS node that lives in
++/// orbslam3_ros2. Its launch file spawns one automatically; this node has no
++/// launch file, so for VINS the detector became something a human had to
++/// remember to start in another terminal. On 2026-09-16 it was forgotten for
++/// four Experiment 3 runs and again three times on 2026-10-15: the node
++/// subscribed, nothing ever published, and every frame recorded matched=0 --
++/// runs that look complete and filtered nothing. Asking the operator to also
++/// know about `dets_csv` was a second thing to remember, not a fix.
++///
++/// So: with filter:=true and no explicit dets_csv, look next to the dataset.
++/// One candidate is used. Several is ambiguous -- they are different detector
++/// weights and silently picking one would put the wrong provenance in the
++/// manifest -- so that is an error naming them, not a guess.
++static std::string autoDetsCsv(
++  const std::string & dataset_path, std::string & note)
++{
++  namespace fs = std::filesystem;
++  std::error_code ec;
++  if (dataset_path.empty() || !fs::is_directory(dataset_path, ec)) {
++    note = "dataset_path is not a directory";
++    return {};
++  }
++  std::vector<std::string> found;
++  for (const auto & e : fs::directory_iterator(dataset_path, ec)) {
++    const auto name = e.path().filename().string();
++    if (name.rfind("dets", 0) == 0 && e.path().extension() == ".csv") {
++      found.push_back(e.path().string());
++    }
++  }
++  std::sort(found.begin(), found.end());
++  if (found.empty()) {
++    note = "no dets*.csv beside the bag; run script/yolo_precompute.py";
++    return {};
++  }
++  if (found.size() > 1) {
++    // Ambiguous only in principle: the chosen path is written to
++    // run_metadata.csv and the file's own `#` header names the weight and
++    // thresholds, so provenance survives the choice. Refusing to choose would
++    // just push the operator back to the failure this function exists to
++    // prevent. Prefer an unsuffixed dets.csv, then the project's primary
++    // weight, then alphabetical -- and say out loud what was picked.
++    auto prefer = [&found](const std::string & want) {
++      for (const auto & f : found) {
++        if (std::filesystem::path(f).filename() == want) return f;
++      }
++      return std::string{};
++    };
++    std::string pick = prefer("dets.csv");
++    if (pick.empty()) pick = prefer("dets_best.csv");
++    if (pick.empty()) pick = found.front();
++    note = "chose " + fs::path(pick).filename().string() + " of";
++    for (const auto & f : found) {
++      note += " " + fs::path(f).filename().string();
++    }
++    note += " -- pass dets_csv to override";
++    return pick;
++  }
++  note = "auto-discovered beside the bag";
++  return found.front();
++}
++
+ class Orbslam3Node : public rclcpp::Node
+ {
+ public:
+@@ -166,6 +229,19 @@ public:
+     const auto sync_slop = declare_parameter<double>("sync_slop", 0.02);
+     const auto experiment_id = declare_parameter<std::string>("experiment_id", "");
+     const auto dataset_path = declare_parameter<std::string>("dataset_path", "");
++    // Same resolution as the VINS node: explicit dets_csv wins, else look beside
++    // the bag, else fall back to the live topic (which the launch file starts).
++    if (filter_ && dets_csv_.empty()) {
++      std::string note;
++      const auto found = autoDetsCsv(dataset_path, note);
++      if (!found.empty()) {
++        dets_csv_ = found;
++        RCLCPP_INFO(get_logger(), "dets_csv   : %s (%s)", found.c_str(), note.c_str());
++      } else {
++        RCLCPP_INFO(
++          get_logger(), "dets_csv   : none -- %s; using the live detector", note.c_str());
++      }
++    }
+     const auto world_path = declare_parameter<std::string>("world_path", "");
+     const auto replay_rate = declare_parameter<double>("replay_rate", 1.0);
+     const auto run_command = declare_parameter<std::string>("run_command", "");
+@@ -335,6 +411,23 @@ public:
+         "(dilate %d px, exact-stamp lookup, nearest within %.0f ms as fallback)",
+         dets_csv_.c_str(), mask_dilate_px_, det_max_age_ * 1e3);
+     } else if (filter_) {
++      // The launch files spawn the detector, but `ros2 run` does not. Same
++      // watchdog as the VINS node, for the same reason: a filter run with no
++      // detector looks complete and filters nothing.
++      dets_watchdog_ = create_wall_timer(
++        std::chrono::seconds(20), [this, dets_topic]() {
++          dets_watchdog_->cancel();
++          if (count_publishers(dets_topic) > 0) {
++            return;
++          }
++          RCLCPP_ERROR(
++            get_logger(),
++            "filter is ON but NOTHING publishes %s after 20 s. Every frame will "
++            "record matched=0 and the run will NOT be comparable with its "
++            "baseline. Launch with filter:=true (which starts the detector), or "
++            "precompute with script/yolo_precompute.py and pass dets_csv.",
++            dets_topic.c_str());
++        });
+       dets_sub_ = create_subscription<vision_msgs::msg::Detection2DArray>(
+         dets_topic, rclcpp::SensorDataQoS(),
+         std::bind(&Orbslam3Node::onDetections, this, std::placeholders::_1));
+@@ -566,6 +659,11 @@ private:
+         << (det_matched_ + det_missed_ ?
+           static_cast<double>(det_matched_) / (det_matched_ + det_missed_) : 0.0) << '\n'
+         << "detection_source," << (!filter_ ? "none" : dets_csv_.empty() ? "live" : "file") << '\n'
++        << "filter_status,"
++        << (!filter_ ? "none"
++          : det_matched_ == 0 ? "never_fired"
++          : det_matched_ < (det_matched_ + det_missed_) * 98 / 100 ? "degraded"
++          : "ok") << '\n'
+         << "filter_mode," << (filter_ ? filter_mode_ : "none") << '\n'
+         << "boxes_voted_moving," << boxes_voted_moving_ << '\n'
+         << "boxes_voted_static," << boxes_voted_static_ << '\n'
+@@ -1090,6 +1188,7 @@ private:
+   rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_sub_;
+ 
+   rclcpp::Subscription<vision_msgs::msg::Detection2DArray>::SharedPtr dets_sub_;
++  rclcpp::TimerBase::SharedPtr dets_watchdog_;
+   std::mutex dets_mu_;
+   std::deque<std::pair<double, std::vector<cv::Rect2f>>> dets_;
+   /// Precomputed detections keyed by image header stamp (ns); empty = live mode.
+diff --git a/script/motion_votes_eval.py b/script/motion_votes_eval.py
+index 9e90164..7304e4f 100644
+--- a/script/motion_votes_eval.py
++++ b/script/motion_votes_eval.py
+@@ -67,6 +67,10 @@ def main() -> None:
+     ap.add_argument('--min-box-age', type=int, default=0,
+                     help='only score census rows whose box chain is at least this old '
+                          '(needs the box_age column; mirrors motion_min_box_age)')
++    ap.add_argument('--out', default=None,
++                    help='directory to write motion_eval.csv (every box-frame with its '
++                         'truth label) and motion_summary.csv (the metrics printed '
++                         'below, one row), for script/summarise_motion_eval.py')
+     a = ap.parse_args()
+ 
+     body_T_cam0 = E.read_extrinsic(a.config, 'body_T_cam0')
+@@ -121,6 +125,18 @@ def main() -> None:
+     print(f"{hdr:16s}{'unknown':>9s}{'static':>9s}{'moving':>9s}")
+     for truth in ('moving', 'static', 'none'):
+         print(f'{truth:16s}' + ''.join(f'{conf.get((truth, v), 0):9d}' for v in ('unknown', 'static', 'moving')))
++    summary = {'votes_file': a.votes, 'bag': a.bag, 'box_frames': len(labelled),
++               'min_points': a.min_points, 'ratio': a.ratio, 'min_box_age': a.min_box_age}
++    for truth in ('moving', 'static', 'none'):
++        for v in ('unknown', 'static', 'moving'):
++            summary[f'{truth}_{v}'] = conf.get((truth, v), 0)
++    n_mov = sum(conf.get(('moving', v), 0) for v in ('unknown', 'static', 'moving'))
++    n_sta = sum(conf.get(('static', v), 0) for v in ('unknown', 'static', 'moving'))
++    # What the mask was built from: fraction of truly-moving / truly-static
++    # box-frames that ended up painted. These are the numbers that compare
++    # directly with class mode (1.0 / 1.0) and with no filter (0 / 0).
++    summary['moving_masked_frac'] = conf.get(('moving', 'moving'), 0) / n_mov if n_mov else float('nan')
++    summary['static_masked_frac'] = conf.get(('static', 'moving'), 0) / n_sta if n_sta else float('nan')
+ 
+     # ---- 2. the census itself, voted rows only
+     def old_enough(r):
+@@ -130,31 +146,64 @@ def main() -> None:
+     print(f'\n== census on voted rows (n_kp >= {a.min_points}): {len(voted)} of {len(labelled)} ==')
+     for truth in ('moving', 'static'):
+         vals = sorted(v for r, t in voted if t == truth for v in [ratio_rel(r)] if v is not None)
++        summary[f'census_{truth}_n'] = len(vals)
+         if not vals:
++            summary[f'census_{truth}_median'] = float('nan')
+             print(f'  {truth:7s}: no rows'); continue
+         q = lambda p: vals[int(p * (len(vals) - 1))]
+         print(f'  {truth:7s} n={len(vals):5d}  box/bg inlier ratio  p10 {q(.1):.2f}  p25 {q(.25):.2f}  '
+               f'median {q(.5):.2f}  p75 {q(.75):.2f}  p90 {q(.9):.2f}')
+-
+-    # ---- 3. parameter sweep on the same census
++        summary[f'census_{truth}_median'] = q(.5)
++
++    # ---- 3a. the run's OWN operating point, always recorded
++    def rates(mp, th):
++        tp = fm = ts_ = fs = 0
++        for r, truth, _ in labelled:
++            if int(r['n_kp']) < mp or truth == 'none' or not old_enough(r):
++                continue
++            v = ratio_rel(r)
++            if v is None:
++                continue
++            moving = v < th
++            if truth == 'moving':
++                tp += moving; fm += 1
++            else:
++                fs += moving; ts_ += 1
++        return tp, fm, fs, ts_
++
++    tp, fm, fs, ts_ = rates(a.min_points, a.ratio)
++    summary['vote_n_moving'] = fm
++    summary['vote_n_static'] = ts_
++    summary['vote_recall'] = tp / fm if fm else float('nan')
++    summary['vote_false_alarm'] = fs / ts_ if ts_ else float('nan')
++
++    # ---- 3b. sweep around it
+     print('\n== sweep: fraction of truly-MOVING boxes voted moving (recall) vs truly-STATIC voted moving (false alarm) ==')
+     print(f"{'min_pts':>8s}{'ratio':>7s}{'n_mov':>7s}{'recall':>8s}{'n_stat':>8s}{'false':>8s}")
+-    for mp in (8, 15, 25, 40):
+-        for th in (0.25, 0.5, 0.75):
+-            tp = fm = ts_ = fs = 0
+-            for r, truth, _ in labelled:
+-                if int(r['n_kp']) < mp or truth == 'none' or not old_enough(r):
+-                    continue
+-                v = ratio_rel(r)
+-                if v is None:
+-                    continue
+-                moving = v < th
+-                if truth == 'moving':
+-                    tp += moving; fm += 1
+-                else:
+-                    fs += moving; ts_ += 1
++    for mp in sorted({8, 15, 25, 40, a.min_points}):
++        for th in sorted({0.25, 0.5, 0.75, a.ratio}):
++            tp, fm, fs, ts_ = rates(mp, th)
++            mark = ' <-- run' if mp == a.min_points and abs(th - a.ratio) < 1e-9 else ''
+             print(f'{mp:8d}{th:7.2f}{fm:7d}{(tp / fm if fm else float("nan")):8.3f}'
+-                  f'{ts_:8d}{(fs / ts_ if ts_ else float("nan")):8.3f}')
++                  f'{ts_:8d}{(fs / ts_ if ts_ else float("nan")):8.3f}{mark}')
++
++    if a.out:
++        os.makedirs(a.out, exist_ok=True)
++        with open(os.path.join(a.out, 'motion_eval.csv'), 'w', newline='') as f:
++            w = csv.writer(f)
++            w.writerow(['timestamp_ns', 'box', 'x0', 'y0', 'x1', 'y1', 'n_kp', 'n_inlier',
++                        'bg_kp', 'bg_inlier', 'inherited', 'verdict', 'box_age',
++                        'truth', 'gt_name', 'rel_ratio'])
++            for r, truth, who in labelled:
++                v = ratio_rel(r)
++                w.writerow([r['timestamp_ns'], r['box'], r['x0'], r['y0'], r['x1'], r['y1'],
++                            r['n_kp'], r['n_inlier'], r['bg_kp'], r['bg_inlier'],
++                            r['inherited'], r['verdict'], r.get('box_age', ''),
++                            truth, who, '' if v is None else f'{v:.4f}'])
++        with open(os.path.join(a.out, 'motion_summary.csv'), 'w', newline='') as f:
++            w = csv.DictWriter(f, fieldnames=list(summary))
++            w.writeheader(); w.writerow(summary)
++        print(f'\nwrote     : {a.out}/motion_eval.csv, motion_summary.csv')
+ 
+ 
+ if __name__ == '__main__':
+diff --git a/vins_fusion_ros2 b/vins_fusion_ros2
+--- a/vins_fusion_ros2
++++ b/vins_fusion_ros2
+@@ -1 +1 @@
+-Subproject commit 3e9a05ffb7431ebfd9b0abf3c6074ed50a54e4b0
++Subproject commit 3e9a05ffb7431ebfd9b0abf3c6074ed50a54e4b0-dirty
+diff --git a/warehouse_map_realistic.osa b/warehouse_map_realistic.osa
+index 3840db3..cd12bb1 100644
+Binary files a/warehouse_map_realistic.osa and b/warehouse_map_realistic.osa differ
+diff --git a/warehouse_map_realistic_01_dynamic.osa b/warehouse_map_realistic_01_dynamic.osa
+deleted file mode 100644
+index 2e46f47..0000000
+Binary files a/warehouse_map_realistic_01_dynamic.osa and /dev/null differ
+diff --git a/warehouse_map_realistic_dynamic.osa b/warehouse_map_realistic_dynamic.osa
+deleted file mode 100644
+index 9dbdb5a..0000000
+Binary files a/warehouse_map_realistic_dynamic.osa and /dev/null differ

@@ -10,12 +10,19 @@
 # PROBLEM 1 -- the IMU->camera TRANSLATION is a placeholder. The rotation is fine.
 #   Be precise about which half is missing, because it changes the fix.
 #
-#   ROTATION: identity is MEASURED, not assumed. Averaging the stationary window
-#   of the 95mm bag gives "up" in the IMU frame as (+0.029, -0.997, -0.075) --
-#   gravity almost entirely on -Y, so the IMU's +Y points DOWN. That is the
-#   RealSense convention (x-right, y-down, z-forward), which is the same
-#   convention as a camera optical frame, so IMU -> cam0 really is ~identity.
-#   The residual is ~4.3 deg pitch / ~1.7 deg roll of mounting tilt.
+#   ROTATION: MEASURED, not assumed, and NO LONGER IDENTITY -- the RealSense is
+#   now mounted rotated 180 deg about its own X axis (2026-10-19).
+#   Averaging the stationary window of the 95mm bag gave "up" in the IMU frame as
+#   (+0.029, -0.997, -0.075) -- gravity almost entirely on -Y, so the IMU's +Y
+#   pointed DOWN. That is the RealSense convention (x-right, y-down, z-forward),
+#   the same convention as a camera optical frame, so IMU -> cam0 WAS ~identity.
+#   The 180 deg X flip maps that to diag(1, -1, -1): X unchanged, Y and Z negated.
+#   So +Y now points UP and the stationary accelerometer should read
+#   (+0.269, +9.236, +0.695) m/s^2 raw, where it previously read
+#   (+0.269, -9.236, -0.695). VERIFY THAT before trusting a run -- it is the
+#   cheapest check that the mount matches this file.
+#   The residual is ~4.3 deg pitch / ~1.7 deg roll of mounting tilt, left to
+#   online refinement (VINS) and simply carried here.
 #
 #   TRANSLATION: zero, and wrong. It asserts the IMU sits exactly at cam0's
 #   optical centre. The lever arm couples angular rate into measured
@@ -53,6 +60,7 @@
 # finds none, prints "*Error with the camera parameters in the config file*" and
 # then SEGFAULTS on a null camera. Do not remove it.
 File.version: "1.0"
+loopClosing: 0
 
 #--------------------------------------------------------------------------------------------
 # ~180 degree fisheye. ORB-SLAM3 models this natively as KannalaBrandt8, which
@@ -111,7 +119,7 @@ Camera2.overlappingEnd: 1919
 #--------------------------------------------------------------------------------------------
 # Stereo geometry
 #--------------------------------------------------------------------------------------------
-# Baseline 0.09360 m, so ThDepth 90 puts the close/far split at ~8.4 m. Same
+# Baseline 0.08972 m (2026-10-21), so ThDepth 90 puts the close/far split at ~8.1 m. Same
 # reasoning as the sim config: EuRoC's stock 60 assumes a 0.11 m baseline.
 Stereo.ThDepth: 90.0
 
@@ -124,17 +132,36 @@ Stereo.ThDepth: 90.0
 # problem for the inertial config -- but it is harmless here, where the body
 # frame is never used.)
 #
-# Ultimately from camera1_rot_trans.dat: 1.0854 deg relative rotation, and the
-# translation lies on cam0's optical +X, i.e. cam1 is the RIGHT camera.
-# script/check_stereo_side.py verifies that empirically from a bag.
+# (Provenance of the old block below: inverse of the 2026-08-06 .dat, cam1 RIGHT of
+# cam0. script/check_stereo_side.py verifies the side empirically from a bag.)
+# UPDATED 2026-10-21 from camera_parameters/211026camera1_rot_trans.dat (OpenCV
+# stereoCalibrate output: X_cam1 = R*X_cam0 + T, i.e. cam1_T_cam0). INVERTED here
+# to cam0_T_cam1 because Camera1 := cam0 and Camera2 := cam1 -- no topic swap.
+# cam1 is physically to the LEFT of cam0, so the translation is on cam0's -X
+# (-0.0897 m). That is fine for the KannalaBrandt8 path: Settings.cc takes
+# b = |t| and TriangulateMatches only requires depth > 0 in both cameras; the
+# realv3 "matches behind the cameras" problem was stale extrinsics, not an
+# ordering rule, so the image0:=/cam1 swap in the launch comments is obsolete.
+# Baseline 0.089723 m, 0.9669 deg (was 0.093604 m, 1.0854 deg).
+#
+# OLD value, kept for reference -- inverse of the 2026-08-06 camera1_rot_trans.dat,
+# valid for the pre-remount rig where cam1 was to the RIGHT of cam0:
+# Stereo.T_c1_c2: !!opencv-matrix
+#   rows: 4
+#   cols: 4
+#   dt: f
+#   data: [ 0.9999155119,  0.0066784035,  0.0111520357,  0.0935980368,
+#          -0.0065240958,  0.9998832669, -0.0138162526, -0.0010121732,
+#          -0.0112430044,  0.0137423283,  0.9998423592,  0.0003943868,
+#           0.0,           0.0,           0.0,           1.0]
 Stereo.T_c1_c2: !!opencv-matrix
   rows: 4
   cols: 4
   dt: f
-  data: [ 0.9999155119,  0.0066784035,  0.0111520357,  0.0935980368,
-         -0.0065240958,  0.9998832669, -0.0138162526, -0.0010121732,
-         -0.0112430044,  0.0137423283,  0.9998423592,  0.0003943868,
-          0.0,           0.0,           0.0,           1.0]
+  data: [ 0.9998579160, -0.0051040575, -0.0160653773, -0.0897173102,
+          0.0051169031,  0.9999866208,  0.0007585784,  0.0000049715,
+          0.0160612906, -0.0008406756,  0.9998706557,  0.0010314226,
+          0.0000000000,  0.0000000000,  0.0000000000,  1.0000000000]
 
 #--------------------------------------------------------------------------------------------
 # ORB extractor
@@ -167,17 +194,19 @@ Viewer.imageViewScale: 0.35
 #--------------------------------------------------------------------------------------------
 # IMU  -- read the header of this file before trusting any of it
 #--------------------------------------------------------------------------------------------
-# body(imu) <- cam0. IDENTITY IS A PLACEHOLDER, NOT A MEASUREMENT. See PROBLEM 1.
-# Replacing this with a real transform is the single biggest accuracy win
-# available on this rig.
+# body(imu) <- cam0. The ROTATION is the measured mount: diag(1, -1, -1), i.e.
+# the RealSense turned 180 deg about X (see PROBLEM 1). The TRANSLATION is still
+# a placeholder -- zero asserts the IMU sits at cam0's optical centre, which it
+# does not. Filling that last column in is still the single biggest accuracy win
+# available on this rig; the 180 deg flip does not change that.
 IMU.T_b_c1: !!opencv-matrix
   rows: 4
   cols: 4
   dt: f
-  data: [1.0, 0.0, 0.0, 0.0,
-         0.0, 1.0, 0.0, 0.0,
-         0.0, 0.0, 1.0, 0.0,
-         0.0, 0.0, 0.0, 1.0]
+  data: [1.0,  0.0,  0.0, 0.0,
+         0.0, -1.0,  0.0, 0.0,
+         0.0,  0.0, -1.0, 0.0,
+         0.0,  0.0,  0.0, 1.0]
 
 # Mapped 1:1 from VINS config/wil/stereo_imu.yaml -- same continuous-density
 # convention, no unit conversion. Note VINS's g_norm: 9.2642 has NO counterpart

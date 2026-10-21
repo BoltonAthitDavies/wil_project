@@ -500,12 +500,17 @@ def pin_to_reference(ax, ref, aligned, th, frac=0.12):
     return off
 
 
-def plot_trajectory_montage(groups, theme):
-    """Cross-run sheet matching the established trajectories_* figure family."""
+def plot_trajectory_montage(groups, theme, cols=4, out_name=None, title=None):
+    """Cross-run sheet matching the established trajectories_* figure family.
+
+    cols/out_name/title (added 21 Oct 2026) let the same sheet be cut by scene for
+    the report, where the 21-panel sheet is too small for one page: three
+    columns, a static sheet and a dynamic sheet. Defaults reproduce the
+    original file byte-for-byte in layout.
+    """
     th = THEMES[theme]
-    cols = 4
     rows_n = math.ceil(len(groups) / cols)
-    fig, axes = plt.subplots(rows_n, cols, figsize=(15, 3.65 * rows_n + .9),
+    fig, axes = plt.subplots(rows_n, cols, figsize=(3.75 * cols, 3.65 * rows_n + .9),
                              facecolor=th["surface"], squeeze=False)
     for ax in axes.ravel():
         ax.set_visible(False)
@@ -532,13 +537,16 @@ def plot_trajectory_montage(groups, theme):
     handles, labels = axes[0, 0].get_legend_handles_labels()
     fig.legend(handles, labels, loc="upper right", ncol=len(labels), fontsize=8,
                facecolor=th["surface"], edgecolor=th["grid"], labelcolor=th["ink2"])
-    fig.suptitle("Relogged trajectories, top-down (SE(3)-aligned to rosbag ground truth)",
+    fig.suptitle(title or "Relogged trajectories, top-down (SE(3)-aligned to rosbag ground truth)",
                  x=.025, ha="left", y=.992, fontsize=14, color=th["ink"])
     fig.text(.025, .972,
              "each panel is one repeat; fixed-scale SE(3) alignment to rosbag ground truth; VINS+YOLO* had zero matched masks",
              ha="left", va="top", fontsize=8.5, color=th["ink3"])
     fig.tight_layout(rect=[0, 0, 1, .955])
-    p = OUT / f"trajectories_{theme}_yolo_nofloortexture.png"
+    # NOT `name`: the drawing loop above binds `name` to each system label, and a
+    # parameter of that name was silently overwritten (sheets came out as
+    # "ORB-SLAM3+YOLO.png" on 21 Oct 2026).
+    p = OUT / (out_name or f"trajectories_{theme}_yolo_nofloortexture.png")
     fig.savefig(p, dpi=160, facecolor=th["surface"]); plt.close(fig)
 
 
@@ -654,6 +662,13 @@ def main():
     for theme in THEMES:
         plot_capacity(run_rows,theme); plot_latency(module_rows,theme); plot_robustness(run_rows,theme)
         plot_trajectory_montage(groups, theme); plot_summary_table(groups, run_rows, theme)
+        # Per-scene sheets for the report (every repeat, three columns per page).
+        plot_trajectory_montage([g for g in groups if "static_" in g[0]], theme, cols=3,
+                                out_name=f"trajectories_{theme}_static_sheet.png",
+                                title="Extreme world, static: every repeat")
+        plot_trajectory_montage([g for g in groups if "dynamic_" in g[0]], theme, cols=3,
+                                out_name=f"trajectories_{theme}_dynamic_sheet.png",
+                                title="Extreme world, dynamic: every repeat")
 
     # Audit treatment pairing without converting unequal input streams into a causal result.
     audit=[]

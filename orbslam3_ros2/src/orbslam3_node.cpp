@@ -49,6 +49,7 @@
 namespace orbslam3_ros2
 {
 
+
 class Orbslam3Node : public rclcpp::Node
 {
 public:
@@ -92,13 +93,6 @@ public:
     filter_ = declare_parameter<bool>("filter", false);
     const auto dets_topic =
       declare_parameter<std::string>("dynamic_dets_topic", "/orbslam3/dynamic_dets");
-    // Precomputed detections (script/yolo_precompute.py). When set, the live
-    // detector is not consulted at all: every frame's boxes are looked up by the
-    // frame's OWN header stamp, so two runs of the same bag mask identical frames
-    // with identical boxes. Without it, whether a frame is masked depends on the
-    // detector keeping within det_max_age of the tracker -- which on this laptop
-    // meant 33% of frames on a warm run and 91% on a cool one.
-    dets_csv_ = declare_parameter<std::string>("dets_csv", "");
     // Detection boxes clip their objects slightly, and a feature ON the silhouette
     // of a moving crate is exactly the one that corrupts the map. Grow them.
     mask_dilate_px_ = declare_parameter<int>("mask_dilate_px", 8);
@@ -263,7 +257,6 @@ public:
         {"det_max_age_s", std::to_string(det_max_age_)},
         {"mask_dilate_px", std::to_string(mask_dilate_px_)},
         {"max_mask_fraction", std::to_string(max_mask_fraction_)},
-        {"dets_csv", dets_csv_},
         {"filter_mode", filter_mode_},
         {"motion_iou", std::to_string(motion_iou_)},
         {"motion_min_points", std::to_string(motion_min_points_)},
@@ -328,13 +321,23 @@ public:
         std::bind(&Orbslam3Node::onStereo, this, std::placeholders::_1, std::placeholders::_2));
     }
 
-    if (filter_ && !dets_csv_.empty()) {
-      loadDetsCsv(dets_csv_);
-      RCLCPP_INFO(
-        get_logger(), "filter     : ON -- masking from precomputed %s "
-        "(dilate %d px, exact-stamp lookup, nearest within %.0f ms as fallback)",
-        dets_csv_.c_str(), mask_dilate_px_, det_max_age_ * 1e3);
-    } else if (filter_) {
+    if (filter_) {
+      // The launch files spawn the detector, but `ros2 run` does not. Same
+      // watchdog as the VINS node, for the same reason: a filter run with no
+      // detector looks complete and filters nothing.
+      dets_watchdog_ = create_wall_timer(
+        std::chrono::seconds(20), [this, dets_topic]() {
+          dets_watchdog_->cancel();
+          if (count_publishers(dets_topic) > 0) {
+            return;
+          }
+          RCLCPP_ERROR(
+            get_logger(),
+            "filter is ON but NOTHING publishes %s after 20 s. Every frame will "
+            "record matched=0 and the run will NOT be comparable with its "
+            "baseline. Launch with filter:=true, which starts the detector.",
+            dets_topic.c_str());
+        });
       dets_sub_ = create_subscription<vision_msgs::msg::Detection2DArray>(
         dets_topic, rclcpp::SensorDataQoS(),
         std::bind(&Orbslam3Node::onDetections, this, std::placeholders::_1));
@@ -421,8 +424,7 @@ public:
           get_logger(),
           "only %.1f%% of frames (%zu of %zu) had a detection to mask with; the "
           "filter was effectively OFF for the rest. This run is NOT comparable "
-          "with a filter:=false run. Precompute detections with "
-          "script/yolo_precompute.py and pass dets_csv to make it deterministic.",
+          "with a filter:=false run -- the detector could not keep up.",
           100.0 * det_matched_ / (det_matched_ + det_missed_), det_matched_,
           det_matched_ + det_missed_);
       }
@@ -565,7 +567,12 @@ private:
         << "detection_match_rate," << std::fixed << std::setprecision(4)
         << (det_matched_ + det_missed_ ?
           static_cast<double>(det_matched_) / (det_matched_ + det_missed_) : 0.0) << '\n'
-        << "detection_source," << (!filter_ ? "none" : dets_csv_.empty() ? "live" : "file") << '\n'
+
+        << "filter_status,"
+        << (!filter_ ? "none"
+          : det_matched_ == 0 ? "never_fired"
+          : det_matched_ < (det_matched_ + det_missed_) * 98 / 100 ? "degraded"
+          : "ok") << '\n'
         << "filter_mode," << (filter_ ? filter_mode_ : "none") << '\n'
         << "boxes_voted_moving," << boxes_voted_moving_ << '\n'
         << "boxes_voted_static," << boxes_voted_static_ << '\n'
@@ -667,7 +674,7 @@ private:
   /// Builds the CV_8UC1 mask for a frame: 255 = static/keep, 0 = dynamic.
   /// Returns an empty Mat when filtering is off, when no detection is recent
   /// enough, or when the result would blank too much of the image.
-  cv::Mat maskFor(const builtin_interfaces::msg::Time & stamp, double t, const cv::Size & size)
+  cv::Mat maskFor(double t, const cv::Size & size)
   {
     // Always reset: a frame with no detection must not inherit the previous
     // frame's vote boxes, or its census would be charged to the wrong boxes.
@@ -677,36 +684,7 @@ private:
     }
 
     std::vector<cv::Rect2f> boxes;
-    if (!dets_file_.empty()) {
-      // Precomputed: the frame's own stamp, exactly. The nearest-within-tolerance
-      // fallback only exists for a re-stamped replay, and it reports a nonzero
-      // age so a run that needed it is visible in yolo_mask.csv.
-      const int64_t ns = stampNs(stamp);
-      auto it = dets_file_.find(ns);
-      double age = 0.0;
-      if (it == dets_file_.end()) {
-        auto up = dets_file_.lower_bound(ns);
-        double best = det_max_age_;
-        for (auto cand : {up, up == dets_file_.begin() ? dets_file_.end() : std::prev(up)}) {
-          if (cand == dets_file_.end()) {
-            continue;
-          }
-          const double a = std::fabs(static_cast<double>(cand->first - ns)) * 1e-9;
-          if (a <= best) {
-            best = a;
-            it = cand;
-          }
-        }
-        if (it == dets_file_.end()) {
-          ++det_missed_;
-          last_ = LogRow{0, 0.0, false, -1.0, false};
-          return cv::Mat();
-        }
-        age = best;
-      }
-      boxes = it->second;
-      last_age_ = age;
-    } else {
+    {
       std::lock_guard<std::mutex> lk(dets_mu_);
       double best = det_max_age_;
       const std::vector<cv::Rect2f> * pick = nullptr;
@@ -880,51 +858,6 @@ private:
     return static_cast<int64_t>(t.sec) * 1000000000LL + static_cast<int64_t>(t.nanosec);
   }
 
-  /// Reads a script/yolo_precompute.py file: '#' provenance lines, a header,
-  /// then one row per box as timestamp_ns,class,score,x0,y0,x1,y1. A frame with
-  /// nothing detected is present with an empty class, so "no boxes" and "frame
-  /// not in file" stay distinguishable -- only the latter counts as missed.
-  void loadDetsCsv(const std::string & path)
-  {
-    std::ifstream in(path);
-    if (!in) {
-      throw std::runtime_error("dets_csv: cannot open " + path);
-    }
-    std::string line;
-    std::size_t n_boxes = 0;
-    while (std::getline(in, line)) {
-      if (line.empty() || line[0] == '#' || line.rfind("timestamp_ns", 0) == 0) {
-        continue;
-      }
-      std::stringstream ss(line);
-      std::string f[7];
-      int i = 0;
-      while (i < 7 && std::getline(ss, f[i], ',')) {
-        ++i;
-      }
-      if (i < 7) {
-        continue;
-      }
-      auto & v = dets_file_[std::stoll(f[0])];
-      if (f[1].empty()) {
-        continue;
-      }
-      const float x0 = std::stof(f[3]), y0 = std::stof(f[4]);
-      const float x1 = std::stof(f[5]), y1 = std::stof(f[6]);
-      if (x1 > x0 && y1 > y0) {
-        v.emplace_back(x0, y0, x1 - x0, y1 - y0);
-        ++n_boxes;
-      }
-    }
-    if (dets_file_.empty()) {
-      throw std::runtime_error("dets_csv: no frames in " + path);
-    }
-    RCLCPP_INFO(
-      get_logger(), "dets_csv   : %zu frames, %zu boxes (%.2f per frame) from %s",
-      dets_file_.size(), n_boxes,
-      static_cast<double>(n_boxes) / dets_file_.size(), path.c_str());
-  }
-
   /// One row per frame into yolo_mask.csv. Timestamp is written as integer
   /// nanoseconds, exactly as TrajectoryWriter does for vio.csv, so a join on
   /// column 0 lines the two files up with no tolerance fudging.
@@ -977,7 +910,7 @@ private:
     // script/extract_gt.py samples for ground_truth.csv, so no time alignment
     // is needed when comparing the two.
     const double t = stampSeconds(left->header.stamp);
-    const cv::Mat mask = maskFor(left->header.stamp, t, l->image.size());
+    const cv::Mat mask = maskFor(t, l->image.size());
     logMask(left->header.stamp);
     slam_->pushStereo(t, l->image, r->image, mask, cv::Mat(), vote_boxes_);
   }
@@ -997,7 +930,7 @@ private:
       return;
     }
     const double t = stampSeconds(left->header.stamp);
-    const cv::Mat mask = maskFor(left->header.stamp, t, l.size());
+    const cv::Mat mask = maskFor(t, l.size());
     logMask(left->header.stamp);
     slam_->pushStereo(t, l, r, mask, cv::Mat(), vote_boxes_);
   }
@@ -1090,11 +1023,9 @@ private:
   rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_sub_;
 
   rclcpp::Subscription<vision_msgs::msg::Detection2DArray>::SharedPtr dets_sub_;
+  rclcpp::TimerBase::SharedPtr dets_watchdog_;
   std::mutex dets_mu_;
   std::deque<std::pair<double, std::vector<cv::Rect2f>>> dets_;
-  /// Precomputed detections keyed by image header stamp (ns); empty = live mode.
-  std::string dets_csv_;
-  std::map<int64_t, std::vector<cv::Rect2f>> dets_file_;
   /// What maskFor() decided about the frame currently being pushed.
   struct LogRow
   {

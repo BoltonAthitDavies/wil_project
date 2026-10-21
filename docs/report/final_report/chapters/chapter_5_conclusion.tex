@@ -37,6 +37,13 @@ project's target of \SI{0.05}{\metre} ATE, no estimator qualifies; against the
 scenes. The comparison is confined to static, encoder-equipped recordings and
 to a floor on which the wheels effectively cannot slip.
 
+On the real robot the slot holds one provisional recording
+(\cref{sec:exp1-real}). ORB-SLAM3 keeps planar error at
+\SIrange{1.1}{1.3}{\metre} with no jumps over a \SI{10}{\metre} loop but
+traverses less than half its length, and VINS-Fusion diverges inertially. With
+the tracker-marker lever arm and the remounted rig's extrinsics unmeasured,
+neither number is yet evidence about the estimators.
+
 \subsection{Experiment 2: how good is the detector?}
 
 The three-class detector is reliable at naming and unreliable at finding:
@@ -57,12 +64,27 @@ of twelve ORB-SLAM3 treatment pairs received different input, and the scripted
 dynamic worlds were found to be an invalid testbed, so every dynamic-scene
 trajectory is withheld as a finding (\cref{sec:trajectory-results}). This is
 untested, not tested and failed. The static runs do establish two things: the
-two front ends reach medians of \SI{0.370}{\metre} and \SI{0.454}{\metre}
-aligned ATE, and ORB-SLAM3's eleven-fold rotational penalty is produced by one
-or two discrete events near inertial initialisation, not by its steady-state
-tracking (\cref{sec:rpe}). Neither front end keeps up with the frame rate at the
+best of three repeats per recording reaches \SIrange{0.29}{0.37}{\metre}
+aligned ATE for VINS-Fusion and \SIrange{0.36}{0.58}{\metre} for ORB-SLAM3,
+with medians up to \SI{0.79}{\metre}; and ORB-SLAM3's \SI{17}{\degree}
+rotational RMSE against VINS-Fusion's \SIrange{1}{2}{\degree} is one discrete
+event near inertial initialisation, not its steady-state tracking, the median
+rotational RPE of the same runs being \SIrange{0.05}{0.13}{\degree} for both
+(\cref{sec:rpe}). Neither front end keeps up with the frame rate at the
 replay rate used, and they hide that deficit differently, one by dropping
 frames and one by queueing them (\cref{sec:block-performance}).
+
+The rebuilt, physically dynamic worlds change one half of that statement
+(\cref{sec:realistic-ab}). With pallet jacks and people moving through the
+scene, neither front end loses tracking: ORB-SLAM3 stays within its static
+range of \SIrange{0.36}{0.68}{\metre}, and VINS-Fusion degrades on one of two
+layouts, to \SI{1.95}{\metre}, continuously and without a jump --- the
+signature of features followed on moving objects rather than of lost tracking.
+That is from one run per condition and does not separate traffic from route.
+The other half stands: the filter arms produced no admissible pair, because the
+VINS-Fusion detector cannot deliver a mask at deployment rate on this machine
+and every ORB-SLAM3 pair differs from its baseline in input or in software
+revision.
 
 \subsection{Experiment 4: is the map usable?}
 
@@ -89,17 +111,19 @@ unmeasured and its loop-closure configuration is absent from the run manifest,
 so its loop-closure results cannot be attributed. The detector is scored against
 projected geometry with exemptions the training convention lacks. The dynamic
 worlds move props kinematically and so do not pose the problem the project
-poses. And no real-robot slot is filled: the rig's calibration has a
-placeholder translation and a reused intrinsic set, and no recording carries
-motion-capture truth, wheel odometry or varied illumination.
+poses. And one real-robot slot holds only a provisional result: the rig's
+calibration has a placeholder translation and a reused intrinsic set, the one
+tracker-truthed recording lacks a measured lever arm, and no recording carries
+wheel odometry in metric units or varied illumination.
 
 \section{Recommendations and Next Steps}
 \label{sec:recommendations}
 
 \textbf{Fill the four real-robot slots, in the order the simulation results
-suggest.} First calibrate the real camera--IMU pair and record the
-motion-capture reference with the wheel and steering topics bridged, which
-unlocks Experiments~1 and~3 at once and yields the first measured noise model of
+suggest.} First calibrate the remounted camera--IMU pair, measure the
+tracker-marker lever arm, and re-record the tracker reference with the wheel
+and steering topics bridged in metric units, which unlocks Experiments~1
+and~3 at once and yields the first measured noise model of
 the real IMU. Then annotate a frame subset under the three illumination levels
 for Experiment~2, and survey the site into a reference grid for Experiment~4.
 The integrated live test of \cref{sec:vio-filter-method}, both pipelines at

@@ -283,18 +283,26 @@ insertion point is not sufficient for both.
 \input{chapters/fragments/m3_dataset_registry}
 
 \paragraph{Recordings added after the cutoff.} \Cref{tab:dataset-registry} is
-the registry at 25 September 2026. Three recordings have been added since and
-are listed here so the registry stays complete; none is used by a result slot
-in \cref{chap:results}. \repo{dataset_map_realistic} (8 October 2026) is the
-first recording in the realistic family and is described in
-\cref{sec:realistic-worlds}. \repo{dataset_realv2_000} (\SI{35}{\second}) and
-\repo{dataset_realv2_001} (\SI{96}{\second}) were recorded on the real robot at
-the Gensurv site on 1 October 2026 and are the first real recordings with an
-independent ground truth: a planar optical tracker at about \SI{7}{\hertz},
-stored under \repo{dataset/gt/}. The tracker and the robot keep separate,
-unsynchronised clocks, so the time offset must be estimated per bag before
-scoring (\repo{script/eval_real_gt.py}); that scoring is provisional and is
-not reported in this document.
+the registry at 25 September 2026. Eight recordings have been added since and
+are listed here so the registry stays complete. \repo{dataset_map_realistic}
+(8 October 2026) is the first recording in the realistic family and is
+described in \cref{sec:realistic-worlds}; the four
+\repo{dataset_allsensor_realistic} recordings (9--14 October 2026) follow it
+in the two realistic layouts, appear in \cref{tab:dataset-scenes} and
+\cref{fig:dataset-scenes}, and are scored in \cref{sec:realistic-ab}.
+\repo{dataset_realv2_000} (\SI{35}{\second}) and \repo{dataset_realv2_001}
+(\SI{96}{\second}) were recorded on the real robot at the Gensurv site on
+1 October 2026 and were the first real recordings with an independent ground
+truth: a planar optical tracker at about \SI{7}{\hertz}, stored under
+\repo{dataset/gt/}. Their scoring was provisional and is not reported; the
+recordings and their estimator runs are no longer held in the workspace.
+\repo{dataset_realv3_000} (\SI{43}{\second}, 19 October 2026) was recorded
+after the stereo camera was remounted, with the same tracker reference, and is
+the one real recording a result slot uses (\cref{sec:exp1-real}). On it
+\repo{cam0} is the right camera, the reverse of the earlier recordings, and
+both estimators' configurations exchange the image topics accordingly. The
+tracker and the robot keep separate clocks, so the time offset is estimated
+per bag before scoring (\cref{sec:method-trajectory}).
 
 \section{Real Platform}
 \label{sec:real-platform}
@@ -470,7 +478,10 @@ frameworks in keeping enough inlier features for odometry under variable light.
 data; \repo{dataset_real_001} and \repo{_002} contain zero IMU messages and
 support image-only work at most. No real recording carries motion-capture
 ground truth or wheel odometry at the cutoff, which is why every real-robot
-result slot in \cref{chap:results} is planned rather than filled.
+result slot in \cref{chap:results} is planned rather than filled. After the
+cutoff, \repo{dataset_realv3_000} added a planar optical-tracker reference and
+is scored provisionally in \cref{sec:exp1-real}; wheel odometry in metric
+units and varied illumination are still absent.
 
 \section{The Four Experiments}
 \label{sec:experiments}
@@ -600,6 +611,30 @@ the map is a self-consistency check, not a result.
 \subsection{Trajectory evaluation}
 \label{sec:method-trajectory}
 \input{chapters/fragments/m3_traj_eval}
+
+\paragraph{Planar reference (added after the cutoff).} The real recordings
+of \cref{sec:dataset-registry} carry an optical-tracker reference that differs
+from the simulator's in three ways, and \repo{script/eval_real_gt.py} handles
+each explicitly. It is planar and has no heading, so alignment is the rigid
+$SE(2)$ case of the fit above with scale fixed at one, ATE is evaluated in the
+plane at the tracker's own samples, and RPE is translational only. Its clock
+is not the robot's: the offset is estimated by cross-correlating the tracker's
+speed with the bag's wheel-speed feedback, which is independent of both
+estimators, and is accepted only when the correlation peak is sharp
+($r \ge 0.9$ and at least $0.05$ above any peak more than \SI{1}{\second}
+away); the ATE is re-evaluated at $\pm 0.1$ and $\pm\SI{0.2}{\second}$ so that
+its sensitivity to the offset is visible. And the tracker follows a marker, not
+the camera origin: the body-fixed lever arm must be supplied, every result is
+labelled provisional until it is measured, and a least-squares fit of the arm
+is reported as a diagnostic but never applied, because it would absorb
+estimator error. A run is \emph{completed} when it shuts down gracefully with
+no reset, no jump and at least \SI{80}{\percent} of the tracker samples
+matched; \emph{partial} when it recovers from a reset or falls short on
+coverage; and \emph{failed} on divergence, a reset storm, coverage below
+\SI{20}{\percent}, or a vertical range above \SI{1}{\metre} on a floor run.
+The last rule was added on 20 October 2026 after \repo{dataset_realv3_000},
+on which VINS-Fusion satisfied every earlier rule while climbing
+\SI{22}{\metre}; it is stated here as a post hoc addition.
 
 \subsection{Computational performance}
 \input{chapters/fragments/m3_compute_eval}

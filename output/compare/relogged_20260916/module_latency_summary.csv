@@ -1,8 +1,8 @@
 system,dataset,repeat,module,events,median_ms,iqr_ms,p95_ms,max_ms
-VINS-Fusion,dataset_dynamic_nofloortexture_00_000,logging_20260916_01,feature_tracking_ms,1505,58.87,21.688000000000002,92.1572,212.418
-VINS-Fusion,dataset_dynamic_nofloortexture_00_000,logging_20260916_01,backend_total_ms,1505,74.653,19.828000000000003,96.1842,156.567
-VINS-Fusion,dataset_dynamic_nofloortexture_00_000,logging_20260916_01,solver_ms,1505,65.635,20.938000000000002,84.6272,96.544
-VINS-Fusion,dataset_dynamic_nofloortexture_00_000,logging_20260916_01,visual_update_ms,1505,0.597,0.35000000000000003,1.1799999999999997,2.231
+VINS-Fusion,dataset_dynamic_nofloortexture_00_000,logging_20260916_01,feature_tracking_ms,2095,41.767,10.328499999999998,61.219199999999994,123.602
+VINS-Fusion,dataset_dynamic_nofloortexture_00_000,logging_20260916_01,backend_total_ms,2095,71.555,23.706500000000005,89.4216,148.816
+VINS-Fusion,dataset_dynamic_nofloortexture_00_000,logging_20260916_01,solver_ms,2095,65.184,25.921999999999997,82.6704,86.28
+VINS-Fusion,dataset_dynamic_nofloortexture_00_000,logging_20260916_01,visual_update_ms,2095,0.406,0.16549999999999998,0.6583,1.211
 VINS-Fusion,dataset_dynamic_nofloortexture_00_000,logging_20260916_02,feature_tracking_ms,1389,63.454,21.307000000000002,98.82839999999996,214.029
 VINS-Fusion,dataset_dynamic_nofloortexture_00_000,logging_20260916_02,backend_total_ms,1389,77.925,24.936999999999998,98.8778,170.119
 VINS-Fusion,dataset_dynamic_nofloortexture_00_000,logging_20260916_02,solver_ms,1389,66.087,25.302000000000007,85.025,102.027
@@ -188,10 +188,10 @@ ORB-SLAM3,dataset_static_nofloortexture_002,logging_20260916_03,feature_stereo_m
 ORB-SLAM3,dataset_static_nofloortexture_002,logging_20260916_03,local_mapping_total_ms,230,347.4785,99.65625000000006,493.4106499999999,1158.119
 ORB-SLAM3,dataset_static_nofloortexture_002,logging_20260916_03,local_BA_ms,230,281.7215,83.63825000000003,386.54709999999994,470.906
 ORB-SLAM3,dataset_static_nofloortexture_002,logging_20260916_03,place_recognition_ms,236,57.7804575,71.7752305,101.54191625,4024.494614
-VINS-Fusion+YOLO,dataset_dynamic_nofloortexture_00_000,logging_20260916_01,feature_tracking_ms,2186,40.9765,10.475000000000001,55.7095,125.438
-VINS-Fusion+YOLO,dataset_dynamic_nofloortexture_00_000,logging_20260916_01,backend_total_ms,2186,44.83,45.48725,87.53325,136.686
-VINS-Fusion+YOLO,dataset_dynamic_nofloortexture_00_000,logging_20260916_01,solver_ms,2186,39.230000000000004,44.47475000000001,82.138,87.293
-VINS-Fusion+YOLO,dataset_dynamic_nofloortexture_00_000,logging_20260916_01,visual_update_ms,2186,0.357,0.15500000000000003,0.57375,2.252
+VINS-Fusion+YOLO,dataset_dynamic_nofloortexture_00_000,logging_20260916_01,feature_tracking_ms,2143,40.667,11.549,62.649899999999995,173.072
+VINS-Fusion+YOLO,dataset_dynamic_nofloortexture_00_000,logging_20260916_01,backend_total_ms,2143,50.131,39.583,89.48409999999998,198.684
+VINS-Fusion+YOLO,dataset_dynamic_nofloortexture_00_000,logging_20260916_01,solver_ms,2143,43.101,36.452,82.198,89.165
+VINS-Fusion+YOLO,dataset_dynamic_nofloortexture_00_000,logging_20260916_01,visual_update_ms,2143,0.248,0.24800000000000003,0.6819,3.428
 VINS-Fusion+YOLO,dataset_dynamic_nofloortexture_00_000,logging_20260916_02,feature_tracking_ms,2244,39.8395,10.098499999999994,52.311299999999996,76.939
 VINS-Fusion+YOLO,dataset_dynamic_nofloortexture_00_000,logging_20260916_02,backend_total_ms,2244,45.2055,44.20025,86.40969999999999,124.905
 VINS-Fusion+YOLO,dataset_dynamic_nofloortexture_00_000,logging_20260916_02,solver_ms,2244,39.9875,43.19699999999999,81.7461,86.308

@@ -67,6 +67,10 @@ def main() -> None:
     ap.add_argument('--min-box-age', type=int, default=0,
                     help='only score census rows whose box chain is at least this old '
                          '(needs the box_age column; mirrors motion_min_box_age)')
+    ap.add_argument('--out', default=None,
+                    help='directory to write motion_eval.csv (every box-frame with its '
+                         'truth label) and motion_summary.csv (the metrics printed '
+                         'below, one row), for script/summarise_motion_eval.py')
     a = ap.parse_args()
 
     body_T_cam0 = E.read_extrinsic(a.config, 'body_T_cam0')
@@ -121,6 +125,18 @@ def main() -> None:
     print(f"{hdr:16s}{'unknown':>9s}{'static':>9s}{'moving':>9s}")
     for truth in ('moving', 'static', 'none'):
         print(f'{truth:16s}' + ''.join(f'{conf.get((truth, v), 0):9d}' for v in ('unknown', 'static', 'moving')))
+    summary = {'votes_file': a.votes, 'bag': a.bag, 'box_frames': len(labelled),
+               'min_points': a.min_points, 'ratio': a.ratio, 'min_box_age': a.min_box_age}
+    for truth in ('moving', 'static', 'none'):
+        for v in ('unknown', 'static', 'moving'):
+            summary[f'{truth}_{v}'] = conf.get((truth, v), 0)
+    n_mov = sum(conf.get(('moving', v), 0) for v in ('unknown', 'static', 'moving'))
+    n_sta = sum(conf.get(('static', v), 0) for v in ('unknown', 'static', 'moving'))
+    # What the mask was built from: fraction of truly-moving / truly-static
+    # box-frames that ended up painted. These are the numbers that compare
+    # directly with class mode (1.0 / 1.0) and with no filter (0 / 0).
+    summary['moving_masked_frac'] = conf.get(('moving', 'moving'), 0) / n_mov if n_mov else float('nan')
+    summary['static_masked_frac'] = conf.get(('static', 'moving'), 0) / n_sta if n_sta else float('nan')
 
     # ---- 2. the census itself, voted rows only
     def old_enough(r):
@@ -130,31 +146,64 @@ def main() -> None:
     print(f'\n== census on voted rows (n_kp >= {a.min_points}): {len(voted)} of {len(labelled)} ==')
     for truth in ('moving', 'static'):
         vals = sorted(v for r, t in voted if t == truth for v in [ratio_rel(r)] if v is not None)
+        summary[f'census_{truth}_n'] = len(vals)
         if not vals:
+            summary[f'census_{truth}_median'] = float('nan')
             print(f'  {truth:7s}: no rows'); continue
         q = lambda p: vals[int(p * (len(vals) - 1))]
         print(f'  {truth:7s} n={len(vals):5d}  box/bg inlier ratio  p10 {q(.1):.2f}  p25 {q(.25):.2f}  '
               f'median {q(.5):.2f}  p75 {q(.75):.2f}  p90 {q(.9):.2f}')
+        summary[f'census_{truth}_median'] = q(.5)
 
-    # ---- 3. parameter sweep on the same census
+    # ---- 3a. the run's OWN operating point, always recorded
+    def rates(mp, th):
+        tp = fm = ts_ = fs = 0
+        for r, truth, _ in labelled:
+            if int(r['n_kp']) < mp or truth == 'none' or not old_enough(r):
+                continue
+            v = ratio_rel(r)
+            if v is None:
+                continue
+            moving = v < th
+            if truth == 'moving':
+                tp += moving; fm += 1
+            else:
+                fs += moving; ts_ += 1
+        return tp, fm, fs, ts_
+
+    tp, fm, fs, ts_ = rates(a.min_points, a.ratio)
+    summary['vote_n_moving'] = fm
+    summary['vote_n_static'] = ts_
+    summary['vote_recall'] = tp / fm if fm else float('nan')
+    summary['vote_false_alarm'] = fs / ts_ if ts_ else float('nan')
+
+    # ---- 3b. sweep around it
     print('\n== sweep: fraction of truly-MOVING boxes voted moving (recall) vs truly-STATIC voted moving (false alarm) ==')
     print(f"{'min_pts':>8s}{'ratio':>7s}{'n_mov':>7s}{'recall':>8s}{'n_stat':>8s}{'false':>8s}")
-    for mp in (8, 15, 25, 40):
-        for th in (0.25, 0.5, 0.75):
-            tp = fm = ts_ = fs = 0
-            for r, truth, _ in labelled:
-                if int(r['n_kp']) < mp or truth == 'none' or not old_enough(r):
-                    continue
-                v = ratio_rel(r)
-                if v is None:
-                    continue
-                moving = v < th
-                if truth == 'moving':
-                    tp += moving; fm += 1
-                else:
-                    fs += moving; ts_ += 1
+    for mp in sorted({8, 15, 25, 40, a.min_points}):
+        for th in sorted({0.25, 0.5, 0.75, a.ratio}):
+            tp, fm, fs, ts_ = rates(mp, th)
+            mark = ' <-- run' if mp == a.min_points and abs(th - a.ratio) < 1e-9 else ''
             print(f'{mp:8d}{th:7.2f}{fm:7d}{(tp / fm if fm else float("nan")):8.3f}'
-                  f'{ts_:8d}{(fs / ts_ if ts_ else float("nan")):8.3f}')
+                  f'{ts_:8d}{(fs / ts_ if ts_ else float("nan")):8.3f}{mark}')
+
+    if a.out:
+        os.makedirs(a.out, exist_ok=True)
+        with open(os.path.join(a.out, 'motion_eval.csv'), 'w', newline='') as f:
+            w = csv.writer(f)
+            w.writerow(['timestamp_ns', 'box', 'x0', 'y0', 'x1', 'y1', 'n_kp', 'n_inlier',
+                        'bg_kp', 'bg_inlier', 'inherited', 'verdict', 'box_age',
+                        'truth', 'gt_name', 'rel_ratio'])
+            for r, truth, who in labelled:
+                v = ratio_rel(r)
+                w.writerow([r['timestamp_ns'], r['box'], r['x0'], r['y0'], r['x1'], r['y1'],
+                            r['n_kp'], r['n_inlier'], r['bg_kp'], r['bg_inlier'],
+                            r['inherited'], r['verdict'], r.get('box_age', ''),
+                            truth, who, '' if v is None else f'{v:.4f}'])
+        with open(os.path.join(a.out, 'motion_summary.csv'), 'w', newline='') as f:
+            w = csv.DictWriter(f, fieldnames=list(summary))
+            w.writeheader(); w.writerow(summary)
+        print(f'\nwrote     : {a.out}/motion_eval.csv, motion_summary.csv')
 
 
 if __name__ == '__main__':

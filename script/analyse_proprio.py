@@ -118,9 +118,14 @@ COLOUR = {"Wheel odometry": "#4fc3f7",
           # Same hues viewer.py and plot_compare.py already use for these two, so a
           # reader moving between the overlay, the comparison figures and this one
           # does not have to re-learn which trail is which.
-          "VINS-Fusion": "#ffb74d",
+          # Two steps re-set on 21 Oct 2026 after the palette checks (OKLab /
+          # Machado CVD, the dataviz validator ported to Python): the amber was
+          # out of the lightness band at 1.7:1 on the light surface, and the two
+          # purples sat at normal-vision Delta E 13.2 (floor 15). Same hue
+          # families, nearest passing steps; identical to analyse_realistic_runs.py.
+          "VINS-Fusion": "#cc8319",
           "ORB-SLAM3": "#e040fb",
-          "ORB-SLAM3 (no LC)": "#ab47bc"}
+          "ORB-SLAM3 (no LC)": "#a347b2"}
 
 
 # Trees whose estimator starts FROM the ground-truth pose, which is the only case
@@ -471,9 +476,15 @@ def figure(recs, dataset, outdir, theme):
     return p
 
 
-def trajectory_figure(recs, dataset, outdir, theme, systems):
+def _draw_trajectory(ax, recs, dataset, theme, systems, scale=1.0, title=None,
+                     legend=True):
+    """Draw one dataset's estimator comparison into `ax`.
+
+    Shared by the single-dataset figure and the all-datasets grid so the two can
+    never disagree about what is drawn. `scale` enlarges fonts for the grid, whose
+    panels are reproduced at about half this size on the page.
+    """
     th = THEMES[theme]
-    fig, ax = plt.subplots(figsize=(8, 8), facecolor=th["surface"])
     ax.set_facecolor(th["surface"])
     gt = None
     for entry in systems:
@@ -503,19 +514,82 @@ def trajectory_figure(recs, dataset, outdir, theme, systems):
             continue
         ax.plot(xs, ys, lw=1.2, color=COLOUR.get(r["name"], "#999"), label=lbl)
     ax.set_aspect("equal", "datalim")
-    ax.set_xlabel("x [m]", color=th["ink2"])
-    ax.set_ylabel("y [m]", color=th["ink2"])
-    ax.set_title("%s -- estimator comparison, world frame" % dataset,
-                 color=th["ink"], fontsize=11, loc="left")
-    ax.tick_params(colors=th["ink2"], labelsize=8)
+    ax.set_xlabel("x [m]", color=th["ink2"], fontsize=10 * scale)
+    ax.set_ylabel("y [m]", color=th["ink2"], fontsize=10 * scale)
+    ax.set_title(title if title is not None else
+                 "%s -- estimator comparison, world frame" % dataset,
+                 color=th["ink"], fontsize=11 * scale, loc="left")
+    ax.tick_params(colors=th["ink2"], labelsize=8 * scale)
     ax.grid(True, color=th["grid"], lw=0.5)
-    for s in ax.spines.values():
-        s.set_color(th["grid"])
-    ax.legend(fontsize=8, facecolor=th["surface"], labelcolor=th["ink2"],
-              edgecolor=th["grid"])
+    for s_ in ax.spines.values():
+        s_.set_color(th["grid"])
+    if legend:
+        ax.legend(fontsize=8 * scale, facecolor=th["surface"], labelcolor=th["ink2"],
+                  edgecolor=th["grid"])
+
+
+def trajectory_figure(recs, dataset, outdir, theme, systems):
+    th = THEMES[theme]
+    fig, ax = plt.subplots(figsize=(8, 8), facecolor=th["surface"])
+    _draw_trajectory(ax, recs, dataset, theme, systems)
     fig.tight_layout()
     p = os.path.join(outdir, "proprio_trajectories_%s_%s.png"
                      % (dataset.split("/")[-1], theme))
+    fig.savefig(p, dpi=160, facecolor=th["surface"])
+    plt.close(fig)
+    return p
+
+
+def r_anchored(by_dataset, name):
+    """Whether estimator `name` is drawn as estimated (anchored) or aligned."""
+    for recs in by_dataset.values():
+        for r in recs:
+            if r["name"] == name:
+                return bool(r["anchored"])
+    return False
+
+
+def trajectory_grid(by_dataset, outdir, theme, systems):
+    """Every dataset's comparison on one sheet, two columns, for the report.
+
+    The single-dataset figures stay as they were; this only places the same
+    drawings side by side so the report can show every recording rather than
+    one example. Fonts are scaled up because the sheet is printed at about half
+    the per-panel size of the single figure.
+    """
+    th = THEMES[theme]
+    names = list(by_dataset)
+    cols = 2
+    rows_n = int(np.ceil(len(names) / cols))
+    fig, axes = plt.subplots(rows_n, cols, figsize=(5.6 * cols, 5.8 * rows_n),
+                             facecolor=th["surface"], squeeze=False)
+    for ax in axes.ravel():
+        ax.set_visible(False)
+    for k, ds in enumerate(names):
+        ax = axes[k // cols, k % cols]
+        ax.set_visible(True)
+        # No per-panel legend: seven entries at this font size cover the paths.
+        # Identities go in one shared legend in the spare cell; the per-run
+        # numbers the single-figure legends carry are in the tables.
+        _draw_trajectory(ax, by_dataset[ds], ds, theme, systems, scale=1.35,
+                         title=ds.split("/")[-1].replace("dataset_", ""), legend=False)
+    from matplotlib.lines import Line2D
+    order = ["ground truth"] + [vm.split(e)[0] for e in systems]
+    handles = [Line2D([], [], color="#8a8983" if n == "ground truth" else COLOUR.get(n, "#999"),
+                      lw=2.4 if n == "ground truth" else 1.8) for n in order]
+    labels = [n if n == "ground truth" else
+              (n + ("" if r_anchored(by_dataset, n) else ", SE(3)-aligned")) for n in order]
+    spare = axes.ravel()[len(names)] if len(names) < rows_n * cols else None
+    if spare is not None:
+        spare.set_visible(True); spare.axis("off")
+        spare.legend(handles, labels, loc="center", fontsize=13, frameon=True,
+                     facecolor=th["surface"], edgecolor=th["grid"], labelcolor=th["ink2"],
+                     title="estimators", title_fontsize=13)
+    else:
+        fig.legend(handles, labels, loc="lower center", ncol=4, fontsize=12, frameon=False,
+                   labelcolor=th["ink2"])
+    fig.tight_layout()
+    p = os.path.join(outdir, "proprio_trajectories_grid_%s.png" % theme)
     fig.savefig(p, dpi=160, facecolor=th["surface"])
     plt.close(fig)
     return p
@@ -738,6 +812,7 @@ def main():
     os.makedirs(outdir, exist_ok=True)
 
     allrecs = []
+    by_dataset = {}
     for ds in args.dataset:
         print("== %s" % ds)
         recs = analyse_one(ds, args)
@@ -788,9 +863,13 @@ def main():
             figure(recs, ds, outdir, theme)
             trajectory_figure(recs, ds, outdir, theme, args.systems)
         allrecs += recs
+        by_dataset[ds] = recs
 
     if not allrecs:
         sys.exit("no baseline runs found -- has proprio_estimator.py been run?")
+    if len(by_dataset) > 1:
+        for theme in ("light", "dark"):
+            trajectory_grid(by_dataset, outdir, theme, args.systems)
     write_csv(os.path.join(outdir, "proprio_metrics.csv"), allrecs)
     write_tex(os.path.join(outdir, "proprio_baseline_table.tex"), allrecs)
     write_rpe_csv(os.path.join(outdir, "proprio_rpe_metrics.csv"), allrecs)

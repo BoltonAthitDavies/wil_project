@@ -1,0 +1,219 @@
+%YAML:1.0
+
+# ORB-SLAM3 STEREO (no IMU) -- real WiL rig, RealSense fisheye pair.
+#
+# THIS IS THE DEFAULT CONFIG FOR THE REAL RIG, and the one to trust. Its
+# inertial sibling (stereo_imu.yaml) exists, but two unresolved hardware
+# problems make it an experiment rather than a baseline -- see that file.
+# Neither problem can touch this config, because there is no IMU in it, and
+# stereo is metric on its own from the calibrated 93.6 mm baseline.
+#
+# Replay:
+#   ros2 bag play dataset/rosbag_realsense_imu_cambaseline95mm
+# The bags carry ONLY /camN/image_raw/compressed, so the launch file sets the
+# node's image_transport parameter to "compressed". No republish process is
+# needed -- unlike VINS, which needs two (config/wil/stereo_imu.yaml:32-38).
+#
+# Key naming: ORB-SLAM3 counts cameras from 1, VINS from 0. Camera1 == cam0.
+
+File.version: "1.0"
+
+#--------------------------------------------------------------------------------------------
+# Cameras
+#--------------------------------------------------------------------------------------------
+# ~180 degree fisheye. ORB-SLAM3 models this natively as KannalaBrandt8, which
+# is the same model OpenCV's cv::fisheye implements, so the calibration in
+# vins_fusion_ros2/config/wil/fisheye_calibration.json drops in unchanged:
+# Camera*.k1..k4 ARE the raw OpenCV D vector, in order.
+#
+# (Worth knowing if you cross-check against the VINS files: VINS's
+# KANNALA_BRANDT block cannot be copied directly. It fixes its own k1=1 and
+# shifts the OpenCV terms into k2..k5. ORB-SLAM3 does not, so going back to the
+# JSON is both simpler and less error-prone than re-indexing.)
+Camera.type: "KannalaBrandt8"
+
+Camera1.fx: 607.5108682653754
+Camera1.fy: 609.9053834748036
+Camera1.cx: 958.2558093864706
+Camera1.cy: 539.7975091283472
+
+Camera1.k1: -0.03645464928389926
+Camera1.k2: -0.0008403394026266405
+Camera1.k3: 0.00017697497379393103
+Camera1.k4: -0.000382711572282332
+
+# cam1 REUSES cam0's intrinsics. Only one mono calibration exists for this rig
+# (vins_fusion_ros2/config/wil/cam1_fisheye.yaml:7-9 says the same). This is a
+# real approximation, not a simulated-rig coincidence like in wil_sim: two
+# physical lenses do differ. Calibrating cam1 separately is the cheapest
+# available accuracy win on this rig.
+Camera2.fx: 607.5108682653754
+Camera2.fy: 609.9053834748036
+Camera2.cx: 958.2558093864706
+Camera2.cy: 539.7975091283472
+
+Camera2.k1: -0.03645464928389926
+Camera2.k2: -0.0008403394026266405
+Camera2.k3: 0.00017697497379393103
+Camera2.k4: -0.000382711572282332
+
+Camera.width: 1920
+Camera.height: 1080
+Camera.fps: 30
+
+# Ignored -- the node converts to mono8 before ORB-SLAM3 sees the frame.
+Camera.RGB: 1
+
+# Lapping region: the horizontal band where the two fisheye views overlap and
+# stereo matching is attempted. Full width to start with, which is what TUM-VI
+# does. A ~180 deg lens with a 94 mm baseline genuinely overlaps almost
+# everywhere, but if stereo matches look poor at the extreme edges, narrowing
+# this is the first tuning knob to reach for.
+Camera1.overlappingBegin: 0
+Camera1.overlappingEnd: 1919
+Camera2.overlappingBegin: 0
+Camera2.overlappingEnd: 1919
+
+#--------------------------------------------------------------------------------------------
+# Stereo geometry
+#--------------------------------------------------------------------------------------------
+# Baseline 0.08972 m (2026-10-21), so ThDepth 90 puts the close/far split at ~8.1 m. Same
+# reasoning as the sim config: EuRoC's stock 60 assumes a 0.11 m baseline.
+Stereo.ThDepth: 90.0
+
+# cam0 -> cam1, taken verbatim from VINS's body_T_cam1.
+#
+# That substitution is exact rather than convenient: VINS's body_T_cam0 for this
+# rig is the identity matrix, so body IS cam0 and body_T_cam1 already expresses
+# exactly the cam0->cam1 transform ORB-SLAM3 wants here. (The identity is a
+# placeholder standing in for a missing IMU-camera calibration, which is a real
+# problem for the inertial config -- but it is harmless here, where the body
+# frame is never used.)
+#
+# (Provenance of the old block below: inverse of the 2026-08-06 .dat, cam1 RIGHT of
+# cam0. script/check_stereo_side.py verifies the side empirically from a bag.)
+# UPDATED 2026-10-21 from camera_parameters/211026camera1_rot_trans.dat (OpenCV
+# stereoCalibrate output: X_cam1 = R*X_cam0 + T, i.e. cam1_T_cam0). INVERTED here
+# to cam0_T_cam1 because Camera1 := cam0 and Camera2 := cam1 -- no topic swap.
+# cam1 is physically to the LEFT of cam0, so the translation is on cam0's -X
+# (-0.0897 m). That is fine for the KannalaBrandt8 path: Settings.cc takes
+# b = |t| and TriangulateMatches only requires depth > 0 in both cameras; the
+# realv3 "matches behind the cameras" problem was stale extrinsics, not an
+# ordering rule, so the image0:=/cam1 swap in the launch comments is obsolete.
+# Baseline 0.089723 m, 0.9669 deg (was 0.093604 m, 1.0854 deg).
+#
+# OLD value, kept for reference -- inverse of the 2026-08-06 camera1_rot_trans.dat,
+# valid for the pre-remount rig where cam1 was to the RIGHT of cam0:
+# Stereo.T_c1_c2: !!opencv-matrix
+#   rows: 4
+#   cols: 4
+#   dt: f
+#   data: [ 0.9999155119,  0.0066784035,  0.0111520357,  0.0935980368,
+#          -0.0065240958,  0.9998832669, -0.0138162526, -0.0010121732,
+#          -0.0112430044,  0.0137423283,  0.9998423592,  0.0003943868,
+#           0.0,           0.0,           0.0,           1.0]
+# UPDATED 2026-10-26 from camera_parameters_261026/261026camera1_rot_trans.dat
+# (OpenCV stereoCalibrate output cam1_T_cam0), same derivation as 2026-10-21:
+# cam0_T_cam1 = inverse(R, T) = (R^T, -R^T T).
+# Baseline 0.090258 m, relative rotation 4.72 deg (was 0.089723 m, 0.9669 deg on
+# 2026-10-21). NOTE the relative rotation grew ~5x between the two calibrations of
+# the same bracket; treat as a calibration-quality question until checked on a bag.
+# PREVIOUS value (2026-10-21), kept for reference:
+# Stereo.T_c1_c2: !!opencv-matrix
+#   rows: 4
+#   cols: 4
+#   dt: f
+#   data: [ 0.9998579160, -0.0051040575, -0.0160653773, -0.0897173102,
+#           0.0051169031,  0.9999866208,  0.0007585784,  0.0000049715,
+#           0.0160612906, -0.0008406756,  0.9998706557,  0.0010314226,
+#           0.0000000000,  0.0000000000,  0.0000000000,  1.0000000000]
+# UPDATED 2026-10-27 from camera_parameters_271026/271026camera1_rot_trans.dat
+# (OpenCV stereoCalibrate output cam1_T_cam0), same derivation as 10-21 and 10-26:
+# cam0_T_cam1 = inverse(R, T) = (R^T, -R^T T).
+# Baseline 0.088418 m, relative rotation 1.29 deg (10-26: 0.090303 m / 4.72 deg; 10-21: 0.089723 m / 0.97 deg).
+# PREVIOUS value (2026-10-26), kept for reference:
+# Stereo.T_c1_c2: !!opencv-matrix
+#   rows: 4
+#   cols: 4
+#   dt: f
+#   data: [ 0.9968834966, -0.0031961813, -0.0788230846, -0.0901712571,
+#           0.0050462668,  0.9997161700,  0.0232833560,  0.0014758000,
+#           0.0787262944, -0.0236085556,  0.9966166799, -0.0036627138,
+#           0.0000000000,  0.0000000000,  0.0000000000,  1.0000000000]
+# RE-UPDATED 2026-10-27 (13:48 revision): camera_parameters_271026/271026camera1_rot_trans.dat was regenerated after the
+# first 10-27 application; same derivation. Baseline 0.088827 m, relative rotation 1.15 deg.
+# PREVIOUS value (first 10-27 revision of the same .dat), kept for reference:
+# Stereo.T_c1_c2: !!opencv-matrix
+#   rows: 4
+#   cols: 4
+#   dt: f
+#   data: [ 0.9998810533,  0.0082047679, -0.0130599033, -0.0883886225,
+#          -0.0079883459,  0.9998313217,  0.0165382702,  0.0022479903,
+#           0.0131933931, -0.0164319760,  0.9997779376, -0.0003213134,
+#           0.0000000000,  0.0000000000,  0.0000000000,  1.0000000000]
+# UPDATED 2026-10-28 from camera_parameters_281026/281026camera1_rot_trans.dat
+# (OpenCV stereoCalibrate output cam1_T_cam0), same derivation as before:
+# cam0_T_cam1 = inverse(R, T) = (R^T, -R^T T).
+# Baseline 0.089028 m, relative rotation 0.86 deg (10-27 13:48: 0.088830 m / 1.15 deg).
+# PREVIOUS value (2026-10-27 13:48 revision), kept for reference:
+# Stereo.T_c1_c2: !!opencv-matrix
+#   rows: 4
+#   cols: 4
+#   dt: f
+#   data: [ 0.9999536454,  0.0044054398, -0.0085614905, -0.0888038145,
+#          -0.0042535869,  0.9998347419,  0.0176747250,  0.0020094256,
+#           0.0086379405, -0.0176374887,  0.9998071339, -0.0002223474,
+#           0.0000000000,  0.0000000000,  0.0000000000,  1.0000000000]
+Stereo.T_c1_c2: !!opencv-matrix
+  rows: 4
+  cols: 4
+  dt: f
+  data: [ 0.9999581038,  0.0010089898,  0.0090979406, -0.0889903996,
+         -0.0011175407,  0.9999281605,  0.0119341921,  0.0011567181,
+         -0.0090852455, -0.0119438595,  0.9998873949,  0.0023003115,
+          0.0000000000,  0.0000000000,  0.0000000000,  1.0000000000]
+
+#--------------------------------------------------------------------------------------------
+# ORB extractor
+#--------------------------------------------------------------------------------------------
+# 1920x1080 is 5.7x EuRoC's frame area. 2000 features keeps the density
+# reasonable; drop it if extraction cannot keep up at 30 Hz (the node logs
+# dropped frames when it cannot).
+ORBextractor.nFeatures: 2000
+ORBextractor.scaleFactor: 1.2
+ORBextractor.nLevels: 8
+ORBextractor.iniThFAST: 20
+ORBextractor.minThFAST: 7
+
+#--------------------------------------------------------------------------------------------
+# GPU front end -- orbslam3_ros2 patch (10), 2026-10-28
+#--------------------------------------------------------------------------------------------
+# 1 = FAST scoring, NMS, 7x7 blur, orientation and rBRIEF on the GPU (driver API
+# + NVRTC loaded at runtime; no CUDA toolkit needed; falls back to the CPU path
+# with one log line if the GPU is unavailable). Keypoint SELECTION (octree
+# distribution) and everything downstream are unchanged. 0 = stock CPU extractor.
+#
+# Validated 2026-10-28 on dataset_realv5_000 (1920x1080, 2000 features, RTX 3070):
+#   harness: 39 -> 9.3 ms per image, 90 % of keypoints at the identical position,
+#            descriptors 0.35 Hamming bits apart on average;
+#   node, stereo-only, same bag: tracker 110 -> 82 ms (rate 0.5) and 206 -> 118 ms
+#            (rate 1.0), frames processed +23 % / +64 %, inliers and map points at
+#            parity, 0 losses and 0 resets in both arms.
+# The sim configs keep 0 so results stay comparable with stock ORB-SLAM3.
+ORBextractor.useGPU: 1
+
+#--------------------------------------------------------------------------------------------
+# Viewer
+#--------------------------------------------------------------------------------------------
+Viewer.KeyFrameSize: 0.05
+Viewer.KeyFrameLineWidth: 1.0
+Viewer.GraphLineWidth: 0.9
+Viewer.PointSize: 2.0
+Viewer.CameraSize: 0.08
+Viewer.CameraLineWidth: 3.0
+Viewer.ViewpointX: 0.0
+Viewer.ViewpointY: -0.7
+Viewer.ViewpointZ: -1.8
+Viewer.ViewpointF: 500.0
+# 1920x1080 pairs will not fit next to the map window at full size.
+Viewer.imageViewScale: 0.35

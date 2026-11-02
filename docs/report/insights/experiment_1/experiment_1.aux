@@ -1,0 +1,91 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyperFirstAtBeginDocument{\AtBeginDocument}
+\HyperFirstAtBeginDocument{\ifx\hyper@anchor\@undefined
+\global\let\oldcontentsline\contentsline
+\gdef\contentsline#1#2#3#4{\oldcontentsline{#1}{#2}{#3}}
+\global\let\oldnewlabel\newlabel
+\gdef\newlabel#1#2{\newlabelxx{#1}#2}
+\gdef\newlabelxx#1#2#3#4#5#6{\oldnewlabel{#1}{{#2}{#3}}}
+\AtEndDocument{\ifx\hyper@anchor\@undefined
+\let\contentsline\oldcontentsline
+\let\newlabel\oldnewlabel
+\fi}
+\fi}
+\global\let\hyper@last\relax 
+\gdef\HyperFirstAtBeginDocument#1{#1}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\@writefile{toc}{\contentsline {section}{\numberline {4.1.1}Simulation}{1}{section.4.1}\protected@file@percent }
+\newlabel{sec:exp1-sim}{{4.1.1}{1}{Simulation}{section.4.1}{}}
+\newlabel{sec:exp1-sim@cref}{{[section][1][4]4.1.1}{[1][1][]1}}
+\@writefile{toc}{\contentsline {paragraph}{Objective.}{1}{section*.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Process.}{1}{section*.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Datasets.}{1}{section*.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1.1}{\ignorespaces The five \texttt  {allsensor} recordings. ``Yaw-rate scale'' is the fitted wheel-model yaw-rate scale against ground truth, the quantity H1 is about.\relax }}{1}{table.caption.4}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{tab:e1-datasets}{{1.1}{1}{The five \repo {allsensor} recordings. ``Yaw-rate scale'' is the fitted wheel-model yaw-rate scale against ground truth, the quantity H1 is about.\relax }{table.caption.4}{}}
+\newlabel{tab:e1-datasets@cref}{{[table][1][4]1.1}{[1][1][]1}}
+\newlabel{sec:rpe}{{4.1.1}{2}{Reporting rules}{section*.5}{}}
+\newlabel{sec:rpe@cref}{{[section][1][4]4.1.1}{[1][1][]2}}
+\@writefile{toc}{\contentsline {paragraph}{Reporting rules.}{2}{section*.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Results.}{2}{section*.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Analysis.}{2}{section*.12}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1.2}{\ignorespaces Estimator comparison on the five \texttt  {allsensor} bags. Bold marks the best aligned ATE of each bag \emph  {as each system was configured}. Visual estimators are scored at the IMU point, baselines at the model origin (see Reporting rules). The \emph  {EKF @ VSLAM noise} rows are the same filter with only its four IMU noise terms replaced by the values of \texttt  {config/wil_sim/stereo_imu.yaml}, the file every visual run read. Drift is final position error over distance driven.\relax }}{3}{table.caption.7}\protected@file@percent }
+\newlabel{tab:e1-accuracy}{{1.2}{3}{Estimator comparison on the five \repo {allsensor} bags. Bold marks the best aligned ATE of each bag \emph {as each system was configured}. Visual estimators are scored at the IMU point, baselines at the model origin (see Reporting rules). The \emph {EKF @ VSLAM noise} rows are the same filter with only its four IMU noise terms replaced by the values of \repo {config/wil_sim/stereo_imu.yaml}, the file every visual run read. Drift is final position error over distance driven.\relax }{table.caption.7}{}}
+\newlabel{tab:e1-accuracy@cref}{{[table][2][4]1.2}{[1][2][]3}}
+\@writefile{lot}{\contentsline {table}{\numberline {1.3}{\ignorespaces Relative pose error at $\Delta =\SI {1}{\second }$, no alignment, pairs spanning a step above \SI {10}{\metre \per \second } excluded (``clean''). Jumps are the number of such steps. ORB-SLAM3's one to six jumps are its gravity re-alignment at inertial initialisation, which carries about \SI {90}{\degree } of rotation and no translation; with them included its rotational RPE reads \SIrange {8.8}{10.5}{\degree }.\relax }}{3}{table.caption.9}\protected@file@percent }
+\newlabel{tab:e1-rpe}{{1.3}{3}{Relative pose error at $\Delta =\SI {1}{\second }$, no alignment, pairs spanning a step above \SI {10}{\metre \per \second } excluded (``clean''). Jumps are the number of such steps. ORB-SLAM3's one to six jumps are its gravity re-alignment at inertial initialisation, which carries about \SI {90}{\degree } of rotation and no translation; with them included its rotational RPE reads \SIrange {8.8}{10.5}{\degree }.\relax }{table.caption.9}{}}
+\newlabel{tab:e1-rpe@cref}{{[table][3][4]1.3}{[1][2][]3}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.1}{\ignorespaces Every estimator on every \texttt  {allsensor} recording, world frame, on the warehouse plan. The baselines are drawn as estimated from the ground-truth start pose; the visual estimators after the rigid $SE(3)$ alignment used for their metrics. The ground-truth line is the model-origin path, so the visual estimates, which follow the IMU, sit up to \SI {0.34}{\metre } from it by construction. The wheel-odometry bow and the IMU's departure from the building recur on all five; the one visual outlier is ORB-SLAM3 with loop closure on \texttt  {allsensor_003}.\relax }}{4}{figure.caption.8}\protected@file@percent }
+\newlabel{fig:e1-grid}{{1.1}{4}{Every estimator on every \repo {allsensor} recording, world frame, on the warehouse plan. The baselines are drawn as estimated from the ground-truth start pose; the visual estimators after the rigid $SE(3)$ alignment used for their metrics. The ground-truth line is the model-origin path, so the visual estimates, which follow the IMU, sit up to \SI {0.34}{\metre } from it by construction. The wheel-odometry bow and the IMU's departure from the building recur on all five; the one visual outlier is ORB-SLAM3 with loop closure on \repo {allsensor_003}.\relax }{figure.caption.8}{}}
+\newlabel{fig:e1-grid@cref}{{[figure][1][4]1.1}{[1][2][]4}}
+\@writefile{lot}{\contentsline {table}{\numberline {1.4}{\ignorespaces Covariance consistency of the non-visual estimators. A consistent filter gives $\mathrm  {ANEES}=3.0$ and coverages of 0.683, 0.954 and 0.997. Neither visual estimator writes a pose covariance, so neither can be tested. The $\chi ^2$ test runs on a \SI {1}{\hertz } subsample (81 to 102 samples per bag); the coverage columns make no independence assumption and are the sturdier statement.\relax }}{5}{table.caption.10}\protected@file@percent }
+\newlabel{tab:e1-covariance}{{1.4}{5}{Covariance consistency of the non-visual estimators. A consistent filter gives $\mathrm {ANEES}=3.0$ and coverages of 0.683, 0.954 and 0.997. Neither visual estimator writes a pose covariance, so neither can be tested. The $\chi ^2$ test runs on a \SI {1}{\hertz } subsample (81 to 102 samples per bag); the coverage columns make no independence assumption and are the sturdier statement.\relax }{table.caption.10}{}}
+\newlabel{tab:e1-covariance@cref}{{[table][4][4]1.4}{[1][2][]5}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.2}{\ignorespaces Error against claimed uncertainty on \texttt  {dataset_allsensor_001}. Top left: position error over time. Top right and bottom right: absolute error against the estimator's own $3\sigma $ bound in $x$ and in heading; a solid line above the dashed line of the same colour is overconfidence. Bottom left: NEES against the consistent value of 3. The step near \SI {9.5}{\second } in every panel is the first turn.\relax }}{5}{figure.caption.11}\protected@file@percent }
+\newlabel{fig:e1-covariance}{{1.2}{5}{Error against claimed uncertainty on \repo {dataset_allsensor_001}. Top left: position error over time. Top right and bottom right: absolute error against the estimator's own $3\sigma $ bound in $x$ and in heading; a solid line above the dashed line of the same colour is overconfidence. Bottom left: NEES against the consistent value of 3. The step near \SI {9.5}{\second } in every panel is the first turn.\relax }{figure.caption.11}{}}
+\newlabel{fig:e1-covariance@cref}{{[figure][2][4]1.2}{[1][2][]5}}
+\@writefile{lot}{\contentsline {table}{\numberline {1.5}{\ignorespaces Which IMU noise term costs the EKF its accuracy. Each row moves one term from its measured value to the one \texttt  {config/wil_sim/stereo_imu.yaml} declares, averaged over the five bags. The last row reproduces the gyroscope term's effect on the measurement noise $R$ only, leaving the process noise $Q$ measured: it is harmless, so the damage is entirely through $Q$.\relax }}{6}{table.caption.13}\protected@file@percent }
+\newlabel{tab:e1-ablation}{{1.5}{6}{Which IMU noise term costs the EKF its accuracy. Each row moves one term from its measured value to the one \repo {config/wil_sim/stereo_imu.yaml} declares, averaged over the five bags. The last row reproduces the gyroscope term's effect on the measurement noise $R$ only, leaving the process noise $Q$ measured: it is harmless, so the damage is entirely through $Q$.\relax }{table.caption.13}{}}
+\newlabel{tab:e1-ablation@cref}{{[table][5][4]1.5}{[1][2][]6}}
+\@writefile{lot}{\contentsline {table}{\numberline {1.6}{\ignorespaces EKF aligned ATE with an in-sample and an out-of-sample noise model. Mean change about $-10\,\%$: no systematic in-sample advantage.\relax }}{6}{table.caption.14}\protected@file@percent }
+\newlabel{tab:e1-xval}{{1.6}{6}{EKF aligned ATE with an in-sample and an out-of-sample noise model. Mean change about $-10\,\%$: no systematic in-sample advantage.\relax }{table.caption.14}{}}
+\newlabel{tab:e1-xval@cref}{{[table][6][4]1.6}{[1][6][]6}}
+\@writefile{lot}{\contentsline {table}{\numberline {1.7}{\ignorespaces Wheel-odometry heading drift against the fitted yaw-rate scale. ``Rotation'' is the total unsigned ground-truth rotation of the run. The last column is the mean yaw-rate residual of the run multiplied by its duration.\relax }}{7}{table.caption.15}\protected@file@percent }
+\newlabel{tab:e1-h1}{{1.7}{7}{Wheel-odometry heading drift against the fitted yaw-rate scale. ``Rotation'' is the total unsigned ground-truth rotation of the run. The last column is the mean yaw-rate residual of the run multiplied by its duration.\relax }{table.caption.15}{}}
+\newlabel{tab:e1-h1@cref}{{[table][7][4]1.7}{[1][7][]7}}
+\@writefile{lot}{\contentsline {table}{\numberline {1.8}{\ignorespaces The EKF's heading error follows the quality of the wheel yaw rate it uses to observe its gyroscope bias.\relax }}{7}{table.caption.16}\protected@file@percent }
+\newlabel{tab:e1-coupling}{{1.8}{7}{The EKF's heading error follows the quality of the wheel yaw rate it uses to observe its gyroscope bias.\relax }{table.caption.16}{}}
+\newlabel{tab:e1-coupling@cref}{{[table][8][4]1.8}{[1][7][]7}}
+\@writefile{toc}{\contentsline {paragraph}{Summary.}{7}{section*.17}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Future plan.}{8}{section*.18}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4.1.2}Real robot}{8}{section.4.2}\protected@file@percent }
+\newlabel{sec:exp1-real}{{4.1.2}{8}{Real robot}{section.4.2}{}}
+\newlabel{sec:exp1-real@cref}{{[section][2][4]4.1.2}{[1][8][]8}}
+\@writefile{toc}{\contentsline {paragraph}{Objective.}{8}{section*.19}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Process.}{8}{section*.20}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Datasets.}{8}{section*.21}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1.9}{\ignorespaces The real recording and its reference. The wheel-speed feedback is in unverified units and is used for its shape only.\relax }}{8}{table.caption.22}\protected@file@percent }
+\newlabel{tab:e1-realdata}{{1.9}{8}{The real recording and its reference. The wheel-speed feedback is in unverified units and is used for its shape only.\relax }{table.caption.22}{}}
+\newlabel{tab:e1-realdata@cref}{{[table][9][4]1.9}{[1][8][]8}}
+\newlabel{sec:method-trajectory}{{4.1.2}{9}{Reporting rules}{section*.23}{}}
+\newlabel{sec:method-trajectory@cref}{{[section][2][4]4.1.2}{[1][8][]9}}
+\@writefile{toc}{\contentsline {paragraph}{Reporting rules.}{9}{section*.23}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Results.}{9}{section*.24}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1.10}{\ignorespaces Visual estimators against the optical-tracker ground truth on the real \texttt  {dataset_realv3_000} recording. Planar ATE after rigid $SE(2)$ alignment with scale fixed at one, evaluated at the tracker's own samples ($n$); the time offset between the unsynchronised robot clock and the tracker is estimated from wheel-speed correlation (\cref  {sec:method-trajectory}). Translational RPE at $\Delta =\SI {1}{\second }$ compares relative displacements in the aligned frame; the tracker has no heading, so rotational RPE is not defined. ``Path'' is the estimate's planar path length over the matched interval divided by the tracker's. The marker-to-sensor lever arm is not measured (horizontal offset assumed zero), so every value is provisional. Failed runs (\texttt  {dataset_realv3_000} VINS-Fusion) are excluded and reported in the text. Lower is better.\relax }}{9}{table.caption.25}\protected@file@percent }
+\newlabel{tab:real-gt-ate}{{1.10}{9}{Visual estimators against the optical-tracker ground truth on the real \repo {dataset_realv3_000} recording. Planar ATE after rigid $SE(2)$ alignment with scale fixed at one, evaluated at the tracker's own samples ($n$); the time offset between the unsynchronised robot clock and the tracker is estimated from wheel-speed correlation (\cref {sec:method-trajectory}). Translational RPE at $\Delta =\SI {1}{\second }$ compares relative displacements in the aligned frame; the tracker has no heading, so rotational RPE is not defined. ``Path'' is the estimate's planar path length over the matched interval divided by the tracker's. The marker-to-sensor lever arm is not measured (horizontal offset assumed zero), so every value is provisional. Failed runs (\repo {dataset_realv3_000} VINS-Fusion) are excluded and reported in the text. Lower is better.\relax }{table.caption.25}{}}
+\newlabel{tab:real-gt-ate@cref}{{[table][10][4]1.10}{[1][9][]9}}
+\@writefile{lot}{\contentsline {table}{\numberline {1.11}{\ignorespaces Translational RPE sweep on the real recordings, RMSE over all admissible pairs (realised separation within \SI {25}{\percent } of $\Delta $), relative displacements compared in the aligned frame. Pair counts in parentheses. Failed runs excluded.\relax }}{9}{table.caption.26}\protected@file@percent }
+\newlabel{tab:real-gt-rpe}{{1.11}{9}{Translational RPE sweep on the real recordings, RMSE over all admissible pairs (realised separation within \SI {25}{\percent } of $\Delta $), relative displacements compared in the aligned frame. Pair counts in parentheses. Failed runs excluded.\relax }{table.caption.26}{}}
+\newlabel{tab:real-gt-rpe@cref}{{[table][11][4]1.11}{[1][9][]9}}
+\@writefile{toc}{\contentsline {paragraph}{Analysis.}{9}{section*.29}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1.3}{\ignorespaces Real-robot estimates against the optical tracker on \texttt  {dataset_realv3_000}. Left: the two ORB-SLAM3 runs after rigid planar alignment with scale fixed; the tracker (black) traces a loop about \SI {2}{\metre } across and both estimates a smaller loop inside it. Right: planar error and speed on the robot-clock timeline; the tracker's speed is drawn shifted by the fitted offset, and VINS-Fusion's speed rises without bound from \SI {10}{\second } while the robot moves at \SI {0.2}{\metre \per \second }. No site plan exists for the real floor, so no map underlay is drawn.\relax }}{10}{figure.caption.27}\protected@file@percent }
+\newlabel{fig:e1-real}{{1.3}{10}{Real-robot estimates against the optical tracker on \repo {dataset_realv3_000}. Left: the two ORB-SLAM3 runs after rigid planar alignment with scale fixed; the tracker (black) traces a loop about \SI {2}{\metre } across and both estimates a smaller loop inside it. Right: planar error and speed on the robot-clock timeline; the tracker's speed is drawn shifted by the fitted offset, and VINS-Fusion's speed rises without bound from \SI {10}{\second } while the robot moves at \SI {0.2}{\metre \per \second }. No site plan exists for the real floor, so no map underlay is drawn.\relax }{figure.caption.27}{}}
+\newlabel{fig:e1-real@cref}{{[figure][3][4]1.3}{[1][9][]10}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1.4}{\ignorespaces The same alignment with the failed VINS-Fusion run included: its \SI {60}{\metre } path reduces the \SI {2}{\metre } loop to a dot, which is why it is omitted from \cref  {fig:e1-real}.\relax }}{10}{figure.caption.28}\protected@file@percent }
+\newlabel{fig:e1-real-all}{{1.4}{10}{The same alignment with the failed VINS-Fusion run included: its \SI {60}{\metre } path reduces the \SI {2}{\metre } loop to a dot, which is why it is omitted from \cref {fig:e1-real}.\relax }{figure.caption.28}{}}
+\newlabel{fig:e1-real-all@cref}{{[figure][4][4]1.4}{[1][9][]10}}
+\@writefile{toc}{\contentsline {paragraph}{Summary.}{11}{section*.30}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Future plan.}{11}{section*.31}\protected@file@percent }
+\gdef \@abspage@last{11}

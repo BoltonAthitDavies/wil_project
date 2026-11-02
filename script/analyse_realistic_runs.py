@@ -58,6 +58,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import vio_metrics as vm  # noqa: E402
+from map_underlay import draw_map  # noqa: E402
 
 import matplotlib  # noqa: E402
 matplotlib.use("Agg")
@@ -353,7 +354,8 @@ def fig_trajectories(rows, aligned, theme):
     fig, axes = plt.subplots(2, 2, figsize=(11, 10.5), facecolor=th["surface"])
     for ax, ds in zip(axes.ravel(), DATASETS):
         style(ax, th)
-        g = vm.load(os.path.join(ROOT, "output", "output_vins", "simulation", ds, "ground_truth.csv"))
+        draw_map(ax, ds)
+        g = vm.load_gt(os.path.join(ROOT, "output", "output_vins", "simulation", ds, "ground_truth.csv"))
         if g is not None:
             ax.plot(g[1][:, 0], g[1][:, 1], color=th["ink"], lw=1.3, label="ground truth", zorder=5)
         for r in rows:

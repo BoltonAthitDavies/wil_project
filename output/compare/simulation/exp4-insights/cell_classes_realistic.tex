@@ -1,0 +1,15 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption[Occupied map cells by distance to the true structure.]{Occupied map cells by their distance to the nearest true structure (filled shelf footprints and the wall ring of the world file). ``Correct'' is within the \SI{0.25}{\metre} tolerance of the chapter; ``thickened'' is a cell beyond the tolerance but within \SI{0.50}{\metre} of a true surface, i.e.\ a surface drawn too thick; ``phantom'' is further than that from any structure. The last columns describe the phantom cells: how many connected clusters they form, the size of the largest, and the median distance of a phantom cell from the independent probe route.}
+\label{tab:insight4-classes-realistic}
+\begin{tabular}{lrrrrrrr}
+\toprule
+Map & occupied & correct & thickened & phantom & clusters & largest & route dist. \\
+ & cells & [\si{\percent}] & [\si{\percent}] & [\si{\percent}] & & [cells] & med.\ [m] \\
+\midrule
+\repo{map_realistic.db} & 26711 & 81.3 & 13.4 & 5.2 & 413 & 108 & 4.89 \\
+\repo{map_realistic_01.db} & 25395 & 85.0 & 9.7 & 5.3 & 385 & 157 & 10.10 \\
+\bottomrule
+\end{tabular}
+\end{table}

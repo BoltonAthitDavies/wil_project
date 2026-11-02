@@ -35,6 +35,12 @@ def generate_launch_description():
         'config', 'wil', 'stereo.yaml')
 
     args = [
+        # Settings file. Default = the installed config/wil/stereo.yaml (a symlink to
+        # the source tree). A calibration variant that is not installed, e.g.
+        # config/wil_311026_selfcal/ (self-calibrated extrinsic for the 31 Oct 2026
+        # mount), is selected by its SOURCE path:
+        #   config_file:=$HOME/wil_project/orbslam3_ros2/config/wil_311026_selfcal/stereo.yaml
+        DeclareLaunchArgument('config_file', default_value=config_file),
         DeclareLaunchArgument('vocabulary_file', default_value=DEFAULT_VOCAB),
         DeclareLaunchArgument('output_path', default_value=DEFAULT_OUTPUT),
         DeclareLaunchArgument('experiment_id', default_value=''),
@@ -73,7 +79,7 @@ def generate_launch_description():
             # republishes on the wall clock, so sim time would stall at 0.
             'use_sim_time': False,
 
-            'config_file': config_file,
+            'config_file': LaunchConfiguration('config_file'),
             'vocabulary_file': LaunchConfiguration('vocabulary_file'),
             'output_path': LaunchConfiguration('output_path'),
             'experiment_id': LaunchConfiguration('experiment_id'),

@@ -351,6 +351,168 @@ p.write_text(s.replace(old, new, 1))
 PYEOF
         echo "    patched Viewer.cc      (DestroyWindow on the viewer thread)"
     fi
+
+    # (11) Relocalisation on a fisheye STEREO rig segfaults (2026-10-29, gdb on
+    #      realv5). ORBmatcher::SearchByProjection(Frame&, KeyFrame*, set, th,
+    #      ORBdist) -- used only by Tracking::Relocalization() -- reads
+    #      pKF->mvKeysUn[i] for every matched map point. KannalaBrandt8 frames have
+    #      mDistCoef == 0, so mvKeysUn = mvKeys holds only the NLeft left-camera
+    #      keypoints, while GetMapPointMatches() is NLeft+NRight long: a point first
+    #      seen through the right camera reads past the vector, the angle is NaN,
+    #      round() gives INT_MIN and rotHist[bin] faults. Every other matcher
+    #      variant already guards this with NLeft; this one did not.
+    f="$ORB_SRC/src/ORBmatcher.cc"
+    if grep -q 'float rot = pKF->mvKeysUn\[i\].angle-CurrentFrame.mvKeysUn\[bestIdx2\].angle;' "$f" && \
+       ! grep -q 'orbslam3_ros2 patch (11)' "$f"; then
+        python3 - "$f" <<'PYEOF'
+import pathlib, sys
+p = pathlib.Path(sys.argv[1]); s = p.read_text()
+old = ('                            float rot = pKF->mvKeysUn[i].angle-CurrentFrame.mvKeysUn[bestIdx2].angle;\n'
+       '                            if(rot<0.0)\n'
+       '                                rot+=360.0f;\n'
+       '                            int bin = round(rot*factor);\n'
+       '                            if(bin==HISTO_LENGTH)\n'
+       '                                bin=0;\n'
+       '                            assert(bin>=0 && bin<HISTO_LENGTH);\n'
+       '                            rotHist[bin].push_back(bestIdx2);\n')
+assert s.count(old) == 1, "relocalisation SearchByProjection histogram block not found"
+new = ('                            // float rot = pKF->mvKeysUn[i].angle-CurrentFrame.mvKeysUn[bestIdx2].angle;   // orbslam3_ros2 patch (11), 2026-10-29: out-of-bounds for fisheye stereo\n'
+       '                            // Fisheye (KannalaBrandt8) frames have mDistCoef == 0, so mvKeysUn = mvKeys holds only the\n'
+       '                            // NLeft left-camera keypoints while GetMapPointMatches() is NLeft+NRight long; a map point first\n'
+       '                            // seen through the right camera (i >= NLeft) read past the vector, gave a NaN angle, bin = INT_MIN,\n'
+       '                            // and rotHist[bin] segfaulted (gdb, realv5, Tracking::Relocalization). Same guard as the other\n'
+       '                            // SearchByProjection variants.\n'
+       '                            const float angKF = (pKF->NLeft == -1) ? pKF->mvKeysUn[i].angle\n'
+       '                                              : (i < (size_t)pKF->NLeft) ? pKF->mvKeys[i].angle\n'
+       '                                                                         : pKF->mvKeysRight[i - pKF->NLeft].angle;\n'
+       '                            const float angCF = (CurrentFrame.Nleft == -1) ? CurrentFrame.mvKeysUn[bestIdx2].angle\n'
+       '                                              : (bestIdx2 < CurrentFrame.Nleft) ? CurrentFrame.mvKeys[bestIdx2].angle\n'
+       '                                                                                : CurrentFrame.mvKeysRight[bestIdx2 - CurrentFrame.Nleft].angle;\n'
+       '                            float rot = angKF-angCF;\n'
+       '                            if(rot<0.0)\n'
+       '                                rot+=360.0f;\n'
+       '                            int bin = round(rot*factor);\n'
+       '                            if(bin==HISTO_LENGTH)\n'
+       '                                bin=0;\n'
+       '                            assert(bin>=0 && bin<HISTO_LENGTH);\n'
+       '                            if(bin<0 || bin>=HISTO_LENGTH)   // patch (11): never index the histogram with a NaN-derived bin\n'
+       '                                continue;\n'
+       '                            rotHist[bin].push_back(bestIdx2);\n')
+p.write_text(s.replace(old, new, 1))
+PYEOF
+        echo "    patched ORBmatcher.cc  (fisheye NLeft guard in relocalisation SearchByProjection)"
+    fi
+
+    # (12) Three more fisheye-stereo out-of-bounds reads in the MAPPING thread
+    #      (2026-11-02, kernel log on realv6: three segfaults at one instruction in
+    #      LocalMapping::KeyFrameCulling, one in CreateNewMapPoints). Same class as
+    #      (11): mvKeysUn/mvuRight/mvDepth hold only the NLeft left-camera entries
+    #      on a KannalaBrandt8 stereo frame, but KeyFrameCulling indexed
+    #      mvKeysRight[i] with the FULL index (should be i - NLeft) and read mvDepth[i]
+    #      for i >= NLeft; CreateNewMapPoints read mvuRight[idx] with right-camera
+    #      indices; ORBmatcher::Fuse read mvuRight with a right-grid index; the two
+    #      merge-BA loops in Optimizer.cc indexed with get<0> == -1. All guarded, old
+    #      lines kept as comments. Applied with one embedded patcher, guarded by the tag.
+    if grep -q 'pKF -> mvKeysRight\[i\].octave' "$ORB_SRC/src/LocalMapping.cc" && \
+       ! grep -q 'orbslam3_ros2 patch (12)' "$ORB_SRC/src/LocalMapping.cc"; then
+        python3 - "$ORB_SRC" <<'PYEOF'
+import pathlib, re, sys
+root = pathlib.Path(sys.argv[1])
+TAG = "orbslam3_ros2 patch (12), 2026-11-02"
+def edit(path, pairs):
+    s = path.read_text()
+    for old, new, mode in pairs:
+        if mode == 're':
+            assert len(re.findall(old, s)) == 1, (path.name, old[:50]); s = re.sub(old, new, s, count=1)
+        else:
+            assert s.count(old) == 1, (path.name, old[:50]); s = s.replace(old, new)
+    path.write_text(s)
+edit(root / "src/LocalMapping.cc", [
+("""                        const int &scaleLevel = (pKF -> NLeft == -1) ? pKF->mvKeysUn[i].octave
+                                                                     : (i < pKF -> NLeft) ? pKF -> mvKeys[i].octave
+                                                                                          : pKF -> mvKeysRight[i].octave;
+""",
+"""                        // const int &scaleLevel = (pKF -> NLeft == -1) ? pKF->mvKeysUn[i].octave                       // %s:
+                        //                                              : (i < pKF -> NLeft) ? pKF -> mvKeys[i].octave     // upstream indexed
+                        //                                                                   : pKF -> mvKeysRight[i].octave; // mvKeysRight with the FULL index
+                        // For a fisheye stereo keyframe a map point first seen by the right camera has i >= NLeft, and
+                        // mvKeysRight[i] (instead of [i - NLeft]) read past the vector; the reference was dereferenced
+                        // below and segfaulted in KeyFrameCulling (kernel log, realv6, 3 crashes at one instruction).
+                        const int scaleLevel = (pKF -> NLeft == -1) ? pKF->mvKeysUn[i].octave
+                                                                    : (i < (size_t)pKF -> NLeft) ? pKF -> mvKeys[i].octave
+                                                                                                 : pKF -> mvKeysRight[i - pKF -> NLeft].octave;
+""" % TAG, 's'),
+("""                    if(!mbMonocular)
+                    {
+                        if(pKF->mvDepth[i]>pKF->mThDepth || pKF->mvDepth[i]<0)
+                            continue;
+                    }
+""",
+"""                    if(!mbMonocular)
+                    {
+                        // %s: mvDepth has only NLeft entries on a fisheye stereo
+                        // keyframe; a right-camera-only observation (i >= NLeft) has no depth, so skip it as
+                        // "no depth" instead of reading past the vector.
+                        if(pKF -> NLeft != -1 && i >= (size_t)pKF -> NLeft)
+                            continue;
+                        if(pKF->mvDepth[i]>pKF->mThDepth || pKF->mvDepth[i]<0)
+                            continue;
+                    }
+""" % TAG, 's'),
+("""            const float kp1_ur=mpCurrentKeyFrame->mvuRight[idx1];
+""",
+"""            // const float kp1_ur=mpCurrentKeyFrame->mvuRight[idx1];   // %s: mvuRight is NLeft-sized on fisheye; idx1 may be a right-camera index
+            const float kp1_ur = (mpCurrentKeyFrame -> NLeft == -1 || idx1 < mpCurrentKeyFrame -> NLeft) ? mpCurrentKeyFrame->mvuRight[idx1] : -1.0f;
+""" % TAG, 's'),
+("""            const float kp2_ur = pKF2->mvuRight[idx2];
+""",
+"""            // const float kp2_ur = pKF2->mvuRight[idx2];   // %s: same guard as kp1_ur
+            const float kp2_ur = (pKF2 -> NLeft == -1 || idx2 < pKF2 -> NLeft) ? pKF2->mvuRight[idx2] : -1.0f;
+""" % TAG, 's'),
+])
+edit(root / "src/ORBmatcher.cc", [
+(r"(\n(\s*)if\(pKF->mvuRight\[idx\]>=0\)\n)",
+ lambda m: "\n%s// if(pKF->mvuRight[idx]>=0)   // %s: on fisheye mvuRight is NLeft-sized and never >= 0; with bRight the\n%s// index is a right-grid index that can exceed NLeft, so only consult it on the pinhole path\n%sif(pKF -> NLeft == -1 && pKF->mvuRight[idx]>=0)\n" % (m.group(2), TAG, m.group(2), m.group(2)), 're'),
+])
+p = root / "src/Optimizer.cc"; s = p.read_text()
+pat = re.compile(r"(\n(\s*)if\(pKF->isBad\(\) \|\| pKF->mnId>maxKFid \|\| pKF->mnBALocalFor(Merge|KF) != pMainKF->mnId \|\| !pKF->GetMapPoint\(get<0>\(mit->second\)\)\))")
+ms = list(pat.finditer(s)); assert len(ms) == 2, len(ms)
+out = s; shift = 0
+for m in ms:
+    ins = "\n%s// %s: a right-camera-only observation carries get<0> == -1 and these loops index\n%s// mvKeysUn / mvuRight / GetMapPoint with it; upstream predates fisheye here, so skip such observations.\n%sif(get<0>(mit->second) == -1)\n%s    continue;" % (m.group(2), TAG, m.group(2), m.group(2), m.group(2))
+    pos = m.start() + shift; out = out[:pos] + ins + out[pos:]; shift += len(ins)
+p.write_text(out)
+PYEOF
+        echo "    patched LocalMapping/ORBmatcher/Optimizer (fisheye right-index guards, mapping thread)"
+    fi
+
+    # (10) GPU front end for ORBextractor (2026-10-28). Unlike (1)-(9) this is NOT
+    #      applied by this script: it is a set of files COMMITTED IN THE FORK --
+    #        include/ORBextractorGPU.h, src/ORBextractorGPU.cc (new),
+    #        include/ORBextractor.h, src/ORBextractor.cc (static switch + hooks,
+    #        CPU code kept intact as the fallback), src/System.cc (reads the YAML
+    #        key ORBextractor.useGPU, 0/1 int, absent = 0), CMakeLists.txt (adds
+    #        the file and ${CMAKE_DL_LIBS}).
+    #      No CUDA toolkit is needed to build: the driver API and NVRTC are
+    #      dlopen'ed at first use and the kernels are JIT-compiled; if that fails
+    #      the extractor logs one line and runs the CPU path. Needs libcuda.so.1
+    #      (driver) and libnvrtc.so.12 (e.g. the torch pip wheels; override the
+    #      directory with ORB_SLAM3_NVRTC_DIR).
+    #      Measured 2026-10-28 on 1920x1080, 2000 features, 8 levels, RTX 3070:
+    #      39 -> 9.3 ms per image; 90 % of keypoints at identical positions,
+    #      descriptors 0.35 Hamming bits apart on average.
+    # (10b) GPU stereo matcher (2026-10-29), same files plus src/Frame.cc,
+    #      include/Frame.h (GpuHamming::Knn2 replaces cv::BFMatcher knnMatch in
+    #      ComputeStereoFishEyeMatches, CPU call kept as comment + fallback) and
+    #      System.cc (YAML key Stereo.useGPUMatch, absent = follow useGPU).
+    #      Bit-identical to the CPU matcher; 9-10 ms -> 0.44 ms per frame; node
+    #      tracker 64 -> 45 ms at rate 1.0 on realv5 (ABBA, cool starts).
+    if grep -q 'src/ORBextractorGPU.cc' "$ORB_SRC/CMakeLists.txt"; then
+        echo "    patch (10) present     (GPU front end committed in the fork)"
+        if grep -q 'GpuHamming::Knn2' "$ORB_SRC/src/Frame.cc"; then echo "    patch (10b) present    (GPU stereo matcher in Frame.cc)"; else echo "    patch (10b) ABSENT     (Frame.cc still calls cv::BFMatcher only)"; fi
+    else
+        echo "    patch (10) ABSENT      (fork checkout predates the GPU front end; see comment above)"
+    fi
 }
 
 stage_orbslam3() {

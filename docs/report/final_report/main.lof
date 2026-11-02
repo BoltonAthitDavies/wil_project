@@ -37,15 +37,29 @@
 \contentsline {figure}{\numberline {4.3}{\ignorespaces Estimator comparison on every \repo {allsensor} recording, world frame.}}{76}{figure.caption.129}%
 \contentsline {figure}{\numberline {4.4}{\ignorespaces Real-robot estimates against the optical tracker on \repo {dataset_realv3_000}: aligned trajectories, and error and speed over time.}}{78}{figure.caption.133}%
 \contentsline {figure}{\numberline {4.5}{\ignorespaces Per-dataset and pooled detector scores and box-area coverage.}}{80}{figure.caption.139}%
-\contentsline {figure}{\numberline {4.6}{\ignorespaces Representative validation overlay used before accepting the offline metrics.}}{80}{figure.caption.140}%
-\contentsline {figure}{\numberline {4.7}{\ignorespaces Object-class confusion conditional on class-agnostic IoU association.}}{81}{figure.caption.143}%
-\contentsline {figure}{\numberline {4.8}{\ignorespaces Run-level anomaly diagnostics.}}{86}{figure.caption.151}%
-\contentsline {figure}{\numberline {4.9}{\ignorespaces Extreme world, static recordings: every repeat, top-down after rigid alignment.}}{88}{figure.caption.155}%
-\contentsline {figure}{\numberline {4.10}{\ignorespaces Extreme world, dynamic recordings: every repeat, all four systems, top-down after rigid alignment.}}{89}{figure.caption.156}%
-\contentsline {figure}{\numberline {4.11}{\ignorespaces Unfiltered estimates on the four realistic-warehouse recordings after rigid alignment.}}{92}{figure.caption.165}%
-\contentsline {figure}{\numberline {4.12}{\ignorespaces Aligned ATE and jump-free RPE of the unfiltered arms by recording.}}{93}{figure.caption.166}%
-\contentsline {figure}{\numberline {4.13}{\ignorespaces Dense-map evaluation of \repo {map/map_tiny.db}.}}{99}{figure.caption.184}%
-\contentsline {figure}{\numberline {4.14}{\ignorespaces The same database scored against the run that built it, \repo {dataset/dataset_map_tiny}.}}{100}{figure.caption.185}%
-\contentsline {figure}{\numberline {4.15}{\ignorespaces Per-block performance in the \textbf {static} condition, over the five \repo {allsensor} datasets.}}{104}{figure.caption.192}%
-\contentsline {figure}{\numberline {4.16}{\ignorespaces Per-block performance in the \textbf {dynamic} condition, over the twelve relogged dynamic runs of each estimator.}}{108}{figure.caption.196}%
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Representative validation overlay used before accepting the offline metrics.}}{81}{figure.caption.140}%
+\contentsline {figure}{\numberline {4.7}{\ignorespaces Object-class confusion conditional on class-agnostic IoU association.}}{82}{figure.caption.143}%
+\contentsline {figure}{\numberline {4.8}{\ignorespaces Run-level anomaly diagnostics.}}{87}{figure.caption.151}%
+\contentsline {figure}{\numberline {4.9}{\ignorespaces Extreme world, static recordings: every repeat, top-down after rigid alignment.}}{89}{figure.caption.155}%
+\contentsline {figure}{\numberline {4.10}{\ignorespaces Extreme world, dynamic recordings: every unfiltered repeat, top-down after rigid alignment.}}{90}{figure.caption.156}%
+\contentsline {figure}{\numberline {4.11}{\ignorespaces Extreme world, dynamic recordings: every October filtered run, top-down after rigid alignment.}}{91}{figure.caption.159}%
+\contentsline {figure}{\numberline {4.12}{\ignorespaces Extreme world, \repo {static_000}: every run's error timeline, filter activity and onset on the route.}}{94}{figure.caption.163}%
+\contentsline {figure}{\numberline {4.13}{\ignorespaces Extreme world, \repo {static_001}: every run's error timeline, filter activity and onset on the route.}}{95}{figure.caption.164}%
+\contentsline {figure}{\numberline {4.14}{\ignorespaces Extreme world, \repo {static_002}: every run's error timeline, filter activity and onset on the route.}}{96}{figure.caption.165}%
+\contentsline {figure}{\numberline {4.15}{\ignorespaces Extreme world, \repo {dynamic_00_000}: every run's error timeline, filter activity and onset on the route.}}{97}{figure.caption.166}%
+\contentsline {figure}{\numberline {4.16}{\ignorespaces Extreme world, \repo {dynamic_00_001}: every run's error timeline, filter activity and onset on the route.}}{98}{figure.caption.167}%
+\contentsline {figure}{\numberline {4.17}{\ignorespaces Extreme world, \repo {dynamic_01_000}: every run's error timeline, filter activity and onset on the route.}}{99}{figure.caption.168}%
+\contentsline {figure}{\numberline {4.18}{\ignorespaces Extreme world, \repo {dynamic_02_000}: every run's error timeline, filter activity and onset on the route.}}{100}{figure.caption.169}%
+\contentsline {figure}{\numberline {4.19}{\ignorespaces Unfiltered estimates on the four realistic-warehouse recordings after rigid alignment.}}{103}{figure.caption.176}%
+\contentsline {figure}{\numberline {4.20}{\ignorespaces Aligned ATE and jump-free RPE of the unfiltered arms by recording.}}{104}{figure.caption.177}%
+\contentsline {figure}{\numberline {4.21}{\ignorespaces Realistic world, \repo {realistic_000}: every run's error timeline, filter activity and onset on the route.}}{108}{figure.caption.186}%
+\contentsline {figure}{\numberline {4.22}{\ignorespaces Realistic world, \repo {realistic_001}: every run's error timeline, filter activity and onset on the route.}}{109}{figure.caption.187}%
+\contentsline {figure}{\numberline {4.23}{\ignorespaces Realistic world, \repo {realistic_002}: every run's error timeline, filter activity and onset on the route.}}{110}{figure.caption.188}%
+\contentsline {figure}{\numberline {4.24}{\ignorespaces Realistic world, \repo {realistic_003}: every run's error timeline, filter activity and onset on the route.}}{111}{figure.caption.189}%
+\contentsline {figure}{\numberline {4.25}{\ignorespaces Dense-map evaluation of \repo {map/map_tiny.db}.}}{116}{figure.caption.202}%
+\contentsline {figure}{\numberline {4.26}{\ignorespaces The same database scored against the run that built it, \repo {dataset/dataset_map_tiny}.}}{117}{figure.caption.203}%
+\contentsline {figure}{\numberline {4.27}{\ignorespaces Dense-map evaluation of \repo {map/map_realistic} against the independent probe.}}{121}{figure.caption.211}%
+\contentsline {figure}{\numberline {4.28}{\ignorespaces Dense-map evaluation of \repo {map/map_realistic_01} against the independent probe.}}{122}{figure.caption.212}%
+\contentsline {figure}{\numberline {4.29}{\ignorespaces Per-block performance in the \textbf {static} condition, over the five \repo {allsensor} datasets.}}{126}{figure.caption.216}%
+\contentsline {figure}{\numberline {4.30}{\ignorespaces Per-block performance in the \textbf {dynamic} condition, over the twelve relogged dynamic runs of each estimator.}}{130}{figure.caption.220}%
 \addvspace {10\p@ }

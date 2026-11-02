@@ -1,0 +1,18 @@
+\begin{table}[htbp]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2pt}
+\caption[The five RTAB-Map databases under \repo{map/}.]{The five RTAB-Map databases under \repo{map/}: size, graph nodes, simulation-time span of the nodes, odometry path length and planar extent, vertical range of the node poses, loop closures, the placement fit against the tiny world (agreement score and margin over the best rival yaw, from \path{script/fit_map_pose.py}), and what the database is identified as. Only \repo{map_tiny.db} is registered in the project records.}
+\label{tab:insight4-dbs}
+\begin{tabular}{lrrrrrrrlp{2.4cm}}
+\toprule
+Database & MB & nodes & stamps [s] & path [m] & extent [m] & $z$ [m] & closures & fit (agr., margin) & identified as \\
+\midrule
+\repo{map_tiny.db} & 67.4 & 30 & 31--90 & 69.5 & 17$\times$7 & -0.0..0.6 & 5 & 0.387, +61\,\% & the scored tiny map (registered); built on the \repo{dataset_map_tiny} route \\
+\repo{map_01.db} & 0.8 & 2 & 59--61 & 0.0 & 0$\times$0 & -0.1..1.7 & 0 & --- & aborted start (2 nodes) \\
+\repo{map_02.db} & 55.3 & 38 & 30--91 & 68.8 & 7$\times$17 & -0.3..-0.1 & 7 & 0.385, +54\,\% & a second tiny-warehouse map on a different route (21 Sep) \\
+\repo{map_02_vins.db} & 9.3 & 2 & 34--35 & 0.7 & 1$\times$0 & 0.1..0.2 & 0 & --- & aborted start (2 nodes) \\
+\repo{map_03.db} & 29.2 & 18 & 35--64 & 75.8 & 5$\times$37 & -0.3..9.8 & 0 & 0.19, +7\,\% (large worlds; weak) & a 37 m straight run that left the floor: the lost large-warehouse attempt, unplaceable \\
+\bottomrule
+\end{tabular}
+\end{table}

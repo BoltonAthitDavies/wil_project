@@ -1,0 +1,18 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption[Structure of the misses.]{Structure of the misses, per recording, from the gaps between consecutive matches of the same object (gaps under \SI{2}{\second} only). ``Single-frame'' is the share of gaps one frame long; ``in long gaps'' the share of the gap frames that lie in gaps of \SI{1}{\second} or more. ``Short-gap misses / FN'' compares the misses this reading finds with the scorer's total false negatives: the remainder are misses at the ends of tracks or in gaps longer than \SI{2}{\second}, which this reading cannot separate from objects leaving the view. ``Objects under 0.5'': objects with at least 30 frames whose in-track recall is below one half. Source: \path{miss_structure.csv}.}
+\label{tab:e2i-miss}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrrrr}
+\toprule
+Recording & objects & gaps & median & p90 & single-frame & in long gaps & short-gap misses / FN \\
+ & & & [frames] & [frames] & & & \\
+\midrule
+\repo{dyn_00_000} & 32 (4 under 0.5) & 660 & 2 & 16 & 47\,\% & 37\,\% & 3728 / 5900 (63\,\%) \\
+\repo{dyn_00_001} & 38 (4 under 0.5) & 823 & 2 & 19 & 45\,\% & 39\,\% & 5156 / 6868 (75\,\%) \\
+\repo{dyn_01_000} & 32 (5 under 0.5) & 671 & 2 & 8 & 50\,\% & 30\,\% & 2811 / 6064 (46\,\%) \\
+\repo{dyn_02_000} & 30 (3 under 0.5) & 745 & 2 & 9 & 48\,\% & 26\,\% & 3123 / 6502 (48\,\%) \\
+\bottomrule
+\end{tabular}}
+\end{table}

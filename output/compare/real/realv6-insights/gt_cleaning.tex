@@ -1,0 +1,16 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption[Realv6: raw versus cleaned tracker export.]{\repo{dataset_realv6_000}: the same ORB-SLAM3 runs scored against the tracker export as delivered and with one sample removed (the \SI{5.2}{\metre} excursion at \SI{184.9}{\second}). Time offset by wheel-speed cross-correlation with its peak correlation $r$; aligned planar ATE; path ratio = estimate / truth. The cleaned truth still fails the gap rule (66 gaps above \SI{1}{\second}, tracker at \SI{1.7}{\hertz}), so every value is provisional.}
+\label{tab:realv6-cleaning}
+\begin{tabular}{llrrrrrr}
+\toprule
+Run & truth & GT path [m] & offset [s] & $r$ & ATE [m] & median [m] & path ratio \\
+\midrule
+ORB-SLAM3, replay 1.0 & raw & 36.8 & 4.38 & 0.10 & 1.183 & 0.836 & 0.68 \\
+ORB-SLAM3, replay 1.0 & cleaned & 27.1 & -4.14 & 0.61 & 0.409 & 0.343 & 0.93 \\
+ORB-SLAM3, replay 0.5 & raw & 36.8 & 4.38 & 0.10 & 1.232 & 0.889 & 0.70 \\
+ORB-SLAM3, replay 0.5 & cleaned & 27.1 & -4.14 & 0.61 & 0.570 & 0.435 & 0.92 \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -1,0 +1,5 @@
+dataset,run,loop_closures,overlap_s,poses,global_ate_rmse_m,anchored_end_m,anchored_max_m,anchored_max_at_s,anchored_median_m,keyframes_created,keyframes_final,map_points_final,queue_dropped,resets,anchor_window,gt_source
+dataset_allsensor_realistic_map,loopclosing,3,213.8,4947,2.013,0.919,4.566,76.5,4.145,751,498,58568,551,0,"5-45 s after first pose, SE(3) scale fixed, lever arm via vio_metrics.load_gt",/ground_truth/odometry from the flash-drive bag
+dataset_allsensor_realistic_map,noloopclosing,0,213.3,4845,0.067,0.03,1.026,2.4,0.042,747,538,63820,559,0,"5-45 s after first pose, SE(3) scale fixed, lever arm via vio_metrics.load_gt",/ground_truth/odometry from the flash-drive bag
+dataset_allsensor_realistic_mapv2,loopclosing,6,285.9,6374,8.824,25.17,48.668,180.6,0.176,964,661,65824,904,0,"5-45 s after first pose, SE(3) scale fixed, lever arm via vio_metrics.load_gt",/ground_truth/odometry from the flash-drive bag
+dataset_allsensor_realistic_mapv2,noloopclosing,0,287.8,6633,0.098,0.105,0.648,2.4,0.107,1003,754,89415,747,0,"5-45 s after first pose, SE(3) scale fixed, lever arm via vio_metrics.load_gt",/ground_truth/odometry from the flash-drive bag

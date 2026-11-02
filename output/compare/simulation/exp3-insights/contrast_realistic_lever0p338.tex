@@ -1,0 +1,32 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption[Within-run drift contrasts, realistic world.]{Within-run drift contrasts, realistic world. Each run is its own control: the growth rate of the start-anchored error is computed separately in the two states and the two rates are compared across runs (median of each, number of runs where the first exceeds the second, Wilcoxon signed-rank $p$). ``Turning'': ground-truth yaw rate above \SI{10}{\degree\per\second}. ``Object in view'': detector boxes present on the frame (borrowed from the class-filtered run on the same bag for unfiltered runs). Rates are taken only while the estimate is still tracking (before the first jump and below \SI{3}{\metre} error). Source: \path{output/compare/simulation/exp3-insights/insights.csv}.}
+\label{tab:insight-contrast-realistic}
+\begin{tabular}{llrrrrr}
+\toprule
+Condition & Estimator & $n$ & turning & straight & $n_{>}$ & $p$ \\
+ & & & \multicolumn{2}{c}{[\si{\milli\metre\per\second}]} & & \\
+\midrule
+static & VINS-Fusion & 2 & 3.9 & 7.5 & 1 & --- \\
+static & ORB-SLAM3 & 4 & 0.1 & 1.6 & 1 & --- \\
+dynamic & VINS-Fusion & 1 & 1.8 & 4.8 & 0 & --- \\
+dynamic & ORB-SLAM3 & 4 & -1.3 & 2.1 & 2 & --- \\
+dynamic & VINS-Fusion+YOLO & 3 & 0.1 & 5.5 & 1 & --- \\
+dynamic & ORB-SLAM3+YOLO & 9 & 9.1 & 4.3 & 2 & 0.20 \\
+\midrule
+\multicolumn{7}{l}{\emph{Heading error, same contrast} [\si{\milli\degree\per\second}]} \\
+static & VINS-Fusion & 2 & 4.1 & 3.2 & 1 & --- \\
+static & ORB-SLAM3 & 4 & 5.6 & -6.1 & 3 & --- \\
+dynamic & VINS-Fusion & 1 & 7.0 & 9.4 & 0 & --- \\
+dynamic & ORB-SLAM3 & 4 & -15.0 & 5.8 & 0 & --- \\
+dynamic & VINS-Fusion+YOLO & 3 & 0.6 & 0.1 & 1 & --- \\
+dynamic & ORB-SLAM3+YOLO & 9 & -5.4 & 3.7 & 3 & 0.30 \\
+\midrule
+\multicolumn{7}{l}{\emph{Object in view vs none, dynamic recordings} [\si{\milli\metre\per\second}]} \\
+ & & & in view & none & & \\
+dynamic & VINS-Fusion+YOLO & 1 & 1.0 & 4.2 & 0 & --- \\
+dynamic & ORB-SLAM3+YOLO & 3 & 14.4 & 7.0 & 1 & --- \\
+\bottomrule
+\end{tabular}
+\end{table}

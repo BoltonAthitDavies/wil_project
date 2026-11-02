@@ -1,0 +1,66 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyperFirstAtBeginDocument{\AtBeginDocument}
+\HyperFirstAtBeginDocument{\ifx\hyper@anchor\@undefined
+\global\let\oldcontentsline\contentsline
+\gdef\contentsline#1#2#3#4{\oldcontentsline{#1}{#2}{#3}}
+\global\let\oldnewlabel\newlabel
+\gdef\newlabel#1#2{\newlabelxx{#1}#2}
+\gdef\newlabelxx#1#2#3#4#5#6{\oldnewlabel{#1}{{#2}{#3}}}
+\AtEndDocument{\ifx\hyper@anchor\@undefined
+\let\contentsline\oldcontentsline
+\let\newlabel\oldnewlabel
+\fi}
+\fi}
+\global\let\hyper@last\relax 
+\gdef\HyperFirstAtBeginDocument#1{#1}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Questions and method}{1}{section.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Baselines.}{1}{section*.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Visual estimators.}{1}{section*.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Insight 1: wheel odometry's error is heading error made in the turns, not a distance error}{2}{section.4.2}\protected@file@percent }
+\newlabel{sec:insight1-wheel}{{2}{2}{Insight 1: wheel odometry's error is heading error made in the turns, not a distance error}{section.4.2}{}}
+\newlabel{sec:insight1-wheel@cref}{{[section][2][4]2}{[1][2][]2}}
+\@writefile{lot}{\contentsline {table}{\numberline {I.1}{\ignorespaces Anchored error of the proprioceptive baselines split into along-track, cross-track and heading parts.}}{2}{table.caption.3}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{tab:e1i-decomp}{{I.1}{2}{Anchored error of the proprioceptive baselines split into along-track, cross-track and heading parts}{table.caption.3}{}}
+\newlabel{tab:e1i-decomp@cref}{{[table][1][4]I.1}{[1][2][]2}}
+\@writefile{lot}{\contentsline {table}{\numberline {I.2}{\ignorespaces Growth of position and heading error while turning against straights, every estimator.}}{3}{table.caption.4}\protected@file@percent }
+\newlabel{tab:e1i-turning}{{I.2}{3}{Growth of position and heading error while turning against straights, every estimator}{table.caption.4}{}}
+\newlabel{tab:e1i-turning@cref}{{[table][2][4]I.2}{[1][2][]3}}
+\@writefile{lof}{\contentsline {figure}{\numberline {I.1}{\ignorespaces Anchored error of wheel odometry and the EKF on each recording, in the ground-truth path frame: along-track error, cross-track error and heading error against time. Grey bands are the moments the ground-truth yaw rate exceeds \SI {10}{\degree \per \second }.\relax }}{3}{figure.caption.5}\protected@file@percent }
+\newlabel{fig:decomp}{{I.1}{3}{Anchored error of wheel odometry and the EKF on each recording, in the ground-truth path frame: along-track error, cross-track error and heading error against time. Grey bands are the moments the ground-truth yaw rate exceeds \SI {10}{\degree \per \second }.\relax }{figure.caption.5}{}}
+\newlabel{fig:decomp@cref}{{[figure][1][4]I.1}{[1][2][]3}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Insight 2: IMU dead reckoning diverges through its velocity, not its heading}{4}{section.4.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {I.3}{\ignorespaces IMU dead reckoning: growth law of the error and the share the heading error explains.}}{4}{table.caption.6}\protected@file@percent }
+\newlabel{tab:e1i-imu}{{I.3}{4}{IMU dead reckoning: growth law of the error and the share the heading error explains}{table.caption.6}{}}
+\newlabel{tab:e1i-imu@cref}{{[table][3][4]I.3}{[1][4][]4}}
+\@writefile{lof}{\contentsline {figure}{\numberline {I.2}{\ignorespaces IMU dead reckoning on the five recordings. Left: anchored position error against time on logarithmic axes, with $t$ and $t^{2}$ guides. Right: the same error on linear axes with, dashed, the error that the heading error alone would produce.\relax }}{4}{figure.caption.7}\protected@file@percent }
+\newlabel{fig:imu}{{I.2}{4}{IMU dead reckoning on the five recordings. Left: anchored position error against time on logarithmic axes, with $t$ and $t^{2}$ guides. Right: the same error on linear axes with, dashed, the error that the heading error alone would produce.\relax }{figure.caption.7}{}}
+\newlabel{fig:imu@cref}{{[figure][2][4]I.2}{[1][4][]4}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Insight 3: the EKF removes the heading error, and its covariance stops describing the error at the first turn}{4}{section.4.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {I.4}{\ignorespaces When the EKF's NEES leaves its band, against the first turn.}}{5}{table.caption.8}\protected@file@percent }
+\newlabel{tab:e1i-nees}{{I.4}{5}{When the EKF's NEES leaves its band, against the first turn}{table.caption.8}{}}
+\newlabel{tab:e1i-nees@cref}{{[table][4][4]I.4}{[1][4][]5}}
+\@writefile{lof}{\contentsline {figure}{\numberline {I.3}{\ignorespaces 3-DOF NEES of the EKF against time on each recording, for the measured per-recording noise model and for the VSLAM noise file, with the first ground-truth heading change (dotted), the \SI {97.5}{\percent } band (dashed) and the consistent value of 3 (solid).\relax }}{5}{figure.caption.9}\protected@file@percent }
+\newlabel{fig:nees}{{I.3}{5}{3-DOF NEES of the EKF against time on each recording, for the measured per-recording noise model and for the VSLAM noise file, with the first ground-truth heading change (dotted), the \SI {97.5}{\percent } band (dashed) and the consistent value of 3 (solid).\relax }{figure.caption.9}{}}
+\newlabel{fig:nees@cref}{{[figure][3][4]I.3}{[1][4][]5}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Insight 4: the transferred noise model turns the EKF back into wheel odometry at the turns}{5}{section.4.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}Insight 5: the visual estimators' reported error is largely vertical, and their one failure is a loop-closure event}{6}{section.4.6}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {I.5}{\ignorespaces Visual estimators at the IMU point: drift while turning, features against drift, jumps.}}{6}{table.caption.10}\protected@file@percent }
+\newlabel{tab:e1i-visual}{{I.5}{6}{Visual estimators at the IMU point: drift while turning, features against drift, jumps}{table.caption.10}{}}
+\newlabel{tab:e1i-visual@cref}{{[table][5][4]I.5}{[1][6][]6}}
+\@writefile{lot}{\contentsline {table}{\numberline {I.6}{\ignorespaces Anatomy of the ORB-SLAM3 failure on allsensor\_003.}}{6}{table.caption.11}\protected@file@percent }
+\newlabel{tab:e1i-orbfail}{{I.6}{6}{Anatomy of the ORB-SLAM3 failure on allsensor\_003}{table.caption.11}{}}
+\newlabel{tab:e1i-orbfail@cref}{{[table][6][4]I.6}{[1][6][]6}}
+\@writefile{lof}{\contentsline {figure}{\numberline {I.4}{\ignorespaces ORB-SLAM3 with the loop closer on \texttt  {allsensor_003}. Left: whole-run aligned planar error against time, with the impossible-speed jumps of the estimate in red. Right: the aligned estimate against the ground truth at the IMU point on the warehouse plan, with the jump locations.\relax }}{7}{figure.caption.12}\protected@file@percent }
+\newlabel{fig:orb}{{I.4}{7}{ORB-SLAM3 with the loop closer on \repo {allsensor_003}. Left: whole-run aligned planar error against time, with the impossible-speed jumps of the estimate in red. Right: the aligned estimate against the ground truth at the IMU point on the warehouse plan, with the jump locations.\relax }{figure.caption.12}{}}
+\newlabel{fig:orb@cref}{{[figure][4][4]I.4}{[1][6][]7}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}What these data cannot answer}{7}{section.4.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {8}Summary}{8}{section.4.8}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {I.7}{\ignorespaces Questions, answers and the strength of the evidence.\relax }}{8}{table.caption.13}\protected@file@percent }
+\newlabel{tab:e1i-summary}{{I.7}{8}{Questions, answers and the strength of the evidence.\relax }{table.caption.13}{}}
+\newlabel{tab:e1i-summary@cref}{{[table][7][4]I.7}{[1][8][]8}}
+\@writefile{toc}{\contentsline {paragraph}{Consequences for Chapter 4.}{8}{section*.14}\protected@file@percent }
+\gdef \@abspage@last{8}

@@ -1,0 +1,5 @@
+run,extractor,replay_rate,bag,mode,pairs_received,pairs_processed,queue_dropped,tracker_total_ms_median,extraction_stage_ms_median,inliers_median,inliers_p10,frames_ok,frames_lost,tracking_loss_events,resets,keyframes,map_points_final,poses
+cpu_r05,cpu,0.5,/media/ambushee/32E4AAB1E4AA772F/dataset_realv5_000,"stereo-only, loopClosing 0, viewer off",3757,2285,1472,109.8,67.2,948,607,2285,0,0,0,85,4937,2285
+gpu_r05,gpu,0.5,/media/ambushee/32E4AAB1E4AA772F/dataset_realv5_000,"stereo-only, loopClosing 0, viewer off",3743,2803,940,81.5,29.5,923,575,2803,0,0,0,88,4907,2803
+cpu_r10,cpu,1.0,/media/ambushee/32E4AAB1E4AA772F/dataset_realv5_000,"stereo-only, loopClosing 0, viewer off",2684,636,2048,206.0,131.1,806,497,636,0,0,0,86,4800,636
+gpu_r10,gpu,1.0,/media/ambushee/32E4AAB1E4AA772F/dataset_realv5_000,"stereo-only, loopClosing 0, viewer off",2466,1043,1423,118.0,44.1,830,560,1043,0,0,0,94,5273,1043

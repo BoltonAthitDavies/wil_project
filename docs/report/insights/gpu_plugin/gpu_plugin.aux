@@ -1,0 +1,81 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyperFirstAtBeginDocument{\AtBeginDocument}
+\HyperFirstAtBeginDocument{\ifx\hyper@anchor\@undefined
+\global\let\oldcontentsline\contentsline
+\gdef\contentsline#1#2#3#4{\oldcontentsline{#1}{#2}{#3}}
+\global\let\oldnewlabel\newlabel
+\gdef\newlabel#1#2{\newlabelxx{#1}#2}
+\gdef\newlabelxx#1#2#3#4#5#6{\oldnewlabel{#1}{{#2}{#3}}}
+\AtEndDocument{\ifx\hyper@anchor\@undefined
+\let\contentsline\oldcontentsline
+\let\newlabel\oldnewlabel
+\fi}
+\fi}
+\global\let\hyper@last\relax 
+\gdef\HyperFirstAtBeginDocument#1{#1}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{rublee2011}
+\citation{rosten2006}
+\citation{calonder2010}
+\citation{campos2021}
+\citation{kannala2006}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Why the front end was moved}{1}{section.3.1}\protected@file@percent }
+\newlabel{sec:gpu-why}{{1}{1}{Why the front end was moved}{section.3.1}{}}
+\newlabel{sec:gpu-why@cref}{{[section][1][3]1}{[1][1][]1}}
+\@writefile{toc}{\contentsline {section}{\numberline {2}What moved and what did not}{1}{section.3.2}\protected@file@percent }
+\newlabel{sec:gpu-design}{{2}{1}{What moved and what did not}{section.3.2}{}}
+\newlabel{sec:gpu-design@cref}{{[section][2][3]2}{[1][1][]1}}
+\citation{nvidia2026nvrtc}
+\@writefile{lot}{\contentsline {table}{\numberline {G.1}{\ignorespaces Time per stereo frame of the fisheye stereo front end, measured in a standalone harness on two \texttt  {dataset_realv5_000} frame pairs (\num {1920}\(\times \)\num {1080}, \num {2000} features per camera, 8 levels). Mean of 10 repetitions after a warm-up. The CPU matcher figure is with all 16 hardware threads idle; single-threaded it is \SI {38.2}{\milli \second }.\relax }}{2}{table.caption.1}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{tab:gpu-stages}{{G.1}{2}{Time per stereo frame of the fisheye stereo front end, measured in a standalone harness on two \repo {dataset_realv5_000} frame pairs (\num {1920}\(\times \)\num {1080}, \num {2000} features per camera, 8 levels). Mean of 10 repetitions after a warm-up. The CPU matcher figure is with all 16 hardware threads idle; single-threaded it is \SI {38.2}{\milli \second }.\relax }{table.caption.1}{}}
+\newlabel{tab:gpu-stages@cref}{{[table][1][3]G.1}{[1][1][]2}}
+\@writefile{lot}{\contentsline {table}{\numberline {G.2}{\ignorespaces Settings that control the GPU front end. Both real-rig configurations set \texttt  {ORBextractor.useGPU: 1}; both simulation configurations omit it.\relax }}{2}{table.caption.2}\protected@file@percent }
+\newlabel{tab:gpu-keys}{{G.2}{2}{Settings that control the GPU front end. Both real-rig configurations set \texttt {ORBextractor.useGPU: 1}; both simulation configurations omit it.\relax }{table.caption.2}{}}
+\newlabel{tab:gpu-keys@cref}{{[table][2][3]G.2}{[1][2][]2}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Validation}{2}{section.3.3}\protected@file@percent }
+\newlabel{sec:gpu-validation}{{3}{2}{Validation}{section.3.3}{}}
+\newlabel{sec:gpu-validation@cref}{{[section][3][3]3}{[1][2][]2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Fidelity of the GPU extractor}{2}{subsection.3.3.1}\protected@file@percent }
+\newlabel{sec:gpu-fidelity}{{3.1}{2}{Fidelity of the GPU extractor}{subsection.3.3.1}{}}
+\newlabel{sec:gpu-fidelity@cref}{{[subsection][1][3,3]3.1}{[1][2][]2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Fidelity of the GPU stereo matcher}{2}{subsection.3.3.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {G.3}{\ignorespaces CPU versus GPU extractor on four \texttt  {dataset_realv5_000} frames (\num {1920}\(\times \)\num {1080}, \num {2000} features, 8 levels, RTX\nobreakspace  {}3070). ``Identical'' means the same pixel position and octave; the descriptor comparison is over those keypoints. Time is the mean of 15 repetitions.\relax }}{3}{table.caption.3}\protected@file@percent }
+\newlabel{tab:gpu-fidelity}{{G.3}{3}{CPU versus GPU extractor on four \repo {dataset_realv5_000} frames (\num {1920}\(\times \)\num {1080}, \num {2000} features, 8 levels, RTX~3070). ``Identical'' means the same pixel position and octave; the descriptor comparison is over those keypoints. Time is the mean of 15 repetitions.\relax }{table.caption.3}{}}
+\newlabel{tab:gpu-fidelity@cref}{{[table][3][3]G.3}{[1][2][]3}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Effect inside the running node}{3}{subsection.3.3.3}\protected@file@percent }
+\newlabel{sec:gpu-node}{{3.3}{3}{Effect inside the running node}{subsection.3.3.3}{}}
+\newlabel{sec:gpu-node@cref}{{[subsection][3][3,3]3.3}{[1][2][]3}}
+\@writefile{lot}{\contentsline {table}{\numberline {G.4}{\ignorespaces Node A/B of the stereo matcher on \texttt  {dataset_realv5_000}, first \SI {60}{\second } of the recording, stereo-only, loop closing off, viewer off, ABBA order, each run started with the CPU package below \SI {75}{\celsius }. Both arms use the GPU extractor. Medians over frames in the tracking-OK state. Source: \texttt  {output/compare/real/gpu-stereo-matcher-ab/gpu_match_abba_metrics.csv}.\relax }}{3}{table.caption.4}\protected@file@percent }
+\newlabel{tab:gpu-abba}{{G.4}{3}{Node A/B of the stereo matcher on \repo {dataset_realv5_000}, first \SI {60}{\second } of the recording, stereo-only, loop closing off, viewer off, ABBA order, each run started with the CPU package below \SI {75}{\celsius }. Both arms use the GPU extractor. Medians over frames in the tracking-OK state. Source: \repo {output/compare/real/gpu-stereo-matcher-ab/gpu_match_abba_metrics.csv}.\relax }{table.caption.4}{}}
+\newlabel{tab:gpu-abba@cref}{{[table][4][3]G.4}{[1][3][]3}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}A measurement condition found on the way}{3}{subsection.3.3.4}\protected@file@percent }
+\newlabel{sec:gpu-thermal}{{3.4}{3}{A measurement condition found on the way}{subsection.3.3.4}{}}
+\newlabel{sec:gpu-thermal@cref}{{[subsection][4][3,3]3.4}{[1][3][]3}}
+\@writefile{lof}{\contentsline {figure}{\numberline {G.1}{\ignorespaces Tracker time per frame by stage, mean of the two runs per arm at replay rate 1.0 from \cref  {tab:gpu-abba} (\(n=2\) runs per arm, 840--1153 frames per run). The two CPU-side stages also fall by about \SI {3}{\milli \second }: the CPU matcher launched a sixteen-thread parallel loop on every frame that competed with the other threads. Data: \texttt  {gpu_plugin_stage_means.csv} beside this note.\relax }}{4}{figure.caption.5}\protected@file@percent }
+\newlabel{fig:gpu-stages}{{G.1}{4}{Tracker time per frame by stage, mean of the two runs per arm at replay rate 1.0 from \cref {tab:gpu-abba} (\(n=2\) runs per arm, 840--1153 frames per run). The two CPU-side stages also fall by about \SI {3}{\milli \second }: the CPU matcher launched a sixteen-thread parallel loop on every frame that competed with the other threads. Data: \repo {gpu_plugin_stage_means.csv} beside this note.\relax }{figure.caption.5}{}}
+\newlabel{fig:gpu-stages@cref}{{[figure][1][3]G.1}{[1][3][]4}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}A defect exposed by the validation runs}{4}{section.3.4}\protected@file@percent }
+\newlabel{sec:gpu-defect}{{4}{4}{A defect exposed by the validation runs}{section.3.4}{}}
+\newlabel{sec:gpu-defect@cref}{{[section][4][3]4}{[1][3][]4}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Stereo-inertial on the same recording}{4}{section.3.5}\protected@file@percent }
+\newlabel{sec:gpu-inertial}{{5}{4}{Stereo-inertial on the same recording}{section.3.5}{}}
+\newlabel{sec:gpu-inertial@cref}{{[section][5][3]5}{[1][4][]4}}
+\@writefile{lot}{\contentsline {table}{\numberline {G.5}{\ignorespaces Stereo-inertial runs on \texttt  {dataset_realv5_000} at replay rate 0.5, GPU front end on, loop closing on, one run per row. ``Starved'' frames are frames skipped because fewer than two IMU samples had arrived for them. Source: \texttt  {output/output_orb/real/realv5_imu_*/run_summary.csv}.\relax }}{5}{table.caption.6}\protected@file@percent }
+\newlabel{tab:gpu-inertial}{{G.5}{5}{Stereo-inertial runs on \repo {dataset_realv5_000} at replay rate 0.5, GPU front end on, loop closing on, one run per row. ``Starved'' frames are frames skipped because fewer than two IMU samples had arrived for them. Source: \repo {output/output_orb/real/realv5_imu_*/run_summary.csv}.\relax }{table.caption.6}{}}
+\newlabel{tab:gpu-inertial@cref}{{[table][5][3]G.5}{[1][4][]5}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Limitations and threats to validity}{5}{section.3.6}\protected@file@percent }
+\newlabel{sec:gpu-threats}{{6}{5}{Limitations and threats to validity}{section.3.6}{}}
+\newlabel{sec:gpu-threats@cref}{{[section][6][3]6}{[1][5][]5}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Reporting rules}{6}{section.3.7}\protected@file@percent }
+\newlabel{sec:gpu-rules}{{7}{6}{Reporting rules}{section.3.7}{}}
+\newlabel{sec:gpu-rules@cref}{{[section][7][3]7}{[1][5][]6}}
+\bibcite{rublee2011}{1}
+\bibcite{rosten2006}{2}
+\bibcite{calonder2010}{3}
+\bibcite{campos2021}{4}
+\bibcite{kannala2006}{5}
+\bibcite{nvidia2026nvrtc}{6}
+\gdef \@abspage@last{7}

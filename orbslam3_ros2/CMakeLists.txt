@@ -10,6 +10,16 @@ add_compile_options(-Wextra -Wpedantic)
 
 set(CMAKE_BUILD_TYPE Release)
 
+# orbslam3_ros2 2026-11-02: the ORB-SLAM3 library adds -march=native to its Release
+# flags (thirdparty/ORB_SLAM3/CMakeLists.txt). On this CPU that raises Eigen's maximum
+# alignment from 16 to 64 bytes, which CHANGES THE LAYOUT of library classes:
+# sizeof(ORB_SLAM3::Frame) is 149376 in the library and 149360 without the flag. This
+# node reads ORB_SLAM3 objects directly (Tracking::mCurrentFrame in slam_wrapper.cpp),
+# so a mismatch makes it read the wrong offsets -- an ODR violation, and undefined
+# behaviour. Both sides must use the same flag. Remove it HERE and THERE together if
+# the build is ever moved to another machine (e.g. the Jetson).
+add_compile_options(-march=native)
+
 # ORB-SLAM3 is built out of tree by ../build_orbslam3.sh and ships no install
 # rules, so we point at its source tree. Override with
 #   colcon build --cmake-args -DORB_SLAM3_ROOT=/somewhere/else

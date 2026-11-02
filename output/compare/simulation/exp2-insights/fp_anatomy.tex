@@ -1,0 +1,19 @@
+\begin{table}[htbp]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\caption[What the unmatched predictions are.]{What the unmatched predictions are, per recording. An unmatched prediction is a \emph{duplicate} when it overlaps a matched prediction of the same class by IoU $\ge 0.5$; a \emph{near miss} when its best IoU with an unmatched truth box of its class is in $[0.2, 0.5)$; \emph{slight overlap} when that IoU is in $(0, 0.2)$; \emph{no overlap} when it touches no truth box. The scorer excludes the predictions that land on unlabelled scenery (\emph{ignored}); they are counted here from the per-frame totals because the per-box file does not flag them, so the four categories sum to unmatched, not to scored false positives. ``At border'': the box touches an image edge. Source: \path{output/compare/simulation/exp2-insights/fp_anatomy.csv}.}
+\label{tab:e2i-fp}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrrrrr}
+\toprule
+Recording & unmatched & scored FP & ignored & duplicate & near miss & slight & none & at border \\
+ & & & (scenery) & & [0.2,0.5) & (0,0.2) & 0 & \\
+\midrule
+\repo{dyn_00_000} & 5420 & 4826 & 843 & 436 (8\,\%) & 3992 (74\,\%) & 651 (12\,\%) & 341 (6\,\%) & 12\,\% \\
+\repo{dyn_00_001} & 5695 & 4265 & 1833 & 367 (6\,\%) & 3827 (67\,\%) & 620 (11\,\%) & 881 (15\,\%) & 11\,\% \\
+\repo{dyn_01_000} & 5010 & 4226 & 1005 & 328 (7\,\%) & 3621 (72\,\%) & 620 (12\,\%) & 441 (9\,\%) & 11\,\% \\
+\repo{dyn_02_000} & 4485 & 3743 & 1087 & 420 (9\,\%) & 3217 (72\,\%) & 419 (9\,\%) & 429 (10\,\%) & 14\,\% \\
+\bottomrule
+\end{tabular}}
+\end{table}

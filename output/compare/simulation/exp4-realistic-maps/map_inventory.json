@@ -1,0 +1,51 @@
+[
+  {
+    "closure_spans": [
+      1,
+      2,
+      3
+    ],
+    "closures": 3,
+    "closures_spanning": 0,
+    "db_mb": 417.173504,
+    "duration_s": 285.714,
+    "key": "map_realistic",
+    "links_by_type": {
+      "0": 322,
+      "1": 3,
+      "9": 165
+    },
+    "links_total": 490,
+    "nodes": 165,
+    "path_m": 369.50725165612823,
+    "sessions": 1,
+    "stamp_first": 13.234,
+    "stamp_last": 298.948,
+    "words": 55802
+  },
+  {
+    "closure_spans": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "closures": 4,
+    "closures_spanning": 0,
+    "db_mb": 437.866496,
+    "duration_s": 314.886,
+    "key": "map_realistic_01",
+    "links_by_type": {
+      "0": 356,
+      "1": 4,
+      "9": 185
+    },
+    "links_total": 545,
+    "nodes": 185,
+    "path_m": 384.7443768984413,
+    "sessions": 1,
+    "stamp_first": 19.933,
+    "stamp_last": 334.819,
+    "words": 63276
+  }
+]

@@ -1,0 +1,17 @@
+  cooled to 72C after 20 s
+done r05_A1 09:36:01 temp 73C -> 85C
+  cooled to 97C after 300 s
+done r05_B1 09:43:18 temp 95C -> 81C
+  cooled to 72C after 210 s
+done r05_B2 09:48:49 temp 75C -> 85C
+  cooled to 79C after 300 s
+done r05_A2 09:56:00 temp 79C -> 88C
+  cooled to 73C after 300 s
+done r10_A1 10:02:11 temp 73C -> 83C
+  cooled to 72C after 190 s
+done r10_B1 10:06:21 temp 74C -> 84C
+  cooled to 72C after 190 s
+done r10_B2 10:10:32 temp 73C -> 83C
+  cooled to 72C after 250 s
+done r10_A2 10:15:43 temp 73C -> 82C
+all done 10:15:43

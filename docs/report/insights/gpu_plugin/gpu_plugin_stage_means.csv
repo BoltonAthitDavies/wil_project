@@ -1,0 +1,7 @@
+# Per-stage tracker medians, mean of the two ABBA runs per arm, dataset_realv5_000 first 60 s, replay rate 1.0, cool start (<=74 C).
+# Source: output/compare/real/gpu-stereo-matcher-ab/gpu_match_abba_metrics.csv (r10_A1,r10_A2 vs r10_B1,r10_B2).
+stage,cpu_matcher_ms,gpu_matcher_ms
+extraction_and_stereo,27.15,14.95
+pose_prediction,16.95,14.05
+local_map_tracking,17.70,14.25
+total,63.70,44.60

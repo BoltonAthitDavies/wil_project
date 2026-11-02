@@ -348,6 +348,10 @@ This is a supervised, manually executed workflow.
    continue, and the criterion for stopping it.
 7. Stop and wait for the user to return the artifacts or logs. Analyze only after
    confirming that the run passed the predefined validity checks.
+8. Chapter 4 text is never written straight into the report. Write the raw
+   LaTeX report under `docs/report/insights/experiment_<N>/` first (Section 10,
+   "Chapter 4 writing protocol"), let the user read it, then extract into the
+   chapter.
 
 Do not launch Gazebo, play a rosbag, start an estimator, or run a full evaluation
 unless the user explicitly overrides this protocol for that run.
@@ -688,6 +692,49 @@ untested explanations labelled as such. Weak, negative, or disappointing results
 are valid and must not be softened or omitted. Keep invalid or retracted
 measurements out of headline tables but document them in a clearly labelled
 diagnostic subsection when they explain a bug or a methodological correction.
+
+### Chapter 4 writing protocol: raw write-up first, chapter second
+
+Chapter 4 prose is **never written straight into**
+`final_report/chapters/chapter_4_experiments.tex`. Each experiment is first
+written as a **raw report** under
+`/home/ambushee/wil_project/docs/report/insights/experiment_<N>/experiment_<N>.tex`:
+a standalone, compilable LaTeX document (`latexmk -pdf` in that directory)
+that inputs `../common/preamble.tex` and carries everything the chapter will
+carry: both domain slots, their status boxes, every table and figure, the
+analysis. Figures and tables are not copied; the preamble's `\graphicspath`
+and `\reporttable{name}` resolve into `final_report/figures/` and
+`final_report/tables/`, so the raw write-up and the chapter always show the
+same artefacts. The user reads the compiled PDF, and the insights are then
+extracted from it into the chapter. A later revision of an experiment updates
+the same file. A requested change to existing chapter 4 text goes into the raw
+write-up first, then into the chapter, so the two never disagree.
+
+Each slot in the raw write-up keeps the fixed order (status; objective;
+process; dataset; results; analysis; summary; future plan), written to the
+rules below. Open concerns are stated in place with `\flag`/`queried`, which
+the preamble renders in red, instead of being deferred to the concerns
+document.
+
+Writing rules for the raw write-up and the chapter (earlier chapter drafts
+rambled; these fix that):
+
+- Open each slot with the finding in one sentence that contains the one
+  number that proves it.
+- One claim per paragraph. State it in the first sentence, support it, stop.
+  No paragraph longer than six sentences.
+- Numbers belong in tables. Prose quotes a number only when that number is the
+  point of the sentence.
+- Do not restate a table in prose. Say what the table shows, in one sentence,
+  and move on.
+- Do not narrate the analysis. Which script ran, which gate was checked, what
+  was tried first: that belongs in the engineering record and the script
+  docstring. The write-up reports results. Provenance lives in one
+  "Reporting rules" paragraph per slot, not repeated under every table.
+- Hedge once. A limitation is stated once, labelled, in the analysis or the
+  threats paragraph, not again in the summary.
+- Before handing over, reread and delete every sentence that does not change
+  the reader's conclusion about the hypothesis.
 
 ### Chapter 5: Conclusions and recommendations
 

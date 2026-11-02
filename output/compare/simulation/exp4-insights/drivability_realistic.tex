@@ -1,0 +1,15 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption[Drivability of the realistic-warehouse maps under the true footprint along their independent probe routes.]{Drivability of the two realistic-warehouse maps under the nav2 footprint stamped along the static-twin recording of each layout, which did not build the map (\repo{realistic_000}, 6278 poses, for the U map; \repo{realistic_001}, 4847 poses, for the I map). Same method as the raw write-up, which it reproduces.}
+\label{tab:insight4-driv-realistic}
+\begin{tabular}{llrrrr}
+\toprule
+Map & route & false obstacle & unmapped & clearance med. & clearance p05 \\
+ & & [\si{\percent} of poses] & [\si{\percent}] & [m] & [m] \\
+\midrule
+\repo{map_realistic.db} & independent & 2.1 & 2.4 & 1.95 & 0.61 \\
+\repo{map_realistic_01.db} & independent & 4.4 & 0.7 & 2.16 & 0.36 \\
+\bottomrule
+\end{tabular}
+\end{table}

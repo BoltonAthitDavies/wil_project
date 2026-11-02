@@ -1,0 +1,15 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption[Drivability of both maps under the true footprint along the recorded tiny route.]{Drivability of both tiny-warehouse maps under the nav2 footprint stamped along the recorded route of \repo{dataset_map_tiny} (3032 poses). For \repo{map_tiny.db} this is the route that built the map; for \repo{map_02.db} it is an independent route through the same world, which the lost \repo{dataset_static_tiny_repeat} reference was meant to provide.}
+\label{tab:insight4-driv}
+\begin{tabular}{llrrrr}
+\toprule
+Map & route & false obstacle & unmapped & clearance med. & clearance p05 \\
+ & & [\si{\percent} of poses] & [\si{\percent}] & [m] & [m] \\
+\midrule
+\repo{map_tiny.db} & built the map & 0.0 & 0.0 & 1.01 & 0.46 \\
+\repo{map_02.db} & independent & 7.6 & 5.5 & 0.98 & 0.25 \\
+\bottomrule
+\end{tabular}
+\end{table}

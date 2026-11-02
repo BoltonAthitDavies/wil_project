@@ -1,0 +1,31 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption[Realistic world: tracking against traffic in the camera's view.]{Realistic world, dynamic recordings: within-run contrasts between the moments a traffic agent (carrier or person) is in the camera's view and the moments none is. Visibility is computed from the bag's own model poses (\path{/world/default/pose/info}): within \SI{20}{\metre}, within $\pm$\SI{45}{\degree} of the ground-truth heading, and with no shelf footprint on the line of sight. Drift rate while tracking (before the first jump, below \SI{3}{\metre}); share of frames ORB-SLAM3 was not tracking OK; median matched features (ORB-SLAM3 map inliers, VINS-Fusion tracked features); jumps per second. $n_{>}$ counts runs where the in-view value exceeds the other; $p$ is the Wilcoxon signed-rank test.}
+\label{tab:insight-traffic-realistic}
+\begin{tabular}{llrrrrr}
+\toprule
+Quantity & Estimator & $n$ & in view & none & $n_{>}$ & $p$ \\
+\midrule
+drift rate [\si{\milli\metre\per\second}] & VINS-Fusion & 1 & 3.7 & 0.7 & 1 & --- \\
+ & ORB-SLAM3 & 4 & 4.7 & -1.9 & 4 & --- \\
+ & VINS-Fusion+YOLO & 3 & 7.8 & -1.6 & 2 & --- \\
+ & ORB-SLAM3+YOLO & 10 & 54.4 & 3.8 & 9 & 0.01 \\
+\addlinespace
+not tracking OK [share] & ORB-SLAM3 & 4 & 0.000 & 0.000 & 0 & --- \\
+ & ORB-SLAM3+YOLO & 16 & 0.003 & 0.030 & 5 & 0.48 \\
+\addlinespace
+matched features & VINS-Fusion & 2 & 150 & 150 & 0 & --- \\
+ & ORB-SLAM3 & 4 & 432 & 453 & 2 & --- \\
+ & VINS-Fusion+YOLO & 4 & 150 & 150 & 0 & --- \\
+ & ORB-SLAM3+YOLO & 16 & 349 & 368 & 6 & 0.09 \\
+\addlinespace
+jumps [\si{\per\second}] & VINS-Fusion & 2 & 0.00 & 0.00 & 0 & --- \\
+ & ORB-SLAM3 & 4 & 0.00 & 0.01 & 0 & --- \\
+ & VINS-Fusion+YOLO & 4 & 0.00 & 0.00 & 0 & --- \\
+ & ORB-SLAM3+YOLO & 16 & 0.07 & 0.06 & 7 & 0.91 \\
+\addlinespace
+\bottomrule
+\multicolumn{7}{l}{\footnotesize Traffic was in view for a median 35\,\si{\percent} of the tracked time.} \\
+\end{tabular}
+\end{table}

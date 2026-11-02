@@ -1,0 +1,21 @@
+\begin{table}[htbp]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2pt}
+\caption[Precision and recall of the observed surfaces by distance from the independent probe route (\repo{realistic_000} for U, \repo{map_realistic}; \repo{realistic_001} for I, \repo{map_realistic_01}).]{Precision and recall of the observed surfaces by distance from the independent probe route (\repo{realistic_000} for U, \repo{map_realistic}; \repo{realistic_001} for I, \repo{map_realistic_01}). The probe is not the route that built either map, so this is only a proxy for range from the mapping camera.}
+\label{tab:insight4-dist-realistic}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+Distance from route & \multicolumn{2}{c}{\repo{U} precision} & \multicolumn{2}{c}{\repo{U} recall} & \multicolumn{2}{c}{\repo{I} precision} & \multicolumn{2}{c}{\repo{I} recall} \\
+{[m]} & cells & [\si{\percent}] & cells & [\si{\percent}] & cells & [\si{\percent}] & cells & [\si{\percent}] \\
+\midrule
+0--1 & 110 & 6.4 & 1 & 100.0 & 1281 & 91.7 & 415 & 95.2 \\
+1--2 & 2343 & 99.0 & 1142 & 82.4 & 2581 & 96.6 & 907 & 95.0 \\
+2--3 & 4387 & 97.7 & 2248 & 88.5 & 5172 & 96.3 & 1875 & 90.7 \\
+3--4 & 6575 & 80.5 & 2130 & 87.1 & 2655 & 96.5 & 1200 & 80.4 \\
+4--6 & 8608 & 81.5 & 3369 & 82.4 & 4475 & 95.8 & 2188 & 78.0 \\
+6--8 & 2202 & 64.9 & 1182 & 68.9 & 3073 & 84.5 & 1497 & 80.4 \\
+$\geq 8$ & 2486 & 55.3 & 837 & 77.1 & 6158 & 56.7 & 2375 & 70.9 \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -53,6 +53,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import analyse_relogged_runs as rl      # noqa: E402  campaign code: accuracy + resources
 import analyse_realistic_runs as ar     # noqa: E402  realistic-world registry + scoring
 import vio_metrics as vm                # noqa: E402
+from map_underlay import draw_map       # noqa: E402
 
 ROOT = Path(vm.ROOT)
 OUT = ROOT / "output" / "compare" / "simulation" / "exp3-rules"
@@ -143,6 +144,8 @@ def extreme_october():
                                 filter_status=summ.get("filter_status", fsum.get("filter_status", "")),
                                 ate=acc.get("trans_rmse_m"), rot_rmse=acc.get("rot_rmse_deg"),
                                 rpe1_clean=acc.get("rpe1_trans_rmse_clean_m"), jumps=acc.get("jumps"),
+                                overlap_s=acc.get("overlap_s"),
+                                gt_s=float(np.ptp(rl.load_vio(rl.OUT / "ground_truth" / f"{dsdir.name}.csv")["t"])),
                                 started=meta.get("start_wall_time_unix_ns"), **res))
     return out
 
@@ -230,18 +233,23 @@ def tex_october(rows, path):
         w("\\caption{Extreme world, filtered arms: every run outside the September repeat set, one row each "
           "(October 2026, replay rate 1.0, live detector). ``Match'' is \\repo{detection_match_rate}; a run below "
           "0.98 did not filter on every frame. ``Kept'' is the processed fraction of received frames. Loop-closer "
-          "state is read from the log. These runs are reported on their own, not as pairs: their baselines are the "
+          "state is read from the log. ``Overlap'' is the span over which estimate and ground truth coexist, against "
+          "the recording's length; a run covering less than \\SI{80}{\\percent} of it is a partial run and its ATE "
+          "describes only that span. These runs are reported on their own, not as pairs: their baselines are the "
           "September repeats of \\cref{tab:extreme-accuracy-best}, a different session and node build.}\n"
           "\\label{tab:extreme-filtered}\n\\small\n\\resizebox{\\textwidth}{!}{%\n")
-        w("\\begin{tabular}{llll rr rrrr}\n\\toprule\n")
-        w("Recording & Estimator & Mask & LC & Match & Kept & ATE [\\si{\\metre}] & Rot.\\ [\\si{\\degree}] & "
+        w("\\begin{tabular}{llll rr l rrrr}\n\\toprule\n")
+        w("Recording & Estimator & Mask & LC & Match & Kept & Overlap [\\si{\\second}] & ATE [\\si{\\metre}] & Rot.\\ [\\si{\\degree}] & "
           "RPE$_{1\\,\\mathrm{s}}$ [\\si{\\metre}] & Jumps \\\\\n\\midrule\n")
         last = None
         for r in sorted(rows, key=lambda r: (r["dataset"], r["system"], r["mode"], r["lc_state"])):
             first = r["dataset"] != last; last = r["dataset"]
-            w("%s & %s & %s & %s & %s & %s & %s & %s & %s & %s \\\\\n" % (
+            ov = ("%.0f of %.0f" % (r["overlap_s"], r["gt_s"])) if r.get("overlap_s") else "---"
+            if r.get("overlap_s") and r["overlap_s"] < 0.8 * r["gt_s"]:
+                ov = "\\textbf{%s}" % ov
+            w("%s & %s & %s & %s & %s & %s & %s & %s & %s & %s & %s \\\\\n" % (
                 "\\repo{%s}" % short(r["dataset"]) if first else "", r["system"], r["mode"],
-                r["lc_state"] if r["lc_state"] != "n/a" else "---", f(r["match_rate"], 3), f(r["kept_pct"], 0) + "\\,\\%",
+                r["lc_state"] if r["lc_state"] != "n/a" else "---", f(r["match_rate"], 3), f(r["kept_pct"], 0) + "\\,\\%", ov,
                 f(r["ate"]), f(r["rot_rmse"], 2), f(r["rpe1_clean"]), r["jumps"] if r["jumps"] is not None else "---"))
         w("\\bottomrule\n\\end{tabular}}\n\\end{table}\n")
 
@@ -296,8 +304,76 @@ def tex_resources(per_run, path, caption, label, group_keys=("dataset", "system"
         w("\\bottomrule\n\\end{tabular}}\n\\end{table}\n")
 
 
+# ------------------------------------------------------------------ sheets
+
+def sheets():
+    """Every-repeat sheets consistent with the rules: the September dynamic sheet
+    with the unfiltered arms only, and a sheet of every October filtered run."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    th = rl.THEMES["light"]
+    runs = rl.discover_runs()
+    valid = {(r["system"], r["dataset"], r["repeat"]) for r in runs if r["system"] in BASE_SYS}
+    groups = []
+    for ds in sorted({r["dataset"] for r in runs if "dynamic_" in r["dataset"]}):
+        for rep in sorted({r["repeat"] for r in runs if r["dataset"] == ds}):
+            g = rl.trajectory_group([r for r in runs if r["system"] in BASE_SYS], ds, rep, valid)
+            if g is not None:
+                groups.append((ds, rep, g[1], g[2]))
+    rl.plot_trajectory_montage(groups, "light", cols=3, out_name="trajectories_light_dynamic_unfiltered_sheet.png",
+                               title="Extreme world, dynamic: every unfiltered repeat",
+                               note="each panel is one repeat of the two unfiltered arms; fixed-scale SE(3) alignment to rosbag ground truth; axes pinned to the ground-truth extent")
+    # October filtered runs, one panel each, with the best unfiltered repeat of the
+    # same estimator drawn faintly behind for scale.
+    octo = []
+    for tree, sysn in (("output_vins_yolo", "VINS-Fusion+YOLO"), ("output_orb_yolo", "ORB-SLAM3+YOLO")):
+        for dsdir in sorted((ROOT / "output" / tree / "simulation").glob("dataset_dynamic_nofloortexture_*")):
+            for d in sorted(dsdir.iterdir()):
+                if (d / "vio.csv").exists() and not SEPT.fullmatch(d.name):
+                    run = dict(path=d, tree=tree, system=sysn, dataset=dsdir.name, repeat=d.name)
+                    g = rl.trajectory_group([run], dsdir.name, d.name, {(sysn, dsdir.name, d.name)})
+                    summ = rl.read_kv(d / "run_summary.csv"); fsum = rl.read_kv(d / "filter_summary.csv")
+                    if g is not None and g[2]:
+                        octo.append((dsdir.name, d.name, sysn, g[1][sysn], g[2][0],
+                                     float(summ.get("detection_match_rate", fsum.get("detection_match_rate", "nan")) or "nan")))
+    cols, n = 3, len(octo)
+    rows_n = -(-n // cols)
+    fig, axes = plt.subplots(rows_n, cols, figsize=(3.75 * cols, 3.65 * rows_n + .9), facecolor=th["surface"], squeeze=False)
+    for ax in axes.ravel():
+        ax.set_visible(False)
+    full_gt = {}
+    for k, (ds, run, sysn, a, row, match) in enumerate(octo):
+        ax = axes[k // cols, k % cols]; ax.set_visible(True)
+        # The whole ground-truth path, not the part resampled over the estimate's
+        # overlap: a run that only overlaps for a few seconds would otherwise pin
+        # its panel to a sliver of the route and look like a different recording.
+        if ds not in full_gt:
+            full_gt[ds] = rl.load_gt(ds)["p"]
+        ref = full_gt[ds]
+        draw_map(ax, ds)
+        ax.plot(ref[:, 0], ref[:, 1], color=rl.COLORS["reference"], lw=2.5, alpha=.55, label="ground truth")
+        ax.plot(a["p"][:, 0], a["p"][:, 1], color=rl.COLORS[sysn], lw=1.05, label=sysn)
+        rl.pin_to_reference(ax, ref, {sysn: a}, th)
+        rl.style(ax, th, "x [m]", "y [m]", "%s / %s" % (short(ds), run.replace("_noatlas", "").replace("noloopclosing", "no-LC").replace("loopclosing", "LC")))
+        ax.text(.98, .02, "ATE %.1f m over %.0f s; jumps %d; mask on %.0f%% of frames" % (
+            row["trans_rmse_m"], row["overlap_s"], row["jumps"], 100 * match),
+                transform=ax.transAxes, ha="right", va="bottom", fontsize=6.5, color=th["ink3"])
+    from matplotlib.lines import Line2D
+    handles = [Line2D([], [], color=rl.COLORS["reference"], lw=2.5, alpha=.55)] + [Line2D([], [], color=rl.COLORS[s], lw=1.05) for s in ("VINS-Fusion+YOLO", "ORB-SLAM3+YOLO")]
+    fig.legend(handles, ["ground truth", "VINS-Fusion+YOLO", "ORB-SLAM3+YOLO"], loc="upper right", ncol=3, fontsize=8,
+               facecolor=th["surface"], edgecolor=th["grid"], labelcolor=th["ink2"])
+    fig.suptitle("Extreme world, dynamic: every October filtered run", x=.025, ha="left", y=.992, fontsize=14, color=th["ink"])
+    fig.text(.025, .972, "one panel per run; fixed-scale SE(3) alignment to rosbag ground truth; axes pinned to the ground-truth extent",
+             ha="left", va="top", fontsize=8.5, color=th["ink3"])
+    fig.tight_layout(rect=[0, 0, 1, .955])
+    fig.savefig(OUT / "trajectories_light_dynamic_october_sheet.png", dpi=160, facecolor=th["surface"]); plt.close(fig)
+    print("sheets: %d unfiltered repeat panels, %d October panels" % (len(groups), n))
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
+    sheets()
     best = extreme_best(); octo = extreme_october(); res = extreme_resources(); real = realistic_rows()
     write_csv(OUT / "extreme_accuracy_best.csv", best); tex_best(best, OUT / "extreme_accuracy_best.tex")
     write_csv(OUT / "extreme_filtered_october.csv", octo); tex_october(octo, OUT / "extreme_filtered_october.tex")

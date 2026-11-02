@@ -147,6 +147,44 @@ def discover(prefix="", contains=None, exclude=None, systems=SYSTEMS):
                   and (exclude is None or exclude not in d))
 
 
+# ---------------------------------------------------------------- lever arm
+# The simulated ground truth (/ground_truth/odometry) reports the MODEL ORIGIN of
+# ackermann_robot; both estimators report the IMU, which models/ackermann_robot/
+# model.sdf places 0.338 m ahead of and 0.192 m above that origin (imu_link pose
+# in the base_footprint frame; cam0 is a further 0.158 m ahead, which the
+# estimators' body_T_cam0 already encodes). Scoring an IMU path against an origin
+# path leaves a rigid offset that rotates with the heading: it inflates every
+# aligned ATE by 0.1-0.2 m and shows up as "error that grows while turning".
+# Found 2026-10-22 (script/exp3_insights.py lever sweep: ATE minimum at a median
+# 0.34 m over 30 runs). Apply gt_at_imu()/load_gt() whenever a VISUAL estimate is
+# scored; the wheel/IMU/EKF baselines of Experiment 1 are referenced to the model
+# origin and must keep the raw ground truth.
+IMU_LEVER_M = np.array([0.338, 0.0, 0.192])
+
+
+def is_visual_tree(tree):
+    """True for the estimator trees that report the IMU frame (ORB-SLAM3, VINS-Fusion
+    and their +YOLO variants); False for the wheel/IMU/EKF baselines."""
+    t = str(tree).lower()
+    return ("orb" in t) or ("vins" in t)
+
+
+def gt_at_imu(p, q, lever=IMU_LEVER_M):
+    """Ground-truth positions moved from the model origin to the IMU: p + R(q) lever."""
+    R = quat_to_R(np.asarray(q, float))
+    return np.asarray(p, float) + np.einsum("nij,j->ni", R, np.asarray(lever, float))
+
+
+def load_gt(path, lever=True):
+    """load() for a ground_truth.csv, with the positions moved to the IMU point
+    unless lever=False. Returns the same (t, p, q, v) tuple as load()."""
+    r = load(path)
+    if r is None or not lever:
+        return r
+    t, p, q, v = r
+    return t, gt_at_imu(p, q), q, v
+
+
 def load(path):
     """VINS-format CSV -> (t_sec, position, quaternion_wxyz, velocity).
 
@@ -395,7 +433,7 @@ def analyse(dataset, log=lambda *_: None, trim_start=0.0, systems=SYSTEMS,
         if r is None:
             log(f"  [skip] {name}: no usable data at {path}")
             continue
-        runs.append([name, *r])
+        runs.append([name, *r, path])
     if not runs:
         return None
 
@@ -416,6 +454,9 @@ def analyse(dataset, log=lambda *_: None, trim_start=0.0, systems=SYSTEMS,
         ref_v = np.einsum("nij,nj->ni", ref_R, gt[3])
         ref_eul = euler_zyx(ref_R)
         ref_q = gt[2]
+        # The IMU-point reference for the visual estimators (see IMU_LEVER_M): the
+        # wheel/IMU/EKF baselines keep the model-origin reference.
+        ref_p_imu = gt_at_imu(gt[1], gt[2])
     else:
         ref_name, ref_t, ref_p = runs[0][0], runs[0][1], runs[0][2]
         ref_v = ref_eul = None
@@ -427,7 +468,8 @@ def analyse(dataset, log=lambda *_: None, trim_start=0.0, systems=SYSTEMS,
         log(f"  no ground truth; using {ref_name} as the reference frame")
 
     rows, aligned = [], []
-    for name, t, p, q, v in runs:
+    for name, t, p, q, v, src in runs:
+        ref_p_sys = ref_p_imu if (gt is not None and is_visual_tree(src)) else ref_p
         lo, hi = max(t[0], ref_t[0]), min(t[-1], ref_t[-1])
         m = (t >= lo) & (t <= hi)
         if m.sum() < 10:
@@ -444,7 +486,7 @@ def analyse(dataset, log=lambda *_: None, trim_start=0.0, systems=SYSTEMS,
                     f"trimming the first {trim_start:.1f}s")
                 continue
             tc, pc, qc, vc = tc[keep], pc[keep], qc[keep], vc[keep]
-        rp = resample(ref_t, ref_p, tc)
+        rp = resample(ref_t, ref_p_sys, tc)
         R, tr = umeyama(pc, rp)
         pa = (R @ pc.T).T + tr
         # The same R that puts positions in the reference frame puts velocities and

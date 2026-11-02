@@ -372,9 +372,37 @@ public:
       // deliberately, for this same reason. If you ever point this at a
       // BEST_EFFORT publisher the subscription will match nothing and go
       // silent -- that is the QoS trap viewer.py's docstring warns about.
+      // 2026-10-29 (realv5 stereo-inertial debugging): the IMU arrived in
+      // bursts of hundreds of samples separated by gaps of seconds while the
+      // images kept flowing, so half the frames were "IMU-starved" and the
+      // inertial map reset on every timestamp jump. Two defences, both
+      // selectable so they can be A/B'd without a rebuild:
+      //   * the IMU callback gets its OWN reentrant callback group, so it is
+      //     never queued behind a JPEG decode in the default (mutually
+      //     exclusive) group of this node;
+      //   * imu_best_effort:=true subscribes BEST_EFFORT with the same deep
+      //     queue. A RELIABLE reader delivers in order and stalls on one lost
+      //     datagram until it is retransmitted (Fast-DDS heartbeat period);
+      //     BEST_EFFORT simply hands over what arrives. With the kernel socket
+      //     buffers raised (net.core.rmem_max) loss is ~0 either way.
+      //     Default stays RELIABLE, as the comment above explains.
+      // imu_sub_ = create_subscription<sensor_msgs::msg::Imu>(
+      //   imu_topic, rclcpp::QoS(rclcpp::KeepLast(2000)),
+      //   std::bind(&Orbslam3Node::onImu, this, std::placeholders::_1));
+      const bool imu_best_effort = declare_parameter<bool>("imu_best_effort", false);
+      rclcpp::QoS imu_qos(rclcpp::KeepLast(2000));
+      if (imu_best_effort) {
+        imu_qos.best_effort();
+      }
+      imu_cb_group_ = create_callback_group(rclcpp::CallbackGroupType::Reentrant);
+      rclcpp::SubscriptionOptions imu_opts;
+      imu_opts.callback_group = imu_cb_group_;
       imu_sub_ = create_subscription<sensor_msgs::msg::Imu>(
-        imu_topic, rclcpp::QoS(rclcpp::KeepLast(2000)),
-        std::bind(&Orbslam3Node::onImu, this, std::placeholders::_1));
+        imu_topic, imu_qos,
+        std::bind(&Orbslam3Node::onImu, this, std::placeholders::_1), imu_opts);
+      RCLCPP_INFO(
+        get_logger(), "imu subscription: %s, depth 2000, own reentrant callback group",
+        imu_best_effort ? "BEST_EFFORT" : "RELIABLE");
     }
 
     RCLCPP_INFO(
@@ -1021,6 +1049,7 @@ private:
   message_filters::Subscriber<sensor_msgs::msg::CompressedImage> cleft_sub_, cright_sub_;
   std::unique_ptr<CompressedSync> csync_;
   rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_sub_;
+  rclcpp::CallbackGroup::SharedPtr imu_cb_group_;   // 2026-10-29: IMU callbacks never wait behind image decoding
 
   rclcpp::Subscription<vision_msgs::msg::Detection2DArray>::SharedPtr dets_sub_;
   rclcpp::TimerBase::SharedPtr dets_watchdog_;

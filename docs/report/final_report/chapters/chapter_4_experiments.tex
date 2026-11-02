@@ -41,9 +41,11 @@ Experiment & Simulation & Real robot \\
 \end{table}
 
 % =====================================================================
+\FloatBarrier
 \section{Experiment 1: Non-Visual Baseline and Estimator Comparison}
 \label{sec:exp1}
 
+\FloatBarrier
 \subsection{Simulation}
 \label{sec:results-proprio}
 
@@ -102,6 +104,7 @@ and drift correction from vision; and re-run in a realistic environment with
 wheel slip and encoder quantisation, since both idealisations of
 \cref{sec:sim-fidelity} favour dead reckoning.
 
+\FloatBarrier
 \subsection{Real robot}
 \label{sec:exp1-real}
 
@@ -226,9 +229,11 @@ and steering feedback in metric units so that the baselines of
 routes with turns and speed changes long enough for scale to be observable.
 
 % =====================================================================
+\FloatBarrier
 \section{Experiment 2: Offline YOLO Detector Performance}
 \label{sec:exp2}
 
+\FloatBarrier
 \subsection{Simulation}
 \label{sec:yolo-performance}
 
@@ -262,6 +267,7 @@ so that the mask targets moving objects rather than object classes; and re-run
 on the realistic warehouse worlds of \cref{sec:realistic-worlds}, built after
 the cutoff, where the moving objects are pallet jacks on logistics jobs.
 
+\FloatBarrier
 \subsection{Real robot}
 \label{sec:exp2-real}
 
@@ -280,10 +286,12 @@ and manual truth planned for the simulation slot then also calibrates the two
 conventions against each other.
 
 % =====================================================================
+\FloatBarrier
 \section{Experiment 3: Visual-Inertial Odometry With Dynamic-Environment
 Filtering}
 \label{sec:exp3}
 
+\FloatBarrier
 \subsection{Simulation}
 \label{sec:results-validity}
 
@@ -429,22 +437,24 @@ the campaign's own analysis produces.
 \begin{figure}[p]
   \centering
   \includegraphics[width=0.84\textwidth]{figures/extreme_trajectories_dynamic.png}
-  \caption[Extreme world, dynamic recordings: every repeat, all four systems,
+  \caption[Extreme world, dynamic recordings: every unfiltered repeat,
   top-down after rigid alignment.]{Extreme world, dynamic recordings: every
-  repeat of all four systems, top-down after rigid $SE(3)$ alignment. The axes
+  repeat of the two unfiltered arms, top-down after rigid $SE(3)$ alignment;
+  the filtered runs are in \cref{fig:extreme-trajectories-october}. The axes
   are pinned to the ground truth's own extent, because the diverged estimates
   wander by hundreds of metres and would otherwise reduce the reference to a
   dot; each panel names the systems that leave its frame, so a clipped trace
   is declared rather than hidden, and a trace absent altogether never entered
   the frame. These are the withheld dynamic-scene results of this testbed,
-  shown as excluded evidence. The VINS-Fusion and VINS-Fusion+YOLO panels of
-  \repo{dynamic_00_000}, repeat~1, are 15 October 2026 re-runs that replaced
-  the September runs under the same names.}
+  shown as excluded evidence. The VINS-Fusion trace of \repo{dynamic_00_000},
+  repeat~1, is a 15 October 2026 re-run that replaced the September run under
+  the same name.}
   \label{fig:extreme-trajectories-dynamic}
 \end{figure}
 
-\paragraph{Filtered arms, October runs.} \Cref{tab:extreme-filtered} lists the
-fourteen runs made outside the September repeat set: ORB-SLAM3 with the class
+\paragraph{Filtered arms, October runs.} \Cref{tab:extreme-filtered} lists, and
+\cref{fig:extreme-trajectories-october} draws, the fourteen runs made outside
+the September repeat set: ORB-SLAM3 with the class
 mask on three dynamic recordings (none exists on \repo{dynamic_00_001}) and
 with the motion gate on one, VINS-Fusion with the class mask on all four and
 the motion gate on two, all at replay rate 1.0 with the live detector. They are
@@ -457,16 +467,131 @@ repeat --- except the class mask with loop closure on \repo{dynamic_02_000},
 which diverges to \SI{1391}{\metre} and 441 jumps where the same mask without
 the closer holds \SI{10.0}{\metre}. And VINS-Fusion separates cleanly by mask
 rate: the three class runs with a mask on \SIrange{15}{24}{\percent} of frames
-diverge to \SIrange{1500}{2900}{\metre}, while the runs with a mask on
-\SIrange{93}{100}{\percent} of frames hold \SIrange{5.3}{6.4}{\metre} on
-\repo{dynamic_00_001} --- the only VINS-Fusion results under \SI{10}{\metre}
-on any dynamic recording of this testbed --- and \SI{403}{\metre} on
-\repo{dynamic_00_000}. Nothing here is a treatment effect; the testbed is not
-valid and the runs are unpaired. It is recorded because it is the only
-evidence so far that a running filter changes what happens on these
-recordings.
+diverge to \SIrange{1500}{2900}{\metre}, while the class run with a mask on
+\SI{93}{\percent} of frames holds \SI{6.4}{\metre} over \SI{73}{\second} on
+\repo{dynamic_00_001} --- the only VINS-Fusion result under \SI{10}{\metre}
+on any dynamic recording of this testbed --- and the motion-gated run with a
+mask on every frame reaches \SI{403}{\metre} on \repo{dynamic_00_000}. The
+motion-gated run on \repo{dynamic_00_001} overlaps the ground truth for only
+\SI{5}{\second} and is not read; the four ORB-SLAM3 runs on
+\repo{dynamic_00_000} cover \SI{49}{} of \SI{77}{\second}. Nothing here is a
+treatment effect; the testbed is not valid and the runs are unpaired. It is
+recorded because it is the only evidence so far that a running filter changes
+what happens on these recordings.
 
 \input{tables/extreme_filtered_october}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=0.8\textwidth]{figures/extreme_trajectories_october.png}
+  \caption[Extreme world, dynamic recordings: every October filtered run,
+  top-down after rigid alignment.]{Extreme world, dynamic recordings: every
+  October filtered run, one panel each, top-down after rigid $SE(3)$ alignment
+  with the axes pinned to the ground-truth extent as in
+  \cref{fig:extreme-trajectories-dynamic}. Each panel's footer gives the run's
+  ATE, its discontinuities and the fraction of frames that carried a mask ---
+  the runs with a mask on most frames are the ones that stay near the
+  reference.}
+  \label{fig:extreme-trajectories-october}
+\end{figure}
+
+\paragraph{When the error rises, where on the route, and how long the filter
+ran.} The progress update showed two failures as viewer screenshots, one on a
+straight aisle and one in a heading change. The same question is answered here
+from the logs for every run, under definitions fixed before the numbers were
+read. The error series is the position error after a rigid $SE(3)$ fit made on
+an \emph{anchor window} near the start and applied to the whole run, so that a
+late divergence cannot be spread back over the good early part: the window
+begins after the initialisation transient (ORB-SLAM3 re-seats its world frame
+about \SI{2.6}{\second} in) and ends once the ground truth has turned
+\SI{60}{\degree}, so that yaw is observed. The \emph{onset} is the first time
+that error stays above three times the estimator's static median in the same
+testbed for \SI{1}{\second}; the place is the ground-truth position then, with
+``heading change'' meaning a ground-truth yaw rate above
+\SI{10}{\degree\per\second}. The filter is \emph{working} in a \SI{5}{\second}
+window when a mask was present on at least \SI{98}{\percent} of its frames, and
+\emph{unmasked area} is the image fraction left after masking. Every run has
+its own timeline figure under \repo{output/compare/simulation/exp3-timelines/};
+the report reproduces one full-page figure per recording, split by estimator
+and by output tree. Scoring: \repo{script/analyse_exp3_timelines.py}.
+
+Thresholds here are \SI{0.95}{\metre} for VINS-Fusion and \SI{1.31}{\metre} for
+ORB-SLAM3. \Cref{tab:extreme-timelines-baseline} shows what the testbed does
+unfiltered: all 24 dynamic baseline runs cross the threshold, 20 of them on a
+\emph{straight}, ORB-SLAM3 at \SIrange{3}{18}{\second} and VINS-Fusion at
+\SIrange{13}{38}{\second} --- within the first fifth of the route, on the first
+aisle, before any corner. That is the signature of a scene whose props move
+continuously through the camera's view, not of a turn the tracker cannot
+follow. \Cref{tab:extreme-timelines-filtered} adds the filtered runs. In the
+September repeats the filter worked for at most \SI{60}{\second} in four runs
+and never in sixteen, and where it never ran the onsets fall where the
+baselines' do. The October runs are different: all four ORB-SLAM3 runs on
+\repo{dynamic_00_000} survive the first two aisles and cross at
+\SIrange{42}{43}{\second}, in the heading change at the south-west corner
+(\SI{52}{\percent} of the route, \cref{fig:timeline-extreme-dynamic-00-000}), with the class
+filter working until \SIrange{38}{68}{\second}; on \repo{01_000} and
+\repo{02_000} they cross at \SIrange{23}{37}{\second}, three of four in a
+heading change. Across the sixteen filtered runs that had a working filter and
+an onset, ten crossed \emph{while the filter was still working} and six after
+it had stopped, so in this testbed a running mask delays the failure but does
+not prevent it. The class mask leaves a median \SIrange{88}{94}{\percent} of the
+image, with per-run minima down to \SI{5}{\percent} on \repo{dynamic_00_000}
+--- whole frames nearly blanked when a prop fills the view; the motion gate
+leaves \SI{100}{\percent} at the median and \SIrange{45}{100}{\percent} at the
+minimum, because it rarely paints.
+
+\input{tables/extreme_baseline_timeline}
+\input{tables/extreme_filtered_timeline}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=0.98\textwidth]{figures/timeline_extreme__static_000.png}
+  \caption[Extreme world, \repo{static_000}: every run's error timeline, filter activity and onset on the route.]{Extreme world, \repo{static_000}, every run. Rows: ORB-SLAM3, VINS-Fusion. Columns: the unfiltered output tree and the filtered one, so each cell holds one estimator and one tree, drawn with one hue per run (runs five to eight dashed). Each error panel is the start-anchored position error on a log scale with that estimator's threshold (dotted) and each run's onset marked by a dot; beneath it, the features per frame of each run as a percentage of the estimator's feature budget read from its configuration --- ORB-SLAM3's keypoints after extraction against \repo{ORBextractor.nFeatures}, which is after the mask when the filter is on, and VINS-Fusion's tracked features against \repo{max_cnt} --- so the cost of masking is read across the row; beneath each filtered cell, the image area left after masking on every frame, one line per run in the run's own hue, with a gap wherever no mask was present on the frame. Bottom: the ground-truth route with heading-change segments in amber and every onset placed on it, circles for unfiltered and squares for filtered runs, hue by estimator.}
+  \label{fig:timeline-extreme}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=0.98\textwidth]{figures/timeline_extreme__static_001.png}
+  \caption[Extreme world, \repo{static_001}: every run's error timeline, filter activity and onset on the route.]{Extreme world, \repo{static_001}, every run. Panels as in \cref{fig:timeline-extreme}.}
+  \label{fig:timeline-extreme-static-001}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=0.98\textwidth]{figures/timeline_extreme__static_002.png}
+  \caption[Extreme world, \repo{static_002}: every run's error timeline, filter activity and onset on the route.]{Extreme world, \repo{static_002}, every run. Panels as in \cref{fig:timeline-extreme}.}
+  \label{fig:timeline-extreme-static-002}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=0.98\textwidth]{figures/timeline_extreme__dynamic_00_000.png}
+  \caption[Extreme world, \repo{dynamic_00_000}: every run's error timeline, filter activity and onset on the route.]{Extreme world, \repo{dynamic_00_000}, every run. Panels as in \cref{fig:timeline-extreme}. The four October ORB-SLAM3 runs survive the first two aisles and cross in the south-west corner at \SIrange{42}{43}{\second}; the September runs cross on the first aisle.}
+  \label{fig:timeline-extreme-dynamic-00-000}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=0.98\textwidth]{figures/timeline_extreme__dynamic_00_001.png}
+  \caption[Extreme world, \repo{dynamic_00_001}: every run's error timeline, filter activity and onset on the route.]{Extreme world, \repo{dynamic_00_001}, every run. Panels as in \cref{fig:timeline-extreme}.}
+  \label{fig:timeline-extreme-dynamic-00-001}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=0.98\textwidth]{figures/timeline_extreme__dynamic_01_000.png}
+  \caption[Extreme world, \repo{dynamic_01_000}: every run's error timeline, filter activity and onset on the route.]{Extreme world, \repo{dynamic_01_000}, every run. Panels as in \cref{fig:timeline-extreme}.}
+  \label{fig:timeline-extreme-dynamic-01-000}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=0.98\textwidth]{figures/timeline_extreme__dynamic_02_000.png}
+  \caption[Extreme world, \repo{dynamic_02_000}: every run's error timeline, filter activity and onset on the route.]{Extreme world, \repo{dynamic_02_000}, every run. Panels as in \cref{fig:timeline-extreme}.}
+  \label{fig:timeline-extreme-dynamic-02-000}
+\end{figure}
+
 
 \paragraph{Real-time and computational measurements, mean of three repeats.}
 \label{sec:compute-results}
@@ -506,9 +631,11 @@ withheld as findings: even the best repeat is locally wrong by more than the
 distance the robot travels, and the environment that produced them is not
 physical. The campaign holds two comparable treatment pairs, both in that
 invalid testbed; the fourteen October filtered runs are reported unpaired, and
-show only that a filter that actually runs changes the outcome. Neither
-pipeline processes frames as fast as they arrive at half replay rate, and the
-detector's cost lands on ORB-SLAM3's tracking thread.
+show only that a filter that actually runs changes the outcome. Unfiltered,
+every dynamic run fails on the first aisle, within the first fifth of the
+route; a running mask delays the failure to the first corner but does not
+prevent it. Neither pipeline processes frames as fast as they arrive at half
+replay rate, and the detector's cost lands on ORB-SLAM3's tracking thread.
 
 % =============================================================== testbed B
 \subsubsection{Realistic world: physically simulated traffic (October 2026
@@ -647,6 +774,62 @@ low mask rates of \cref{tab:realistic-filtered}.
 
 \input{tables/realistic_resources}
 
+\paragraph{When the error rises, where, and how long the filter ran.} Same
+definitions as in the extreme world (\cref{sec:extreme-world}); thresholds
+here are \SI{1.38}{\metre} for VINS-Fusion and \SI{1.77}{\metre} for ORB-SLAM3
+(\cref{tab:realistic-timelines-baseline,tab:realistic-timelines-filtered}).
+Unfiltered, only one of the six runs on the two dynamic recordings ever
+crosses: VINS-Fusion on \repo{realistic_002}, at \SI{30}{\second}, in the
+heading change at \SI{39}{\percent} of the route --- the degradation already
+reported above, now placed. Neither ORB-SLAM3 arm crosses on either dynamic
+recording. Filtered, fourteen of twenty runs cross, nine of them in a heading
+change: on \repo{realistic_003} three of the four class-masked ORB-SLAM3 runs
+cross at \SIrange{34}{45}{\second}, two of them in the first corner after the
+long aisle (\SIrange{29}{39}{\percent} of the route,
+\cref{fig:timeline-realistic-003}), and in the run whose mask was present on every
+frame the error rises \emph{with the filter working}. The six filtered runs
+that never cross are four motion-gated ORB-SLAM3 runs and three VINS-Fusion
+runs whose masks were present on \SIrange{1}{39}{\percent} of frames --- with
+one exception, ORB-SLAM3's motion gate without loop closure on
+\repo{realistic_003}, mask present on \SI{99}{\percent} of frames and no
+onset. With one run per cell none of this is an effect; it is where to look
+first in the repeat: the first heading change after the long rack aisle, with
+the class mask on. The class mask leaves a median \SIrange{90}{92}{\percent} of
+the image (minima \SIrange{49}{85}{\percent}), the motion gate
+\SI{100}{\percent} (minima \SIrange{62}{100}{\percent}).
+
+\input{tables/realistic_baseline_timeline}
+\input{tables/realistic_filtered_timeline}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=0.98\textwidth]{figures/timeline_realistic__realistic_000.png}
+  \caption[Realistic world, \repo{realistic_000}: every run's error timeline, filter activity and onset on the route.]{Realistic world, \repo{realistic_000}, every run; panels as in \cref{fig:timeline-extreme}.}
+  \label{fig:timeline-realistic}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=0.98\textwidth]{figures/timeline_realistic__realistic_001.png}
+  \caption[Realistic world, \repo{realistic_001}: every run's error timeline, filter activity and onset on the route.]{Realistic world, \repo{realistic_001}, every run; panels as in \cref{fig:timeline-extreme}.}
+  \label{fig:timeline-realistic-001}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=0.98\textwidth]{figures/timeline_realistic__realistic_002.png}
+  \caption[Realistic world, \repo{realistic_002}: every run's error timeline, filter activity and onset on the route.]{Realistic world, \repo{realistic_002}, every run; panels as in \cref{fig:timeline-extreme}. VINS-Fusion unfiltered crosses at \SI{30}{\second} in the heading change at \SI{39}{\percent} of the route.}
+  \label{fig:timeline-realistic-002}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=0.98\textwidth]{figures/timeline_realistic__realistic_003.png}
+  \caption[Realistic world, \repo{realistic_003}: every run's error timeline, filter activity and onset on the route.]{Realistic world, \repo{realistic_003}, every run; panels as in \cref{fig:timeline-extreme}. The class-masked ORB-SLAM3 runs cross in the first heading change after the long aisle, at \SIrange{34}{45}{\second}, with the mask present on nearly every frame; the unfiltered runs never cross.}
+  \label{fig:timeline-realistic-003}
+\end{figure}
+
+
 \paragraph{Summary, realistic world.} With physically simulated traffic
 neither front end loses tracking: ORB-SLAM3 stays within its static range of
 \SIrange{0.36}{0.68}{\metre} aligned ATE, and VINS-Fusion degrades on one of
@@ -655,7 +838,9 @@ run per condition and without traffic separated from route. Of twelve
 candidate filtered runs, the VINS-Fusion filter did not run at deployment
 rate, and every ORB-SLAM3 pair fails on input match or on software revision;
 the one input-matched pair reads worse filtered than unfiltered but is not
-attributable.
+attributable. Where the filtered ORB-SLAM3 runs do fail, it is in the first
+heading change after the long rack aisle, with the mask present; the unfiltered
+runs do not fail there.
 
 \paragraph{Summary.} The two testbeds answer different questions and neither
 answers the one the experiment was designed for. The extreme world shows what
@@ -675,6 +860,7 @@ run at this rate on this machine''; record a second route in each layout so
 that traffic and route are separable; and report the prior-atlas runs under
 the relocalisation direction of \cref{sec:recommendations}, where they belong.
 
+\FloatBarrier
 \subsection{Real robot}
 \label{sec:exp3-real}
 
@@ -702,15 +888,19 @@ pipelines at the three illumination levels, at
 transfer.
 
 % =====================================================================
+\FloatBarrier
 \section{Experiment 4: Dense Map Reconstruction and Map-Quality Evaluation}
 \label{sec:exp4}
 
+\FloatBarrier
 \subsection{Simulation}
 \label{sec:map-quality}
 
-\slotstatus{partial}{One database, the tiny warehouse, is scored for geometry
-and drivability. The large-warehouse map attempt failed through tracking loss
-and produced no scorable database.}
+\slotstatus{partial}{Three databases are scored for geometry and drivability:
+the tiny warehouse, which passes, and two realistic-warehouse maps, one per
+layout, built on 26 October 2026 with loop closure deliberately disabled, which
+fail the quality criterion fixed before scoring. The tiny map's independent
+drivability reference remains lost.}
 
 \textbf{Objective.} Verify that the reconstructed map reflects the physical
 environment and is usable by a planner (\cref{sec:map-eval-method}).
@@ -718,11 +908,20 @@ environment and is usable by a planner (\cref{sec:map-eval-method}).
 \textbf{Process.} RTAB-Map 0.23.7 built \repo{map/map_tiny.db}; its placement
 was measured by \repo{script/fit_map_pose.py}; geometry and drivability were
 scored by \repo{script/validate_map.py} against the world file and a
-ground-truth route.
+ground-truth route. Two further databases were built in the realistic worlds
+with loop closure disabled on both sides of the pipeline and scored by the same
+two scripts, each against a recording that did not build it
+(\cref{sec:map-realistic}).
 
 \textbf{Dataset.} \repo{dataset_map_tiny} (the build run) and the independent
 route \repo{dataset_static_tiny_repeat}, which no longer exists; and, for the
-large warehouse, \repo{dataset_map_01} (\cref{tab:dataset-registry}).
+large warehouse, \repo{dataset_map_01} (\cref{tab:dataset-registry}). The
+realistic-warehouse builds postdate that registry:
+\repo{dataset_allsensor_realistic_mapv2} (U layout, \SI{285.7}{\second}) built
+\repo{map/map_realistic} and \repo{dataset_allsensor_realistic_01_map} (I
+layout, \SI{314.9}{\second}) built \repo{map/map_realistic_01}; their
+independent probes are the static twins \repo{dataset_allsensor_realistic_000}
+and \repo{_001} of \cref{sec:realistic-worlds}.
 
 \input{chapters/fragments/m4_exp4_sim}
 
@@ -741,20 +940,231 @@ the cutoff, so the result is reported on the strength of the progress record
 and cannot yet be audited. The attempt must be repeated with its artifacts
 retained before it is carried into any conclusion.}
 
-\paragraph{Summary.} The mapping pipeline is geometrically sound where tracking
-is sound: on the tiny map, occupied-cell precision is \SI{96.6}{\percent} and
-observed-surface recall \SI{89.5}{\percent}, and the whole-building recall of
-\SI{67.2}{\percent} is route coverage, not mapping failure. The drivability
-half is a dated measurement whose independent route is lost. On the large map
-the pipeline fails through repetitive structure, before the back end is
+\subsubsection{Realistic-warehouse maps}
+\label{sec:map-realistic}
+
+Two databases, one per layout, built on 26 October 2026 in the realistic
+worlds of \cref{sec:realistic-worlds} replace the unauditable large-warehouse
+attempt: each has a registered build recording, a fitted placement, a score and
+a figure. Both fail the quality criterion fixed before they were scored.
+
+\textbf{Reporting rules.} The criterion, fixed in
+\repo{script/eval_realistic_maps.py} before any map was placed, is occupied-cell
+precision $\ge$ \SI{90}{\percent}, observed-region recall $\ge$ \SI{85}{\percent}
+and false obstacles $\le$ \SI{1}{\percent} of probe poses, each taken from the
+tiny map's result; whole-building recall is reported, not tested. The metrics
+are those of \cref{sec:map-eval-method}. Placement was measured by
+\repo{script/fit_map_pose.py} with the realistic spawn
+$(5.250, 19.995, \SI{-90}{\degree})$ and confirmed on the overlays before
+scoring. Scoring is the unchanged \repo{script/validate_map.py} at
+\SI{0.25}{\metre} tolerance with the $0.83\times0.50$~m footprint, each map
+probed by the static twin of its own layout. The databases store their full
+parameter set, unlike the tiny map: \repo{Rtabmap/LoopThr} 1.0 and
+\repo{RGBD/ProximityBySpace} false (\repo{loop_closure:=false}, RTAB-Map record
+\S7c). The grid was built to \SI{8.0}{\metre} range (\repo{Grid/RangeMax};
+the record's measured default is 10.0) at \SI{0.05}{\metre} cells and
+optimised with GTSAM (\repo{Optimizer/Strategy} 2). Every number is under the
+experiment directory \repo{exp4-realistic-maps} of
+\repo{output/compare/simulation}: the scores in
+\repo{realistic_map_metrics.csv}, one \repo{validate_*.json} per map, the
+graph inventory in \repo{map_inventory.json}, and the placement overlays. The
+experimental unit is one database, $n=1$ per layout. \repo{map/map_realistic}
+is the build held until 26 October as \repo{map_realistic_v2}; an earlier
+114-node database of the same name was deleted that day, and its scores are
+retained under \repo{superseded/} in the experiment directory.
+
+\textbf{Results.} \Cref{tab:map-realistic-geometry} gives geometry and
+\cref{tab:map-realistic-drivability} drivability against the independent
+probes; \cref{tab:map-realistic-graph} summarises the stored graphs.
+\Cref{fig:map-realistic-validate,fig:map-realistic-01-validate} are the
+evaluation overlays.
+
+\begin{table}[htbp]
+\centering
+\caption{Occupied-cell geometry of the two realistic-warehouse databases
+against their world files at \SI{0.25}{\metre} tolerance, beside the tiny map.
+Bold marks a value below the fixed criterion.}
+\label{tab:map-realistic-geometry}
+\small
+\begin{tabular}{lrrrrr}
+\toprule
+Database & Nodes & Occupied & Precision & Recall & Recall \\
+ & & cells & & observed & building \\
+ & & & [\si{\percent}] & [\si{\percent}] & [\si{\percent}] \\
+\midrule
+\repo{map_tiny} & 30 & 11\,634 & 96.6 & 89.5 & 67.2 \\
+\repo{map_realistic} & 165 & 26\,728 & \textbf{81.2} & \textbf{82.5} & 55.7 \\
+\repo{map_realistic_01} & 185 & 25\,440 & \textbf{84.8} & \textbf{81.4} & 54.5 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption[Drivability of the realistic-warehouse databases under the true nav2
+footprint, against independent routes.]{Drivability of the realistic-warehouse
+databases under the true $0.83\times0.50$~m nav2 footprint, against the
+independent probe of each layout; column heads drop the \repo{map_} prefix.
+The tiny map's independent column is repeated for scale; its probe was one
+loop of the wide central aisle, whereas these probes thread the shelf aisles,
+so the two are not route-matched.}
+\label{tab:map-realistic-drivability}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrr}
+\toprule
+Metric & \repo{tiny} & \repo{realistic} & \repo{realistic_01} \\
+\midrule
+Probe poses & 2\,973 & 6\,278 & 4\,847 \\
+Clear and mapped [\si{\percent}] & 99.3 & 96.2 & 94.9 \\
+False obstacle [\si{\percent}] & 0.7 & \textbf{3.8} & \textbf{4.4} \\
+Unmapped under footprint [\si{\percent}] & 0.0 & 2.4 & 0.7 \\
+Clearance, median [\si{\metre}] & 1.07 & 1.96 & 2.16 \\
+Clearance, 5th percentile [\si{\metre}] & 0.45 & 0.62 & 0.36 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption[Stored contents of the realistic-warehouse databases.]{Stored contents
+of the realistic-warehouse databases, read in read-only mode. Neighbour links are
+stored per direction; closure and gravity rows once. ``Spanning'' closures join
+nodes more than three apart; none exists, by configuration.}
+\label{tab:map-realistic-graph}
+\small
+\begin{tabular}{lrr}
+\toprule
+Element & \repo{map_realistic} & \repo{map_realistic_01} \\
+\midrule
+Nodes & 165 & 185 \\
+Node stamp span [\si{\second}] & 285.7 & 314.9 \\
+Optimised path [\si{\metre}] & 369.5 & 384.7 \\
+Neighbour links, rows / pairs & 322 / 161 & 356 / 178 \\
+Global closures, rows & 3 & 4 \\
+Closures spanning $>3$ nodes & 0 & 0 \\
+Gravity links & 165 & 185 \\
+Visual words & 55\,802 & 63\,276 \\
+Features & 145\,067 & 159\,009 \\
+Database size [\si{\mega\byte}] & 417 & 438 \\
+Fitted placement $(x, y, \theta)$ & $(5.30, 19.50, \SI{-179.9}{\degree})$ & $(5.15, 20.45, \SI{179.4}{\degree})$ \\
+Fit agreement, margin & 0.183, \SI{+10.1}{\percent} & 0.260, \SI{+66.1}{\percent} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=\textwidth]{figures/map_realistic_validate.png}
+  \caption[Dense-map evaluation of \repo{map/map_realistic} against the
+  independent probe.]{Dense-map evaluation of \repo{map/map_realistic} against
+  \repo{dataset_allsensor_realistic_000}. Left: occupied cells (red) over the
+  world file's collision geometry (grey), with the probe route coloured by
+  drivability and the spawn marked; top right: distance from each occupied
+  cell to real structure against the \SI{0.25}{\metre} tolerance; bottom
+  right: clearance from the route to the nearest mapped obstacle. The shelf
+  rows are thickened toward the aisles; the false-obstacle poses sit on the
+  first metres below the spawn, where the top wall is doubled, and where the
+  probe hugs the left shelf column at $x\approx-12.5$.}
+  \label{fig:map-realistic-validate}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=\textwidth]{figures/map_realistic_01_validate.png}
+  \caption[Dense-map evaluation of \repo{map/map_realistic_01} against the
+  independent probe.]{Dense-map evaluation of \repo{map/map_realistic_01}
+  against \repo{dataset_allsensor_realistic_001}, panels as in
+  \cref{fig:map-realistic-validate}. The cleaner of the two in geometry. The
+  clearance mode at exactly \SI{0.25}{\metre} is the probe threading the
+  one-aisle gap at $x\approx10$ between two mapped shelf rows.}
+  \label{fig:map-realistic-01-validate}
+\end{figure}
+
+\textbf{Analysis.} Both maps fail, by similar margins, on every criterion:
+precision 81.2 and 84.8 against \SI{90}{\percent}, observed recall 82.5 and
+81.4 against \SI{85}{\percent}, false obstacles 3.8 and 4.4 against
+\SI{1}{\percent}. Agreement across two layouts and two independent builds makes
+this a property of the build rather than of one run.
+
+The precision loss is mostly thickened structure, with a phantom share the
+tiny map did not have. Classifying the wrong cells
+(\repo{script/exp4_insights.py}): 13.4 and \SI{9.7}{\percent} of occupied cells
+are surfaces drawn too thick, within \SI{0.50}{\metre} of true structure, and
+5.2 and \SI{5.3}{\percent} are phantoms further out, against 3.0 and
+\SI{0.4}{\percent} on the tiny map. The thickening sits on the shelf rows the
+build route passed; the phantoms are the east and south walls, drawn about
+\SI{0.5}{\metre} off their true line in both maps and far from any route. The
+false obstacles are not the thickened shelving: every blocked probe pose lies
+within \SI{0.6}{\metre} of a phantom cell, the largest blocked stretch of each
+map is the first metres from the spawn, and 96 and \SI{63}{\percent} of the
+phantom cells under those stretches were first observed by one of the first
+five graph nodes, during the inertial initialisation transient.
+
+These maps are an odometry picture by design, and the result should be read as
+one. Loop closure was disabled on both sides of the pipeline after the A/B of
+26 October showed the front end's own closures corrupting an otherwise
+\SI{0.1}{\metre} map (RTAB-Map record \S7c), so no node was ever corrected
+against a revisited place; the stored graph confirms it, with no closure
+spanning more than three nodes. The thickening is therefore uncorrected drift
+along a 370--385-metre build route re-observing the same shelf from slightly
+different estimated places, which is exactly what this configuration was built
+to expose. It is not evidence about RTAB-Map's loop closing, which was not
 exercised.
 
-\paragraph{Future plan.} Study methods robust to repeated features
-(place-recognition gating, geometric verification of loop candidates); enable
-ORB-SLAM3's Atlas so that a tracking loss opens a new sub-map instead of
-corrupting the existing one, merging sub-maps afterwards; and record an
-independent route on both maps and score drivability against it.
+Whole-building recall of 55.7 and \SI{54.5}{\percent} is route coverage, as on
+the tiny map: the build routes loop the central block and the outer bays on the
+left and right were seen only in passing. Observed-region recall, the mapping
+figure, is 82.5 and \SI{81.4}{\percent}.
 
+Placement needed the overlay, and the spawn check did not apply. Both fits
+landed about \SI{180}{\degree} from the \SI{-90}{\degree} spawn prediction, one
+with a thin margin, because the map frame was seated during the inertial
+initialisation transient rather than at the body's spawn pose: node 1 of each
+database carries a yaw of \SI{57}{} and \SI{-89}{\degree} and a height still
+settling over the first nodes, where the tiny map's node 1 is the identity. The
+overlays leave no doubt about the placement, and the two fits agree to
+\SI{0.7}{\degree}.
+
+\textbf{Limitations, each stated once.} \emph{Not route-matched:} the tiny
+probe was one loop of a wide aisle, these probes thread shelf aisles
+(5th-percentile clearance 0.36--0.62 against \SI{0.45}{\metre}), so part of the
+false-obstacle gap is probe difficulty and the \SI{1}{\percent} threshold was
+set against an easier route. \emph{No attribution:} world, route, duration and
+path length vary together across the two, so no factor may be credited for a
+difference between them; the longer build, \repo{_01}, is the cleaner.
+\emph{$n$:} one database per layout supports no uncertainty estimate.
+\emph{Front end unrecorded:} the database stores the back end's parameters but
+not which front end supplied the odometry chain.
+
+\begin{queried}[Queried: front end of the realistic builds]
+RTAB-Map took its pose from TF, so the odometry came from whichever front end
+was running; the database does not record which. The precision loss cannot be
+placed on the front end against the back end until the build logs name it.
+\end{queried}
+
+\paragraph{Summary.} Where tracking holds, the mapping pipeline is
+geometrically sound on the tiny map: occupied-cell precision \SI{96.6}{\percent}
+and observed-surface recall \SI{89.5}{\percent}, with whole-building recall of
+\SI{67.2}{\percent} explained by route coverage; the drivability half is a dated
+measurement whose independent reference is lost. On the realistic warehouse
+two maps built without loop closure are auditable end to end and fail the
+same criterion by similar margins: precision 81.2 and 84.8 and false obstacles
+3.8 and \SI{4.4}{\percent} against independent probes. Their loss is thickened
+shelving, displaced walls and spawn-area phantoms from uncorrected drift over
+370--385-metre routes, which the
+closure-free build was configured to expose. The earlier large-warehouse
+attempt that lost tracking remains unauditable.
+
+\paragraph{Future plan.} The two realistic maps are the odometry baseline
+that a corrected map is to be compared against with the unchanged evaluator:
+re-enable closure with a translation bound on accepted corrections, or merge
+the closure-free sub-maps through Atlas, and rescore. Name the front end in
+every build manifest. Record the tiny-warehouse independent route again and
+retain it. Identify and score the 21 September databases, or let the realistic
+maps stand as the large-warehouse result.
+
+\FloatBarrier
 \subsection{Real robot}
 \label{sec:exp4-real}
 
@@ -772,10 +1182,12 @@ database from a real mapping run, and then score it with the unchanged
 evaluator, using a motion-capture route from a second run for drivability.
 
 % =====================================================================
+\FloatBarrier
 \section{Cross-Experiment Discussion, Simulation-to-Real Comparison and
 Limitations}
 \label{sec:results-discussion}
 
+\FloatBarrier
 \subsection{Simulation against the real robot}
 
 No simulation-to-real comparison can be drawn at the cutoff, because no

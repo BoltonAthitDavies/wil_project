@@ -1,0 +1,72 @@
+[INFO] [1793242429.869731396] [orbslam3]: settings   : /tmp/claude-1000/-home-ambushee-wil-project/88846a24-8e90-425d-beed-b9cdd3dcb9c4/scratchpad/gpumatch/ab2/stereo_extract.yaml
+[INFO] [1793242429.869832854] [orbslam3]: vocabulary : /home/ambushee/wil_project/thirdparty/ORB_SLAM3/Vocabulary/ORBvoc.txt
+[INFO] [1793242429.869839306] [orbslam3]: mode       : STEREO
+[INFO] [1793242429.869843530] [orbslam3]: transport  : compressed
+
+ORB-SLAM3 Copyright (C) 2017-2020 Carlos Campos, Richard Elvira, Juan J. Gómez, José M.M. Montiel and Juan D. Tardós, University of Zaragoza.
+ORB-SLAM2 Copyright (C) 2014-2016 Raúl Mur-Artal, José M.M. Montiel and Juan D. Tardós, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Stereo
+Loading settings from /tmp/claude-1000/-home-ambushee-wil-project/88846a24-8e90-425d-beed-b9cdd3dcb9c4/scratchpad/gpumatch/ab2/stereo_extract.yaml
+	-Loaded camera 1
+	-Loaded camera 2
+Camera.newHeight optional parameter does not exist...
+Camera.newWidth optional parameter does not exist...
+	-Loaded image info
+	-Loaded ORB settings
+	-Loaded viewer settings
+System.LoadAtlasFromFile optional parameter does not exist...
+System.SaveAtlasToFile optional parameter does not exist...
+	-Loaded Atlas settings
+System.thFarPoints optional parameter does not exist...
+	-Loaded misc parameters
+----------------------------------
+SLAM settings: 
+	-Camera 1 parameters (Kannala-Brandt): [ 607.511 609.905 958.256 539.797 -0.0364546 -0.000840339 0.000176975 -0.000382712 ]
+	-Camera 2 parameters (Kannala-Brandt: [ 607.511 609.905 958.256 539.797 -0.0364546 -0.000840339 0.000176975 -0.000382712 ]
+	-Original image size: [ 1920 , 1080 ]
+	-Current image size: [ 1920 , 1080 ]
+	-Sequence FPS: 30
+	-Stereo baseline: 0.0890276
+	-Stereo depth threshold : 90
+	-Camera 1 overlapping area: [ 0 , 1919 ]
+	-Camera 2 overlapping area: [ 0 , 1919 ]
+	-Features per image: 2000
+	-ORB scale factor: 1.2
+	-ORB number of scales: 8
+	-Initial FAST threshold: 20
+	-Min FAST threshold: 7
+
+
+Loading ORB Vocabulary. This could take a while...
+Vocabulary loaded!
+
+Initialization of Atlas from scratch 
+Creation of new map with id: 0
+Creation of new map with last KF id: 0
+Seq. Name: 
+There are 1 cameras in the atlas
+Camera 0 is fisheye
+[INFO] [1793242435.735018699] [orbslam3]: trajectory : /tmp/claude-1000/-home-ambushee-wil-project/88846a24-8e90-425d-beed-b9cdd3dcb9c4/scratchpad/gpumatch/ab2/r05_A2/vio.csv
+[INFO] [1793242435.740460424] [orbslam3]: filter     : off (stock ORB-SLAM3 feature extraction)
+[INFO] [1793242435.740489858] [orbslam3]: subscribed: /cam0/image_raw | /cam1/image_raw | (no imu)
+[ORBextractor] GPU front end active (FAST/NMS/blur/orientation/rBRIEF on the GPU)
+[ORBextractor] GPU front end active (FAST/NMS/blur/orientation/rBRIEF on the GPU)
+First KF:0; Map init KF:0
+New Map created with 147 points
+[INFO] [1793242436.952333258] [orbslam3]: tracking OK -- publishing poses
+[INFO] [1793242559.512679819] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+Shutdown
+
+Saving trajectory to /tmp/claude-1000/-home-ambushee-wil-project/88846a24-8e90-425d-beed-b9cdd3dcb9c4/scratchpad/gpumatch/ab2/r05_A2/final_frame_trajectory.txt ...
+There are 1 maps in the atlas
+  Map 0 has 40 KFs
+
+End of saving trajectory to /tmp/claude-1000/-home-ambushee-wil-project/88846a24-8e90-425d-beed-b9cdd3dcb9c4/scratchpad/gpumatch/ab2/r05_A2/final_frame_trajectory.txt ...
+
+Saving keyframe trajectory to /tmp/claude-1000/-home-ambushee-wil-project/88846a24-8e90-425d-beed-b9cdd3dcb9c4/scratchpad/gpumatch/ab2/r05_A2/final_keyframe_trajectory.txt ...
+[INFO] [1793242559.535149115] [orbslam3]: wrote 1088 poses to /tmp/claude-1000/-home-ambushee-wil-project/88846a24-8e90-425d-beed-b9cdd3dcb9c4/scratchpad/gpumatch/ab2/r05_A2/vio.csv
+[WARN] [1793242559.535164649] [orbslam3]: dropped 452 of 1540 stereo frames -- tracking could not keep up. Two runs of this bag no longer see the same images, so neither filter ON/OFF nor repeat runs are comparable. Lower `ros2 bag play --rate` until this is 0.

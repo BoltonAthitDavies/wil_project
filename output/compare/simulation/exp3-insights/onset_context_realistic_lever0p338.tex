@@ -1,0 +1,19 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption[What the robot was doing at the onset, realistic world.]{What the robot was doing at the error onset, realistic world, per estimator and condition. ``Turning'' and ``object in view'' as in the contrast table; ``features'' is the median tracked-feature level in the \SI{5}{\second} before onset as a percentage of the run's own level before that. Runs without an onset are counted separately. Source: \path{output/compare/simulation/exp3-insights/insights.csv}.}
+\label{tab:insight-onset-realistic}
+\begin{tabular}{llrrrrr}
+\toprule
+Condition & Estimator & runs & no onset & turning & object in view & features \\
+ & & & & [of onsets] & [of onsets] & [\si{\percent} of own] \\
+\midrule
+static & VINS-Fusion & 2 & 1 & 0/1 & --- & 100 \\
+static & ORB-SLAM3 & 4 & 4 & 0/0 & --- & --- \\
+dynamic & VINS-Fusion & 2 & 1 & 1/1 & 1/1 & 100 \\
+dynamic & ORB-SLAM3 & 4 & 4 & 0/0 & --- & --- \\
+dynamic & VINS-Fusion+YOLO & 4 & 3 & 1/1 & 1/1 & 100 \\
+dynamic & ORB-SLAM3+YOLO & 16 & 3 & 7/13 & 13/13 & 100 \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -156,7 +156,8 @@ def gt_path(run_dir, dataset=None):
 
 def ate(run_dir, dataset=None):
     a = vm.load(os.path.join(run_dir, "vio.csv"))
-    g = vm.load(gt_path(run_dir, dataset))
+    # ORB-SLAM3 / VINS-Fusion report the IMU; the EKF reports the model origin
+    g = vm.load_gt(gt_path(run_dir, dataset), lever=vm.is_visual_tree(run_dir))
     if a is None or g is None:
         return float("nan")
     t, p = a[0], a[1]

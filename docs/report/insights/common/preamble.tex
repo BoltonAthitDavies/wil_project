@@ -1,0 +1,85 @@
+% Shared preamble for the raw chapter-4 write-ups under docs/report/insights/.
+%
+% Each experiment_N/experiment_N.tex is a standalone, compilable LaTeX report
+% written BEFORE anything goes into final_report/chapters/chapter_4_*.tex.
+% It uses the final report's fonts, units and macros so that passages, tables
+% and figures lift into the chapter without reformatting.
+%
+%   \documentclass[11pt,a4paper]{report}
+%   \input{../common/preamble}
+%   \begin{document} ...
+%
+% Figures and tables are NOT copied: \graphicspath and \reporttable resolve into
+% final_report/figures/ and final_report/tables/, so the raw write-up always
+% shows the same artefacts as the chapter.  Compile with:  latexmk -pdf <file>
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{mathptmx}
+\usepackage[scaled=0.92]{helvet}
+\usepackage{courier}
+\usepackage[a4paper,left=30mm,right=20mm,top=25mm,bottom=25mm]{geometry}
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ifthen}
+\usepackage{siunitx}
+\usepackage{graphicx}
+\usepackage{placeins}
+\usepackage{caption}
+\usepackage{enumitem}
+\usepackage[table]{xcolor}
+\usepackage{rotating}
+\PassOptionsToPackage{hyphens}{url}\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+\usepackage[nameinlink,noabbrev]{cleveref}
+
+\graphicspath{{../../final_report/}{../../final_report/figures/}}
+% \reporttable{name} inputs final_report/tables/name.tex
+\newcommand{\reporttable}[1]{\input{../../final_report/tables/#1}}
+
+\newcommand{\repo}[1]{\texttt{\detokenize{#1}}}
+\sisetup{detect-all,group-separator={,},range-phrase=--,range-units=single}
+\DeclareSIUnit{\pixel}{px}
+\DeclareSIUnit{\mebi}{Mi}
+\captionsetup{font=small,labelfont=bf}
+\setlist{nosep}
+\setlength{\parskip}{4pt}
+\setlength{\LTcapwidth}{\textwidth}
+
+% ---- result-slot status (RENDERED here, unlike in the final report)
+\definecolor{stcompleted}{HTML}{A5D6A7}
+\definecolor{stpartial}{HTML}{FFF2CC}
+\definecolor{stuntested}{HTML}{FFD8A8}
+\definecolor{stblocked}{HTML}{FFCDD2}
+\definecolor{stfailed}{HTML}{FFCDD2}
+\definecolor{stplanned}{HTML}{E0E0E0}
+\newcommand{\slotstatus}[2]{%
+  \par\noindent\fcolorbox{black!40}{st#1}{\parbox{\dimexpr\textwidth-2\fboxsep-2\fboxrule}{%
+    \textbf{Status: #1.}\ #2}}\par\medskip}
+\newcommand{\status}[1]{\textbf{#1}}
+
+% ---- queries: RENDERED in red here so a reader sees every open concern in place
+\definecolor{flagred}{HTML}{B00000}
+\newcommand{\flag}[1]{\textcolor{flagred}{#1}}
+\newcommand{\moved}[1]{#1}
+\newenvironment{queried}[1][Questionable]%
+  {\par\addvspace{0.6ex}\begingroup\color{flagred}\noindent
+   \textbf{[#1]}\ \ignorespaces}%
+  {\par\endgroup\addvspace{0.6ex}}
+
+% ---- per-block performance marks (section 4.5 diagrams)
+\definecolor{perfgood}{HTML}{A5D6A7}
+\definecolor{perfpoor}{HTML}{FFCDD2}
+\definecolor{perfnoeffect}{HTML}{D9EAF7}
+\definecolor{perfnone}{HTML}{FFF2CC}
+\newcommand{\perfmark}[1]{%
+  \ifthenelse{\equal{#1}{good}}{\colorbox{perfgood}{\scriptsize good}}{%
+  \ifthenelse{\equal{#1}{poor}}{\colorbox{perfpoor}{\scriptsize poor}}{%
+  \ifthenelse{\equal{#1}{noeffect}}{\colorbox{perfnoeffect}{\scriptsize no effect}}{%
+  \colorbox{perfnone}{\scriptsize no claim}}}}}

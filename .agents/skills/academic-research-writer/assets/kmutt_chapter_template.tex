@@ -1,0 +1,70 @@
+% KMUTT Faculty of Engineering chapter skeleton, English edition.
+%
+% Drop this in as chapters/chapter_N_<name>.tex and \include it from main.tex.
+% The sizes (15 pt chapter / 14 pt section / 13 pt subsection, 12 pt body), the
+% margins and the caption sides are set once in the preamble -- see
+% docs/report/final_report/main.tex -- so this file carries CONTENT ONLY and
+% never restates formatting.  Replace every <...> placeholder.
+
+\chapter{<CHAPTER TITLE IN CAPS>}
+\label{ch:<slug>}
+
+% An opening paragraph before the first numbered section: what this chapter
+% establishes and how it is laid out.  No bullet list here.
+<Opening paragraph.>
+
+\section{<Head Topic>}
+\label{sec:<slug>}
+
+<Body text at 12 pt.  Every claim taken from outside carries its citation
+number, e.g.\ dynamic-environment SLAM has been surveyed in \cite{saputra2018}.
+Two authors are cited by both surnames, more than three by the first surname
+and ``et al.''\ -- the surname goes in the prose, the number in the bracket.>
+
+\subsection{<Sub Topic>}
+\label{subsec:<slug>}
+
+<Body text.>
+
+% Sub-items below a subsection are dashes, not numbered lists.
+\begin{itemize}
+  \item[--] <sub content>
+  \item[--] <sub content, continuation lines aligned under the first word>
+\end{itemize}
+
+% ---------------------------------------------------------------- a table
+% Caption ABOVE the table.  A table taken from a source carries its citation
+% number in the caption and a (Source : ...) line beneath it.  Years in A.D.
+\begin{table}[htbp]
+  \caption{<Name of table>}
+  \label{tab:<slug>}
+  \centering
+  \begin{tabular}{@{}lrr@{}}
+    \toprule
+    <Topic> & <Topic> & <Topic> \\
+    \midrule
+    <row> & <value> & <value> \\
+    \bottomrule
+  \end{tabular}
+  % Only for a reproduced or adapted table:
+  % \\[2pt] {\small (Source : <author>, <year in A.D.>)}
+\end{table}
+
+% ---------------------------------------------------------------- a figure
+% Caption BELOW the figure.
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.9\textwidth]{figures/<file>}
+  \caption{<Name of figure>}
+  \label{fig:<slug>}
+  % Only for a reproduced or adapted figure:
+  % \\[2pt] {\small (Source : <author>, <year in A.D.>)}
+\end{figure}
+
+% Refer to every float from the text: \cref{tab:<slug>}, \cref{fig:<slug>}.
+% Keep a result slot's floats inside the slot with \FloatBarrier.
+
+\section{<Head Topic>}
+\label{sec:<slug2>}
+
+<Body text.>

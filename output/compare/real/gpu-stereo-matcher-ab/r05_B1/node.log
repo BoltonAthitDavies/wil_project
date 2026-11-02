@@ -1,0 +1,214 @@
+[INFO] [1793241663.134398382] [orbslam3]: settings   : /tmp/claude-1000/-home-ambushee-wil-project/88846a24-8e90-425d-beed-b9cdd3dcb9c4/scratchpad/gpumatch/ab2/stereo_match.yaml
+[INFO] [1793241663.136959766] [orbslam3]: vocabulary : /home/ambushee/wil_project/thirdparty/ORB_SLAM3/Vocabulary/ORBvoc.txt
+[INFO] [1793241663.137220565] [orbslam3]: mode       : STEREO
+[INFO] [1793241663.137351152] [orbslam3]: transport  : compressed
+
+ORB-SLAM3 Copyright (C) 2017-2020 Carlos Campos, Richard Elvira, Juan J. Gómez, José M.M. Montiel and Juan D. Tardós, University of Zaragoza.
+ORB-SLAM2 Copyright (C) 2014-2016 Raúl Mur-Artal, José M.M. Montiel and Juan D. Tardós, University of Zaragoza.
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See LICENSE.txt.
+
+Input sensor was set to: Stereo
+Loading settings from /tmp/claude-1000/-home-ambushee-wil-project/88846a24-8e90-425d-beed-b9cdd3dcb9c4/scratchpad/gpumatch/ab2/stereo_match.yaml
+	-Loaded camera 1
+	-Loaded camera 2
+Camera.newHeight optional parameter does not exist...
+Camera.newWidth optional parameter does not exist...
+	-Loaded image info
+	-Loaded ORB settings
+	-Loaded viewer settings
+System.LoadAtlasFromFile optional parameter does not exist...
+System.SaveAtlasToFile optional parameter does not exist...
+	-Loaded Atlas settings
+System.thFarPoints optional parameter does not exist...
+	-Loaded misc parameters
+----------------------------------
+SLAM settings: 
+	-Camera 1 parameters (Kannala-Brandt): [ 607.511 609.905 958.256 539.797 -0.0364546 -0.000840339 0.000176975 -0.000382712 ]
+	-Camera 2 parameters (Kannala-Brandt: [ 607.511 609.905 958.256 539.797 -0.0364546 -0.000840339 0.000176975 -0.000382712 ]
+	-Original image size: [ 1920 , 1080 ]
+	-Current image size: [ 1920 , 1080 ]
+	-Sequence FPS: 30
+	-Stereo baseline: 0.0890276
+	-Stereo depth threshold : 90
+	-Camera 1 overlapping area: [ 0 , 1919 ]
+	-Camera 2 overlapping area: [ 0 , 1919 ]
+	-Features per image: 2000
+	-ORB scale factor: 1.2
+	-ORB number of scales: 8
+	-Initial FAST threshold: 20
+	-Min FAST threshold: 7
+
+
+Loading ORB Vocabulary. This could take a while...
+Vocabulary loaded!
+
+Initialization of Atlas from scratch 
+Creation of new map with id: 0
+Creation of new map with last KF id: 0
+Seq. Name: 
+There are 1 cameras in the atlas
+Camera 0 is fisheye
+[INFO] [1793241674.601006286] [orbslam3]: trajectory : /tmp/claude-1000/-home-ambushee-wil-project/88846a24-8e90-425d-beed-b9cdd3dcb9c4/scratchpad/gpumatch/ab2/r05_B1/vio.csv
+[INFO] [1793241674.612018977] [orbslam3]: filter     : off (stock ORB-SLAM3 feature extraction)
+[INFO] [1793241674.612087894] [orbslam3]: subscribed: /cam0/image_raw | /cam1/image_raw | (no imu)
+[ORBextractor] GPU front end active (FAST/NMS/blur/orientation/rBRIEF on the GPU)
+[ORBextractor] GPU front end active (FAST/NMS/blur/orientation/rBRIEF on the GPU)
+[Frame] GPU stereo matcher active (brute-force Hamming 2-NN on the GPU)
+First KF:0; Map init KF:0
+New Map created with 167 points
+[INFO] [1793241676.624996737] [orbslam3]: tracking OK -- publishing poses
+[WARN] [1793241678.354227861] []: Messages of type 0 arrived out of order (will print only once)
+ERROR: Frame with a timestamp older than previous frame detected!
+Creation of new map with id: 1
+Stored map with ID: 0
+Creation of new map with last KF id: 3
+[INFO] [1793241678.649913823] [orbslam3]: tracking state 0 (no pose published)
+First KF:3; Map init KF:3
+New Map created with 114 points
+ERROR: Frame with a timestamp older than previous frame detected!
+Creation of new map with id: 2
+Stored map with ID: 1
+Creation of new map with last KF id: 3
+First KF:4; Map init KF:3
+New Map created with 128 points
+ERROR: Frame with a timestamp older than previous frame detected!
+Creation of new map with id: 3
+Stored map with ID: 2
+Creation of new map with last KF id: 5
+First KF:5; Map init KF:5
+New Map created with 135 points
+ERROR: Frame with a timestamp older than previous frame detected!
+Creation of new map with id: 4
+Stored map with ID: 3
+Creation of new map with last KF id: 7
+First KF:7; Map init KF:7
+New Map created with 130 points
+ERROR: Frame with a timestamp older than previous frame detected!
+Creation of new map with id: 5
+Stored map with ID: 4
+Creation of new map with last KF id: 7
+First KF:8; Map init KF:7
+New Map created with 127 points
+ERROR: Frame with a timestamp older than previous frame detected!
+Creation of new map with id: 6
+Stored map with ID: 5
+Creation of new map with last KF id: 9
+First KF:9; Map init KF:9
+New Map created with 144 points
+ERROR: Frame with a timestamp older than previous frame detected!
+Creation of new map with id: 7
+Stored map with ID: 6
+Creation of new map with last KF id: 11
+First KF:11; Map init KF:11
+New Map created with 159 points
+ERROR: Frame with a timestamp older than previous frame detected!
+Creation of new map with id: 8
+Stored map with ID: 7
+Creation of new map with last KF id: 14
+[INFO] [1793241681.110919521] [orbslam3]: tracking state 0 (no pose published)
+First KF:14; Map init KF:14
+New Map created with 145 points
+ERROR: Frame with a timestamp older than previous frame detected!
+Creation of new map with id: 9
+Stored map with ID: 8
+Creation of new map with last KF id: 16
+First KF:16; Map init KF:16
+New Map created with 139 points
+ERROR: Frame with a timestamp older than previous frame detected!
+Creation of new map with id: 10
+Stored map with ID: 9
+Creation of new map with last KF id: 19
+First KF:19; Map init KF:19
+New Map created with 127 points
+[WARN] [1793241682.395076752] []: Messages of type 1 arrived out of order (will print only once)
+ERROR: Frame with a timestamp older than previous frame detected!
+Creation of new map with id: 11
+Stored map with ID: 10
+Creation of new map with last KF id: 22
+First KF:22; Map init KF:22
+New Map created with 135 points
+ERROR: Frame with a timestamp older than previous frame detected!
+Creation of new map with id: 12
+Stored map with ID: 11
+Creation of new map with last KF id: 24
+First KF:24; Map init KF:24
+New Map created with 118 points
+ERROR: Frame with a timestamp older than previous frame detected!
+Creation of new map with id: 13
+Stored map with ID: 12
+Creation of new map with last KF id: 26
+[INFO] [1793241683.959430474] [orbslam3]: tracking state 0 (no pose published)
+First KF:26; Map init KF:26
+New Map created with 135 points
+ERROR: Frame with a timestamp older than previous frame detected!
+Creation of new map with id: 14
+Stored map with ID: 13
+Creation of new map with last KF id: 28
+First KF:28; Map init KF:28
+New Map created with 129 points
+ERROR: Frame with a timestamp older than previous frame detected!
+Creation of new map with id: 15
+Stored map with ID: 14
+Creation of new map with last KF id: 31
+First KF:31; Map init KF:31
+New Map created with 130 points
+ERROR: Frame with a timestamp older than previous frame detected!
+Creation of new map with id: 16
+Stored map with ID: 15
+Creation of new map with last KF id: 33
+[INFO] [1793241686.746779623] [orbslam3]: tracking state 0 (no pose published)
+First KF:33; Map init KF:33
+New Map created with 131 points
+ERROR: Frame with a timestamp older than previous frame detected!
+Creation of new map with id: 17
+Stored map with ID: 16
+Creation of new map with last KF id: 35
+First KF:35; Map init KF:35
+New Map created with 104 points
+ERROR: Frame with a timestamp older than previous frame detected!
+Creation of new map with id: 18
+Stored map with ID: 17
+Creation of new map with last KF id: 37
+First KF:37; Map init KF:37
+New Map created with 133 points
+ERROR: Frame with a timestamp older than previous frame detected!
+Creation of new map with id: 19
+Stored map with ID: 18
+Creation of new map with last KF id: 39
+First KF:39; Map init KF:39
+New Map created with 132 points
+ERROR: Frame with a timestamp older than previous frame detected!
+Creation of new map with id: 20
+Stored map with ID: 19
+Creation of new map with last KF id: 41
+[INFO] [1793241689.290948881] [orbslam3]: tracking state 0 (no pose published)
+First KF:41; Map init KF:41
+New Map created with 146 points
+TRACK_REF_KF: Less than 15 matches!!
+Fail to track local map!
+LM: Active map reset recieved
+LM: Active map reset, waiting...
+LM: Reseting current map in Local Mapping...
+LM: End reseting Local Mapping...
+LM: Reset free the mutex
+LM: Active map reset, Done!!!
+mnFirstFrameId = 0
+mnInitialFrameId = 99
+0 Frames set to lost
+First KF:42; Map init KF:41
+New Map created with 114 points
+ERROR: Frame with a timestamp older than previous frame detected!
+Creation of new map with id: 21
+Stored map with ID: 20
+Creation of new map with last KF id: 43
+First KF:43; Map init KF:43
+New Map created with 120 points
+Fail to track local map!
+[INFO] [1793241691.329481717] [orbslam3]: tracking state 3 (no pose published)
+Relocalized!!
+Fail to track local map!
+Relocalized!!
+Fail to track local map!
+[INFO] [1793241695.045705739] [orbslam3]: tracking state 3 (no pose published)

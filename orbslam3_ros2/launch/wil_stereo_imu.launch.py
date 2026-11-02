@@ -36,7 +36,14 @@ DEFAULT_OUTPUT = os.path.expanduser('~/output/wil_orbslam3_stereo_imu')
 
 # 9.81 / 9.2642. Set back to 1.0 once the accelerometer is recalibrated
 # (rs-imu-calibration.py) -- leaving it on after a fix would double-correct.
-ACCEL_SCALE = 9.81 / 9.2642
+# ACCEL_SCALE = 9.81 / 9.2642   # RealSense IMU, measured 2026-09; STALE for the current rig
+# 2026-10-29: the rig's IMU (/hwt101ct_yaw_publisher) reads |a| = 9.8858 m/s^2 at
+# rest (dataset_realv5_000, stillest 2 s window, std 0.018). With the old factor the
+# node fed 10.47 m/s^2 and the inertial initialisation never converged
+# (imu_initialized 0, every reset "tracking_lost_before_inertial_ba2"). Re-measure
+# on each new recording: script/imu_arrival_probe.py reports arrival only; the
+# rest value comes from the stillest window of the bag (see integration.md 7.11).
+ACCEL_SCALE = 9.81 / 9.8858
 
 # YOLO weights for dynamic-object detection. Classes are bin/box/bucket -- these
 # are warehouse-prop weights, so on real-rig bags expect fewer hits than in sim.
@@ -49,6 +56,12 @@ def generate_launch_description():
         'config', 'wil', 'stereo_imu.yaml')
 
     args = [
+        # Settings file. Default = the installed config/wil/stereo_imu.yaml (a symlink to
+        # the source tree). A calibration variant that is not installed, e.g.
+        # config/wil_311026_selfcal/ (self-calibrated extrinsic for the 31 Oct 2026
+        # mount), is selected by its SOURCE path:
+        #   config_file:=$HOME/wil_project/orbslam3_ros2/config/wil_311026_selfcal/stereo_imu.yaml
+        DeclareLaunchArgument('config_file', default_value=config_file),
         DeclareLaunchArgument('vocabulary_file', default_value=DEFAULT_VOCAB),
         DeclareLaunchArgument('output_path', default_value=DEFAULT_OUTPUT),
         DeclareLaunchArgument('experiment_id', default_value=''),
@@ -77,6 +90,10 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'imu_accel_scale', default_value=str(ACCEL_SCALE),
             description='Accelerometer correction; 1.0 once the IMU is recalibrated.'),
+        DeclareLaunchArgument(
+            'imu_best_effort', default_value='false',
+            description='Subscribe to the IMU BEST_EFFORT (deep queue) instead of RELIABLE; '
+                        'A/B lever for the IMU-burst problem seen on realv5 (2026-10-29).'),
         DeclareLaunchArgument(
             'filter', default_value='false',
             description='RY-SLAM dynamic-object filtering. When true, also starts '
@@ -110,7 +127,7 @@ def generate_launch_description():
         parameters=[{
             'use_sim_time': False,    # no /clock on these bags
 
-            'config_file': config_file,
+            'config_file': LaunchConfiguration('config_file'),
             'vocabulary_file': LaunchConfiguration('vocabulary_file'),
             'output_path': LaunchConfiguration('output_path'),
             'experiment_id': ParameterValue(LaunchConfiguration('experiment_id'), value_type=str),
@@ -123,6 +140,7 @@ def generate_launch_description():
 
             'use_imu': True,
             'imu_accel_scale': LaunchConfiguration('imu_accel_scale'),
+            'imu_best_effort': LaunchConfiguration('imu_best_effort'),
 
             'image0_topic': LaunchConfiguration('image0_topic'),
             'image1_topic': LaunchConfiguration('image1_topic'),

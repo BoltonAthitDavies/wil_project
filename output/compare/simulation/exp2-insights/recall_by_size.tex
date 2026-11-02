@@ -1,0 +1,23 @@
+\begin{table}[htbp]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\caption[Recall against truth-box size.]{Recall against truth-box size, pooled over the four recordings. Frame level: the frame's truth boxes are binned by the frame's mean truth-box side (square root of the mean truth area; the per-box truth is not logged), recall is TP/(TP+FN) of those frames. Object level: each object's median matched-box side; a miss is a frame inside a gap shorter than \SI{2}{\second} between two matches of that object, so objects that leave the view are not charged. Moving: object moving in at least half of its matched frames. Source: \path{recall_by_size.csv}.}
+\label{tab:e2i-size}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrrrr}
+\toprule
+Side [px] & \multicolumn{3}{c}{frame level} & \multicolumn{4}{c}{object level} \\
+ & boxes & recall & R$_{\mathrm{mov}}$ / R$_{\mathrm{stat}}$ & objects mov/stat & frames & R$_{\mathrm{mov}}$ & R$_{\mathrm{stat}}$ \\
+\midrule
+0--24 & 0 & --- & --- / --- & 0/0 & 0 & --- & --- \\
+24--32 & 1 & 0.00 & --- / 0.00 & 0/0 & 0 & --- & --- \\
+32--48 & 121 & 0.35 & 0.04 / 0.42 & 9/10 & 3863 & 0.67 & 0.86 \\
+48--64 & 5546 & 0.65 & 0.64 / 0.66 & 24/6 & 12137 & 0.72 & 0.58 \\
+64--96 & 23137 & 0.59 & 0.59 / 0.58 & 37/1 & 18615 & 0.71 & 0.45 \\
+96--128 & 15477 & 0.57 & 0.56 / 0.59 & 27/0 & 11466 & 0.77 & --- \\
+128--192 & 12705 & 0.58 & 0.58 / 0.61 & 16/0 & 6275 & 0.71 & --- \\
+192--$\infty$ & 5295 & 0.66 & 0.67 / 0.63 & 2/0 & 628 & 0.63 & --- \\
+\bottomrule
+\end{tabular}}
+\end{table}

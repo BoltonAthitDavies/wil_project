@@ -1,0 +1,26 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption[Within-run drift contrasts, extreme world.]{Within-run drift contrasts, extreme world. Each run is its own control: the growth rate of the start-anchored error is computed separately in the two states and the two rates are compared across runs (median of each, number of runs where the first exceeds the second, Wilcoxon signed-rank $p$). ``Turning'': ground-truth yaw rate above \SI{10}{\degree\per\second}. ``Object in view'': detector boxes present on the frame (borrowed from the class-filtered run on the same bag for unfiltered runs). Rates are taken only while the estimate is still tracking (before the first jump and below \SI{3}{\metre} error). Source: \path{output/compare/simulation/exp3-insights/insights.csv}.}
+\label{tab:insight-contrast-extreme}
+\begin{tabular}{llrrrrr}
+\toprule
+Condition & Estimator & $n$ & turning & straight & $n_{>}$ & $p$ \\
+ & & & \multicolumn{2}{c}{[\si{\milli\metre\per\second}]} & & \\
+\midrule
+static & VINS-Fusion & 9 & 2.2 & -2.1 & 6 & 0.25 \\
+static & ORB-SLAM3 & 9 & -8.2 & 2.1 & 4 & 0.36 \\
+dynamic & VINS-Fusion & 2 & 124.4 & 145.5 & 1 & --- \\
+dynamic & VINS-Fusion+YOLO & 2 & 139.4 & 166.6 & 1 & --- \\
+\midrule
+\multicolumn{7}{l}{\emph{Heading error, same contrast} [\si{\milli\degree\per\second}]} \\
+static & VINS-Fusion & 9 & 9.0 & 9.1 & 4 & 0.73 \\
+static & ORB-SLAM3 & 9 & -5.5 & 4.6 & 3 & 0.65 \\
+dynamic & VINS-Fusion & 2 & 162.5 & 167.2 & 1 & --- \\
+dynamic & VINS-Fusion+YOLO & 2 & 94.6 & 104.8 & 0 & --- \\
+\midrule
+\multicolumn{7}{l}{\emph{Object in view vs none, dynamic recordings} [\si{\milli\metre\per\second}]} \\
+ & & & in view & none & & \\
+\bottomrule
+\end{tabular}
+\end{table}

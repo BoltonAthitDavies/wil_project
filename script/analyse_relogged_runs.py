@@ -23,9 +23,13 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from vio_metrics import rpe, RPE_DELTAS  # noqa: E402
+from map_underlay import draw_map  # noqa: E402
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+import os, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import vio_metrics as vm  # noqa: E402
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -100,6 +104,18 @@ def load_vio(path: Path):
         return None
     return dict(t=a[:, 0] / 1e9, p=a[:, 1:4], q=a[:, 4:8],
                 v=a[:, 8:11] if a.shape[1] >= 11 else np.zeros((len(a), 3)))
+
+
+def load_gt(dataset):
+    """The rosbag ground truth of a campaign dataset, moved from the model origin to
+    the IMU point that both estimators report (vio_metrics.IMU_LEVER_M; see the
+    note there). Every alignment and metric in this campaign uses this reference."""
+    ref = load_vio(OUT / "ground_truth" / f"{dataset}.csv")
+    if ref is None:
+        return None
+    ref = dict(ref)
+    ref["p"] = vm.gt_at_imu(ref["p"], ref["q"])
+    return ref
 
 
 def quat_to_R(q):
@@ -276,7 +292,7 @@ def trajectory_group(runs, dataset, repeat, valid_keys):
                 and (r["system"], r["dataset"], r["repeat"]) in valid_keys]
     data = {r["system"]: load_vio(r["path"] / "vio.csv") for r in selected}
     data = {k: v for k, v in data.items() if v is not None}
-    ref = load_vio(OUT / "ground_truth" / f"{dataset}.csv")
+    ref = load_gt(dataset)
     if ref is None:
         return None
     aligned, rows, rpe_rows = {}, [], []
@@ -500,7 +516,7 @@ def pin_to_reference(ax, ref, aligned, th, frac=0.12):
     return off
 
 
-def plot_trajectory_montage(groups, theme, cols=4, out_name=None, title=None):
+def plot_trajectory_montage(groups, theme, cols=4, out_name=None, title=None, note=None):
     """Cross-run sheet matching the established trajectories_* figure family.
 
     cols/out_name/title (added 21 Oct 2026) let the same sheet be cut by scene for
@@ -517,6 +533,7 @@ def plot_trajectory_montage(groups, theme, cols=4, out_name=None, title=None):
     for k, (dataset, repeat, aligned, rows) in enumerate(groups):
         ax = axes[k // cols, k % cols]
         ax.set_visible(True)
+        draw_map(ax, dataset)
         ref = next(iter(aligned.values()))["ref"]
         ax.plot(ref[:, 0], ref[:, 1], color=COLORS["reference"], lw=2.5,
                 alpha=.55, label="ground truth")
@@ -540,7 +557,7 @@ def plot_trajectory_montage(groups, theme, cols=4, out_name=None, title=None):
     fig.suptitle(title or "Relogged trajectories, top-down (SE(3)-aligned to rosbag ground truth)",
                  x=.025, ha="left", y=.992, fontsize=14, color=th["ink"])
     fig.text(.025, .972,
-             "each panel is one repeat; fixed-scale SE(3) alignment to rosbag ground truth; VINS+YOLO* had zero matched masks",
+             note or "each panel is one repeat; fixed-scale SE(3) alignment to rosbag ground truth; VINS+YOLO* had zero matched masks",
              ha="left", va="top", fontsize=8.5, color=th["ink3"])
     fig.tight_layout(rect=[0, 0, 1, .955])
     # NOT `name`: the drawing loop above binds `name` to each system label, and a

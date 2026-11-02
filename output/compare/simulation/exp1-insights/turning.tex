@@ -1,0 +1,21 @@
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption[Growth of position and heading error while turning against straights, every estimator.]{Growth rate of the position error and of the heading error while the ground-truth yaw rate exceeds \SI{10}{\degree\per\second} and on straights, median over the five recordings, with the number of recordings in which the turning rate is the larger ($n_{>}$). Baselines: anchored error over the whole run. Visual estimators: start-anchored error at the IMU point, tracking regime only (before the first jump, below \SI{3}{\metre}); heading contrast not computed for them.}
+\label{tab:e1i-turning}
+\begin{tabular}{lrrrrrrr}
+\toprule
+Estimator & $n$ & \multicolumn{3}{c}{position [\si{\milli\metre\per\second}]} & \multicolumn{3}{c}{heading [\si{\milli\degree\per\second}]} \\
+ & & turning & straight & $n_{>}$ & turning & straight & $n_{>}$ \\
+\midrule
+Wheel odometry & 5 & 63.6 & 48.2 & 2 & 845.5 & -78.0 & 5 \\
+IMU dead reckoning & 5 & 175.1 & 605.8 & 0 & 18.2 & 15.6 & 4 \\
+EKF wheel+IMU & 5 & 7.8 & 2.6 & 4 & 15.3 & 6.7 & 3 \\
+EKF @ VSLAM noise & 5 & 76.1 & -11.0 & 5 & 538.6 & -13.4 & 5 \\
+\midrule
+VINS-Fusion & 5 & 0.4 & 5.4 & 1 & --- & --- & --- \\
+ORB-SLAM3 & 4 & 12.3 & 0.3 & 3 & --- & --- & --- \\
+ORB-SLAM3 (no LC) & 4 & -1.7 & 1.8 & 1 & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}

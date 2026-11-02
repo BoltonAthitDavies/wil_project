@@ -1,0 +1,44 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption[Lever arm that minimises each run's ATE.]{The forward lever arm that minimises each tracked unfiltered run's whole-run planar ATE, from a sweep of $L$ in \SIrange{0}{0.60}{\metre} in \SI{0.04}{\metre} steps, with the ATE at $L=0$ (as reported in the chapter) and at the SDF value $L=\SI{0.338}{\metre}$. The IMU sits \SI{0.338}{\metre} ahead of the model origin in \path{models/ackermann_robot/model.sdf}.}
+\label{tab:insight-lever-argmin}
+\begin{tabular}{lllrrrr}
+\toprule
+Testbed & Recording & Estimator & $L^{*}$ [m] & ATE($0$) [m] & ATE($L^{*}$) [m] & ATE($0.338$) [m] \\
+\midrule
+extreme & \repo{static_000} & ORB-SLAM3 & 0.28 & 0.37 & 0.33 & 0.33 \\
+extreme & \repo{static_000} & ORB-SLAM3 & 0.48 & 0.42 & 0.30 & 0.31 \\
+extreme & \repo{static_000} & ORB-SLAM3 & 0.60 & 0.64 & 0.53 & 0.55 \\
+extreme & \repo{static_000} & VINS-Fusion & 0.44 & 0.31 & 0.13 & 0.15 \\
+extreme & \repo{static_000} & VINS-Fusion & 0.44 & 0.32 & 0.14 & 0.16 \\
+extreme & \repo{static_000} & VINS-Fusion & 0.44 & 0.33 & 0.15 & 0.16 \\
+extreme & \repo{static_001} & ORB-SLAM3 & 0.32 & 0.18 & 0.06 & 0.06 \\
+extreme & \repo{static_001} & ORB-SLAM3 & 0.32 & 0.33 & 0.28 & 0.28 \\
+extreme & \repo{static_001} & ORB-SLAM3 & 0.32 & 0.19 & 0.08 & 0.08 \\
+extreme & \repo{static_001} & VINS-Fusion & 0.40 & 0.26 & 0.07 & 0.08 \\
+extreme & \repo{static_001} & VINS-Fusion & 0.40 & 0.25 & 0.07 & 0.08 \\
+extreme & \repo{static_001} & VINS-Fusion & 0.36 & 0.25 & 0.12 & 0.12 \\
+extreme & \repo{static_002} & ORB-SLAM3 & 0.36 & 0.39 & 0.15 & 0.15 \\
+extreme & \repo{static_002} & ORB-SLAM3 & 0.40 & 0.42 & 0.19 & 0.19 \\
+extreme & \repo{static_002} & ORB-SLAM3 & 0.36 & 0.34 & 0.05 & 0.05 \\
+extreme & \repo{static_002} & VINS-Fusion & 0.32 & 0.33 & 0.10 & 0.10 \\
+extreme & \repo{static_002} & VINS-Fusion & 0.36 & 0.34 & 0.09 & 0.09 \\
+extreme & \repo{static_002} & VINS-Fusion & 0.32 & 0.33 & 0.07 & 0.08 \\
+realistic & \repo{realistic_000} & ORB-SLAM3 & 0.28 & 0.34 & 0.20 & 0.21 \\
+realistic & \repo{realistic_000} & ORB-SLAM3 & 0.28 & 0.34 & 0.18 & 0.19 \\
+realistic & \repo{realistic_000} & VINS-Fusion & 0.32 & 0.45 & 0.32 & 0.32 \\
+realistic & \repo{realistic_001} & ORB-SLAM3 & 0.32 & 0.30 & 0.10 & 0.10 \\
+realistic & \repo{realistic_001} & ORB-SLAM3 & 0.32 & 0.30 & 0.08 & 0.09 \\
+realistic & \repo{realistic_001} & VINS-Fusion & 0.32 & 0.29 & 0.10 & 0.10 \\
+realistic & \repo{realistic_002} & ORB-SLAM3 & 0.08 & 0.64 & 0.64 & 0.66 \\
+realistic & \repo{realistic_002} & ORB-SLAM3 & 0.00 & 0.47 & 0.47 & 0.51 \\
+realistic & \repo{realistic_002} & VINS-Fusion & 0.60 & 1.82 & 1.64 & 1.71 \\
+realistic & \repo{realistic_003} & ORB-SLAM3 & 0.32 & 0.15 & 0.06 & 0.06 \\
+realistic & \repo{realistic_003} & ORB-SLAM3 & 0.36 & 0.17 & 0.05 & 0.05 \\
+realistic & \repo{realistic_003} & VINS-Fusion & 0.48 & 0.29 & 0.17 & 0.18 \\
+\midrule
+\multicolumn{7}{l}{median $L^{*}$ = 0.34\,m, IQR 0.32--0.40\,m over 30 runs} \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -40,6 +40,7 @@
 \usepackage{ifthen}
 \usepackage{siunitx}
 \usepackage{graphicx}
+\usepackage{placeins}          % \FloatBarrier: keep each result slot's floats inside the slot
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,fit,positioning,shapes.geometric}
 \usepackage{rotating}
@@ -259,7 +260,7 @@
 
 \title{Open Concerns}
 \author{Bolton Athit Davies}
-\date{21 October 2026}
+\date{26 October 2026}
 
 \begin{document}
 \maketitle
@@ -267,7 +268,7 @@
 
 \noindent
 Every passage the final report marks as \flag{queried}, and the status of each
-of its eight result slots, collected into one list. 97 items, from
+of its eight result slots, collected into one list. 98 items, from
 the final report.
 
 \medskip
@@ -870,9 +871,11 @@ experiment's protocol (\reportref{tab:real-rig,tab:deviations}).}
 \medskip
 
 \subsection*{Experiment 4: Dense Map Reconstruction and Map-Quality Evaluation: Simulation}
-\noindent\textbf{39.}\quad \slotstatus{partial}{One database, the tiny warehouse, is scored for geometry
-and drivability. The large-warehouse map attempt failed through tracking loss
-and produced no scorable database.}
+\noindent\textbf{39.}\quad \slotstatus{partial}{Three databases are scored for geometry and drivability:
+the tiny warehouse, which passes, and two realistic-warehouse maps, one per
+layout, built on 26 October 2026 with loop closure deliberately disabled, which
+fail the quality criterion fixed before scoring. The tiny map's independent
+drivability reference remains lost.}
 
 \medskip
 \noindent\textbf{40.\ \flag{[Queried: reproducibility of the drivability half]}}\quad The geometry result is fully reproducible: both \repo{map/map_tiny.db} and the
@@ -897,16 +900,21 @@ and cannot yet be audited. The attempt must be repeated with its artifacts
 retained before it is carried into any conclusion.}
 
 \medskip
+\noindent\textbf{42.\ \flag{[Queried: front end of the realistic builds]}}\quad RTAB-Map took its pose from TF, so the odometry came from whichever front end
+was running; the database does not record which. The precision loss cannot be
+placed on the front end against the back end until the build logs name it.
+
+\medskip
 
 \subsection*{Experiment 4: Dense Map Reconstruction and Map-Quality Evaluation: Real robot}
-\noindent\textbf{42.}\quad \slotstatus{planned}{No RTAB-Map database has been built from real imagery, and
+\noindent\textbf{43.}\quad \slotstatus{planned}{No RTAB-Map database has been built from real imagery, and
 no reference geometry of the site exists to score one against.}
 
 \medskip
 
 \subsection*{Cross-Experiment Discussion, Simulation-to-Real Comparison and
 Limitations: Where each pipeline is weak, block by block}
-\noindent\textbf{43.\ \flag{[Withdrawn criterion]}}\quad An earlier revision of these tables graded VINS-Fusion's solver quality against
+\noindent\textbf{44.\ \flag{[Withdrawn criterion]}}\quad An earlier revision of these tables graded VINS-Fusion's solver quality against
 ``median final cost $>5000$''. That threshold was chosen after observing 1176 in
 static scenes and 14110 in dynamic ones, so it separated two numbers already in
 hand and the \flag{``poor'' verdict it produced was guaranteed by the choice
@@ -922,7 +930,7 @@ and \SI{45.3}{\percent} in dynamic ones reaching the iteration or
 graded, because any threshold on it would repeat the same error.
 
 \medskip
-\noindent\textbf{44.}\quad \textbf{Both visual front ends are the dominant cost, and neither keeps up
+\noindent\textbf{45.}\quad \textbf{Both visual front ends are the dominant cost, and neither keeps up
 cleanly.} ORB-SLAM3 spends \SI{33.1}{\milli\second} of a \SI{53.8}{\milli\second}
 tracking budget on preprocessing, extraction and stereo matching in static scenes,
 rising to \SI{45.1}{\milli\second} of \SI{61.2}{\milli\second} in dynamic ones.
@@ -933,39 +941,39 @@ processes frames as fast as they arrive, and the two differ in what they do abou
 it.
 
 \medskip
-\noindent\textbf{45.}\quad \emph{table row:} E \textbar{} \flag{replay rate $0.5\times$ for both visual estimators} \textbar{} accuracy figures
+\noindent\textbf{46.}\quad \emph{table row:} E \textbar{} \flag{replay rate $0.5\times$ for both visual estimators} \textbar{} accuracy figures
   are not evidence of real-time capability
 
 \medskip
-\noindent\textbf{46.}\quad \emph{table row:} E \textbar{} \flag{baselines are offline, visual estimators ran live} \textbar{} timing-induced
+\noindent\textbf{47.}\quad \emph{table row:} E \textbar{} \flag{baselines are offline, visual estimators ran live} \textbar{} timing-induced
   error is present on one side of the comparison only
 
 \medskip
-\noindent\textbf{47.}\quad \emph{table row:} E \textbar{} \flag{only \repo{allsensor} bags carry wheel encoders} \textbar{} the baseline exists
+\noindent\textbf{48.}\quad \emph{table row:} E \textbar{} \flag{only \repo{allsensor} bags carry wheel encoders} \textbar{} the baseline exists
   for static featureless-floor scenes only; no dynamic condition
 
 \medskip
-\noindent\textbf{48.}\quad \emph{table row:} E \textbar{} \flag{$n=5$ across four worlds, no condition repeated more than twice} \textbar{} no
+\noindent\textbf{49.}\quad \emph{table row:} E \textbar{} \flag{$n=5$ across four worlds, no condition repeated more than twice} \textbar{} no
   mean, deviation or interval; between-bag differences are not effects
 
 \medskip
-\noindent\textbf{49.}\quad \emph{table row:} E \textbar{} \flag{ORB-SLAM3 drops frames at a depth-5 best-effort subscriber; VINS buffers
+\noindent\textbf{50.}\quad \emph{table row:} E \textbar{} \flag{ORB-SLAM3 drops frames at a depth-5 best-effort subscriber; VINS buffers
   100 deep} \textbar{} input delivery is not matched between the two; no timing comparison
   is admissible
 
 \medskip
-\noindent\textbf{50.}\quad \emph{table row:} E \textbar{} \flag{ORB-SLAM3 run-to-run spread unmeasured, one run per configuration} \textbar{} loop-closure differences cannot be attributed; repeats required
+\noindent\textbf{51.}\quad \emph{table row:} E \textbar{} \flag{ORB-SLAM3 run-to-run spread unmeasured, one run per configuration} \textbar{} loop-closure differences cannot be attributed; repeats required
 
 \medskip
-\noindent\textbf{51.}\quad \emph{table row:} E \textbar{} \flag{loop-closure state absent from \repo{run_metadata.csv}} \textbar{} configurations
+\noindent\textbf{52.}\quad \emph{table row:} E \textbar{} \flag{loop-closure state absent from \repo{run_metadata.csv}} \textbar{} configurations
   distinguishable only by inspecting \repo{loop_closing.csv}
 
 \medskip
-\noindent\textbf{52.}\quad \emph{table row:} E \textbar{} \flag{origin of the wheel yaw-rate offset untested} \textbar{} the drift is predicted
+\noindent\textbf{53.}\quad \emph{table row:} E \textbar{} \flag{origin of the wheel yaw-rate offset untested} \textbar{} the drift is predicted
   but not yet attributable or correctable (\reportref{sec:h1-falsified})
 
 \medskip
-\noindent\textbf{53.}\quad \emph{table row:} E \textbar{} \flag{accelerometer characterisation unstable across bags} \textbar{} bias 0.019 to
+\noindent\textbf{54.}\quad \emph{table row:} E \textbar{} \flag{accelerometer characterisation unstable across bags} \textbar{} bias 0.019 to
   0.068, scale 1.020 to 1.067 for one simulated sensor
 
 \medskip

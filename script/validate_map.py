@@ -76,6 +76,10 @@ def main():
                     help='metres a map cell may sit from real structure and still '
                          'count as correct (default 0.25)')
     ap.add_argument('--out', default='output/compare/rtab_map_vs_gt.png')
+    ap.add_argument('--json', default='',
+                    help='also write the computed metrics here, so a figure in '
+                         'the report can be audited against the numbers that '
+                         'drew it instead of against a re-run')
     a = ap.parse_args()
 
     from scipy.ndimage import distance_transform_edt, binary_dilation
@@ -186,6 +190,26 @@ def main():
               % (100 * unmapped))
         print('  clearance to nearest mapped obstacle: median %.2f m, p05 %.2f m'
               % (np.median(clear), np.percentile(clear, 5)))
+
+        # ---- machine-readable ---------------------------------------------
+        # Written BEFORE the plot: the numbers are the result, the figure only
+        # draws them, and a matplotlib failure must not cost the measurement.
+        if a.json:
+            import json
+            rec = dict(
+                map=os.path.abspath(a.map), world=os.path.abspath(a.world),
+                gt=os.path.abspath(a.gt), map_pose=a.map_pose, tol_m=a.tol,
+                occupied_cells=int(M_occ.sum()), known_cells=int(M_known.sum()),
+                true_edge_cells=int(T_edge.sum()), gt_poses=int(len(gt)),
+                precision=prec, recall_whole=rec_raw, recall_seen=rec_seen,
+                drivable=drivable, false_obstacle=blocked, unmapped=unmapped,
+                clearance_median_m=float(np.median(clear)),
+                clearance_p05_m=float(np.percentile(clear, 5)),
+                figure=os.path.abspath(a.out))
+            os.makedirs(os.path.dirname(os.path.abspath(a.json)), exist_ok=True)
+            with open(a.json, 'w') as fh:
+                json.dump(rec, fh, indent=2, sort_keys=True)
+            print('wrote ' + a.json)
 
         # ---- plot -------------------------------------------------------------
         import matplotlib

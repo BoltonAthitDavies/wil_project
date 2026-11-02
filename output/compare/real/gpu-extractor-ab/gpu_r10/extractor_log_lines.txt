@@ -1,0 +1,2 @@
+[ORBextractor] GPU front end active (FAST/NMS/blur/orientation/rBRIEF on the GPU)
+[ORBextractor] GPU front end active (FAST/NMS/blur/orientation/rBRIEF on the GPU)

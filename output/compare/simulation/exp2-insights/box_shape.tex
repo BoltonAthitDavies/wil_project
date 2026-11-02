@@ -1,0 +1,18 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption[Matched boxes against near misses.]{Matched predictions (IoU $\ge 0.5$) against near misses (best IoU in $[0.2, 0.5)$ with an unmatched truth box of the class): median IoU, box side, width-to-height ratio and score. The last columns give how many of the scorer's false negatives have a near miss standing next to them: the share of frames with at least one false negative that also hold at least one near-miss prediction, and the near-miss count against the false-negative count. Source: \path{box_shape.csv}.}
+\label{tab:e2i-shape}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrrrrrr}
+\toprule
+Recording & \multicolumn{2}{c}{IoU median} & \multicolumn{2}{c}{side [px]} & \multicolumn{2}{c}{w/h} & \multicolumn{2}{c}{score} & FN frames with \\
+ & matched & near & matched & near & matched & near & matched & near & a near miss; near/FN \\
+\midrule
+\repo{dyn_00_000} & 0.67 & 0.39 & 77 & 56 & 1.17 & 0.76 & 0.83 & 0.68 & 86\,\%; 4098/5900 \\
+\repo{dyn_00_001} & 0.68 & 0.38 & 74 & 57 & 1.15 & 0.70 & 0.79 & 0.66 & 79\,\%; 3907/6868 \\
+\repo{dyn_01_000} & 0.66 & 0.38 & 87 & 58 & 1.19 & 0.73 & 0.79 & 0.69 & 86\,\%; 3735/6064 \\
+\repo{dyn_02_000} & 0.66 & 0.38 & 82 & 58 & 1.28 & 0.77 & 0.77 & 0.60 & 80\,\%; 3333/6502 \\
+\bottomrule
+\end{tabular}}
+\end{table}

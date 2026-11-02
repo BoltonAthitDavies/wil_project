@@ -1,0 +1,21 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption[Where the recorded route collides with the maps.]{Contiguous stretches of the recorded \repo{dataset_map_tiny} route on which the true footprint overlaps an occupied cell of the map: pose range, number of poses, location, and the smallest clearance from the route centre to a mapped obstacle inside the stretch.}
+\label{tab:insight4-blocked}
+\begin{tabular}{lrrrrr}
+\toprule
+Map & poses & count & $x$ [m] & $y$ [m] & min.\ clearance [m] \\
+\midrule
+\repo{map_tiny.db} & --- & 0 & --- & --- & --- \\
+\repo{map_02.db} & 2356--2421 & 66 & -3.7 & -5.9 & 0.10 \\
+\repo{map_02.db} & 125--164 & 40 & 1.8 & 8.2 & 0.00 \\
+\repo{map_02.db} & 922--958 & 37 & -3.6 & -5.8 & 0.00 \\
+\repo{map_02.db} & 1485--1516 & 32 & -2.4 & 5.6 & 0.11 \\
+\repo{map_02.db} & 960--986 & 27 & -3.8 & -5.2 & 0.20 \\
+\repo{map_02.db} & 1518--1539 & 22 & -2.8 & 5.4 & 0.05 \\
+\repo{map_02.db} & 916--918 & 3 & -3.4 & -6.2 & 0.40 \\
+\repo{map_02.db} & 1406--1407 & 2 & -0.7 & 5.1 & 0.54 \\
+\bottomrule
+\end{tabular}
+\end{table}

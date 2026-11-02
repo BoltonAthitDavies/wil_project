@@ -1,0 +1,45 @@
+\begin{table}[htbp]
+\centering
+\scriptsize
+\caption[Realistic world, every run: drift while turning, drift on straights, drift with traffic in view.]{Realistic world, every run: growth rate of the start-anchored planar error while the robot turns and on straights, and with traffic in the camera's view and without, over the tracked time ($T$). Blank: fewer than \SI{3}{\second} in one of the two states. Onset as in the timeline analysis; ``at onset'' gives whether the robot was turning and whether traffic was in view at that moment.}
+\label{tab:insight-realistic-runs}
+\begin{tabular}{lllrrrrrrl}
+\toprule
+Recording & Estimator & Run & $T$ & turning & straight & traffic & none & onset & at onset \\
+ & & & [s] & \multicolumn{4}{c}{[\si{\milli\metre\per\second}]} & [s] & turn / traffic \\
+\midrule
+\repo{realistic_000} & ORB-SLAM3 & \repo{loopclosing} & 109 & 13.2 & 1.5 & --- & --- & --- & --- / --- \\
+\repo{realistic_000} & ORB-SLAM3 & \repo{noloopclosing} & 109 & 18.2 & 4.4 & --- & --- & 29 & yes / --- \\
+\repo{realistic_000} & VINS-Fusion & \repo{nofilter} & 113 & -1.7 & 9.4 & --- & --- & --- & --- / --- \\
+\repo{realistic_001} & ORB-SLAM3 & \repo{loopclosing} & 70 & 5.6 & -2.8 & --- & --- & --- & --- / --- \\
+\repo{realistic_001} & ORB-SLAM3 & \repo{noloopclosing} & 70 & 7.8 & -3.9 & --- & --- & --- & --- / --- \\
+\repo{realistic_001} & VINS-Fusion & \repo{nofilter} & 70 & 4.5 & 0.5 & --- & --- & --- & --- / --- \\
+\repo{realistic_002} & ORB-SLAM3 & \repo{loopclosing} & 52 & 9.7 & -0.2 & 4.5 & 3.6 & --- & --- / --- \\
+\repo{realistic_002} & ORB-SLAM3 & \repo{noloopclosing} & 52 & 13.0 & 0.4 & 6.9 & 3.6 & --- & --- / --- \\
+\repo{realistic_002} & ORB-SLAM3+YOLO & \repo{class_loopclosing_atlas} & 6 & --- & --- & --- & --- & 33 & no / no \\
+\repo{realistic_002} & ORB-SLAM3+YOLO & \repo{class_loopclosing_noatlas} & 12 & 113.5 & 247.0 & --- & --- & 28 & no / no \\
+\repo{realistic_002} & ORB-SLAM3+YOLO & \repo{class_noloopclosing_atlas} & 0 & --- & --- & --- & --- & 62 & yes / no \\
+\repo{realistic_002} & ORB-SLAM3+YOLO & \repo{class_noloopclosing_noatlas} & 52 & 9.5 & -1.4 & 2.0 & 3.8 & 62 & yes / no \\
+\repo{realistic_002} & ORB-SLAM3+YOLO & \repo{motion_loopclosing_atlas} & 0 & --- & --- & --- & --- & 15 & no / yes \\
+\repo{realistic_002} & ORB-SLAM3+YOLO & \repo{motion_loopclosing_noatlas} & 52 & 6.6 & -0.2 & 2.7 & 1.7 & --- & --- / --- \\
+\repo{realistic_002} & ORB-SLAM3+YOLO & \repo{motion_noloopclosing_atlas} & 0 & --- & --- & --- & --- & 62 & yes / no \\
+\repo{realistic_002} & ORB-SLAM3+YOLO & \repo{motion_noloopclosing_noatlas} & 52 & 8.3 & -0.1 & 5.2 & 2.7 & --- & --- / --- \\
+\repo{realistic_002} & VINS-Fusion & \repo{nofilter} & 5 & --- & --- & --- & --- & 30 & yes / no \\
+\repo{realistic_002} & VINS-Fusion+YOLO & \repo{class} & 5 & --- & --- & --- & --- & 30 & yes / no \\
+\repo{realistic_002} & VINS-Fusion+YOLO & \repo{motion} & 52 & 26.5 & -0.2 & -5.8 & 14.6 & --- & --- / --- \\
+\repo{realistic_003} & ORB-SLAM3 & \repo{loopclosing} & 94 & -1.6 & -2.3 & 5.0 & -7.4 & --- & --- / --- \\
+\repo{realistic_003} & ORB-SLAM3 & \repo{noloopclosing} & 94 & 4.1 & -4.4 & 4.4 & -7.3 & --- & --- / --- \\
+\repo{realistic_003} & ORB-SLAM3+YOLO & \repo{class_loopclosing_atlas} & 10 & --- & --- & 217.3 & 12.1 & 37 & no / no \\
+\repo{realistic_003} & ORB-SLAM3+YOLO & \repo{class_loopclosing_noatlas} & 68 & 44.6 & 38.8 & 58.9 & 26.6 & 42 & yes / no \\
+\repo{realistic_003} & ORB-SLAM3+YOLO & \repo{class_noloopclosing_atlas} & 8 & --- & --- & --- & --- & 89 & yes / no \\
+\repo{realistic_003} & ORB-SLAM3+YOLO & \repo{class_noloopclosing_noatlas} & 11 & --- & --- & 552.0 & 12.1 & 31 & yes / yes \\
+\repo{realistic_003} & ORB-SLAM3+YOLO & \repo{motion_loopclosing_atlas} & 15 & -132.0 & 128.1 & 193.8 & -201.3 & 31 & yes / yes \\
+\repo{realistic_003} & ORB-SLAM3+YOLO & \repo{motion_loopclosing_noatlas} & 14 & 90.0 & 232.8 & 287.4 & 15.5 & 30 & no / yes \\
+\repo{realistic_003} & ORB-SLAM3+YOLO & \repo{motion_noloopclosing_atlas} & 44 & 117.0 & -18.1 & 49.8 & 3.9 & 26 & yes / yes \\
+\repo{realistic_003} & ORB-SLAM3+YOLO & \repo{motion_noloopclosing_noatlas} & 94 & 24.8 & -8.7 & 11.5 & -6.9 & --- & --- / --- \\
+\repo{realistic_003} & VINS-Fusion & \repo{nofilter} & 94 & -0.0 & 2.8 & 3.7 & 0.7 & --- & --- / --- \\
+\repo{realistic_003} & VINS-Fusion+YOLO & \repo{class} & 94 & -7.1 & 7.3 & 8.4 & -1.6 & --- & --- / --- \\
+\repo{realistic_003} & VINS-Fusion+YOLO & \repo{motion} & 94 & 0.4 & 3.1 & 7.8 & -1.6 & --- & --- / --- \\
+\bottomrule
+\end{tabular}
+\end{table}

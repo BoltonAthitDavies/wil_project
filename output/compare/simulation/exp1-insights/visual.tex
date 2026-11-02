@@ -1,0 +1,55 @@
+\begin{table}[htbp]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\caption[Visual estimators at the IMU point: drift while turning, features against drift, jumps.]{Visual estimators scored at the IMU point after the initialisation transient: whole-run aligned ATE in 3-D (as the chapter reports it) and in the plane, the vertical RMS error that separates them, length of the tracking regime, drift rate while turning and on straights in that regime, Spearman $\rho$ between the matched-feature count (ORB-SLAM3 map inliers, VINS-Fusion tracked features) and the drift rate in \SI{2}{\second} bins, and the number of impossible-speed jumps of the estimate.}
+\label{tab:e1i-visual}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llrrrrrrrr}
+\toprule
+Recording & Estimator & ATE 3-D & ATE planar & vertical & regime & turning & straight & $\rho$ (feat., drift) & jumps \\
+ & & [m] & [m] & RMS [m] & [s] & \multicolumn{2}{c}{[\si{\milli\metre\per\second}]} & (bins) & \\
+\midrule
+\repo{allsensor_000} & VINS-Fusion & 0.56 & 0.11 & 0.54 & 59 & 10.7 & 0.6 & 0.05 (29) & 0 \\
+ & ORB-SLAM3 & 0.51 & 0.06 & 0.50 & 59 & -5.3 & 2.0 & 0.08 (29) & 1 \\
+ & ORB-SLAM3 (no LC) & 0.04 & 0.04 & 0.01 & 59 & -0.4 & 0.6 & -0.03 (29) & 2 \\
+\addlinespace
+\repo{allsensor_001} & VINS-Fusion & 0.13 & 0.07 & 0.10 & 69 & 0.4 & 2.8 & -0.11 (34) & 0 \\
+ & ORB-SLAM3 & 0.10 & 0.08 & 0.06 & 66 & 3.9 & -0.5 & 0.23 (32) & 4 \\
+ & ORB-SLAM3 (no LC) & 0.30 & 0.29 & 0.03 & 66 & 4.8 & 0.0 & 0.11 (32) & 3 \\
+\addlinespace
+\repo{allsensor_002} & VINS-Fusion & 0.45 & 0.43 & 0.12 & 72 & 14.2 & 17.9 & 0.00 (36) & 1 \\
+ & ORB-SLAM3 & 0.55 & 0.53 & 0.14 & 72 & 44.3 & -1.8 & 0.19 (36) & 2 \\
+ & ORB-SLAM3 (no LC) & 1.79 & 1.78 & 0.13 & 2 & --- & --- & --- (0) & 3 \\
+\addlinespace
+\repo{allsensor_003} & VINS-Fusion & 0.74 & 0.71 & 0.21 & 84 & -9.6 & 30.0 & 0.16 (41) & 0 \\
+ & ORB-SLAM3 & 6.44 & 6.43 & 0.31 & 70 & 20.6 & 1.1 & -0.07 (34) & 6 \\
+ & ORB-SLAM3 (no LC) & 0.22 & 0.21 & 0.07 & 84 & -7.0 & 2.9 & 0.26 (41) & 2 \\
+\addlinespace
+\repo{allsensor_004} & VINS-Fusion & 0.28 & 0.21 & 0.17 & 83 & -0.4 & 5.4 & -0.16 (41) & 0 \\
+ & ORB-SLAM3 & 1.17 & 0.22 & 1.15 & 9 & --- & --- & --- (0) & 3 \\
+ & ORB-SLAM3 (no LC) & 0.76 & 0.14 & 0.74 & 83 & -3.0 & 7.7 & -0.14 (41) & 3 \\
+\addlinespace
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\small
+\caption[Anatomy of the ORB-SLAM3 failure on allsensor\_003.]{Anatomy of the ORB-SLAM3 (loop closer on) run on \repo{allsensor_003}: whole-run aligned ATE, the number and sizes of impossible-speed jumps, when they occur, how much of the net error change is taken in jump steps against ordinary drift, and the tracking-state losses the front end logged.}
+\label{tab:e1i-orbfail}
+\begin{tabular}{lr}
+\toprule
+Aligned ATE [m] & 6.37 \\
+Jumps & 6 \\
+Jump times [s] & 2.4, 2.5, 16.0, 88.3, 89.4, 89.8 \\
+Jump sizes [m] & 0.41, 0.67, 0.82, 29.99, 11.58, 2.52 \\
+Net error change in jump steps [m] & 13.60 \\
+Net error change in ordinary steps [m] & -2.94 \\
+Frames not tracking OK & 0 \\
+Route progress at the largest jump & 0.89 \\
+Time of the largest jump [s] & 88.3 \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -1,0 +1,26 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption[Extreme world: tracking events against the true moving-object area in view.]{Extreme world, dynamic recordings: tracking events against the \emph{true} moving-object area in view, from the projected simulator truth of Experiment~2 (\path{output/yolo_eval/dyn_*/yolo_eval.csv}). Within each run the frames are split into terciles of moving-object area; the table gives the median over runs of the share of frames in which ORB-SLAM3 was not in the OK state, the rate of impossible-speed jumps of the estimate, and the Spearman correlation between matched features (ORB-SLAM3 map inliers, VINS-Fusion tracked features) and moving-object area. $n_{>}$ counts runs where the top tercile exceeds the bottom; $p$ is the Wilcoxon signed-rank test over runs.}
+\label{tab:insight-mechanism-extreme}
+\begin{tabular}{lrrrrrr}
+\toprule
+Estimator & $n$ & area med. [\si{\percent}] & top tercile & bottom tercile & $n_{>}$ & $p$ \\
+\midrule
+\multicolumn{7}{l}{\emph{Share of frames not tracking OK}} \\
+ORB-SLAM3 & 12 & 5.7 & 0.195 & 0.147 & 5 & 0.79 \\
+\multicolumn{7}{l}{\emph{Share of frames not tracking OK}} \\
+ORB-SLAM3+YOLO & 20 & 5.5 & 0.132 & 0.084 & 10 & 0.39 \\
+\multicolumn{7}{l}{\emph{Jumps of the estimate per second}} \\
+VINS-Fusion & 12 & 5.5 & 21.65 & 20.94 & 7 & 0.03 \\
+ORB-SLAM3 & 12 & 5.7 & 7.04 & 5.34 & 6 & 0.97 \\
+VINS-Fusion+YOLO & 19 & 5.4 & 20.62 & 18.18 & 12 & 0.10 \\
+ORB-SLAM3+YOLO & 20 & 5.5 & 0.70 & 1.22 & 10 & 0.52 \\
+\multicolumn{7}{l}{\emph{Spearman $\rho$, matched features against moving-object area (median over runs; runs with $\rho<0$)}} \\
+VINS-Fusion & 12 & & \multicolumn{2}{c}{$\rho$ = 0.19} & 3 & \\
+ORB-SLAM3 & 12 & & \multicolumn{2}{c}{$\rho$ = -0.11} & 11 & \\
+VINS-Fusion+YOLO & 19 & & \multicolumn{2}{c}{$\rho$ = 0.18} & 7 & \\
+ORB-SLAM3+YOLO & 20 & & \multicolumn{2}{c}{$\rho$ = -0.11} & 14 & \\
+\bottomrule
+\end{tabular}
+\end{table}

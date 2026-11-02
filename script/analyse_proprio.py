@@ -100,6 +100,7 @@ import matplotlib.pyplot as plt
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import vio_metrics as vm
+from map_underlay import draw_map
 
 ROOT = vm.ROOT
 
@@ -219,6 +220,12 @@ def analyse_one(dataset, args):
     if gt is None:
         print("  [skip] %s: no ground_truth.csv under any baseline tree" % dataset)
         return out
+    # The visual estimators report the IMU, 0.338 m ahead of the model origin the
+    # ground truth reports (vio_metrics.IMU_LEVER_M); score them against the IMU
+    # point. The baselines are referenced to the origin and keep the raw truth.
+    p_imu = vm.gt_at_imu(gt["p"], gt["q"])
+    gt_imu = dict(gt, p=p_imu, x=p_imu[:, 0], y=p_imu[:, 1])
+    gt_origin = gt
 
     for entry in args.systems:
         label, tree, run = vm.split(entry)
@@ -238,6 +245,7 @@ def analyse_one(dataset, args):
         if est is None:
             print("  [skip] %s: no usable vio.csv in %s" % (label, d))
             continue
+        gt = gt_imu if vm.is_visual_tree(tree) else gt_origin
 
         lo = max(est["t"][0], gt["t"][0])
         hi = min(est["t"][-1], gt["t"][-1])
@@ -486,6 +494,7 @@ def _draw_trajectory(ax, recs, dataset, theme, systems, scale=1.0, title=None,
     """
     th = THEMES[theme]
     ax.set_facecolor(th["surface"])
+    draw_map(ax, dataset)   # warehouse footprints, 50 % transparent, world frame
     gt = None
     for entry in systems:
         tree = vm.split(entry)[1]

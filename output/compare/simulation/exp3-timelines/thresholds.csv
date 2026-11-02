@@ -1,0 +1,5 @@
+testbed,estimator,static_runs,static_median_m,threshold_m
+extreme,VINS-Fusion,9,0.1140,0.3420
+extreme,ORB-SLAM3,9,0.2506,0.7519
+realistic,VINS-Fusion,2,0.2779,0.8338
+realistic,ORB-SLAM3,4,0.4695,1.4084

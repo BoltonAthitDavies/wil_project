@@ -82,7 +82,7 @@ the include path. Upstream's `build.sh` builds it anyway, which turns its tests 
 those are a known failure and pure disk waste. This is the main reason we do not use
 `build.sh`.
 
-### 3.1 The fork and its nine patches
+### 3.1 The fork and its thirteen patches
 
 Fork: **`BoltonAthitDavies/ORB_SLAM3`**, branch `wil`, pinned at commit
 `5c2b00f`, forked from upstream `UZ-SLAMLab/ORB_SLAM3 @ 4452a3c`. Pinned to a commit
@@ -103,6 +103,10 @@ tree.
 | 7 | `src/LoopClosing.cc` | initialise `mpCurrentKF`; `!mbActiveLC` check moved below the queue pop | **Upstream bug → busy-spin, then SIGSEGV** with `loopClosing: 0`. Added 2026-10-15; see §7.7. |
 | 8 | `src/System.cc` | `Shutdown()` stops the Viewer thread (bounded wait) | Upstream left it commented out → crash in GTK at exit with `use_viewer:=true`. Added 2026-10-15; see §7.8. |
 | 9 | `src/Viewer.cc` | `DestroyWindow` on the viewer thread before `SetFinish()` | Companion to (8): Pangolin's window registry otherwise dies in `_dl_fini` with no GL context. Added 2026-10-15; see §7.8. |
+| 10 | `include/ORBextractorGPU.h`, `src/ORBextractorGPU.cc` (new); hooks in `ORBextractor.{h,cc}`, `System.cc`, `CMakeLists.txt` | GPU front end for the ORB extractor behind `ORBextractor.useGPU` | **Performance, not a bug.** Committed in the fork, not applied by the script. Added 2026-10-28; see §3.5. |
+| 10b | `GpuHamming` in the same two GPU files; hooks in `Frame.{h,cc}`, `System.cc` | GPU brute-force Hamming 2-NN for the fisheye stereo matcher (`Stereo.useGPUMatch`, absent = follow `useGPU`) | **Performance.** Bit-identical to `cv::BFMatcher`. Added 2026-10-29; see §3.5.1. |
+| 11 | `src/ORBmatcher.cc` | `NLeft` guard on the keypoint-angle lookup in the relocalisation `SearchByProjection` (fisheye stereo read past `mvKeysUn`) | **Segfault after tracking loss on the real rig** (`exit code -11`). gdb-confirmed 2026-10-29; applied by the script; see §7.10. |
+| 12 | `src/LocalMapping.cc`, `src/ORBmatcher.cc` (Fuse), `src/Optimizer.cc` (merge BA) | Five more right-camera index guards: `mvKeysRight[i]` → `[i - NLeft]` in `KeyFrameCulling`, `mvDepth`/`mvuRight` reads limited to left indices, `get<0> == -1` skipped | **Segfault while tracking normally on the real rig** (`-11` in the mapping thread). Kernel-log-confirmed 2026-11-02; applied by the script; see §7.12. |
 
 Patches (6)–(9) keep the original upstream line as a comment next to the replacement, and
 each is guarded in `build_orbslam3.sh` so it applies once and only to unpatched source. All
@@ -173,6 +177,121 @@ full `-j8` rebuild and refuses an incremental one that needs ~50 MB. With the ob
 `cmake --build thirdparty/ORB_SLAM3/build -j2` on the same tree does the identical incremental
 build without the gate — that is how patches (6)–(9) were built at ~1 GB free, each behind a
 watchdog that kills `cc1plus` below 250 MB. The gate should be made proportional to the work.
+
+### 3.5 The GPU front end (patch 10, 2026-10-28)
+
+**Why.** On the real rig (1920×1080 fisheye, 2000 features, 8 levels) the tracker took
+~85 ms per stereo pair, of which **~80 % was ORB extraction** (`tracking_frontend.csv`,
+§7.9 runs) — one CPU thread doing FAST on an 8-level pyramid of two 2 MP images. A
+30 Hz camera was therefore processed at ~10 Hz and the rest dropped (§7.9), which is
+where the turn-time losses came from. The SLAM part (pose, local map) was under 10 ms.
+
+**What moved to the GPU, and what did not.** `ORBextractorGPU` runs OpenCV's FAST-9
+corner score (a literal port of `cornerScore<16>`), 3×3 NMS plus ORB-SLAM3's
+two-threshold cell rule, the 7×7/σ2 Gaussian with `REFLECT_101`, `IC_Angle`, and the
+rotated rBRIEF with `cvRound` semantics and OpenCV's `fastAtan2` polynomial. The
+pyramid, the dynamic-mask veto, **`DistributeOctTree` (the uniform-coverage selection)**
+and the mono/stereo ordering stay on the CPU, unchanged. The CPU code is intact beneath
+a runtime switch, `ORBextractor.useGPU: 0/1` (int, absent = 0), read raw in `System.cc`
+like `loopClosing`; the real-rig configs set 1, the sim configs stay at 0 so Experiments
+1–4 remain comparable with stock ORB-SLAM3.
+
+**No CUDA toolkit is needed to build.** The driver API (`libcuda.so.1`) and NVRTC
+(`libnvrtc.so.12`, here from the torch pip wheels; override the directory with
+`ORB_SLAM3_NVRTC_DIR`) are `dlopen`ed at first use and the kernels are JIT-compiled
+(~90 ms once per process). If any step fails the extractor logs one line and runs the
+CPU path. Two things learned the hard way: the pip `nvidia-cuda-nvcc-cu12` wheels ship
+`ptxas` but not `nvcc`, so a compile-time CUDA build was never an option without sudo;
+and installing a different `nvidia-cuda-runtime-cu12` than torch pins breaks the YOLO
+detector's torch — it was restored to 12.1.105.
+
+**Fidelity** (harness, four `realv5` frames, GPU vs stock CPU): per-level keypoint counts
+within ±2; **90 % of GPU keypoints at the identical CPU position and octave**; on those,
+angle difference 0.00°, descriptor Hamming distance 0.35 bits on average, 73 % bit-identical,
+99 % within 2 bits. The other 10 % are NMS/octree tie-breaks between equal-score corners,
+not a different definition. Per image: **39 → 9.3 ms** (×4.1–4.3).
+
+**In the node** (stereo-only, `realv5`, loop closing off, same bag, viewer off):
+
+| rate | arm | pairs processed | dropped | extraction stage | tracker total | inliers (median) | map points | losses / resets |
+| :-- | :-- | --: | --: | --: | --: | --: | --: | --: |
+| 0.5 | CPU | 2285 | 39 % | 67 ms | 110 ms | 948 | 4937 | 0 / 0 |
+| 0.5 | **GPU** | **2803** | **25 %** | **30 ms** | **82 ms** | 923 | 4907 | 0 / 0 |
+| 1.0 | CPU | 636 | 76 % | 131 ms | 206 ms | 806 | 4800 | 0 / 0 |
+| 1.0 | **GPU** | **1043** | **58 %** | **44 ms** | **118 ms** | 830 | 5273 | 0 / 0 |
+
+Both GPU runs logged the front end active twice — once per extractor thread — so the
+two-thread left/right path is exercised. **The in-node gain is 1.3–1.75×, not the
+harness's 4×:** with extraction cut to 30 ms the brute-force stereo matcher and
+local-map tracking, both still on the CPU, become the larger share of the 82 ms. At
+rate 1.0 the tracker is still above the 33 ms frame period, so frames still drop — fewer,
+not none. The next levers, in order, are the stereo descriptor matching (a GPU Hamming
+kNN is straightforward — **done as patch 10b, §3.5.1**), the local-map search, and input resolution.
+
+**Caveats.** GPU extraction is not bit-reproducible run to run, so repeat runs of the
+real rig are statistical, not exact. The GPU is shared with the YOLO detector in
+Experiment 3; contention was not measured. Nothing in the simulation results uses this
+path.
+
+#### 3.5.1 The GPU stereo matcher (patch 10b, 2026-10-29)
+
+**Why.** With extraction on the GPU, a stage-by-stage harness of the fisheye stereo step
+(`output/compare/real/gpu-stereo-matcher-ab/stereo_stage_test.cc`) gave, per frame:
+extraction 12 ms (two threads), **brute-force kNN 8–10 ms**, ratio test 0.1 ms,
+triangulation 0.2 ms. The kNN is `cv::BFMatcher(NORM_HAMMING).knnMatch(k=2)` over *all*
+≈2000×2000 descriptors, because the real-rig lapping area is the full 1920 px. It costs
+8 ms only when OpenCV gets all 16 threads; single-threaded it is 38 ms, and inside the
+node it competes with LocalMapping, the executor and the decoder, so its in-node share
+was the larger part of the 30 ms "preprocessing + stereo" stage.
+
+**What changed.** `GpuHamming::Knn2` (in `ORBextractorGPU.{h,cc}`, same dlopen'd
+driver/NVRTC module, one extra kernel `knn2`: one thread per query descriptor, train
+descriptors streamed through shared memory, `__popcll` on 4×u64) replaces the `knnMatch`
+call in `Frame::ComputeStereoFishEyeMatches`; the CPU line is kept as a comment and as
+the fallback. Strict `<` updates reproduce `cv::batchDistance`'s tie order (lower train
+index wins), so the ratio test downstream sees **identical input: 2003/2003 and 2005/2005
+queries identical in best index and both distances on the two harness pairs, identical
+ratio-test sets; 9–10 ms → 0.44 ms.** Switch: it follows `ORBextractor.useGPU`;
+`Stereo.useGPUMatch: 0/1` (int) overrides it (used for the A/B). The pinhole path
+(`ComputeStereoMatches`, row-band search) is untouched, so the sim is unaffected.
+
+**In the node — and a measurement lesson.** The first A/B (full bag, A then B back to
+back) was unusable: on this laptop every run slows from ~60 to ~150 ms per frame as the
+CPU package passes 90 °C and throttles, so whichever arm ran second looked worse. The
+record is kept in `order_confounded/`. The valid measurement is an **ABBA sequence on the
+first 60 s of `realv5`, each run started only below 72 °C**:
+
+| rate | arm | start °C | pairs processed | dropped | extraction+stereo stage | pose pred. | local map | tracker total | inliers | map points | losses |
+| :-- | :-- | --: | --: | --: | --: | --: | --: | --: | --: | --: | --: |
+| 1.0 | A1 CPU matcher | 73 | 840 | 47 % | 27.3 ms | 17.1 | 18.0 | 64.2 ms | 831 | 2498 | 0 |
+| 1.0 | **B1 GPU matcher** | 74 | **1153** | **34 %** | **14.8 ms** | 14.1 | 14.2 | **44.7 ms** | 851 | 2500 | 0 |
+| 1.0 | **B2 GPU matcher** | 73 | **1147** | **35 %** | **15.1 ms** | 14.0 | 14.3 | **44.5 ms** | 844 | 2444 | 0 |
+| 1.0 | A2 CPU matcher | 73 | 866 | 45 % | 27.0 ms | 16.8 | 17.4 | 63.2 ms | 820 | 2711 | 0 |
+| 0.5 | A1 CPU matcher | 73 | 1487 | 12 % | 26.1 ms | 18.1 | 18.4 | 64.9 ms | 878 | 2734 | 0 |
+| 0.5 | **B2 GPU matcher** | 75 | **1660** | **7 %** | **14.4 ms** | 17.5 | 16.7 | **50.1 ms** | 917 | 2854 | 0 |
+| 0.5 | A2 CPU matcher | 79 (hot) | 1088 | 29 % | 31.8 ms | 25.0 | 24.6 | 84.0 ms | 853 | 2883 | 0 |
+| 0.5 | B1 GPU matcher | 95 (gate timed out) | 89 | — | — | — | — | — | — | — | crashed |
+
+At rate 1.0 the two A runs and the two B runs agree to within 1 ms, which is the
+repeatability the thermal gating buys: **tracker 64 → 45 ms (−30 %), stage 27 → 15 ms,
+frames processed +35 %, drops 46 → 35 %**, inliers and map points at parity, 0 losses.
+At rate 0.5 the one clean pair gives −23 % (65 → 50 ms) and drops 12 → 7 %. The
+pose-prediction and local-map stages also got ~3 ms faster with the GPU matcher: the CPU
+`knnMatch` spawned a 16-thread `parallel_for` on every frame that contended with the
+other threads. r05_B1 crashed after 89 frames: it started at 95 °C with 190 ms frames,
+lost tracking, logged "Relocalized!!" twice and segfaulted — the known stereo-only
+loss→relocalise crash (§12, realv4), which the CPU-matcher arm `extract_r10` of the first
+attempt also hit; neither is in the matcher path.
+
+**Where the tracker time goes now** (rate 1.0, GPU both): stage 15 ms (≈12 ms of it the
+two extractor threads, pyramid and uploads), pose prediction 14 ms, local map 14 ms,
+total 45 ms — still above the 33 ms frame period at 30 Hz, so the remaining drops are
+real. The next lever is the local-map search (`SearchByProjection` on the CPU), then
+input resolution; both are larger changes than 10 and 10b.
+
+**Operational.** The laptop throttles at ~90 °C and every long run drifts; any timing A/B
+on this machine needs cool starts and ABBA order, and "frames processed" over a full bag
+is not a reliable metric for effects under ~20 %.
 
 ## 4. The ROS 2 package
 
@@ -653,6 +772,187 @@ configs hard-code the same cam0=left mapping in their yaml and will fail identic
 rotation `diag(1,-1,-1)` is consistent with gravity on +Y but gravity cannot distinguish an
 X-flip from a Z-flip (yaw sign), so the inertial run is not yet trustworthy.
 
+### 7.10 Stereo-fisheye relocalisation reads past `mvKeysUn` → SIGSEGV  *(2026-10-29)*
+
+**Symptom.** Stereo-only (and stereo-inertial) runs of the real rig died with
+`exit code -11` some seconds after a tracking loss: `Fail to track local map!`,
+`tracking state 3`, one or two `Relocalized!!`, then the segfault (realv4 on 2026-10-27,
+`realv5` on 10-28 and three times on 10-29). Never seen in the pinhole simulation.
+
+**Evidence.** Caught under gdb on `realv5` at rate 1.0 (`output/compare/real/gpu-stereo-matcher-ab/`
+is unrelated; the capture lives in the session scratch, backtrace copied below):
+
+```
+Thread 14 "orbslam3_node" received signal SIGSEGV
+#0 ORB_SLAM3::ORBmatcher::SearchByProjection(Frame&, KeyFrame*, std::set<MapPoint*> const&, float, int) + 2828
+#1 ORB_SLAM3::Tracking::Relocalization()
+#2 ORB_SLAM3::Tracking::Track()
+#3 ORB_SLAM3::Tracking::GrabImageStereo(...)
+   rax = 0xffffffff80000000   (bin = INT_MIN)      r12 = 0x7e3 = 2019   (i, the map-point index)
+   call roundf ; vcvttss2si %xmm0,%eax ; cmp $0x1e,%eax ; ... ; => mov -0x308(%rbp,%rcx,1),%rsi
+```
+
+The faulting instruction indexes the stack array `rotHist[bin]` with the result of
+`round(rot*factor)`; `INT_MIN` is what the conversion returns for a NaN. `rot` is
+`pKF->mvKeysUn[i].angle - CurrentFrame.mvKeysUn[bestIdx2].angle`. For a KannalaBrandt8
+frame `mDistCoef` is all zeros, so `Frame::UndistortKeyPoints()` sets `mvKeysUn = mvKeys`,
+which holds only the `NLeft` left-camera keypoints, while `GetMapPointMatches()` is
+`NLeft + NRight` long. A map point first observed through the right camera has `i ≥ NLeft`
+(here 2019 against ~2003), the read goes past the vector, the angle is garbage, and the
+histogram index is wild. The `assert` is compiled out in Release. Every other
+`SearchByProjection`/`SearchByBoW` variant on the tracking path selects
+`mvKeys`/`mvKeysRight` by `NLeft`; this one, used only from `Tracking::Relocalization()`,
+did not — which is why it only ever fired after a tracking loss on the fisheye rig.
+It is nondeterministic because the overrun only faults when it crosses into unmapped
+memory (one capture relocalised four times and survived).
+
+**Fix (patch 11).** The same `NLeft`/`Nleft` selection as the other variants for both
+angles, plus a `bin` range check so a NaN can never index the histogram. Original line
+kept as a comment. Applied idempotently by `build_orbslam3.sh` (dry-run on a pristine
+copy reproduces the fork file byte for byte).
+
+**Verification.** Plain replays of `realv5` on the patched library no longer lose
+tracking at all (the GPU matcher made the tracker fast enough), so relocalisation was
+forced instead: build a map from the first 25 s, then restart playback at offsets 3, 40
+and 8 s under gdb. Run 1 lost tracking, printed `Relocalized!!` and carried on; run 2 spent
+48 frames in RECENTLY_LOST with repeated relocalisation attempts before opening a new map.
+0 segfaults, graceful shutdown in both. Before the fix the same path crashed in four of
+the six runs that reached it. Logs, scripts and the annotated backtrace:
+`output/compare/real/relocalisation-crash-patch11/`.
+
+### 7.11 Stereo-inertial on the real rig: stale accelerometer scale and IMU starved behind JPEG decode  *(2026-10-29)*
+
+**Symptom.** `wil_stereo_imu.launch.py` on `dataset_realv5_000` (26855 IMU messages,
+a clean 200 Hz stream covering the whole recording) never held tracking: 10 map
+resets in 30 s, `imu_initialized 0`.
+
+**Cause 1 — the accelerometer scale was for a different IMU.** The launch default
+`ACCEL_SCALE = 9.81/9.2642` was measured on the RealSense IMU in September. The
+rig's current IMU (`/hwt101ct_yaw_publisher`) reads **9.8858 m/s² at rest**
+(stillest 2 s window of the bag, std 0.018), so the node fed ORB-SLAM3 10.47 m/s²
+against its hard-coded 9.81 and the inertial initialisation never converged
+(every reset `tracking_lost_before_inertial_ba2`). With `imu_accel_scale:=0.9923`
+initialisation completed at 3.2 s. The launch default is now `9.81/9.8858`, the old
+line commented. Gravity sits on +Y, (0.17, 9.88, 0.24), so `IMU.T_b_c1 = diag(1,-1,-1)`
+still holds to about 1.5°.
+
+**Cause 2 — the IMU arrived in bursts while the images flowed.** After the scale
+fix, 49 % of frames were "IMU-starved" (fewer than two samples between frames even
+after the wrapper's 80 ms wait): `performance.csv` showed zero IMU messages between
+most frames, then bursts of up to 1063 samples (5 s of data), with IMU-free stretches
+up to 15 s of wall time, while `stereo_received` advanced one frame per row. Only
+83 % of the IMU messages ever arrived. Two layers:
+
+- *Loss* — the Linux default socket buffers (`net.core.rmem_max` 208 KB) overflow under
+  the two JPEG streams. `sysctl -w net.core.rmem_max=67108864 net.core.rmem_default=67108864
+  net.core.wmem_max=67108864` raised delivery to 99.8 % but left the bursts.
+- *Delay* — the IMU subscription lived in the node's default, mutually exclusive
+  callback group, so every IMU callback queued behind a stereo JPEG decode on the
+  executor, and a RELIABLE reader then released the backlog at once. Giving the IMU
+  subscription its **own reentrant callback group** (`orbslam3_node.cpp`, old lines
+  commented) removed it: starved frames 615 → 2, resets 19 → 2, map points
+  177 → 9768, 2318 poses over the full 134 s. A `imu_best_effort:=true` launch option
+  was added for the A/B; it starved 0 frames but processed fewer (more queue drops) and
+  is not the default.
+
+| run (rate 0.5, scale 0.9923) | IMU received | starved frames | resets | losses | map points |
+| :-- | --: | --: | --: | --: | --: |
+| default buffers, default callback group | 22409 (83 %) | 1063 | 19 | 73 | 3140 |
+| 64 MB buffers | 26813 (99.8 %) | 615 | 19 | 78 | 177 |
+| + IMU in own reentrant group (RELIABLE) | 26838 | **2** | **2** | 11 | 9768 |
+| + IMU in own group, BEST_EFFORT | 26854 | 0 | 1 | 1 | 10068 |
+
+**What remains.** In the fixed run the two resets are at 3.0 s and 5.6 s during
+inertial initialisation (`local_mapping_bad_imu`, ORB-SLAM3's own IMU sanity check),
+and one RECENTLY_LOST cluster at 59.6–61.9 s recovers every time (patch 11); from 62 s
+to the end tracking is continuous. The remaining lever is the IMU→cam0 lever arm, still
+zero and now on a relocated camera (PROBLEM 1 in the config header).
+
+**Tools and rules.** `script/imu_arrival_probe.py` measures arrival gaps, bursts and
+loss at a subscriber with the node's QoS. Make the sysctl permanent in
+`/etc/sysctl.d/60-ros2-dds.conf`. On every new rig or IMU, re-measure |a| at rest
+before trusting `imu_accel_scale`; a wrong gravity norm silently prevents
+initialisation. Artefacts: `output/output_orb/real/realv5_imu_*`.
+
+### 7.12 Mapping thread reads past the left-camera vectors on fisheye stereo → SIGSEGV  *(2026-11-02)*
+
+**Symptom.** On `dataset_realv6_000` at replay rate 1.0 the node died with `-11`
+20–50 s into the bag, five times in an afternoon, with tracking in the OK state and
+no loss before the crash; the same binaries, bag and config had completed two runs
+that morning. The kernel log (`journalctl -k`) gave the faulting address each time:
+
+```
+orbslam3_node[26065]: segfault at 712fd3e75030 ip 00007131209b2db7 ... in libORB_SLAM3.so[71312092c000+264000]
+```
+
+Three of five at the same offset, `0x12c000 + 0x86db7 = 0x1b2db7 = LocalMapping::KeyFrameCulling()+0x427`
+(`nm` on the library; the executable segment's virtual address is `0x12c000`), one in
+`CreateNewMapPoints()+0x6a0`. The disassembly at `+0x427` dereferences a reference
+to a `cv::KeyPoint::octave` (`imul $0x1c` stride, `+0x14` field) built a few
+instructions earlier from `mvKeysRight` with an index that was **not** reduced by
+`NLeft`.
+
+**Cause.** `LocalMapping.cc:1048` reads `pKF->mvKeysRight[i].octave` for `i ≥ NLeft`
+(upstream typo: the other branches use `i - NLeft`). On a fisheye stereo keyframe
+`mvKeysRight` has `NRight ≈ 2000` entries and `i` runs to `N ≈ 4000`, so every
+right-camera-first map point reads past the vector; the fault occurs only when the
+overrun crosses into unmapped memory, hence the morning/afternoon lottery. The same
+audit found four more left-size-only accesses reachable with right indices:
+`mvDepth[i]` in the same loop, `mvuRight[idx1/idx2]` in `CreateNewMapPoints`,
+`mvuRight[idx]` in `ORBmatcher::Fuse` with a right-grid index, and `get<0> == -1`
+observations indexed in the two merge-BA loops of `Optimizer.cc`. All five are
+guarded (patch 12, old lines commented); nothing else in the library indexes those
+vectors with a possibly-right index (`Tracking.cc` loops are already bounded by
+`Nleft`, `MapPoint.cc`/`SearchForTriangulation` short-circuit on `mpCamera2`).
+
+**Together with patch 11** this means stock ORB-SLAM3 has at least six out-of-bounds
+reads on the KannalaBrandt8 stereo path with a full-width lapping area; none shows
+in the pinhole simulation. Verification: the user re-runs `realv6` at rate 1.0
+several times (the crash rate was 5 of 5 that afternoon).
+
+### 7.13 The node and the library disagreed on class layout (ODR violation)  *(2026-11-02)*
+
+**What.** `thirdparty/ORB_SLAM3/CMakeLists.txt` adds `-march=native` to its Release
+flags; `orbslam3_ros2` did not. On this CPU that flag raises Eigen's maximum alignment
+from 16 to 64 bytes, which changes the layout of library classes:
+
+| compiled as | `EIGEN_MAX_ALIGN_BYTES` | `sizeof(ORB_SLAM3::Frame)` |
+| :-- | --: | --: |
+| the node (`-O3 -DNDEBUG`) | 16 | 149360 |
+| the library (`-O3 -DNDEBUG -march=native`) | 64 | 149376 |
+
+`sizeof(System)` is the same in both (512), so `make_unique<System>` was safe, but
+`SlamWrapper` reads `tracker->mCurrentFrame` directly (`slam_wrapper.cpp:296, :338`),
+computing the offset of a `Frame` inside `Tracking` with the wrong layout. That is an
+ODR violation and undefined behaviour: the node read the velocity from the wrong
+address of a 149 kB object.
+
+**Found by** an AddressSanitizer build reporting a `new-delete-type-mismatch` on
+`g2o::VertexSE3Expmap` (272 vs 288 bytes) — initially an artefact of the sanitiser
+build's own flags, but the same question asked of the production pair gave the table
+above.
+
+**Fixed** by adding `add_compile_options(-march=native)` to
+`orbslam3_ros2/CMakeLists.txt` with a comment tying the two files together; verified by
+recompiling the size probe with the node's real flags (`Frame` 149376 on both sides).
+If the build moves to another machine, the Jetson included, remove the flag in BOTH
+files together.
+
+**What it affects.** Poses come back as the return value of `System::TrackStereo`, so
+trajectories, ATE and RPE are not touched by this. The **velocity columns of
+`vio.csv`** were read through the bad offset and are suspect in every ORB-SLAM3 run
+recorded before 2026-11-02; `script/vio_metrics.py` and
+`script/analyse_relogged_runs.py` consume those columns. It is not established that
+this caused any crash or the realv6 accuracy change (§7.12 and the open question
+below): a wrong offset inside a 149 kB object yields garbage rather than a fault.
+
+**Still open.** On `realv6`, two pre-reboot runs scored \SI{0.41}{\metre} while nine
+later runs, across every combination of culling threshold, loop closing, GPU and CPU
+extractor and replay rate, scored \SIrange{1.0}{4.6}{\metre} with a speed runaway at
+100--130 s. Bag, IMU delivery, initialisation and throughput were matched; the cause is
+not yet identified. Next: an AddressSanitizer run with matching layout, then repeat
+runs to measure the run-to-run spread.
+
 ### 7.4 Truncated CSV on hard kill
 See §5. `numpy.loadtxt` throws on a ragged file, so one truncated final line
 destroys the whole run's data.
@@ -910,6 +1210,12 @@ sustained, no trajectory written. Blocked on calibration (§6.3), not code.
 | Atlas save / load | **save verified** (patch 6); load runs (patch 7) but is only useful with `loopClosing: 1` — see §10 |
 | Loop closing on `allsensor_003` | **OFF is 92 % better** (6.481 → 0.515 m ATE); dynamic sets undecided — see §9 |
 | Real rig `dataset_realv3_000` | **tracks** with the image topics swapped (§7.9): 536/536 frames stereo, 458/462 stereo-inertial. Camera order must be checked per bag. |
+| GPU front end (patch 10) | **validated** 2026-10-28 on `realv5`: parity in inliers/map points, 0 losses, tracker 110 → 82 ms; on by default in the real-rig configs, off in sim — see §3.5 |
+| GPU stereo matcher (patch 10b) | **validated** 2026-10-29: bit-identical to `cv::BFMatcher`; ABBA on `realv5` rate 1.0: tracker 64 → 45 ms, frames processed +35 %, 0 losses; follows `ORBextractor.useGPU` — see §3.5.1 |
+| Segfault after tracking loss on the real rig (`-11`) | **root-caused, fixed and verified** 2026-10-29 (patch 11, §7.10): relocalisation matcher read past `mvKeysUn` on fisheye stereo; forced relocalisations under gdb survive |
+| Stereo-inertial on the real rig | **tracks continuously** on `realv5` since 2026-10-29 (§7.11): accelerometer scale re-measured (0.9923), IMU subscription in its own callback group, 64 MB socket buffers; 2 init-time resets remain (zero lever arm) |
+| Mapping-thread segfault on the real rig (`-11` while tracking OK) | **root-caused and patched** 2026-11-02 (patch 12, §7.12): five right-index out-of-bounds reads in LocalMapping/Fuse/merge-BA; verification runs pending |
+| Node/library class-layout mismatch | **fixed** 2026-11-02 (§7.13): `-march=native` added to `orbslam3_ros2`; velocity columns of earlier runs are suspect, trajectories are not |
 | Whether the IMU truly initialises | **unresolved** — see §9 |
 | Real-rig trajectories | **plausible, unverified** — no ground truth exists for these bags |
 

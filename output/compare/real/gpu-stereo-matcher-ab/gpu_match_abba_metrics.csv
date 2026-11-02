@@ -1,0 +1,9 @@
+run,arm,stereo_matcher,replay_rate,bag_window,start_temp_C,end_temp_C,pairs_received,pairs_processed,drop_pct,tracker_total_ms_median,extraction_stage_ms_median,pose_prediction_ms_median,local_map_ms_median,inliers_median,frames_ok,frames_lost,tracking_loss_events,keyframes,map_points_final,gpu_matcher_log_lines,shutdown
+r05_A1,A,cpu cv::BFMatcher,0.5,first 60 s,73,85,1692,1487,12.1,64.9,26.1,18.1,18.4,878,1487,0,0,40,2734,0,graceful
+r05_B1,B,gpu knn2 (patch 10b),0.5,first 60 s,95,81,,,,99.7,46.1,24.2,15.8,410,89,4,,,,1,segfault (known loss->relocalise crash)
+r05_B2,B,gpu knn2 (patch 10b),0.5,first 60 s,75,85,1782,1660,6.8,50.1,14.4,17.5,16.7,917,1660,0,0,41,2854,1,graceful
+r05_A2,A,cpu cv::BFMatcher,0.5,first 60 s,79,88,1540,1088,29.4,84.0,31.8,25.0,24.6,853,1088,0,0,40,2883,0,graceful
+r10_A1,A,cpu cv::BFMatcher,1.0,first 60 s,73,83,1591,840,47.2,64.2,27.3,17.1,18.0,831,840,0,0,36,2498,0,graceful
+r10_B1,B,gpu knn2 (patch 10b),1.0,first 60 s,74,84,1756,1153,34.3,44.7,14.8,14.1,14.2,851,1153,0,0,38,2500,1,graceful
+r10_B2,B,gpu knn2 (patch 10b),1.0,first 60 s,73,83,1766,1147,35.1,44.5,15.1,14.0,14.3,844,1147,0,0,38,2444,1,graceful
+r10_A2,A,cpu cv::BFMatcher,1.0,first 60 s,73,82,1581,866,45.2,63.2,27.0,16.8,17.4,820,866,0,0,38,2711,0,graceful

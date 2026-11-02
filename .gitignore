@@ -28,3 +28,7 @@ realsense.zip
 build_docker/
 install_docker/
 docker/build_info.txt
+thirdparty/orb_asan_build/
+
+# --- ORB-SLAM3 atlas dumps (land in cwd, regenerable, >100 MB) ---
+*.osa

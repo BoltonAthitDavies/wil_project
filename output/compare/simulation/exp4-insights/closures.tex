@@ -1,0 +1,19 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption[Loop closures and the correction they applied, \repo{map_tiny.db}.]{Loop closures of \repo{map_tiny.db} and the correction the graph optimisation applied: planar and vertical distance between each node's odometry pose and its optimised pose, by node range, and the precision of the occupied cells first observed before and after the revisit that closed the loop (nodes 1--18 against 19--29).}
+\label{tab:insight4-closures}
+\begin{tabular}{lrrr}
+\toprule
+Quantity & nodes 1--18 & nodes 19--29 & all \\
+\midrule
+planar correction, median [m] & 0.01 & 0.16 & 0.09 \\
+planar correction, max [m] & 0.12 & 0.26 & 0.26 \\
+vertical correction, max [m] & 0.18 & 0.52 & 0.52 \\
+occupied cells first seen & 10098 & 1366 & 11632 \\
+precision of those cells [\si{\percent}] & 96.9 & 95.6 & 96.6 \\
+\midrule
+\multicolumn{4}{l}{closure links (from $\rightarrow$ to): 9$\rightarrow$22, 10$\rightarrow$23, 22$\rightarrow$9, 23$\rightarrow$10, 30$\rightarrow$29} \\
+\bottomrule
+\end{tabular}
+\end{table}

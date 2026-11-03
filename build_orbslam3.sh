@@ -486,6 +486,60 @@ PYEOF
         echo "    patched LocalMapping/ORBmatcher/Optimizer (fisheye right-index guards, mapping thread)"
     fi
 
+    # (13) FrameDrawer::Update indexes mvCurrentKeys (left keypoints only) with i up to
+    #      N = left + right on a fisheye stereo frame -> out-of-bounds READ on every
+    #      frame (AddressSanitizer, realv6, 2026-11-03). Drawer data only, but it hid
+    #      every later sanitiser finding. Guarded with the right-keypoint vector.
+    f="$ORB_SRC/src/FrameDrawer.cc"
+    if grep -q 'mmMatchedInImage\[pMP->mnId\] = mvCurrentKeys\[i\].pt;' "$f" && \
+       ! grep -q 'orbslam3_ros2 patch (13)' "$f"; then
+        python3 - "$f" <<'PYEOF'
+import pathlib, sys
+p = pathlib.Path(sys.argv[1]); s = p.read_text()
+old1 = '                    mmMatchedInImage[pMP->mnId] = mvCurrentKeys[i].pt;\n'
+new1 = '                    // mmMatchedInImage[pMP->mnId] = mvCurrentKeys[i].pt;   // orbslam3_ros2 patch (13), 2026-11-03: i runs to N = left+right on a fisheye\n                    //                                                      // stereo frame but mvCurrentKeys holds only the left keypoints\n                    //                                                      // (AddressSanitizer: heap-buffer-overflow READ, FrameDrawer.cc:425, every frame)\n                    mmMatchedInImage[pMP->mnId] = ((both && i >= (int)mvCurrentKeys.size()) ? mvCurrentKeysRight[i - mvCurrentKeys.size()] : mvCurrentKeys[i]).pt;\n'
+old2 = '                    mvOutlierKeys.push_back(mvCurrentKeys[i]);\n'
+new2 = '                    // mvOutlierKeys.push_back(mvCurrentKeys[i]);   // orbslam3_ros2 patch (13), 2026-11-03: same right-index guard\n                    mvOutlierKeys.push_back((both && i >= (int)mvCurrentKeys.size()) ? mvCurrentKeysRight[i - mvCurrentKeys.size()] : mvCurrentKeys[i]);\n'
+assert s.count(old1) == 1 and s.count(old2) == 1, 'FrameDrawer blocks not found'
+p.write_text(s.replace(old1, new1, 1).replace(old2, new2, 1))
+PYEOF
+        echo "    patched FrameDrawer.cc (fisheye right-index guard in Update)"
+    fi
+
+    # (14a) Optimizer::LocalInertialBA asserts every keyframe in the local inertial window
+    #       has >= 3 visual edges; the assert is compiled out in Release so production
+    #       silently optimises keyframes held by IMU edges alone. Replaced by a diagnostic
+    #       line (keyframe id, optimised/fixed, edge count, time) -- no behaviour change.
+    # (14b) OptimizableTypes.cpp: `auto projectJac = -pCamera->projectJac(...)` binds an Eigen
+    #       expression to a dead temporary (AddressSanitizer stack-use-after-scope, realv6,
+    #       2026-11-03) -> garbage Jacobians in LocalBundleAdjustment. Materialised.
+    f="$ORB_SRC/src/Optimizer.cc"
+    if grep -q '        assert(mit->second>=3);' "$f" && ! grep -q 'orbslam3_ros2 patch (14a)' "$f"; then
+        python3 - "$f" <<'PYEOF'
+import pathlib, sys
+p = pathlib.Path(sys.argv[1]); s = p.read_text()
+old = '        assert(mit->second>=3);\n    }\n'
+new = '        // assert(mit->second>=3);   // orbslam3_ros2 patch (14a), 2026-11-03: upstream\'s debug-only check (compiled out\n        // with NDEBUG in every Release build, so production silently continues). A keyframe in the\n        // local inertial window with < 3 visual edges is held by its IMU edges alone; on the real rig\n        // this fired at 66 s of realv6 under the sanitiser build. Log it instead of aborting, with\n        // whether the keyframe is optimised or fixed, so the runaway can be correlated with it.\n        if(mit->second < 3)\n        {\n            bool bOpt = false;\n            for(size_t i = 0; i < vpOptimizableKFs.size(); i++) if((int)vpOptimizableKFs[i]->mnId == mit->first) { bOpt = true; break; }\n            std::cerr << "[LocalInertialBA] keyframe " << mit->first << (bOpt ? " (OPTIMISED)" : " (fixed)")\n                      << " has only " << mit->second << " visual edges in the window (current KF " << pKF->mnId\n                      << ", t=" << std::fixed << std::setprecision(3) << pKF->mTimeStamp << ")" << std::endl;\n        }\n    }\n'
+assert s.count(old) == 1, 'LocalInertialBA assert block not found'
+s = s.replace(old, new, 1)
+if '#include <iomanip>' not in s: s = s.replace('#include "Optimizer.h"\n', '#include "Optimizer.h"\n#include <iomanip>\n', 1)
+p.write_text(s)
+PYEOF
+        echo "    patched Optimizer.cc   (LocalInertialBA: assert -> diagnostic log)"
+    fi
+    f="$ORB_SRC/src/OptimizableTypes.cpp"
+    if grep -q 'auto projectJac = -pCamera->projectJac(xyz_trans);' "$f" && ! grep -q 'orbslam3_ros2 patch (14b)' "$f"; then
+        python3 - "$f" <<'PYEOF'
+import pathlib, sys
+p = pathlib.Path(sys.argv[1]); s = p.read_text()
+old = '        auto projectJac = -pCamera->projectJac(xyz_trans);\n'
+new = '        // auto projectJac = -pCamera->projectJac(xyz_trans);   // orbslam3_ros2 patch (14b), 2026-11-03: `auto` deduces an Eigen\n        // EXPRESSION that keeps a reference to the temporary returned by projectJac(); that temporary\n        // dies at the end of this statement, so the two uses below read a dead stack slot (AddressSanitizer:\n        // stack-use-after-scope, 24 hits in 66 s of realv6, from LocalBundleAdjustment). Materialise it.\n        const Eigen::Matrix<double,2,3> projectJac = -pCamera->projectJac(xyz_trans);\n'
+assert s.count(old) == 1, 'EdgeSE3ProjectXYZ projectJac line not found'
+p.write_text(s.replace(old, new, 1))
+PYEOF
+        echo "    patched OptimizableTypes.cpp (materialised Eigen temporary in EdgeSE3ProjectXYZ)"
+    fi
+
     # (10) GPU front end for ORBextractor (2026-10-28). Unlike (1)-(9) this is NOT
     #      applied by this script: it is a set of files COMMITTED IN THE FORK --
     #        include/ORBextractorGPU.h, src/ORBextractorGPU.cc (new),

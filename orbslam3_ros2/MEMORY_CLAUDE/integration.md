@@ -82,7 +82,7 @@ the include path. Upstream's `build.sh` builds it anyway, which turns its tests 
 those are a known failure and pure disk waste. This is the main reason we do not use
 `build.sh`.
 
-### 3.1 The fork and its thirteen patches
+### 3.1 The fork and its fourteen patches
 
 Fork: **`BoltonAthitDavies/ORB_SLAM3`**, branch `wil`, pinned at commit
 `5c2b00f`, forked from upstream `UZ-SLAMLab/ORB_SLAM3 @ 4452a3c`. Pinned to a commit
@@ -107,6 +107,7 @@ tree.
 | 10b | `GpuHamming` in the same two GPU files; hooks in `Frame.{h,cc}`, `System.cc` | GPU brute-force Hamming 2-NN for the fisheye stereo matcher (`Stereo.useGPUMatch`, absent = follow `useGPU`) | **Performance.** Bit-identical to `cv::BFMatcher`. Added 2026-10-29; see §3.5.1. |
 | 11 | `src/ORBmatcher.cc` | `NLeft` guard on the keypoint-angle lookup in the relocalisation `SearchByProjection` (fisheye stereo read past `mvKeysUn`) | **Segfault after tracking loss on the real rig** (`exit code -11`). gdb-confirmed 2026-10-29; applied by the script; see §7.10. |
 | 12 | `src/LocalMapping.cc`, `src/ORBmatcher.cc` (Fuse), `src/Optimizer.cc` (merge BA) | Five more right-camera index guards: `mvKeysRight[i]` → `[i - NLeft]` in `KeyFrameCulling`, `mvDepth`/`mvuRight` reads limited to left indices, `get<0> == -1` skipped | **Segfault while tracking normally on the real rig** (`-11` in the mapping thread). Kernel-log-confirmed 2026-11-02; applied by the script; see §7.12. |
+| 13 | `src/FrameDrawer.cc` | `FrameDrawer::Update` indexed the left-only `mvCurrentKeys` with `i` up to left+right on fisheye stereo | **Out-of-bounds read every frame** (drawer data only). AddressSanitizer, realv6, 2026-11-03; applied by the script. |
 
 Patches (6)–(9) keep the original upstream line as a comment next to the replacement, and
 each is guarded in `build_orbslam3.sh` so it applies once and only to unpatched source. All

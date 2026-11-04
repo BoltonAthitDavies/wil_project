@@ -35,12 +35,11 @@ apart from the \repo{loop_closure} switch added on 26~October.}
 
 \slotstatus{partial}{\textbf{Real-world configuration.} The fisheye rig is
 rectified in the shim and two recordings (28 and 31~October) produced
-databases, so the chain runs end to end. Three items are open: the IMU height
-above the floor is \flag{not measured} (the base frame uses a
-\SI{0.30}{\metre} placeholder); the 31~October recording needs a chequerboard
+databases, so the chain runs end to end. Two items are open: the 31~October recording needs a chequerboard
 calibration of the moved mount (a self-calibration from the bag stands in);
 and no independent ground truth exists for the real site, so no map-quality
-metric can be reported for either database.}
+metric can be reported for either database. The IMU height above the floor was
+measured on 4~November (\SI{0.11}{\metre}).}
 
 % =====================================================================
 \section{What is common to both domains}
@@ -294,8 +293,12 @@ RTAB-Map measures ground height along the base frame's $z$. A forward-left-up
 \repo{base_link} is therefore hung under it with a static transform (pitch and
 yaw \SI{90}{\degree}, translation $(0,-h,0)$ with $h$ the IMU height above the
 floor), and the launch takes \repo{base_frame:=base_link} with
-\repo{ground_height} at its default. \flag{$h$ is not yet measured; all
-real-rig runs so far used \SI{0.30}{\metre}.}
+\repo{ground_height} at its default. $h$ was measured as \SI{0.11}{\metre}
+on 4~November; real-rig runs before that date used a \SI{0.30}{\metre}
+placeholder. Since 4~November the launch publishes this transform itself
+(\repo{frontend:=orb} or \repo{vins} selects the odometry frames,
+\repo{publish_base_tf} adds the base frame on the fisheye rig, \repo{imu_height}
+defaults to the measured value), so no separate transform node is started.
 
 The ORB-SLAM3 node's published world is not gravity-aligned on this rig. It is
 the active map's frame, which is the camera at map creation, and it differs
@@ -316,10 +319,13 @@ with zero nodes.
 \subsection{Two passes, and the compute budget}
 \label{sec:rtab-real-passes}
 
-ORB-SLAM3, the rectifying shim and RTAB-Map do not fit on the laptop together
-at \num{1920}$\times$\num{1080}, so a real-rig map is built in two passes: the
-front end alone writes \repo{vio.csv}, then the bag is replayed with that
-trajectory broadcast as TF. \Cref{tab:rtab-real-compute} gives the measured
+At the 29~October measurements ORB-SLAM3, the rectifying shim and RTAB-Map did
+not fit on the laptop together at \num{1920}$\times$\num{1080}, so real-rig
+maps were built in two passes: the front end alone writes \repo{vio.csv}, then
+the bag is replayed with that trajectory broadcast as TF. On 4~November the two were run together live with the cooling fan on,
+\repo{rect_scale} 0.5, \repo{detection_rate} 1.0 and \repo{shim_rate} 2.0, and
+produced a map: the 29~October limit was thermal, not the pipeline. The two-pass route remains the deterministic
+procedure for A/B comparisons. \Cref{tab:rtab-real-compute} gives the measured
 costs that fix the replay settings. At \repo{rect_scale} 0.5 the shim delivers
 a pair in about \SI{0.4}{\second} and RTAB-Map updates in about
 \SI{0.3}{\second}; at full resolution the shim alone reached only
@@ -355,20 +361,15 @@ python3 script/gt_tf_publisher.py --ros-args -p use_sim_time:=true \
     -p csv:=output/output_orb/real/<run>/vio.csv \
     -p world_frame:=orbslam3_world -p body_frame:=imu_link \
     -p world_fix:=auto -p start_after_transient:=true
-# 2. base frame under the IMU (h = IMU height above the floor, m)
-ros2 run tf2_ros static_transform_publisher --x 0 --y -<h> --z 0 \
-    --roll 0 --pitch 1.5708 --yaw 1.5708 --frame-id imu_link \
-    --child-frame-id base_link
-# 3. RTAB-Map with the rectifying shim
+# 2. RTAB-Map with the rectifying shim; frontend:=orb sets the odometry
+#    frames and publishes imu_link -> base_link (imu_height 0.11 m default)
 ros2 launch ./rtabmap_ros/rtab_sim.launch.py mode:=construct rviz:=true \
-    camera_model:=fisheye left_cam:=1 rect_scale:=0.5 \
+    frontend:=orb camera_model:=fisheye left_cam:=1 rect_scale:=0.5 \
     config_dir:=$HOME/wil_project/vins_fusion_ros2/config/<calib> \
-    odom_frame:=orbslam3_world body_frame:=imu_link \
-    base_frame:=base_link ground_height:=0.1 \
     output_path:=map/<name>/ database_path:=map/<name>/<name>.db \
     grid_range_max:=3.0 detection_rate:=1.0 shim_rate:=2.0 \
     loop_closure:=false
-# 4. the bag, no --clock
+# 3. the bag, no --clock
 ros2 bag play <bag> --rate 0.5
 \end{verbatim}}
 
@@ -543,8 +544,6 @@ Thermal throttling & RTAB-Map update \SIrange{4}{5}{\second}; then as above & st
 \subsection{Open items}
 
 \begin{itemize}
-\item \flag{IMU height above the floor}: measure once; it is the only
-  unmeasured number in the real-rig chain.
 \item \flag{Chequerboard calibration of the current mount}, then a check of
   the next recording with \repo{script/stereo_selfcal.py} before any map is
   built. Calibrate first, record second.
@@ -562,8 +561,10 @@ Thermal throttling & RTAB-Map update \SIrange{4}{5}{\second}; then as above & st
 \label{sec:rtab-rules}
 
 \begin{itemize}
-\item Launch and shim: \repo{rtabmap_ros/rtab_sim.launch.py} and
-  \repo{rtabmap_ros/rtab_camera_shim.py}; replay
+\item Launch and shim: \repo{vslam_navigation/launch/rtabmap.launch.py} and
+  \repo{vslam_navigation/scripts/rtab_camera_shim.py} (moved from the
+  \repo{rtabmap_ros} fork root on 4~November; a forwarding stub keeps the old
+  command); replay
   \repo{script/gt_tf_publisher.py}; calibration check
   \repo{script/stereo_selfcal.py}. Superproject \repo{23c6c0b}; the
   \repo{rtabmap_ros} fork at \repo{d18dc87} with the 26~October to 2~November

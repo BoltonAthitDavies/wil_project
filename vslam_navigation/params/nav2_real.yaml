@@ -1,0 +1,243 @@
+# Nav2 for the REAL Ackermann rig on a prior RTAB-Map map, localised by
+# ORB-SLAM3 (odometry) + RTAB-Map localize mode (map -> orbslam3_world).
+#
+# Derived from aws-robomaker-small-warehouse-world/params/nav2_ackermann.yaml,
+# whose header explains every curvature number below (rear-axle bound 1.6673 1/m,
+# base_link minimum radius 0.6355 m, why min_lookahead_dist is 1.30, why
+# rotate-to-heading must be off, why velocity_smoother must scale all
+# components together). Read that header before changing any of them.
+#
+# WHAT DIFFERS FROM THE SIMULATION FILE
+#   * odometry frame is orbslam3_world (what the ORB-SLAM3 node broadcasts), and
+#     map -> orbslam3_world is RTAB-Map's live correction, NOT identity. So the
+#     local costmap is a ROLLING window in the odometry frame, and the static
+#     layer inside it is transformed through TF; behavior_server runs in the
+#     odometry frame too.
+#   * /map comes from RTAB-Map (use_saved_map in localize mode), latched; there
+#     is no map_server unless the launch is given a map yaml for offline tests.
+#   * NO live obstacle sensing. The rig has no lidar, and RTAB-Map's local grids
+#     are off in localize mode (the dense stereo cost starved the front end).
+#     Both costmaps therefore contain only the prior map. Anything that moved in
+#     since the map was built is invisible to the planner. Re-enable
+#     use_collision_detection and add an obstacle layer the day a live source
+#     exists.
+#   * speed is capped at 0.6 m/s for the first trials (project target 1.5 m/s).
+#   * use_sim_time is REWRITTEN at launch (true on bag replay, false live).
+#
+# UNVERIFIED FOR THE REAL CHASSIS (values copied from the simulated car):
+#   wheel_base 0.42 m, steering limit 0.6109 rad, footprint rectangle. Measure
+#   them on the robot and update here AND in ackermann_bridge.py before driving.
+
+bt_navigator:
+  ros__parameters:
+    use_sim_time: true
+    global_frame: map
+    robot_base_frame: base_link
+    odom_topic: /orbslam3/odometry
+    bt_loop_duration: 10
+    default_server_timeout: 20
+    default_nav_through_poses_bt_xml: REWRITTEN_AT_LAUNCH
+    navigators: ["navigate_to_pose", "navigate_through_poses"]
+    navigate_to_pose:
+      plugin: "nav2_bt_navigator/NavigateToPoseNavigator"
+    navigate_through_poses:
+      plugin: "nav2_bt_navigator/NavigateThroughPosesNavigator"
+
+controller_server:
+  ros__parameters:
+    use_sim_time: true
+    controller_frequency: 20.0
+    min_x_velocity_threshold: 0.001
+    min_y_velocity_threshold: 0.50
+    min_theta_velocity_threshold: 0.001
+    failure_tolerance: 0.30
+    progress_checker_plugin: "progress_checker"
+    goal_checker_plugins: ["general_goal_checker"]
+    controller_plugins: ["FollowPath"]
+
+    progress_checker:
+      plugin: "nav2_controller::SimpleProgressChecker"
+      required_movement_radius: 0.50
+      movement_time_allowance: 15.0
+
+    general_goal_checker:
+      plugin: "nav2_controller::SimpleGoalChecker"
+      xy_goal_tolerance: 0.50
+      yaw_goal_tolerance: 3.15
+      stateful: true
+
+    FollowPath:
+      plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"
+      desired_linear_vel: 0.60
+      min_approach_linear_velocity: 0.15
+      approach_velocity_scaling_dist: 0.60
+      use_velocity_scaled_lookahead_dist: true
+      lookahead_time: 2.20
+      lookahead_dist: 1.30
+      min_lookahead_dist: 1.30
+      max_lookahead_dist: 2.00
+      use_regulated_linear_velocity_scaling: true
+      regulated_linear_scaling_min_radius: 1.20
+      regulated_linear_scaling_min_speed: 0.25
+      use_cost_regulated_linear_velocity_scaling: false
+      use_rotate_to_heading: false
+      allow_reversing: false
+      rotate_to_heading_min_angle: 3.15
+      max_angular_accel: 1.50
+      max_robot_pose_search_dist: 5.0
+      # The real transform chain arrives through two nodes (ORB at frame rate,
+      # RTAB-Map's correction at its detection rate); give it room.
+      transform_tolerance: 0.30
+      use_collision_detection: true
+      max_allowed_time_to_collision_up_to_carrot: 1.00
+
+planner_server:
+  ros__parameters:
+    use_sim_time: true
+    expected_planner_frequency: 1.0
+    planner_plugins: ["GridBased"]
+    GridBased:
+      plugin: "nav2_smac_planner/SmacPlannerHybrid"
+      tolerance: 0.30
+      downsample_costmap: false
+      # The prior map has unknown cells wherever stereo never saw: refusing to
+      # plan through them is the safe default with no live sensor.
+      allow_unknown: false
+      max_iterations: 1000000
+      max_on_approach_iterations: 1000
+      max_planning_time: 3.0
+      motion_model_for_search: "DUBIN"
+      angle_quantization_bins: 72
+      minimum_turning_radius: 0.75
+      reverse_penalty: 2.0
+      change_penalty: 0.0
+      non_straight_penalty: 1.20
+      cost_penalty: 2.0
+      retrospective_penalty: 0.015
+      analytic_expansion_ratio: 3.5
+      analytic_expansion_max_length: 3.0
+      cache_obstacle_heuristic: true
+      smooth_path: true
+      smoother:
+        max_iterations: 1000
+        w_smooth: 0.3
+        w_data: 0.2
+        tolerance: 1.0e-10
+
+smoother_server:
+  ros__parameters:
+    use_sim_time: true
+    smoother_plugins: ["simple_smoother"]
+    simple_smoother:
+      plugin: "nav2_smoother::SimpleSmoother"
+      tolerance: 1.0e-10
+      max_its: 1000
+      do_refinement: true
+
+behavior_server:
+  ros__parameters:
+    use_sim_time: true
+    global_frame: orbslam3_world
+    robot_base_frame: base_link
+    transform_tolerance: 0.30
+    behavior_plugins: ["spin", "backup", "drive_on_heading", "wait"]
+    spin:
+      plugin: "nav2_behaviors/Spin"
+    backup:
+      plugin: "nav2_behaviors/BackUp"
+    drive_on_heading:
+      plugin: "nav2_behaviors/DriveOnHeading"
+    wait:
+      plugin: "nav2_behaviors/Wait"
+    simulate_ahead_time: 2.0
+    max_rotational_vel: 1.0
+    min_rotational_vel: 0.4
+    rotational_acc_lim: 1.5
+
+velocity_smoother:
+  ros__parameters:
+    use_sim_time: true
+    smoothing_frequency: 20.0
+    scale_velocities: true
+    feedback: "OPEN_LOOP"
+    max_velocity: [0.60, 0.0, 1.00]
+    min_velocity: [-0.30, 0.0, -1.00]
+    max_accel: [0.50, 0.0, 2.00]
+    max_decel: [-1.50, 0.0, -2.50]
+    odom_topic: /orbslam3/odometry
+    odom_duration: 0.10
+    deadband_velocity: [0.0, 0.0, 0.0]
+    velocity_timeout: 1.0
+
+map_server:
+  ros__parameters:
+    use_sim_time: true
+    yaml_filename: ""                   # set by the launch for offline tests only
+
+lifecycle_manager_navigation:
+  ros__parameters:
+    use_sim_time: true
+    # false: the pose gate (scripts/pose_gate.py) starts the stack once the
+    # localisation is judged sound, and pauses it when it stops being sound.
+    autostart: false
+    bond_timeout: 20.0
+    attempt_respawn_reconnection: true
+    node_names:                         # overridden by the launch (map_server optional)
+      - controller_server
+      - smoother_server
+      - planner_server
+      - behavior_server
+      - bt_navigator
+      - velocity_smoother
+
+global_costmap:
+  global_costmap:
+    ros__parameters:
+      use_sim_time: true
+      global_frame: map
+      robot_base_frame: base_link
+      update_frequency: 2.0
+      publish_frequency: 1.0
+      rolling_window: false
+      width: 20
+      height: 20
+      origin_x: -10.0
+      origin_y: -10.0
+      resolution: 0.05
+      footprint: "[[-0.31, 0.25], [0.52, 0.25], [0.52, -0.25], [-0.31, -0.25]]"
+      footprint_padding: 0.01
+      transform_tolerance: 0.30
+      plugins: ["static_layer", "inflation_layer"]
+      static_layer:
+        plugin: "nav2_costmap_2d::StaticLayer"
+        map_subscribe_transient_local: true
+      inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        cost_scaling_factor: 3.0
+        inflation_radius: 0.80
+      always_send_full_costmap: true
+
+local_costmap:
+  local_costmap:
+    ros__parameters:
+      use_sim_time: true
+      global_frame: orbslam3_world
+      robot_base_frame: base_link
+      update_frequency: 2.0
+      publish_frequency: 1.0
+      rolling_window: true
+      width: 10
+      height: 10
+      resolution: 0.05
+      footprint: "[[-0.31, 0.25], [0.52, 0.25], [0.52, -0.25], [-0.31, -0.25]]"
+      footprint_padding: 0.01
+      transform_tolerance: 0.30
+      plugins: ["static_layer", "inflation_layer"]
+      static_layer:
+        plugin: "nav2_costmap_2d::StaticLayer"
+        map_subscribe_transient_local: true
+      inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        cost_scaling_factor: 3.0
+        inflation_radius: 0.80
+      always_send_full_costmap: true

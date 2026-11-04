@@ -1,0 +1,1 @@
+event,current_timestamp_ns,current_keyframe_id,matched_timestamp_ns,matched_keyframe_id,duration_ms,correction_translation_m,correction_rotation_deg,correction_scale,status

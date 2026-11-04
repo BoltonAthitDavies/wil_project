@@ -1,0 +1,83 @@
+<!--
+  NavigateThroughPoses for the ackermann robot. Identical to nav2's stock
+  navigate_through_poses_w_replanning_and_recovery.xml except for the
+  RemovePassedGoals radius below.
+
+  WHY: a via-point is NOT governed by xy_goal_tolerance - that applies only to the
+  FINAL pose. Intermediate poses are discarded purely by proximity, by this one
+  number, and nothing in nav2_ackermann.yaml can reach it. On a differential robot
+  0.7 m is generous. On this car it is not:
+
+    * minimum turning radius is 0.635 m, so a via-point missed by even a metre
+      costs a ~4 m loop to return to a point the robot was effectively already at;
+    * RPP steers at a lookahead of min_lookahead_dist 1.30 m, so it deliberately
+      cuts corners by up to that much. A via-point can therefore be passed at a
+      closest approach larger than 0.7 m as NORMAL tracking, not as an error.
+
+  The symptom is unmistakable and looks like a planner bug: the robot drives past a
+  waypoint, the waypoint is not consumed, the next plan is a full circle back to it,
+  and the robot orbits - replanning every 3 s (the RateController below) and never
+  making progress.
+
+  1.60 is just above min_lookahead_dist, so a via-point the controller cut the
+  corner on still counts as reached. Raise it together with min_lookahead_dist;
+  they are the same quantity seen from two sides. Too large and via-points get
+  consumed early, flattening the route you drew.
+-->
+
+<!--
+  This Behavior Tree replans the global path periodically at 1 Hz through an array of poses continuously
+   and it also has recovery actions specific to planning / control as well as general system issues.
+-->
+<root main_tree_to_execute="MainTree">
+  <BehaviorTree ID="MainTree">
+    <RecoveryNode number_of_retries="6" name="NavigateRecovery">
+      <PipelineSequence name="NavigateWithReplanning">
+        <!-- RemovePassedGoals is OUTSIDE the RateController, and that is the whole
+             point of this file. In nav2's stock tree it sits INSIDE, so the
+             via-point proximity test is evaluated once every 3 s even though the
+             tree ticks at bt_loop_duration (10 ms). The robot is only inside a
+             via-point's radius for 2*radius/speed seconds, so the test is missed
+             outright whenever
+
+                 2 * radius / speed  <  1 / hz
+
+             MEASURED at 1.5 m/s with radius 1.60: the robot passed 0.40 m from a
+             waypoint - comfortably inside it - and number_of_poses_remaining
+             never decremented. It then overshot, looped back, and the waypoint was
+             only consumed on the return pass. That is the "it orbits a waypoint it
+             already reached" bug, and raising the radius alone does not fix it: at
+             0.333 Hz you would need radius > 1.5 * speed = 2.25 m, which starts
+             swallowing waypoints you deliberately placed.
+
+             Out here it is evaluated every tick, so the radius only has to cover
+             RPP's corner-cutting (min_lookahead_dist), not three seconds of travel.
+             Planning stays throttled at 0.333 Hz below, which is what the
+             RateController is actually for. -->
+        <RemovePassedGoals input_goals="{goals}" output_goals="{goals}" radius="1.60"/>
+        <RateController hz="0.333">
+          <RecoveryNode number_of_retries="1" name="ComputePathThroughPoses">
+            <ComputePathThroughPoses goals="{goals}" path="{path}" planner_id="GridBased"/>
+            <ClearEntireCostmap name="ClearGlobalCostmap-Context" service_name="global_costmap/clear_entirely_global_costmap"/>
+          </RecoveryNode>
+        </RateController>
+        <RecoveryNode number_of_retries="1" name="FollowPath">
+          <FollowPath path="{path}" controller_id="FollowPath"/>
+          <ClearEntireCostmap name="ClearLocalCostmap-Context" service_name="local_costmap/clear_entirely_local_costmap"/>
+        </RecoveryNode>
+      </PipelineSequence>
+      <ReactiveFallback name="RecoveryFallback">
+        <GoalUpdated/>
+        <RoundRobin name="RecoveryActions">
+          <Sequence name="ClearingActions">
+            <ClearEntireCostmap name="ClearLocalCostmap-Subtree" service_name="local_costmap/clear_entirely_local_costmap"/>
+            <ClearEntireCostmap name="ClearGlobalCostmap-Subtree" service_name="global_costmap/clear_entirely_global_costmap"/>
+          </Sequence>
+          <Spin spin_dist="1.57"/>
+          <Wait wait_duration="5"/>
+          <BackUp backup_dist="0.30" backup_speed="0.05"/>
+        </RoundRobin>
+      </ReactiveFallback>
+    </RecoveryNode>
+  </BehaviorTree>
+</root>

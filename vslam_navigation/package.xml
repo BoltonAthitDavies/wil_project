@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>vslam_navigation</name>
+  <version>0.1.0</version>
+  <description>
+    WiL navigation stack: visual-inertial SLAM front end (ORB-SLAM3 or VINS-Fusion),
+    RTAB-Map back end for map collection, extension and relocalisation on a prior
+    map, and (later) Nav2 on the real Ackermann rig. Holds the launch files, the
+    stereo input shim, the trajectory writer, RViz and Nav2 configurations; the
+    front-end calibrations stay in orbslam3_ros2 and vins_fusion_ros2.
+  </description>
+  <maintainer email="tennisonben20x@gmail.com">Bolton Athit Davies</maintainer>
+  <license>GPL-3.0-only</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>rtabmap_slam</exec_depend>
+  <exec_depend>rtabmap_msgs</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>message_filters</exec_depend>
+  <exec_depend>orbslam3_ros2</exec_depend>
+  <exec_depend>rviz2</exec_depend>
+  <exec_depend>nav2_bringup</exec_depend>
+  <exec_depend>nav2_common</exec_depend>
+  <exec_depend>nav2_msgs</exec_depend>
+  <exec_depend>nav2_map_server</exec_depend>
+  <exec_depend>nav2_lifecycle_manager</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>python3-numpy</exec_depend>
+  <exec_depend>python3-opencv</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

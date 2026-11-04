@@ -1,0 +1,393 @@
+Rc files read:
+  /etc/LatexMk
+Latexmk: This is Latexmk, John Collins, 20 November 2021, version: 4.76.
+Rule 'pdflatex': File changes, etc:
+   Changed files, or newly in use since previous run(s):
+      '../../../../output/compare/real/realv7-insights/tilt_table.tex'
+------------
+Run number 1 of rule 'pdflatex'
+------------
+------------
+Running 'pdflatex  -interaction=nonstopmode -recorder  "experiment_3_insight.tex"'
+------------
+Latexmk: applying rule 'pdflatex'...
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex)
+ restricted \write18 enabled.
+entering extended mode
+(./experiment_3_insight.tex
+LaTeX2e <2021-11-15> patch level 1
+L3 programming layer <2022-01-21>
+(/usr/share/texlive/texmf-dist/tex/latex/base/report.cls
+Document Class: report 2021/10/04 v1.4n Standard LaTeX document class
+(/usr/share/texlive/texmf-dist/tex/latex/base/size11.clo))
+(../common/preamble.tex
+(/usr/share/texlive/texmf-dist/tex/latex/base/fontenc.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/base/inputenc.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/mathptmx.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/helvet.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/keyval.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/courier.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/geometry/geometry.sty
+(/usr/share/texlive/texmf-dist/tex/generic/iftex/ifvtex.sty
+(/usr/share/texlive/texmf-dist/tex/generic/iftex/iftex.sty)))
+(/usr/share/texlive/texmf-dist/tex/latex/microtype/microtype.sty
+(/usr/share/texlive/texmf-dist/tex/latex/etoolbox/etoolbox.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/microtype/microtype-pdftex.def)
+(/usr/share/texlive/texmf-dist/tex/latex/microtype/microtype.cfg))
+(/usr/share/texlive/texmf-dist/tex/latex/booktabs/booktabs.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/tools/tabularx.sty
+(/usr/share/texlive/texmf-dist/tex/latex/tools/array.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/tools/longtable.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/multirow/multirow.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsmath.sty
+For additional information on amsmath, use the `?' option.
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amstext.sty
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsgen.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsbsy.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsopn.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/amssymb.sty
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/amsfonts.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/base/ifthen.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/siunitx/siunitx.sty
+(/usr/share/texlive/texmf-dist/tex/latex/translations/translations.sty
+(/usr/share/texlive/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
+(/usr/share/texlive/texmf-dist/tex/generic/infwarerr/infwarerr.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty)))
+(/usr/share/texlive/texmf-dist/tex/latex/l3packages/l3keys2e/l3keys2e.sty
+(/usr/share/texlive/texmf-dist/tex/latex/l3kernel/expl3.sty
+(/usr/share/texlive/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def))))
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphicx.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphics.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/trig.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-cfg/graphics.cfg)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-def/pdftex.def)))
+(/usr/share/texlive/texmf-dist/tex/latex/placeins/placeins.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/caption/caption.sty
+(/usr/share/texlive/texmf-dist/tex/latex/caption/caption3.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/caption/ltcaption.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/enumitem/enumitem.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/xcolor/xcolor.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-cfg/color.cfg)
+(/usr/share/texlive/texmf-dist/tex/latex/colortbl/colortbl.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/rotating.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/url/url.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/hyperref.sty
+(/usr/share/texlive/texmf-dist/tex/generic/kvsetkeys/kvsetkeys.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/pdfescape/pdfescape.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/hycolor/hycolor.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/letltxmacro/letltxmacro.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/auxhook/auxhook.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/kvoptions/kvoptions.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/pd1enc.def)
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/hyperref-langpatches.def)
+(/usr/share/texlive/texmf-dist/tex/generic/intcalc/intcalc.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/etexcmds/etexcmds.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/puenc.def)
+(/usr/share/texlive/texmf-dist/tex/generic/bitset/bitset.sty
+(/usr/share/texlive/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/base/atbegshi-ltx.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/hpdftex.def
+(/usr/share/texlive/texmf-dist/tex/latex/base/atveryend-ltx.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty
+(/usr/share/texlive/texmf-dist/tex/generic/uniquecounter/uniquecounter.sty)))
+(/usr/share/texlive/texmf-dist/tex/latex/cleveref/cleveref.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1ptm.fd)
+(./experiment_3_insight.aux)
+*geometry* driver: auto-detecting
+*geometry* detected driver: pdftex
+(/usr/share/texlive/texmf-dist/tex/latex/microtype/mt-ptm.cfg)
+(/usr/share/texlive/texmf-dist/tex/latex/translations/translations-basic-dictio
+nary-english.trsl)
+(/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+) (/usr/share/texlive/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
+(/usr/share/texlive/texmf-dist/tex/latex/grfext/grfext.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg))
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/nameref.sty
+(/usr/share/texlive/texmf-dist/tex/latex/refcount/refcount.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/gettitlestring/gettitlestring.sty))
+(./experiment_3_insight.out) (./experiment_3_insight.out)
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1ztmcm.fd)
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/omlztmcm.fd)
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/omsztmcm.fd)
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/omxztmcm.fd)
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1ptm.fd)
+(/usr/share/texlive/texmf-dist/tex/latex/microtype/mt-msa.cfg)
+(/usr/share/texlive/texmf-dist/tex/latex/microtype/mt-msb.cfg)
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1pcr.fd)
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/ts1ptm.fd) [1{/var/lib/texmf/fo
+nts/map/pdftex/updmap/pdftex.map}]
+(../../../../output/compare/simulation/exp3-insights/lever_arm_sweep.tex)
+(../../../../output/compare/simulation/exp3-insights/lever_arm_argmin.tex)
+[2 <../../../../output/compare/simulation/exp3-insights/fig_lever_sweep_light.p
+ng>] [3]
+(../../../../output/compare/simulation/exp3-insights/contrast_extreme_lever0p33
+8.tex)
+(../../../../output/compare/simulation/exp3-insights/contrast_realistic_lever0p
+338.tex) [4] [5 <../../../../output/compare/simulation/exp3-insights/fig_turn_c
+ontrast_lever0p338_light.png>]
+(../../../../output/compare/simulation/exp3-insights/onset_context_extreme.tex)
+(../../../../output/compare/simulation/exp3-insights/mechanism_extreme.tex)
+[6] [7 <../../../../output/compare/simulation/exp3-insights/fig_onset_epoch_lig
+ht.png>]
+(../../../../output/compare/simulation/exp3-insights/traffic_realistic_lever0p3
+38.tex) [8] [9 <../../../../output/compare/simulation/exp3-insights/fig_traffic
+_timeline_lever0p338_light.png>]
+(../../../../output/compare/real/realv6-insights/gt_cleaning.tex) [10]
+(../../../../output/compare/real/realv6-insights/final_table.tex)
+(../../../../output/compare/real/realv6-insights/turning.tex) [11 <../../../../
+output/compare/real/realv6-insights/fig_gt_cleaning_light.png>] [12 <../../../.
+./output/compare/real/realv6-insights/fig_paths_light.png>] [13 <../../../../ou
+tput/compare/real/realv6-insights/fig_orb_timeline_light.png>]
+(../../../../output/compare/real/realv6-insights/vins_table.tex
+Underfull \hbox (badness 10000) in paragraph at lines 4--4
+[]\T1/ptm/b/n/10 (+20) Table I.11: |\T1/ptm/m/n/10 (+20) VINS-Fusion on \T1/pcr
+/m/n/10 dataset_realv6_000\T1/ptm/m/n/10 (+20) , 3 Novem-ber 2026
+) [14] (../../../../output/compare/real/realv7-insights/tilt_table.tex)
+[15 <../../../../output/compare/real/realv6-insights/fig_vins_light.png>]
+(../../../../output/compare/real/realv7-insights/results_table.tex)
+(../../../../output/compare/real/realv7-insights/vins_table.tex) [16] [17 <../.
+./../../output/compare/real/realv7-insights/fig_tilt_light.png>] [18 <../../../
+../output/compare/real/realv7-insights/fig_paths_lvl_light.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) of for-ward
+
+Underfull \hbox (badness 3713) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) off-set is in
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) the sweep
+
+Underfull \hbox (badness 3138) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) at the SDF
+
+Underfull \hbox (badness 1888) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) value in 30
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) runs, two
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) es-ti-ma-tors,
+
+Underfull \hbox (badness 4832) in paragraph at lines 627--627
+[]|\T1/ptm/m/n/10 (+20) contrasts of
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+[]\T1/ptm/m/n/10 (+20) ta-bles I.3[]
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) and []I.4[];
+
+Underfull \hbox (badness 1796) in paragraph at lines 627--627
+[]|\T1/ptm/m/n/10 (+20) Not mea-sur-
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) area does
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+[]|\T1/ptm/m/n/10 (+20) No ef-fect
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) tered drift;
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) the class
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) mask loses
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) gains drift
+
+Underfull \hbox (badness 1642) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) while traf-fic
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) is in view
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+[]|\T1/ptm/m/n/10 (+20) ORB-
+
+Overfull \hbox (11.84245pt too wide) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (-20) SLAM3+YOLO
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) to one
+
+Underfull \hbox (badness 1226) in paragraph at lines 627--627
+[]|\T1/ptm/m/n/10 (+20) On the first
+
+Underfull \hbox (badness 1874) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) turn-ing; ob-
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+[]|\T1/ptm/m/n/10 (+20) Tracks the
+
+Underfull \hbox (badness 3919) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) whole [][]
+
+Underfull \hbox (badness 2376) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) route in all
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) four con-
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) fig-u-ra-tions;
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) pro-vi-sional
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) ATE []
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) and [][]
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) with the
+
+Underfull \hbox (badness 1082) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) GPU ex-trac-
+
+Underfull \hbox (badness 6047) in paragraph at lines 627--627
+[][] \T1/ptm/m/n/10 (+20) with
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) the CPU
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) ex-trac-tor
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) (two thirds
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) of frames
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) dropped);
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) no turn-ing
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) ef-fect; []--
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+[][][] \T1/ptm/m/n/10 (+20) scale
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) short-fall
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+[]|[]\T1/ptm/m/n/10 (+20) table I.9[]
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+[]|\T1/ptm/m/n/10 (+20) Valid truth;
+
+Underfull \hbox (badness 5563) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) of 12 runs
+
+Underfull \hbox (badness 2376) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) is the IMU
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) ini-tial-i-sa-
+
+Underfull \hbox (badness 5490) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) tion thrown
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) up-stream
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) low-motion
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) re-set and
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) starved in
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) re-paired
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) with-out the
+
+Underfull \hbox (badness 6220) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) truth, ORB
+
+Underfull \hbox (badness 1048) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) scores 0.25--
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) (001), 0.47
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) run), with
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) two losses
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+[]|[]\T1/ptm/m/n/10 (+20) table I.13[]
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) and []fig-
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+[]|\T1/ptm/m/n/10 (+20) No valid
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) run: 217
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/pcr/m/n/10 imu_gap
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) re-sets, [][]
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) of poses;
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+[]|[]\T1/ptm/m/n/10 (+20) table I.11[],
+
+Underfull \hbox (badness 4120) in paragraph at lines 627--627
+[]|\T1/ptm/m/n/10 (+20) One tracker
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) sam-ple set
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) to [][];
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+\T1/ptm/m/n/10 (+20) truth at
+
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
+[][] \T1/ptm/m/n/10 (+20) fails
+
+LaTeX Warning: Float too large for page by 531.40144pt on input line 628.
+
+[19] [20] (./experiment_3_insight.aux) )
+(see the transcript file for additional information){/usr/share/texlive/texmf-d
+ist/fonts/enc/dvips/base/8r.enc}</usr/share/texlive/texmf-dist/fonts/type1/publ
+ic/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/ams
+fonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/c
+m/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/courier/ucrb8a.pfb>
+</usr/share/texlive/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/t
+exlive/texmf-dist/fonts/type1/urw/symbol/usyr.pfb></usr/share/texlive/texmf-dis
+t/fonts/type1/urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/u
+rw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8
+a.pfb>
+Output written on experiment_3_insight.pdf (20 pages, 2198565 bytes).
+Transcript written on experiment_3_insight.log.
+Latexmk: Log file says output to 'experiment_3_insight.pdf'
+Latexmk: Examining 'experiment_3_insight.log'
+=== TeX engine is 'pdfTeX'
+Latexmk: All targets (experiment_3_insight.pdf) are up-to-date

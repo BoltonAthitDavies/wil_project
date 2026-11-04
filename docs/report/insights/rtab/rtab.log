@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  2 NOV 2026 11:54
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  4 NOV 2026 13:55
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -761,118 +761,123 @@ LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <8> not available
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <6> not available
 (Font)              Font shape `OT1/ptm/b/n' tried instead on input line 34.
 
-Underfull \hbox (badness 2376) in paragraph at lines 78--78
+Underfull \hbox (badness 2376) in paragraph at lines 77--77
 []\T1/ptm/b/n/10 (+20) Table R.1: |\T1/ptm/m/n/10 (+20) Launch and RTAB-Map set
 -tings com-mon to both do-mains. Val-ues are those set in
  []
 
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 81.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 80.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <7.4> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 81.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 80.
 
-Underfull \hbox (badness 10000) in paragraph at lines 85--85
+Underfull \hbox (badness 10000) in paragraph at lines 84--84
 []|\T1/ptm/m/n/10 (+20) TF $\T1/pcr/m/n/10 odom _
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 85--85
+Underfull \hbox (badness 10000) in paragraph at lines 84--84
 \T1/pcr/m/n/10 frame$$\OMS/ztmcm/m/n/10 !$$\T1/pcr/m/n/10 body _
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 86--86
+Underfull \hbox (badness 10000) in paragraph at lines 85--85
 []|$\T1/pcr/m/n/10 approx _ sync$ \T1/ptm/m/n/10 (+20) / $\T1/pcr/m/n/10 sync _
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 88--88
+Underfull \hbox (badness 10000) in paragraph at lines 87--87
 []|$\T1/pcr/m/n/10 wait _ for _ transform$ \T1/ptm/m/n/10 (+20) (ar-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 91--91
+Underfull \hbox (badness 10000) in paragraph at lines 90--90
 []|$\T1/pcr/m/n/10 RGBD / OptimizeMaxError$
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 93--93
+Underfull \hbox (badness 10000) in paragraph at lines 92--92
 []|$\T1/pcr/m/n/10 Grid /
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 94--94
+Underfull \hbox (badness 10000) in paragraph at lines 93--93
 []|$\T1/pcr/m/n/10 Grid / MaxGroundHeight$
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 95--95
+Underfull \hbox (badness 10000) in paragraph at lines 94--94
 []|$\T1/pcr/m/n/10 Grid /
  []
 
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <5> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 96.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 95.
 
-Underfull \hbox (badness 10000) in paragraph at lines 96--96
+Underfull \hbox (badness 10000) in paragraph at lines 95--95
 []|$\T1/pcr/m/n/9 Grid /
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 96--96
+Underfull \hbox (badness 10000) in paragraph at lines 95--95
 \T1/pcr/m/n/9 Grid /
  []
 
 
-Overfull \hbox (9.517pt too wide) in paragraph at lines 96--96
+Overfull \hbox (9.517pt too wide) in paragraph at lines 95--95
 \T1/pcr/m/n/9 NoiseFilteringMinNeighbors$| 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 97--97
+Underfull \hbox (badness 10000) in paragraph at lines 96--96
 []|$\T1/pcr/m/n/10 Grid / RangeMax$
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 98--98
+Underfull \hbox (badness 10000) in paragraph at lines 97--97
 []|$\T1/pcr/m/n/10 Rtabmap / DetectionRate$
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 99--100
+Underfull \hbox (badness 10000) in paragraph at lines 98--99
 []|\T1/ptm/m/n/10 (+20) false sets $\T1/pcr/m/n/10 Rtabmap / LoopThr$\T1/ptm/m/
 n/10 (+20) =1.0 and
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 99--100
+Underfull \hbox (badness 10000) in paragraph at lines 98--99
 \T1/pcr/m/n/10 RGBD / ProximityBySpace$\T1/ptm/m/n/10 (+20) =false, keep-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 100--101
+Underfull \hbox (badness 10000) in paragraph at lines 99--100
 []|\T1/ptm/m/n/10 (+20) extend / lo-cal-ize switch $\T1/pcr/m/n/10 Mem /
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 100--101
+Underfull \hbox (badness 10000) in paragraph at lines 99--100
 \T1/pcr/m/n/10 IncrementalMemory$\T1/ptm/m/n/10 (+20) , $\T1/pcr/m/n/10 Mem /
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 100--101
+Underfull \hbox (badness 10000) in paragraph at lines 99--100
 \T1/pcr/m/n/10 InitWMWithAllNodes$\T1/ptm/m/n/10 (+20) , $\T1/pcr/m/n/10 RGBD /
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 100--101
+Underfull \hbox (badness 10000) in paragraph at lines 99--100
 \T1/pcr/m/n/10 StartAtOrigin$\T1/ptm/m/n/10 (+20) , $\T1/pcr/m/n/10 RGBD /
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 118--119
+Underfull \hbox (badness 10000) in paragraph at lines 117--118
 []|$\T1/pcr/m/n/10 static _ dataset _
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 119--119
+[]|$\T1/pcr/m/n/10 Mem / UseOdomGravity$
  []
 
 
@@ -880,21 +885,26 @@ Underfull \hbox (badness 10000) in paragraph at lines 120--120
 []|$\T1/pcr/m/n/10 Mem / UseOdomGravity$
  []
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 121--121
-[]|$\T1/pcr/m/n/10 Mem / UseOdomGravity$
- []
-
 LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 1
-22.
+21.
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ts1ptm.fd
 File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
 )
-Underfull \hbox (badness 10000) in paragraph at lines 122--123
+Underfull \hbox (badness 10000) in paragraph at lines 121--122
 []|$\T1/pcr/m/n/10 dataset _ static _
  []
 
 
+Underfull \hbox (badness 10000) in paragraph at lines 123--123
+[]|$\T1/pcr/m/n/10 RGBD /
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 123--123
+\T1/pcr/m/n/10 OptimizeMaxError$
+ []
+
+
 Underfull \hbox (badness 10000) in paragraph at lines 124--124
 []|$\T1/pcr/m/n/10 RGBD /
  []
@@ -911,38 +921,28 @@ Underfull \hbox (badness 10000) in paragraph at lines 125--125
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 125--125
-\T1/pcr/m/n/10 OptimizeMaxError$
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 126--126
-[]|$\T1/pcr/m/n/10 RGBD /
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 126--126
 \T1/pcr/m/n/10 OptimizeMaxError$
  []
 
 [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [2]
-Underfull \hbox (badness 10000) in paragraph at lines 185--185
+Underfull \hbox (badness 10000) in paragraph at lines 184--184
 []|$\T1/pcr/m/n/10 odom _ frame$ \T1/ptm/m/n/10 (+20) /
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 185--185
+Underfull \hbox (badness 10000) in paragraph at lines 184--184
 []|$\T1/pcr/m/n/10 orbslam3 _ world$ \T1/ptm/m/n/10 (+20) /
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 185--185
+Underfull \hbox (badness 10000) in paragraph at lines 184--184
 []|$\T1/pcr/m/n/10 world$ \T1/ptm/m/n/10 (+20) /
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 192--193
+Underfull \hbox (badness 10000) in paragraph at lines 191--192
 []|\T1/ptm/m/n/10 (+20) A/B on the map-ping bags: ATE
  []
 
@@ -953,7 +953,7 @@ File: ../../final_report/figures//rtab/rtab_realv5_rectified_pair.png Graphic f
 ile (type png)
 <use ../../final_report/figures//rtab/rtab_realv5_rectified_pair.png>
 Package pdftex.def Info: ../../final_report/figures//rtab/rtab_realv5_rectified
-_pair.png  used on input line 249.
+_pair.png  used on input line 248.
 (pdftex.def)             Requested size: 455.24411pt x 256.07509pt.
  [4] [5 <../../final_report/figures//rtab/rtab_realv5_rectified_pair.png (PNG c
 opy)>] [6]
@@ -964,7 +964,7 @@ File: ../../final_report/figures//rtab/rtab_real_stereo_quality_realv5_vs_realv
 <use ../../final_report/figures//rtab/rtab_real_stereo_quality_realv5_vs_realv6
 .png>
 Package pdftex.def Info: ../../final_report/figures//rtab/rtab_real_stereo_qual
-ity_realv5_vs_realv6.png  used on input line 414.
+ity_realv5_vs_realv6.png  used on input line 415.
 (pdftex.def)             Requested size: 455.24411pt x 170.71396pt.
 <../../final_report/figures//rtab/rtab_realv6_grid_closures_vs_odometry.png, id
 =127, 1260.71pt x 764.8575pt>
@@ -973,7 +973,7 @@ g Graphic file (type png)
 <use ../../final_report/figures//rtab/rtab_realv6_grid_closures_vs_odometry.png
 >
 Package pdftex.def Info: ../../final_report/figures//rtab/rtab_realv6_grid_clos
-ures_vs_odometry.png  used on input line 424.
+ures_vs_odometry.png  used on input line 425.
 (pdftex.def)             Requested size: 455.24411pt x 276.18878pt.
 <../../final_report/figures//rtab/rtab_realv6_selfcal_cloud_top.png, id=130, 51
 5.9275pt x 531.9875pt>
@@ -981,93 +981,93 @@ File: ../../final_report/figures//rtab/rtab_realv6_selfcal_cloud_top.png Graphi
 c file (type png)
 <use ../../final_report/figures//rtab/rtab_realv6_selfcal_cloud_top.png>
 Package pdftex.def Info: ../../final_report/figures//rtab/rtab_realv6_selfcal_c
-loud_top.png  used on input line 446.
+loud_top.png  used on input line 447.
 (pdftex.def)             Requested size: 273.14923pt x 281.6598pt.
  [7 <../../final_report/figures//rtab/rtab_real_stereo_quality_realv5_vs_realv6
 .png (PNG copy)>] [8 <../../final_report/figures//rtab/rtab_realv6_grid_closure
 s_vs_odometry.png (PNG copy)> <../../final_report/figures//rtab/rtab_realv6_sel
 fcal_cloud_top.png (PNG copy)>]
-Underfull \hbox (badness 10000) in paragraph at lines 502--502
+Underfull \hbox (badness 10000) in paragraph at lines 503--503
 []|$\T1/pcr/m/n/10 dataset _ realv5 _
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 502--502
+Underfull \hbox (badness 10000) in paragraph at lines 503--503
 []|\T1/ptm/m/n/10 (+20) triangular route
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 502--502
+Underfull \hbox (badness 10000) in paragraph at lines 503--503
 \T1/ptm/m/n/10 (+20) past parked cars;
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 502--502
+Underfull \hbox (badness 10000) in paragraph at lines 503--503
 \T1/pcr/m/n/10 camera _ info$\T1/ptm/m/n/10 (+20) , TF
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 502--502
+Underfull \hbox (badness 10000) in paragraph at lines 503--503
 []|$\T1/pcr/m/n/10 realv5 _ imu _
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 502--502
+Underfull \hbox (badness 10000) in paragraph at lines 503--503
 \T1/pcr/m/n/10 cbgroup _
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 502--502
+Underfull \hbox (badness 10000) in paragraph at lines 503--503
 \T1/pcr/m/n/10 reliable _ r05 _
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 502--502
+Underfull \hbox (badness 10000) in paragraph at lines 503--503
 \T1/pcr/m/n/10 newIMU _ TO _ CAM _
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 503--503
+Underfull \hbox (badness 10000) in paragraph at lines 504--504
 []|$\T1/pcr/m/n/10 dataset _ realv6 _
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 503--503
+Underfull \hbox (badness 10000) in paragraph at lines 504--504
 []|$\T1/pcr/m/n/10 dataset _
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 503--503
+Underfull \hbox (badness 10000) in paragraph at lines 504--504
 \T1/pcr/m/n/10 realv6 _ 000 /
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 503--503
+Underfull \hbox (badness 10000) in paragraph at lines 504--504
 \T1/pcr/m/n/10 loopclosing _
  []
 
 
-Underfull \hbox (badness 5431) in paragraph at lines 503--503
+Underfull \hbox (badness 5431) in paragraph at lines 504--504
 \T1/pcr/m/n/10 rate1$ \T1/ptm/m/n/10 (+20) (3083 rows,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 503--504
+Underfull \hbox (badness 10000) in paragraph at lines 504--505
 []|$\T1/pcr/m/n/10 map / real _ 311026 _ rate05/$\T1/ptm/m/n/10 (+10) :
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 503--504
+Underfull \hbox (badness 10000) in paragraph at lines 504--505
 \T1/pcr/m/n/10 311026 _ rate05 _ lc/$\T1/ptm/m/n/10 (+20) : 189
  []
 
 
-Underfull \hbox (badness 1248) in paragraph at lines 503--504
+Underfull \hbox (badness 1248) in paragraph at lines 504--505
 \T1/ptm/m/n/10 (+20) nodes, 34 + 10 clo-sures; both
  []
 
 
-Overfull \hbox (10.3922pt too wide) in paragraph at lines 498--506
+Overfull \hbox (10.3922pt too wide) in paragraph at lines 499--507
  [][] 
  []
 
@@ -1077,41 +1077,35 @@ File: ../../final_report/figures//rtab/rtab_realv5_grid_real_db.png Graphic fil
 e (type png)
 <use ../../final_report/figures//rtab/rtab_realv5_grid_real_db.png>
 Package pdftex.def Info: ../../final_report/figures//rtab/rtab_realv5_grid_real
-_db.png  used on input line 510.
+_db.png  used on input line 511.
 (pdftex.def)             Requested size: 250.38564pt x 224.81561pt.
 
-Overfull \hbox (6.47409pt too wide) in paragraph at lines 537--538
+Overfull \hbox (6.47409pt too wide) in paragraph at lines 538--539
 []|$\T1/pcr/m/n/10 ps -[] eopid\OML/ztmcm/m/it/10 ;[] \T1/pcr/m/n/10 lstart\OML
 /ztmcm/m/it/10 ;[] \T1/pcr/m/n/10 args\OMS/ztmcm/m/n/10 j\T1/pcr/m/n/10 grepshi
 m$
  []
 
 
-Overfull \hbox (24.66914pt too wide) in paragraph at lines 565--571
-[]\T1/ptm/m/n/10.95 (-20) Launch and shim: $\T1/pcr/m/n/10.95 rtabmap _ ros / r
-tab _ sim . launch . py$ \T1/ptm/m/n/10.95 (-20) and $\T1/pcr/m/n/10.95 rtabmap
- _ ros / rtab _ camera _
+Overfull \hbox (50.29211pt too wide) in paragraph at lines 564--572
+[]\T1/ptm/m/n/10.95 (-20) Launch and shim: $\T1/pcr/m/n/10.95 vslam _ navigatio
+n / launch / rtabmap . launch . py$ \T1/ptm/m/n/10.95 (-20) and $\T1/pcr/m/n/10
+.95 vslam _ navigation /
  []
 
 [9] [10 <../../final_report/figures//rtab/rtab_realv5_grid_real_db.png (PNG cop
-y)>]
-Overfull \hbox (30.66292pt too wide) in paragraph at lines 580--584
-\T1/pcr/m/n/10.95 /media / ambushee / 32E4AAB1E4AA772F / dataset _ realv5 _ 000
-$ \T1/ptm/m/n/10.95 (-20) and $\T1/pcr/m/n/10.95 dataset / dataset _
- []
-
-[11] [12
+y)>] [11] [12
 
 ] (./rtab.aux)
 Package rerunfilecheck Info: File `rtab.out' has not changed.
 (rerunfilecheck)             Checksum: 11B84C81421F649995219B6ED7B3EC3B;2547.
  ) 
 Here is how much of TeX's memory you used:
- 20634 strings out of 480171
- 392745 string characters out of 5894489
+ 20640 strings out of 480171
+ 392802 string characters out of 5894489
  709704 words of memory out of 5000000
  37884 multiletter control sequences out of 15000+600000
- 558647 words of font info for 372 fonts, out of 8000000 for 9000
+ 558907 words of font info for 376 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
  76i,14n,82p,1001b,891s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
@@ -1121,7 +1115,7 @@ fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/
 type1/urw/courier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/tim
 es/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb><
 /usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on rtab.pdf (12 pages, 2967750 bytes).
+Output written on rtab.pdf (12 pages, 2968435 bytes).
 PDF statistics:
  223 PDF objects out of 1000 (max. 8388607)
  187 compressed objects within 2 object streams

@@ -1,0 +1,18 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption[Realv6: the VINS-Fusion run.]{VINS-Fusion on \repo{dataset_realv6_000}, 3 November 2026 (\repo{config/wil/stereo_imu.yaml}, IMU noise $\times 10$, gravity norm still \num{9.2642} against the \SI{9.878}{\metre\per\second\squared} this IMU reads at rest). The scored span is the \SI{18}{\second} it tracked before its last reset and is not a result.}
+\label{tab:realv6-vins}
+\begin{tabular}{lr}
+\toprule
+Quantity & Value \\
+\midrule
+camera frames received (bag: 6\,601) & 3187 \\
+IMU messages received / samples used & 43494 / 6498 \\
+\repo{imu_gap} resets & 217 \\
+poses written / span of poses & 286 / \SI{19}{\second} \\
+tracker samples matched & 41 of 43 in span \\
+ATE over the tracked span & \SI{0.18}{\metre} (not a result) \\
+\bottomrule
+\end{tabular}
+\end{table}

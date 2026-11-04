@@ -1,0 +1,16 @@
+\begin{table}[htbp]
+\centering
+\scriptsize\setlength{\tabcolsep}{3pt}
+\caption[Realv6: every surviving run against the cleaned tracker truth.]{ORB-SLAM3 on \repo{dataset_realv6_000} against the cleaned tracker truth, 3 November 2026 afternoon series: repaired library, replay rate 1.0, 3 November stereo extrinsic, \texttt{IMU.NoiseGyro} 0.1 and \texttt{IMU.NoiseAcc} 1.0, GPU or CPU feature extractor, loop closing (LC) on or off. Aligned planar ATE after a rigid SE(2) fit with scale fixed; RPE at \SI{1}{\second} translational; path ratio = estimate / truth; resets = \repo{local_mapping_bad_imu} map resets; dropped = camera frames the node's queue discarded of about 6\,480 received. Lever arm tracker-marker to IMU unmeasured (zero applied); time offset pinned to \SI{-4.14}{\second}; all values provisional under the scorer's validity rules.}
+\label{tab:realv6-final}
+\begin{tabular}{lrrrrrrr}
+\toprule
+Run & ATE [m] & median [m] & max [m] & RPE$_{1\,\mathrm{s}}$ [m] & path ratio & resets & dropped \\
+\midrule
+ORB-SLAM3, GPU, LC on & 0.52 & 0.44 & 1.11 & 0.057 & 0.85 & 2 & 2420 \\
+ORB-SLAM3, CPU, LC on & 0.62 & 0.48 & 1.38 & 0.110 & 0.88 & 2 & 4363 \\
+ORB-SLAM3, GPU, LC off & 0.46 & 0.36 & 0.99 & 0.056 & 0.87 & 0 & 3201 \\
+ORB-SLAM3, CPU, LC off & 1.03 & 0.89 & 1.83 & 0.223 & 0.96 & 3 & 4204 \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -61,7 +61,7 @@ import vio_metrics as vm
 from render_dataset_scene import world_for, to_px, OBJ_FILL, OBJ_EDGE
 
 ROOT = vm.ROOT
-FLASH = '/media/ambushee/32E4AAB1E4AA772F/dataset'
+FLASH = '/media/ambushee/New Volume/wil_rescue'   # dataset root since 2026-11-03 (was the flash drive's dataset/)
 
 ROUTE = (0, 132, 255)
 ROBOT = (214, 40, 40)
@@ -76,7 +76,7 @@ def bag_for(name):
             dbs = sorted(f for f in os.listdir(d) if f.endswith('.db3'))
             if dbs:
                 return os.path.join(d, dbs[0])
-    raise SystemExit('no bag found for %s in dataset/ or the flash drive' % name)
+    raise SystemExit('no bag found for %s in dataset/ or the dataset root' % name)
 
 
 def read_bag(bag, with_cam=True):

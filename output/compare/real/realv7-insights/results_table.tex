@@ -1,0 +1,26 @@
+\begin{table}[htbp]
+\centering
+\scriptsize\setlength{\tabcolsep}{3pt}
+\caption[Realv7: every run after the frame repair, with its initialisation history.]{ORB-SLAM3 on the three \repo{dataset_realv7} recordings (3 November 2026, same setting as realv6), scored on 4 November with the bags on the dataset drive (wheel-speed time offsets) and the two frame repairs of \repo{script/eval_real_gt.py}: the poses written before each IMU initialisation rotated into the frame used after it (\texttt{--join-imu-init}), and each map's fitted plane levelled (\texttt{--level-plane}). ``IMU'' is the share of tracked frames with the IMU initialised; ``resets'' the active-map resets after the first pose, in seconds (a reset restarts the position at the origin and is not stitched; those inside the route are tracking losses); ``tilt'' the plane tilt of the raw log, zero after the repair in every run. ATE is planar after SE(2) alignment, RPE over \SI{1}{\second}. Status from the scorer's rules (``partial'' = a reset or loss the run recovered from). Lever arm unmeasured (zero); VINS-Fusion diverged on all three (\cref{tab:realv7-vins}) and is omitted.}
+\label{tab:realv7-results}
+\begin{tabular}{llrlrrrrrl}
+\toprule
+Recording & Run & IMU [\%] & resets [s] & tilt [\si{\degree}] & ATE [m] & median [m] & RPE$_{1\,\mathrm{s}}$ [m] & path ratio & status \\
+\midrule
+\repo{realv7_000} & GPU, LC on & 6 & 3 & 89 & 0.25 & 0.24 & 0.05 & 1.05 & partial \\
+\repo{realv7_000} & GPU, LC off & 0 & 3 & 89 & 0.26 & 0.21 & 0.05 & 1.09 & partial \\
+\repo{realv7_000} & CPU, LC on & 11 & 5 & 89 & 0.27 & 0.21 & 0.05 & 1.06 & partial \\
+\repo{realv7_000} & CPU, LC off & 23 & 4 & 88 & 0.26 & 0.23 & 0.05 & 1.08 & partial \\
+\addlinespace
+\repo{realv7_001} & GPU, LC on & 3 & 4 & 89 & 0.48 & 0.47 & 0.07 & 1.07 & partial \\
+\repo{realv7_001} & GPU, LC off & 67 & 3, 5 & 6 & 0.82 & 0.63 & 0.15 & 1.15 & partial \\
+\repo{realv7_001} & CPU, LC on & 94 & 4 & 2 & 0.44 & 0.40 & 0.07 & 1.07 & partial \\
+\repo{realv7_001} & CPU, LC off & 65 & 5 & 13 & 0.56 & 0.50 & 0.10 & 1.11 & failed \\
+\addlinespace
+\repo{realv7_002} & GPU, LC on & 22 & \textcolor{flagred}{3, 49, 59} & 38 & 2.11 & 1.28 & 0.26 & 1.18 & partial \\
+\repo{realv7_002} & GPU, LC off & 22 & \textcolor{flagred}{49} & 60 & 2.08 & 1.83 & 0.23 & 1.29 & partial \\
+\repo{realv7_002} & CPU, LC on & 61 & none & 5 & 0.47 & 0.41 & 0.12 & 1.13 & partial \\
+\repo{realv7_002} & CPU, LC off & 62 & none & 22 & 1.67 & 0.98 & 0.70 & 1.68 & failed \\
+\bottomrule
+\end{tabular}
+\end{table}

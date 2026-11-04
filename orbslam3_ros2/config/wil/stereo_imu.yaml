@@ -78,6 +78,18 @@ loopClosing: 1   # morning-replica A/B: the 0.41 m run had loop closing ON
 #   run 1: 1.0 (no culling)   run 2: 0.9   -- compare against the morning 0.41 m.
 # LocalMapping.redundantTh: 0.9   # A/B run 1 (no culling): 3.76 m -- not the mechanism; absent = upstream for the CPU A/B
 
+# 2026-11-04, fork patch (15) -- two switches for the inertial initialisation (absent = upstream).
+# dataset_realv7 (12 stereo-inertial runs, 3 Nov): the IMU initialised at 3-4 s, upstream then
+# RESET the map for "insufficient motion" (robot still at rest) in 9 of 12 runs, and in the new
+# map the initialisation was never attempted again while keyframes were queued (one every 0.25 s
+# before the initialisation, ~250 ms of local mapping each): never re-initialised in 2 runs,
+# after 37-92 s in 7. Until then the estimate is pure stereo in a camera-frame map (tilted plane
+# in the log, multi-metre step when the late initialisation rotates the map). The five realv6
+# runs of 3 Nov and the twelve realv7 runs were recorded WITHOUT these switches; set both to
+# upstream (0 / 1) to reproduce them.
+LocalMapping.initWithBacklog: 1    # 0 = upstream: initialise only with an empty keyframe queue
+LocalMapping.resetOnLowMotion: 0   # 1 = upstream: reset the map on <2 cm keyframe spacing within 10 s
+
 #--------------------------------------------------------------------------------------------
 # ~180 degree fisheye. ORB-SLAM3 models this natively as KannalaBrandt8, which
 # is the same model OpenCV's cv::fisheye implements, so the calibration in
@@ -276,7 +288,7 @@ ORBextractor.minThFAST: 7
 #            (rate 1.0), frames processed +23 % / +64 %, inliers and map points at
 #            parity, 0 losses and 0 resets in both arms.
 # The sim configs keep 0 so results stay comparable with stock ORB-SLAM3.
-ORBextractor.useGPU: 1
+ORBextractor.useGPU: 0
 # (2026-11-02 evening A/B: 0 reproduced the morning's throughput, 53 % drops, and still ran away at 100-110 s, ATE 1.00 m -- the GPU path is not the cause)
 
 # GPU stereo matcher -- orbslam3_ros2 patch (10b), 2026-10-29
@@ -328,8 +340,16 @@ IMU.T_b_c1: !!opencv-matrix
 # Mapped 1:1 from VINS config/wil/stereo_imu.yaml -- same continuous-density
 # convention, no unit conversion. Note VINS's g_norm: 9.2642 has NO counterpart
 # here; it is handled by the node's imu_accel_scale instead. See PROBLEM 2.
-IMU.NoiseGyro: 0.01      # rad/s/sqrt(Hz)
-IMU.NoiseAcc: 0.1        # m/s^2/sqrt(Hz)
+# 2026-11-03: IMU noise densities INFLATED x10 (user A/B, run loopclosing_rate1_renoise). The values
+# below were copied from the VINS file, never measured; with them the inertial fusion ran away on
+# realv6 in most runs (1.1-9.6 m), stereo-only did not (0.63 m). With the x10 values, THREE runs
+# at rate 1.0 (3 Nov 2026): ATE 0.49 / 0.47 / 0.49 m, median 0.41 / 0.38 / 0.41, max <= 1.11 m, no
+# runaway in any, 2 init resets as always -- the optimiser trusts the IMU less, which is right for
+# an IMU whose x/z axis signs, lever arm and time offset are unverified. THIS IS THE REAL-RIG SETTING.
+# IMU.NoiseGyro: 0.01     # rad/s/sqrt(Hz)   (previous, from VINS)
+# IMU.NoiseAcc: 0.1       # m/s^2/sqrt(Hz)   (previous, from VINS)
+IMU.NoiseGyro: 0.1      # rad/s/sqrt(Hz)
+IMU.NoiseAcc: 1.0        # m/s^2/sqrt(Hz)
 IMU.GyroWalk: 0.0001     # rad/s^2/sqrt(Hz)
 IMU.AccWalk: 0.001       # m/s^3/sqrt(Hz)
 # Bags measure 199.5 Hz; 200 is the nominal rate.

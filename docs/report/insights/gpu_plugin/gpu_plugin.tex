@@ -10,7 +10,7 @@
 \title{GPU Acceleration of the ORB-SLAM3 Front End\\
        \large Engineering note for Chapter 3 (implemented system), with its validation measurements}
 \author{Bolton Athit Davies}
-\date{Reporting cutoff: 29 October 2026 (revised the same evening)}
+\date{Reporting cutoff: 29 October 2026; revised 3 November 2026}
 \begin{document}
 \maketitle
 
@@ -26,13 +26,14 @@ named in \cref{sec:gpu-rules}.
 \slotstatus{completed}{Implemented and validated on the laptop (RTX~3070) for
 the real-rig configuration: extractor patch (10) and stereo-matcher patch
 (10b), enabled by default in \repo{orbslam3_ros2/config/wil/stereo*.yaml}; a
-pre-existing relocalisation crash found during validation is fixed (patch 11).
-The stereo-inertial mode, which shares this front end, was brought to continuous
-tracking on the same recording the same afternoon (\cref{sec:gpu-inertial}): its
-failures were an accelerometer scale left over from the previous IMU and IMU
-messages queued behind image decoding, neither of them GPU-related. Portability
-to the Jetson platform is \status{untested}. The fork changes are not yet
-committed.}
+pre-existing relocalisation crash found during validation is fixed (patch 11), and
+the validation of this and the following days found five more out-of-bounds reads,
+an Eigen temporary read after its scope and a layout mismatch between node and
+library, all fixed (patches 12 to 14b, node build flag); an AddressSanitizer run
+over a whole real recording is clean. The stereo-inertial mode, which shares this
+front end, reached a reproducible \SI{0.48}{\metre} on \repo{dataset_realv6_000}
+on 3 November (\cref{sec:gpu-inertial}). Portability to the Jetson platform is
+\status{untested}. The fork changes are not yet committed.}
 
 % =====================================================================
 \section{Why the front end was moved}
@@ -342,17 +343,21 @@ the bursts: starved frames 615 to 2, resets 19 to 2. A best-effort subscription 
 added as a second lever and was not better (no starvation, but more dropped frames
 and a slower tracker); the default stays reliable.
 
-\textbf{What is left.} The two remaining resets are at \SI{3.0}{} and
-\SI{5.6}{\second}, during inertial initialisation, from ORB-SLAM3's own IMU sanity
-check; from \SI{62}{\second} to the end of the recording tracking is unbroken. The
-expected cause is the IMU-to-camera lever arm, which had been zero. It was measured
-by tape this evening: the left camera sits \SI{0.26}{\metre} above and
-\SI{0.065}{\metre} in front of the IMU, now entered as the translation of
-\texttt{IMU.T\_b\_c1} under the rotation already in the file. \flag{Not yet
-verified by a run. Two open points: the rotation's sign convention (whether the
-IMU's z axis points backward, as the file assumes, or forward) was left unresolved
-when a forward-acceleration check on the bag suggested forward, and the lateral
-offset is entered as zero although cam0 is the right camera of the pair.}
+\textbf{What was left on 29 October, and what became of it.} The two remaining
+resets at \SI{3.0}{} and \SI{5.6}{\second} are ORB-SLAM3's own IMU check during
+initialisation; they appear in every inertial run since and are benign. The lever
+arm was measured by tape that evening (left camera \SI{0.26}{\metre} above and
+\SI{0.065}{\metre} in front of the IMU) and entered under the rotation already in
+the file; the sign of the IMU's z axis and the lateral offset remain
+\flag{unverified}. On \repo{dataset_realv6_000} the inertial mode then proved
+unstable in a way none of this explained: identical runs scored between
+\SI{0.4}{} and \SI{9.6}{\metre}. The resolution, documented in the engineering
+record (sections 7.10 to 7.13) and in the Experiment 3 note, was that the
+optimiser trusted an IMU whose axis signs, lever arm and time offset nobody had
+verified; raising the configured IMU noise densities tenfold gave
+\SI{0.49}{}, \SI{0.47}{} and \SI{0.49}{\metre} in three consecutive runs at
+real-time replay, with the GPU front end on. Those three runs, not the
+inertial rows of \cref{tab:gpu-inertial}, are the state of the inertial mode.
 
 \flag{Resolution of these runs is not recorded in their manifests: the real-rig
 inertial configuration carried \texttt{Camera.newWidth/newHeight} = 960/540 for part
@@ -383,9 +388,10 @@ the stereo-only timings above.}
   extrinsics, re-measured accelerometer scale, IMU callback group, measured
   lever arm). Earlier real-rig ORB-SLAM3 results are not repeats of it and are
   not pooled with it.
-\item \textbf{Not yet committed.} The fork carries nine uncommitted files and
-  the ROS package four; run manifests cannot cite a commit for any of today's
-  changes until they are committed.
+\item \textbf{Not yet committed.} The fork carries the patches of 29 October to
+  3 November uncommitted, the ROS package its node, build-flag and configuration
+  changes; run manifests cannot cite a commit for any of it until they are
+  committed.
 \end{itemize}
 
 % =====================================================================

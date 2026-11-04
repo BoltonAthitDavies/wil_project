@@ -9,7 +9,7 @@ the 200 Hz IMU arrive in bursts of up to ~900 samples separated by gaps of up to
 localised: run it (a) alone while the bag plays, then (b) with the node running.
 
 Usage (two terminals):
-  ros2 bag play /media/ambushee/32E4AAB1E4AA772F/dataset_realv5_000 --rate 0.5
+  ros2 bag play "/media/ambushee/New Volume/wil_rescue/<bag>" --rate 0.5   # datasets moved to this root on 2026-11-03
   python3 script/imu_arrival_probe.py --topic /hwt101ct_yaw_publisher --seconds 40
 
 Prints, every 5 s and at the end: samples received, wall-clock arrival gaps

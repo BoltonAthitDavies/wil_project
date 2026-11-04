@@ -130,7 +130,8 @@ def main():
     print(f"\n\n{'='*78}\nSUMMARY\n{'='*78}")
     print(f"{'bag':<{width}}  {'status':<9} {'actual':>10} {'claimed':>10}")
     for name, st, a, cl in verdicts:
-        print(f"{name:<{width}}  {st:<9} {a:>10,} {cl if cl is None else format(cl,',') :>10}")
+        claim = '-' if cl is None else format(cl, ',')
+        print(f"{name:<{width}}  {st:<9} {a:>10,} {claim:>10}")
     bad = [v for v in verdicts if v[1] != 'OK']
     print(f"\n{len(verdicts)-len(bad)}/{len(verdicts)} healthy; "
           f"problems: {', '.join(n for n,_s,_a,_c in bad) or 'none'}")

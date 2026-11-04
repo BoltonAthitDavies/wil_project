@@ -9,11 +9,12 @@
 \newcommand{\ins}[1]{\input{\insdir/#1}}
 \newcommand{\realdir}{../../../../output/compare/real}
 \newcommand{\insreal}[1]{\input{\realdir/realv6-insights/#1}}
+\newcommand{\insrealb}[1]{\input{\realdir/realv7-insights/#1}}
 
 \title{Experiment 3: What the Pose Error Rises With\\
        \large Insight analysis for Chapter 4, Section 4.3}
 \author{Bolton Athit Davies}
-\date{Reporting cutoff: 22 October 2026; real-robot section added 2 November 2026}
+\date{Reporting cutoff: 22 October 2026; real-robot section added 2 November 2026, rebuilt 3 November (realv6) with realv7 added the same day 2026; revised 4 November 2026}
 
 \begin{document}
 \maketitle
@@ -277,40 +278,56 @@ lower bound on the moments something moving was in the image.
 
 \FloatBarrier
 \section{Insight 5: real robot (\repo{dataset_realv6_000}): ORB-SLAM3 tracks the
-         figure-of-eight to \SI{0.4}{\metre}, VINS-Fusion diverges at both replay
-         rates on a stale gravity norm, and one tracker sample decided the headline}
+         figure-of-eight to \SI{0.5}{\metre} with the GPU front end, loses a factor
+         of two with the CPU front end, and VINS-Fusion has not yet had a valid run}
 
 The first real recording with a usable optical-tracker reference since the
-camera remount gives ORB-SLAM3 a provisional planar ATE of \SI{0.41}{\metre}
-over \SI{218}{\second} at both replay rates, no tracking loss after its
-initialisation resets, and two VINS-Fusion runs that diverge to kilometres from
-the same moment at both replay rates, with an accelerometer bias frozen at the
-difference between the configured gravity norm and the gravity this IMU
-measures. \Cref{tab:realv6-cleaning,tab:realv6-orb,tab:realv6-turning,tab:realv6-vins}
-and \cref{fig:realv6-gt,fig:realv6-all,fig:realv6-orb,fig:realv6-vins} carry the
-evidence.
+camera remount gives ORB-SLAM3 a provisional planar ATE of \SI{0.46}{} and
+\SI{0.52}{\metre} in the two runs with the GPU feature extractor and \SI{0.62}{}
+and \SI{1.03}{\metre} in the two with the CPU extractor, which drops two thirds
+of the frames at real-time replay; no run loses tracking after its
+initialisation resets. VINS-Fusion's run resets 217 times on gaps in its IMU
+stream and stops after \SI{19}{\second}. Every number rests on a tracker export
+that fails the scorer's validity rules and on one spurious sample whose removal
+is documented below. \Cref{tab:realv6-final,tab:realv6-cleaning,tab:realv6-turning,tab:realv6-vins}
+and \cref{fig:realv6-paths,fig:realv6-gt,fig:realv6-orb,fig:realv6-vins} carry
+the evidence.
 
 \paragraph{The recording.} \repo{dataset_realv6_000} was recorded on 31 October
 2026 on the Gensurv floor: \SI{220}{\second}, 6\,601 stereo pairs, the RealSense
 IMU at \SI{200}{\hertz}, wheel-speed feedback, and a figure-of-eight route of
-about \SI{27}{\metre} at a median \SI{0.15}{\metre\per\second}. Four estimator
-runs exist: ORB-SLAM3 and VINS-Fusion each at replay rates 1.0 and 0.5, ORB-SLAM3
-on \repo{config/wil/stereo_imu.yaml} and VINS-Fusion on the 31 October
-self-calibrated extrinsics (\repo{config/wil_311026_selfcal}), all without a
-detector, so unfiltered. No
-filtered run exists, so the filter hypothesis remains untested on the real robot;
-what this slot can now say is how the unfiltered estimators behave on real
-imagery against an independent reference.
+about \SI{27}{\metre} at a median \SI{0.15}{\metre\per\second}, no scripted
+moving objects.
 
-\paragraph{Reporting rules.} Scoring is \path{script/eval_real_gt.py}
-unchanged: time offset from the cross-correlation of the tracker's speed with the
-bag's wheel speed, rigid SE(2) alignment with scale fixed, lever arm from the
-tracker marker to the IMU unmeasured and set to zero, so every number is
-\emph{provisional}. The tool's validity rules were fixed before the data were
-read; the tracker export fails two of them (gaps above \SI{1}{\second}, a step
-above \SI{0.5}{\metre}), so the tool labels every run \emph{failed (ground truth
-invalid)} and the numbers below are reported as diagnostics, not as a result-slot
-headline. Outputs: \path{output/compare/real/realv6*/} and
+\paragraph{The runs.} Five runs made on the afternoon of 3 November 2026 are
+reported, the only ones whose run directories still exist: ORB-SLAM3
+stereo-inertial with the GPU or the CPU feature extractor and with loop closing
+on or off, and VINS-Fusion once; all at replay rate 1.0, all without a detector,
+so unfiltered. ORB-SLAM3 used \repo{config/wil/stereo_imu.yaml} with the
+repaired library (fork patches 11--14b, node and library built alike), the
+3 November stereo extrinsic and \texttt{IMU.NoiseGyro} 0.1 with
+\texttt{IMU.NoiseAcc} 1.0, ten times the values that had been copied from the
+VINS file; VINS-Fusion used the same file's gravity norm of \num{9.2642} from an
+August recording. Earlier runs on this bag (2 November, and the morning of
+3 November) were overwritten by these re-runs; their scorings remain under
+\path{output/compare/real/realv6*} as a record of the search described in
+\cref{sec:realv6-stability} but cannot be reproduced and carry no number here.
+No filtered run exists, so the filter hypothesis remains untested on the real
+robot.
+
+\paragraph{Reporting rules.} Scoring is \path{script/eval_real_gt.py}: rigid
+SE(2) alignment with scale fixed, lever arm from the tracker marker to the IMU
+unmeasured and set to zero, every number \emph{provisional}. The bag was not on
+the machine when these runs were scored, so the time offset is pinned to the
+value the wheel-speed cross-correlation found on 2 November
+(\SI{-4.14}{\second} on the cleaned export, \SI{+4.38}{\second} on the raw one)
+and the bag's first-message time and duration are taken from that day's
+manifest; the new manifests record the substitution. The scorer's validity
+rules were fixed before the data were read; the tracker export fails two of them
+(gaps above \SI{1}{\second}, a step above \SI{0.5}{\metre}), so the tool labels
+every run \emph{failed (ground truth invalid)} and the numbers are reported as
+diagnostics, not as a result-slot headline. Outputs:
+\path{output/compare/real/realv6_1103pm_*/} and
 \path{output/compare/real/realv6-insights/}.
 
 \insreal{gt_cleaning.tex}
@@ -325,117 +342,245 @@ headline. Outputs: \path{output/compare/real/realv6*/} and
   \label{fig:realv6-gt}
 \end{figure}
 
-One tracker sample changed every headline. The export runs at \SI{1.7}{\hertz},
+One tracker sample decided the headline. The export runs at \SI{1.7}{\hertz},
 not the \SI{7}{\hertz} of the earlier recordings, with 66 gaps longer than
 \SI{1}{\second}, and it contains a single sample \SI{5.2}{\metre} off the path.
-That sample added \SI{10}{\metre} to the true path length (37.3 against
-\SI{27.1}{\metre}), dominated the speed cross-correlation so that the time offset
-came out as \SI{+4.4}{\second} with a peak correlation of 0.10, and left
-ORB-SLAM3 with an ATE of \SI{1.18}{\metre} and a path ratio of 0.68
-(\cref{tab:realv6-cleaning}, rows ``raw''). Removing that one sample, and
-nothing else, moves the offset to \SI{-4.1}{\second} at a correlation of 0.61,
-the path ratio to 0.93 and the ATE to \SI{0.41}{\metre}. The sparse rate and the
-gaps remain, so the cleaned truth still fails the gap rule; the cleaning is
-recorded here as a one-sample edit with its effect shown, not applied silently.
+That sample adds \SI{10}{\metre} to the true path length (37.3 against
+\SI{27.1}{\metre}) and dominates the speed cross-correlation; scored against it
+the GPU run reads \SI{1.17}{\metre} with a path ratio of 0.65, and with that one
+sample removed, and nothing else, \SI{0.52}{\metre} with a path ratio of 0.85
+(\cref{tab:realv6-cleaning}). The sparse rate and the gaps remain, so the cleaned
+truth still fails the gap rule; the cleaning is recorded here as a one-sample
+edit with its effect shown, not applied silently.
 
-\insreal{orb_summary.tex}
-
-\begin{figure}[htbp]
+\begin{figure}[p]
   \centering
-  \includegraphics[width=0.62\textwidth]{\realdir/realv6_clean/dataset_realv6_000/trajectory_light.png}
-  \caption{ORB-SLAM3 at replay rate 1.0 against the cleaned tracker truth after
-  rigid SE(2) alignment. The estimate traces the figure-of-eight with its loops
-  about \SI{7}{\percent} smaller than the tracker's (Sim(2) scale diagnostic
-  1.09, not applied).}
-  \label{fig:realv6-traj}
+  \includegraphics[width=\textwidth]{\realdir/realv6-insights/fig_paths_light.png}
+  \caption{Every surviving run against the cleaned tracker truth after rigid
+  SE(2) alignment, one panel per run: ORB-SLAM3 with GPU or CPU extractor and
+  loop closing on or off, and VINS-Fusion, whose \SI{18}{\second} before its
+  resets took over are all it tracked.}
+  \label{fig:realv6-paths}
 \end{figure}
 
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\textwidth]{\realdir/realv6-insights/fig_all_runs_light.png}
-  \caption{All four runs against the cleaned tracker truth after the same rigid
-  SE(2) alignment. Left: ORB-SLAM3 at replay 1.0 and 0.5, both on the route.
-  Right: VINS-Fusion at both rates, which leave the \SI{10}{\metre} floor within
-  a minute; note the axis scale.}
-  \label{fig:realv6-all}
-\end{figure}
+\insreal{final_table.tex}
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{\realdir/realv6-insights/fig_orb_timeline_light.png}
   \caption{ORB-SLAM3 planar error against the cleaned tracker truth over the
-  run, both replay rates. Grey bands: the aligned estimate's heading changes
-  faster than \SI{10}{\degree\per\second}. Dotted red: the frames at which
-  tracking left the OK state, all inside the first \SI{13}{\second} (the
-  \repo{local_mapping_bad_imu} initialisation resets).}
+  run, one panel per configuration. Grey bands: the aligned estimate's heading
+  changes faster than \SI{10}{\degree\per\second}. Dotted red: the frames at
+  which tracking left the OK state (the \repo{local_mapping_bad_imu}
+  initialisation resets, all inside the first \SI{13}{\second}).}
   \label{fig:realv6-orb}
 \end{figure}
 
 \insreal{turning.tex}
 
-ORB-SLAM3 tracks the whole route at both replay rates. After two (rate 1.0) or
-three (rate 0.5) map resets during the first \SI{13}{\second}, while the
-inertial initialisation settles, tracking never leaves the OK state again; the
-error is a slow wave between \SI{0.05}{} and \SI{0.85}{\metre} with its crest
-around \SIrange{120}{140}{\second} and its trough at \SI{195}{\second}, not a
-drift that accumulates (\cref{fig:realv6-orb}). Turning does not raise it: the
-error shrinks slightly during the heading changes in both runs
-(\cref{tab:realv6-turning}), the same answer the simulation gave once the lever
-arm was removed. Real time costs frames but not accuracy here: at rate 1.0 the
-node dropped 3\,390 of 6\,476 frames and scored \SI{0.41}{\metre}; at rate 0.5
-it dropped 619 and scored \SI{0.57}{\metre}, with the same shape of error curve.
+ORB-SLAM3 tracks the whole route in all four configurations, and the front end
+is what separates them. The two GPU runs score \SI{0.52}{} (loop closing on) and
+\SI{0.46}{\metre} (off, with zero resets) after dropping 2\,420 and 3\,201 of
+about 6\,480 frames; the two CPU runs drop 4\,363 and 4\,204 frames, two thirds
+of the stream, and score \SI{0.62}{} and \SI{1.03}{\metre}, the first with a
+\SI{2}{\metre} vertical excursion the scorer flags as implausible and the second
+with three resets and a half-second of lost tracking
+(\cref{tab:realv6-final}, \cref{fig:realv6-paths}). Loop closing changes nothing
+that the front end does not change more. After the initialisation resets no run
+leaves the OK state; the error is a slow wave between \SI{0.05}{} and
+\SI{1}{\metre}, not an accumulating drift (\cref{fig:realv6-orb}), and it does
+not rise while turning in any of the four (\cref{tab:realv6-turning}), the same
+answer the simulation gave once the lever arm was removed.
 
-What the \SI{0.4}{\metre} is made of is not settled. The loops of the estimate
-are a uniform \SI{7}{\percent} smaller than the tracker's
-(\cref{fig:realv6-traj}; Sim(2) scale 1.09; path ratio 0.93), which a
+What the \SI{0.5}{\metre} is made of is not settled. The estimates' loops are a
+uniform \SIrange{12}{15}{\percent} smaller than the tracker's (path ratios
+0.85--0.88 in the three plausible runs; \cref{fig:realv6-paths}), which a
 stereo-baseline error, a tracker scale error or the unmeasured lever arm could
-each produce; the least-squares lever-arm fit (\SI{0.31}{\metre} behind the IMU,
-not applied) would bring the ATE to \SI{0.31}{\metre}, which is the size of the
-effect the unmeasured arm can hide.
+each produce.
 
-\insreal{vins_summary.tex}
+\subsection{How the setting was reached}
+\label{sec:realv6-stability}
+
+The configuration above was not the first tried. The runs of 2 November and of
+the morning of 3 November, whose directories these re-runs overwrote, showed
+that the stereo-inertial estimator with the IMU noise densities copied from the
+VINS file was unstable on this recording: a minority of runs stayed below
+\SI{1}{\metre} and the rest ran away in the velocity state at a different
+place each time, while the robot crept at \SI{0.12}{\metre\per\second}. Six
+out-of-bounds reads in the stereo-fisheye code path were found and fixed, an
+AddressSanitizer run over the whole recording came out clean, and keyframe
+culling, loop closing, the GPU front end, the replay rate, frame drops, the
+stereo extrinsic and the initialisation were each varied without removing the
+runaway; raising the IMU noise densities tenfold removed it in every run since.
+The reading is that the inertial optimisation was trusting an IMU whose
+camera-relative axis signs, lever arm and time offset are unverified; with the
+weaker weighting the images carry the solution and the IMU acts as a prior,
+which is the role the evidence supports. The search is recorded in the ORB-SLAM3
+engineering record (sections 7.10 to 7.13 and the status table); no number from
+those overwritten runs is quoted here.
+
+\insreal{vins_table.tex}
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\textwidth]{\realdir/realv6-insights/fig_vins_divergence_light.png}
-  \caption{VINS-Fusion on \repo{dataset_realv6_000} at both replay rates:
-  distance of the estimate from its origin (log scale), estimated speed, and the
-  accelerometer-bias magnitude the estimator holds. The dashed line is the
-  difference between what the IMU measures at rest in this bag
-  (\SI{9.878}{\metre\per\second\squared}) and the gravity norm the
-  configuration fixes (\num{9.2642}).}
+  \includegraphics[width=\textwidth]{\realdir/realv6-insights/fig_vins_light.png}
+  \caption{VINS-Fusion on \repo{dataset_realv6_000}: distance of the estimate
+  from its origin with every \repo{imu_gap} reset marked (top), and the IMU
+  messages the node received against the samples the estimator used (bottom).}
   \label{fig:realv6-vins}
 \end{figure}
 
-VINS-Fusion diverges at both replay rates from the same moment, so the frame
-rate is not what breaks it. The two nodes received 1\,047 and 2\,264 of the
-bag's 6\,601 frames (one in six and one in three), initialised at
-\SI{0.33}{\second} and never raised a reset; in both the estimated speed passes
-\SI{1}{\metre\per\second} at \SIrange{37}{38}{\second}, while the robot never
-exceeds \SI{0.9}{\metre\per\second}, and from there the position runs away to
-about \SI{5}{\kilo\metre} (\cref{tab:realv6-vins}, \cref{fig:realv6-vins}).
-The quantity that identifies the cause is the accelerometer bias: both runs
-settle it at \SIrange{0.68}{0.72}{\metre\per\second\squared} and then hold it,
-which is within \SI{0.1}{\metre\per\second\squared} of the gap between the
-gravity norm the configuration fixes, \num{9.2642}, measured on an August
-recording of an earlier IMU, and the \SI{9.878}{\metre\per\second\squared}
-this bag's IMU reads at rest. The estimator absorbs the mismatch into the bias
-while the visual constraints are strong, and once they thin out the mis-scaled
-gravity integrates into velocity. ORB-SLAM3 on the same bag is unaffected
-because its launch rescales the accelerometer (\repo{imu_accel_scale}) instead
-of fixing a gravity norm. The frame starvation is real and secondary: it
-weakens the visual constraint that was holding the bias in place, and it sits on
-VINS-Fusion's input path, since the ORB-SLAM3 node received 6\,476 frames from
-the same bag.
+VINS-Fusion has no valid run on this recording. The node received 3\,187 of the
+bag's 6\,601 frames but used only 6\,498 of the 43\,494 IMU messages it
+received; it raised 217 \repo{imu_gap} resets and wrote \SI{19}{\second} of
+poses before the resets took over (\cref{tab:realv6-vins}, \cref{fig:realv6-vins}).
+The delivery of the IMU stream into VINS-Fusion is therefore the defect in front
+of every other; behind it stands a gravity norm of \num{9.2642} in the
+configuration against the \SI{9.878}{\metre\per\second\squared} this bag's IMU
+reads at rest, which the overwritten 2 November runs had shown to drive a
+velocity runaway once the visual constraints thin. The \SI{18}{\second} it did
+track scored \SI{0.18}{\metre} against 41 tracker samples, which is too short to
+mean anything and is not a result.
+
+\subsection{realv7: three recordings with a valid tracker truth, and an IMU
+            initialisation that the map reset threw away}
+\label{sec:realv7-tilt}
+
+The three \repo{dataset_realv7} recordings of 3 November 2026 (routes of
+\SI{21.6}{}, \SI{31.7}{} and \SI{23.4}{\metre} over \SI{97}{}, \SI{134}{} and
+\SI{104}{\second}, a rounded rectangle, a figure-of-eight and a rounded
+rectangle) are the first whose tracker export passes every validity rule of the
+scorer: \SIrange{5}{6}{\hertz}, no gap above \SI{1}{\second}, no step. On them
+the same ORB-SLAM3 setting that tracked realv6 produces an estimate that lies in
+a tilted plane in nine of twelve runs, and the tilt, not the configuration,
+decides the score. \Cref{tab:realv7-tilt,tab:realv7-vins} and
+\cref{fig:realv7-paths,fig:realv7-tilt} carry the observation as scored on
+3 November. The tilt was read first as a wrong gravity direction and then as a
+frame fixed by the node; the per-frame diagnostics of the runs, read on
+4 November, give the mechanism (below), and a repair in the scorer that takes
+nothing from the truth makes all twelve runs scorable
+(\cref{tab:realv7-results}, \cref{fig:realv7-paths-repaired}). The 3 November
+scoring of \repo{001} and \repo{002} took the time offset from the estimate's
+own speed because their bags were not on the machine; the repaired scoring uses
+the wheel speed on all three.
+
+\insrealb{tilt_table.tex}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=\textwidth]{\realdir/realv7-insights/fig_paths_light.png}
+  \caption{Every \repo{realv7} run against its tracker truth after rigid SE(2)
+  alignment, one panel per run: three recordings (rows) by four ORB-SLAM3
+  configurations and VINS-Fusion (columns). Where the estimate's plane is
+  vertical, the planar alignment sees the route collapsed onto a line.}
+  \label{fig:realv7-paths}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=\textwidth]{\realdir/realv7-insights/fig_tilt_light.png}
+  \caption{The same twelve ORB-SLAM3 estimates seen from the side (estimate $x$
+  against $z$, centred). A floor robot's path should be a flat line; on
+  \repo{realv7_000} every run is the route drawn in a vertical plane.}
+  \label{fig:realv7-tilt}
+\end{figure}
+
+The tilt is real, and it is neither the gravity estimate nor the node: it is
+the inertial initialisation being thrown away. A plane fitted to each
+estimate's three-dimensional positions lies within \SI{10}{\degree} of
+horizontal in three of the twelve runs and at \SIrange{88}{90}{\degree} in
+five, with the rest in between (\cref{tab:realv7-tilt}); on \repo{realv7_000}
+all four configurations give a vertical plane with the route intact in it
+(\cref{fig:realv7-tilt}, top row), and the normal of that plane is in every run
+exactly one of the body axes. The node writes ORB-SLAM3's world frame as it is
+(its first-pose alignment option is off), and the per-frame diagnostics of the
+runs tell one story in nine of the twelve. The IMU initialised
+\SIrange{3}{4}{\second} after the first pose, at which moment ORB-SLAM3
+rotated its map so that gravity points down $z$ (the \SI{0.38}{\metre} step in
+the log is that rotation applied to a robot \SI{0.38}{\metre} from the origin).
+Within two seconds the upstream rule that resets a map whose consecutive
+keyframes lie closer than \SI{2}{\centi\metre} in the ten seconds after the
+initialisation fired, because the robot was still standing or crawling, and the
+map was discarded. The new map starts in the camera frame of the reset instant,
+whose vertical is the camera's $y$ axis, and in it the initialisation was
+starved: before the IMU is initialised a keyframe is inserted every
+\SI{0.25}{\second}, creating map points for one takes about
+\SI{250}{\milli\second} on this rig, and upstream attempts the initialisation
+only when its keyframe queue is empty, which it was for \SIrange{3}{9}{\percent}
+of the keyframes. The IMU re-initialised after \SIrange{37}{92}{\second} in
+seven runs and never in two (\repo{000} without loop closing and \repo{001}
+with it, both GPU front end); only \repo{001} with the CPU front end and loop
+closing re-initialised early, at \SI{6.7}{\second}, and it is the run that was
+level. Until the re-initialisation every pose is a stereo-only estimate in a
+map whose vertical is the camera's $y$ axis, which is the body-axis normal; at
+the re-initialisation the map is rotated about its origin under the
+already-written poses, which is the \SIrange{1.9}{6.8}{\metre} step of the
+late-initialising runs. The IMU noise weighting that stopped the realv6 runaway
+and the IMU-to-camera rotation, whose axis signs remain unverified, play no
+part in this. The four surviving realv6 runs of \cref{tab:realv6-final} show
+the same reset at \SIrange{3}{5}{\second}; their re-initialisation came after
+\SIrange{9}{34}{\second}, which is why they were level.
+
+Repaired, the twelve runs score (\cref{tab:realv7-results},
+\cref{fig:realv7-paths-repaired}). The scorer gained two switches on
+4 November, neither of which looks at the truth: it rotates the poses written
+before each initialisation by the rotation it measures at the initialisation
+frame, which brings the \SI{0.38}{} and \SI{6.8}{\metre} steps to \SI{0.00}{}
+and \SI{0.03}{\metre}, and it levels each map's own fitted plane, the side
+chosen by the body's up axis, which agrees with the fitted normal within
+\SI{2}{\degree} wherever the plane is determined. On \repo{000} the four
+configurations give \SIrange{0.25}{0.27}{\metre} planar ATE over
+\SI{89}{\second}, an RPE at \SI{1}{\second} of \SI{0.05}{\metre} and path
+ratios of 1.05 to 1.09, with the IMU initialised for at most a quarter of the
+frames: stereo-only figures in all but name, and the best real-robot numbers of
+the project. On \repo{001} the four give \SIrange{0.44}{0.82}{\metre} over
+\SI{126}{\second}; the run with the IMU initialised for \SI{94}{\percent} of the
+frames scores \SI{0.44}{\metre}, no better than the run with
+\SI{3}{\percent}, and the \SI{0.56}{\metre} run (CPU front end, loop closing
+off) keeps a vertical scatter of \SI{1.02}{\metre} after levelling, two
+centimetres over the scorer's vertical-range rule, which labels it failed. On
+\repo{002} one run tracks (\SI{0.47}{\metre}, CPU front end, loop closing),
+two lose tracking inside the route (resets at \SI{49}{} and \SI{59}{\second},
+\SI{2.1}{\metre} ATE) and the fourth drifts without a reset (\SI{1.67}{\metre},
+RPE \SI{0.70}{\metre}, vertical range \SI{4.3}{\metre}, failed by the same
+rule). The init-time resets of the other runs make them \emph{partial} under
+the scorer's rules, as the table says. The remedy in the estimator is
+fork patch 15: two switches in the local mapper that attempt the initialisation
+while keyframes are queued and skip the insufficient-motion reset for stereo,
+whose scale is fixed. They are on in the real-rig configuration and untested on
+a recording; every number above was obtained without them.
+
+\insrealb{results_table.tex}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=\textwidth]{\realdir/realv7-insights/fig_paths_lvl_light.png}
+  \caption{The twelve \repo{realv7} ORB-SLAM3 runs after the scorer's frame
+  repair, against the tracker truth after rigid SE(2) alignment; each panel's
+  title gives the planar ATE and the share of tracked frames with the IMU
+  initialised.}
+  \label{fig:realv7-paths-repaired}
+\end{figure}
+
+\insrealb{vins_table.tex}
+
+VINS-Fusion fails on all three in the manner of the first realv6 runs: the IMU
+stream now arrives without gaps (zero resets), \SIrange{40}{45}{\percent} of the
+frames reach the node, and the estimate diverges to kilometres on the stale
+gravity norm.
 
 \begin{queried}[What this slot still needs before it is a result]
-A tracker export at its nominal \SI{7}{\hertz} without gaps, or an explicit rule
-for scoring on a sparse reference; the marker-to-IMU lever arm measured, which
-bounds \SI{0.1}{\metre} of the ORB-SLAM3 figure; a VINS-Fusion run with
-\repo{g_norm} set to what this IMU measures (or the accelerometer rescaled as
-ORB-SLAM3 does) and with the full frame stream delivered; and at least one
-filtered run per estimator, without which Experiment~3's hypothesis has no
-real-robot test.
+For realv6, a tracker export at its nominal \SI{7}{\hertz} without gaps, or an
+explicit rule for scoring on a sparse reference; for realv7, one run with the
+fork's two initialisation switches on, to show from the per-frame log that the
+IMU stays initialised from the first seconds without the scorer's repair; for
+both recording sets, the marker-to-IMU lever arm measured and the IMU-to-camera axis
+signs verified, which remain open although they no longer explain the tilt; a
+VINS-Fusion run whose node receives the IMU stream without gaps and the full
+frame stream, with \repo{g_norm} set to what this IMU measures; repeats of the
+ORB-SLAM3 configurations kept under new names rather than overwritten; and at
+least one filtered run per estimator, without which Experiment~3's hypothesis
+has no real-robot test.
 \end{queried}
 
 \FloatBarrier
@@ -476,8 +621,9 @@ Q2 object in view, extreme & Not measurable within a bag; moving area does not m
 Q2 traffic in view, realistic & No effect on the unfiltered drift; the class mask loses features and gains drift while traffic is in view (suggestive) & \cref{tab:insight-traffic-realistic}, \cref{fig:traffic} & low (n) \\
 Q3 features before onset & ORB-SLAM3+YOLO yes (collapse to one fifth); VINS-Fusion no & \cref{fig:epoch} & medium \\
 Q4 state at onset & On the first straight, not turning; objects in view & \cref{tab:insight-onset-extreme} & high \\
-Real robot, ORB & Tracks the whole \SI{218}{\second} route; provisional ATE \SI{0.41}{\metre}; no turning effect; \SI{7}{\percent} scale shortfall unexplained & \cref{tab:realv6-orb,fig:realv6-orb} & medium (provisional, sparse truth) \\
-Real robot, VINS & Diverges at both rates from \SI{37}{\second}; accelerometer bias frozen at the \num{0.6} gap between configured gravity norm and the IMU's; frame starvation secondary & \cref{tab:realv6-vins}, \cref{fig:realv6-vins} & high (mechanism), medium (attribution) \\
+Real robot, ORB & Tracks the whole \SI{218}{\second} route in all four configurations; provisional ATE \SI{0.46}{} and \SI{0.52}{\metre} with the GPU extractor, \SI{0.62}{} and \SI{1.03}{\metre} with the CPU extractor (two thirds of frames dropped); no turning effect; \SIrange{12}{15}{\percent} scale shortfall unexplained & \cref{tab:realv6-final,fig:realv6-paths} & medium (provisional, sparse truth, one run each) \\
+Real robot, realv7 & Valid truth; the tilt in 9 of 12 runs is the IMU initialisation thrown away by the upstream low-motion reset and starved in the new map; repaired without the truth, ORB scores 0.25--0.27 m (000), 0.44--0.82 m (001), 0.47 m (002, one run), with two losses and one drift on 002 & \cref{tab:realv7-results,fig:realv7-paths-repaired} & high (mechanism), medium (ATE) \\
+Real robot, VINS & No valid run: 217 \repo{imu_gap} resets, \SI{19}{\second} of poses; gravity norm still stale & \cref{tab:realv6-vins}, \cref{fig:realv6-vins} & high \\
 Real robot, truth & One tracker sample set the raw ATE to \SI{1.18}{\metre}; truth at \SI{1.7}{\hertz} fails the gap rule & \cref{tab:realv6-cleaning} & high \\
 \bottomrule
 \end{tabularx}
@@ -489,9 +635,16 @@ Report the extreme world as an immediate-failure testbed in which the filter
 cannot be evaluated, not as a drift testbed. Report the realistic world's
 traffic effect as bounded, not measured, and the class mask's feature cost as
 the one mechanism these data show. For the real-robot slot, quote ORB-SLAM3's
-\SI{0.41}{\metre} as provisional with the sparse-truth and lever-arm caveats
-attached, report the VINS-Fusion failure as a configuration defect (stale gravity
-norm) compounded by frame delivery rather than an estimator result, and keep the slot \emph{partial}
-until a filtered run and a full-rate truth exist.
+\SIrange{0.46}{0.52}{\metre} (GPU front end) as provisional with the sparse-truth and lever-arm caveats
+attached, report the VINS-Fusion failure as a delivery defect (IMU-stream gaps)
+in front of a configuration defect (stale gravity norm) rather than an
+estimator result, and keep the slot \emph{partial}
+until a filtered run and a full-rate truth exist; report realv7 as the
+recording set with valid truth, ORB-SLAM3 at \SIrange{0.25}{0.27}{\metre} on
+\repo{000}, \SIrange{0.44}{0.82}{\metre} on \repo{001} and \SI{0.47}{\metre}
+on the one \repo{002} run without a loss, after the scorer's frame repair and
+with each run's initialisation history beside the number; the IMU stayed
+uninitialised for most of nine runs, so these are largely stereo-only figures
+until the fork's initialisation switches are exercised.
 
 \end{document}

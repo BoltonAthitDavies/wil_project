@@ -1,0 +1,146 @@
+{
+  "experiment_id": "realv7_000_lc_cpu_raw",
+  "domain": "real",
+  "dataset": "dataset_realv7_000",
+  "generated": "2026-11-03T22:08:42",
+  "command": "script/eval_real_gt.py --dataset dataset_realv7_000 --run orb=loopclosing_rate1_cpu --systems orb --fit-lever-arm --experiment-id realv7_000_lc_cpu_raw",
+  "git_superproject": "feced2f6e999",
+  "python": "3.10.12",
+  "numpy": "2.2.6",
+  "host": "ambushee-Katana-GF66-11UG",
+  "bag": {
+    "path": "/home/ambushee/wil_project/dataset/dataset_realv7_000/dataset_realv7_000_0.db3",
+    "size_bytes": 2641948672,
+    "substituted_from": null,
+    "first_message_robotclock_s": 1793448177.754709,
+    "duration_s": 90.74548476800001,
+    "message_count": 46376,
+    "wheel_topic": "/feedback/velocity",
+    "wheel_messages": 4533
+  },
+  "ground_truth": {
+    "path": "/home/ambushee/wil_project/dataset/gt/dataset_realv7_000",
+    "sha256": "5e7e31810656f0c1a919de942883710ff0c97df6b62c9ea8c4355edf264442f0",
+    "header": [
+      "Date Time",
+      "Recorded Time (sec.)",
+      "X (cm.)",
+      "Y (cm.)"
+    ],
+    "samples": 524,
+    "duration_s": 96.764,
+    "median_dt_s": 0.16800000000000637,
+    "max_gap_s": 0.336,
+    "max_step_m": 0.09004255749366505,
+    "path_m": 21.553131705977304,
+    "first_stamp": "Tue 11/03/2026 09:48:56 AM",
+    "last_stamp": "Tue 11/03/2026 09:50:33 AM",
+    "checks": {
+      "samples_ok": true,
+      "gap_ok": true,
+      "step_ok": true,
+      "duration_ok": true
+    },
+    "valid": true,
+    "units": "centimetres converted to metres",
+    "dimensions": 2,
+    "heading": false
+  },
+  "time_alignment": {
+    "offset_s": -2.572606636949442,
+    "source": "wheel-speed correlation",
+    "ok": true,
+    "curves": {
+      "wheel /feedback/velocity": {
+        "offset_s": -2.572606636949442,
+        "peak_r": 0.9887225779248451,
+        "second_peak_r": 0.9045038905860308
+      },
+      "ORB-SLAM3": {
+        "offset_s": 0.0977069581971964,
+        "peak_r": 0.09243361543599028,
+        "second_peak_r": 0.08827144400749919
+      }
+    },
+    "search_s": [
+      -5.0,
+      20.0
+    ],
+    "step_s": 0.01
+  },
+  "method": {
+    "alignment": "rigid SE(2), scale fixed (vio_metrics.umeyama on z=0 points)",
+    "association": "estimate linearly interpolated at tracker samples; nearest estimate sample within 0.15 s",
+    "rpe": "translational, relative displacements in the aligned frame, pairs within 25 % of delta",
+    "lever_arm": {
+      "forward_m": 0.0,
+      "left_m": 0.0,
+      "up_m": 0.0,
+      "measured": false,
+      "assumed": false
+    },
+    "trim_start_s": 0.0,
+    "jump_speed_mps": 10.0,
+    "diverged_m": 50.0
+  },
+  "runs": {
+    "ORB-SLAM3": {
+      "dir": "/home/ambushee/wil_project/output/output_orb/real/dataset_realv7_000/loopclosing_rate1_cpu",
+      "status": "completed (provisional: lever arm not provided)",
+      "reasons": [
+        "shutdown not graceful",
+        "implausible: z range 6.9 m on a planar run, path ratio 0.56"
+      ],
+      "body_axes": {
+        "forward": "-z",
+        "confidence": 4.518769314851793
+      },
+      "run_metadata": {
+        "pipeline": "orbslam3_ros2",
+        "experiment_id": "loopclosing_rate1_cpu",
+        "dataset_path": "/home/ambushee/wil_project/dataset/dataset_realv7_000",
+        "world_path": "",
+        "run_command": "",
+        "run_notes": "baseline logging validation",
+        "config_file": "/home/ambushee/wil_project/orbslam3_ros2/config/wil/stereo_imu.yaml",
+        "vocabulary_file": "/home/ambushee/wil_project/thirdparty/ORB_SLAM3/Vocabulary/ORBvoc.txt",
+        "output_path": "/home/ambushee/wil_project/output/output_orb/real/dataset_realv7_000/loopclosing_rate1_cpu",
+        "image0_topic": "/cam0/image_raw",
+        "image1_topic": "/cam1/image_raw",
+        "imu_topic": "/hwt101ct_yaw_publisher",
+        "image_transport": "compressed",
+        "world_frame_id": "orbslam3_world",
+        "body_frame_id": "imu_link",
+        "use_imu": "true",
+        "filter": "false",
+        "publish_tf": "true",
+        "replay_rate": "1.000000",
+        "sync_slop_s": "0.020000",
+        "det_max_age_s": "0.150000",
+        "mask_dilate_px": "8",
+        "max_mask_fraction": "0.800000",
+        "filter_mode": "class",
+        "motion_iou": "0.300000",
+        "motion_min_points": "15",
+        "motion_inlier_ratio": "0.500000",
+        "motion_unknown_mask": "false",
+        "motion_revote_frames": "15",
+        "motion_min_point_age": "30",
+        "motion_min_box_age": "30",
+        "start_wall_time_unix_ns": "1793691475762290183"
+      },
+      "run_summary": {},
+      "ate_offset_sensitivity": {
+        "-0.2": 2.237512406721171,
+        "-0.1": 2.2390322201260697,
+        "+0.1": 2.238427745454694,
+        "+0.2": 2.240599302726001
+      },
+      "fitted_lever_arm": {
+        "forward_m": -1.4950270417846623,
+        "left_m": -0.11145704205161515,
+        "ate_rmse_with_fit": 2.167873337207035
+      }
+    }
+  }
+}

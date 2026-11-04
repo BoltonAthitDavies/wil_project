@@ -1,0 +1,15 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption[Realv7: the VINS-Fusion runs.]{VINS-Fusion on the three \repo{dataset_realv7} recordings (\repo{config/wil/stereo_imu.yaml}, IMU noise $\times 10$, gravity norm \num{9.2642}). Frames received against the bag's count (\SI{30}{\hertz} over the recording), IMU use, resets, and where the estimate ended.}
+\label{tab:realv7-vins}
+\begin{tabular}{lrrrrr}
+\toprule
+Recording & frames received & IMU received / used & resets & z range [m] & $|p|$ at end [m] \\
+\midrule
+\repo{realv7_000} & 1155 of about 2663 & 17906 / 19053 & 0 & 12834403 & 37554 \\
+\repo{realv7_001} & 1541 of about 3686 & 24809 / 26340 & 0 & 3701 & 15974 \\
+\repo{realv7_002} & 1271 of about 2910 & 19368 / 20627 & 0 & 25937 & 5252 \\
+\bottomrule
+\end{tabular}
+\end{table}

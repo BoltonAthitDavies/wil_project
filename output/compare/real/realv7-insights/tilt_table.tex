@@ -1,0 +1,26 @@
+\begin{table}[htbp]
+\centering
+\scriptsize\setlength{\tabcolsep}{3pt}
+\caption[Realv7: every ORB-SLAM3 run, tilt of the estimate and score.]{ORB-SLAM3 on the three \repo{dataset_realv7} recordings, 3 November 2026 afternoon, same setting as the realv6 runs. ``Tilt'' is the angle between the plane fitted to the estimate's 3-D positions and the horizontal; ``off-plane'' the rms distance of the positions from that plane. A floor robot's estimate should be horizontal: a tilt near \SI{90}{\degree} means the poses were written while the map was not yet gravity-aligned (IMU not initialised: the vertical is then the camera's $y$ axis), see \cref{tab:realv7-results} for the initialisation history and the repaired scores. ATE is planar after SE(2) alignment against the raw tracker export (which passes the validity rules on all three recordings); ``offset'' says how the time offset was found: \emph{wheel} = wheel-speed cross-correlation with the bag present (realv7\_000), \emph{estimator} = the estimate's own speed with the bag absent (uncertain; superseded by the wheel offsets of \cref{tab:realv7-results}). Lever arm unmeasured (zero).}
+\label{tab:realv7-tilt}
+\begin{tabular}{llrrrrrrrl}
+\toprule
+Recording & Run & tilt [\si{\degree}] & off-plane [m] & z range [m] & ATE [m] & median [m] & path ratio & resets & offset \\
+\midrule
+\repo{realv7_000} & GPU, LC on & \textcolor{flagred}{89.1} & 0.35 & 6.87 & 2.26 & 2.08 & 0.55 & None & wheel \\
+\repo{realv7_000} & GPU, LC off & \textcolor{flagred}{89.5} & 0.02 & 6.98 & 2.32 & 2.19 & 0.47 & None & wheel \\
+\repo{realv7_000} & CPU, LC on & \textcolor{flagred}{88.8} & 0.41 & 6.88 & 2.24 & 2.04 & 0.56 & None & wheel \\
+\repo{realv7_000} & CPU, LC off & \textcolor{flagred}{87.9} & 0.58 & 6.79 & 2.19 & 1.87 & 0.67 & 1 & wheel \\
+\addlinespace
+\repo{realv7_001} & GPU, LC on & \textcolor{flagred}{88.8} & 0.05 & 9.64 & 3.10 & 3.17 & 0.66 & 2 & estimator \\
+\repo{realv7_001} & GPU, LC off & 6.1 & 1.12 & 5.77 & 1.44 & 0.95 & 1.19 & 2 & estimator \\
+\repo{realv7_001} & CPU, LC on & 1.5 & 0.07 & 0.38 & 0.31 & 0.23 & 1.09 & 1 & estimator \\
+\repo{realv7_001} & CPU, LC off & \textcolor{flagred}{13.0} & 1.05 & 5.23 & 1.48 & 0.79 & 1.16 & 1 & estimator \\
+\addlinespace
+\repo{realv7_002} & GPU, LC on & \textcolor{flagred}{37.7} & 0.87 & 4.08 & 1.94 & 1.46 & 1.15 & 3 & estimator \\
+\repo{realv7_002} & GPU, LC off & \textcolor{flagred}{59.7} & 0.83 & 4.80 & 2.11 & 1.76 & 1.04 & 2 & estimator \\
+\repo{realv7_002} & CPU, LC on & 5.2 & 0.73 & 2.94 & 0.85 & 0.64 & 1.06 & 1 & estimator \\
+\repo{realv7_002} & CPU, LC off & \textcolor{flagred}{21.7} & 0.84 & 7.03 & 1.67 & 1.19 & 1.61 & 0 & estimator \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -111,10 +111,17 @@ finished prose: port them, do not rewrite their science.
 
 ### 3.1 Storage locations
 
-- Flash drive root: `/media/ambushee/`
-- Real-world datasets: `/media/ambushee/`
-- Simulation datasets on flash drive: `/media/ambushee/dataset/`
-- Workspace datasets: `/home/ambushee/wil_project/dataset/`
+- **Dataset root (since 3 November 2026):** `/media/ambushee/New Volume/wil_rescue/`
+  -- an internal partition (161 GB, "New Volume"), every bag rescued from the
+  flash drive by `rsync` on 3 November (`rescue.log` in that directory). The
+  flash drive (`/media/ambushee/32E4AAB1E4AA772F/`) is retired as a source; paths
+  to it in older run manifests and notes mean this root now. Quote the path with
+  the space in it, e.g. `"/media/ambushee/New Volume/wil_rescue/dataset_realv7_000"`.
+- Workspace datasets: `/home/ambushee/wil_project/dataset/` (only what is in
+  active use; the workspace copies of `realv6`/`realv7` were deleted for disk
+  space on 2-3 November -- use the root above)
+- Ground truth: `/home/ambushee/wil_project/dataset/gt/` (tracker exports, not
+  on the dataset drive)
 - Raw estimator results: `/home/ambushee/wil_project/output/output_*`
 - Offline YOLO evaluation: `/home/ambushee/wil_project/output/yolo_eval/`
 - Analysis products: `/home/ambushee/wil_project/output/compare/`
@@ -142,13 +149,23 @@ active use (8 October 2026):
   estimated per bag (`script/eval_real_gt.py`). `/feedback/velocity` on these
   bags is not metres per second; use its shape only.
 
-`dataset_realv2_001` (96 s, a circle) and the earlier simulation bags
-(`dataset_dynamic_nofloortexture_01_000`, `dataset_static_nofloortexture_001`,
-the `allsensor` set, `dataset_real_000`) live on the flash drive, which is not
-always mounted. Do not mark a dataset broken because it is absent from the
-workspace copy. Before preparing a run, report the resolved absolute path and
-inspect its topic inventory, duration, message counts, and storage health. Never
-silently replace a requested dataset with another run.
+Inventory of the dataset root on 3 November 2026 (18 bags, 33 GB; health audit
+by `script/check_bags.py` the same day: **18 of 18 healthy**, message counts equal
+to the metadata for every bag):
+
+| group | present on the root | known absent or lost |
+|---|---|---|
+| real robot | `dataset_realv6_000` (31 Oct, tracker truth needs one sample removed), `dataset_realv7_000/001/002` (3 Nov, the first recordings whose tracker truth passes the validity rules) | `dataset_real_000`, `realv2_*`, `realv3_*`, `realv4_*`, `realv5_000` are not on the root; `realv2_000` may still be in the workspace copy |
+| simulation, Experiment 1 | `dataset_allsensor_000/002/003`, `dataset_static_nofloortexture_000/002` | `allsensor_001/004`, `static_nofloortexture_001` (total losses per the integrity audit), `dynamic_nofloortexture_01_000` |
+| simulation, realistic | `dataset_allsensor_realistic_000..003` (U-static, I-static, U-dynamic, I-dynamic) | -- |
+| simulation, mapping | `dataset_allsensor_realistic_map`, `_map_000`, `_map_dynamic`, `_01_map`, `dataset_map_tiny` | -- |
+
+Do not mark a dataset broken because it is absent from the workspace copy.
+Before preparing a run, report the resolved absolute path and inspect its topic
+inventory, duration, message counts, and storage health. Never silently replace
+a requested dataset with another run. `script/eval_real_gt.py` takes the root
+through `--dataset-root`; `--bag-manifest` scores a run whose bag is offline from
+a saved manifest, labelled as such.
 
 ### 3.3 World naming
 

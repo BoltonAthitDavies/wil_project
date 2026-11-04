@@ -57,40 +57,62 @@
 \@writefile{lof}{\contentsline {figure}{\numberline {I.4}{\ignorespaces Realistic dynamic recordings, unfiltered runs: anchored planar error (ground truth at the IMU point) with the moments a carrier or carried load is in the camera's view (violet) and the moments the robot turns (grey). The green band is the alignment window.\relax }}{9}{figure.caption.13}\protected@file@percent }
 \newlabel{fig:traffic}{{I.4}{9}{Realistic dynamic recordings, unfiltered runs: anchored planar error (ground truth at the IMU point) with the moments a carrier or carried load is in the camera's view (violet) and the moments the robot turns (grey). The green band is the alignment window.\relax }{figure.caption.13}{}}
 \newlabel{fig:traffic@cref}{{[figure][4][4]I.4}{[1][8][]9}}
-\@writefile{toc}{\contentsline {section}{\numberline {6}Insight 5: real robot (\texttt  {dataset_realv6_000}): ORB-SLAM3 tracks the figure-of-eight to \SI {0.4}{\metre }, VINS-Fusion diverges at both replay rates on a stale gravity norm, and one tracker sample decided the headline}{10}{section.4.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}Insight 5: real robot (\texttt  {dataset_realv6_000}): ORB-SLAM3 tracks the figure-of-eight to \SI {0.5}{\metre } with the GPU front end, loses a factor of two with the CPU front end, and VINS-Fusion has not yet had a valid run}{10}{section.4.6}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{The recording.}{10}{section*.14}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Reporting rules.}{10}{section*.15}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {I.8}{\ignorespaces Realv6: raw versus cleaned tracker export.}}{10}{table.caption.16}\protected@file@percent }
-\newlabel{tab:realv6-cleaning}{{I.8}{10}{Realv6: raw versus cleaned tracker export}{table.caption.16}{}}
-\newlabel{tab:realv6-cleaning@cref}{{[table][8][4]I.8}{[1][10][]10}}
-\@writefile{lof}{\contentsline {figure}{\numberline {I.5}{\ignorespaces The tracker export of \texttt  {dataset_realv6_000}: one sample at \SI {184.9}{\second } lies \SI {5.2}{\metre } off the path and back (left), which puts an \SI {8.7}{\metre \per \second } spike into the speed profile the time alignment correlates against (right).\relax }}{11}{figure.caption.17}\protected@file@percent }
-\newlabel{fig:realv6-gt}{{I.5}{11}{The tracker export of \repo {dataset_realv6_000}: one sample at \SI {184.9}{\second } lies \SI {5.2}{\metre } off the path and back (left), which puts an \SI {8.7}{\metre \per \second } spike into the speed profile the time alignment correlates against (right).\relax }{figure.caption.17}{}}
+\@writefile{toc}{\contentsline {paragraph}{The runs.}{10}{section*.15}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Reporting rules.}{10}{section*.16}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {I.8}{\ignorespaces Realv6: raw versus cleaned tracker export.}}{11}{table.caption.17}\protected@file@percent }
+\newlabel{tab:realv6-cleaning}{{I.8}{11}{Realv6: raw versus cleaned tracker export}{table.caption.17}{}}
+\newlabel{tab:realv6-cleaning@cref}{{[table][8][4]I.8}{[1][10][]11}}
+\@writefile{lof}{\contentsline {figure}{\numberline {I.5}{\ignorespaces The tracker export of \texttt  {dataset_realv6_000}: one sample at \SI {184.9}{\second } lies \SI {5.2}{\metre } off the path and back (left), which puts an \SI {8.7}{\metre \per \second } spike into the speed profile the time alignment correlates against (right).\relax }}{11}{figure.caption.18}\protected@file@percent }
+\newlabel{fig:realv6-gt}{{I.5}{11}{The tracker export of \repo {dataset_realv6_000}: one sample at \SI {184.9}{\second } lies \SI {5.2}{\metre } off the path and back (left), which puts an \SI {8.7}{\metre \per \second } spike into the speed profile the time alignment correlates against (right).\relax }{figure.caption.18}{}}
 \newlabel{fig:realv6-gt@cref}{{[figure][5][4]I.5}{[1][10][]11}}
-\@writefile{lot}{\contentsline {table}{\numberline {I.9}{\ignorespaces Realv6: ORB-SLAM3 against the cleaned tracker truth.}}{11}{table.caption.18}\protected@file@percent }
-\newlabel{tab:realv6-orb}{{I.9}{11}{Realv6: ORB-SLAM3 against the cleaned tracker truth}{table.caption.18}{}}
-\newlabel{tab:realv6-orb@cref}{{[table][9][4]I.9}{[1][11][]11}}
-\@writefile{lot}{\contentsline {table}{\numberline {I.10}{\ignorespaces Realv6: ORB-SLAM3 drift while turning versus on straights.}}{11}{table.caption.22}\protected@file@percent }
-\newlabel{tab:realv6-turning}{{I.10}{11}{Realv6: ORB-SLAM3 drift while turning versus on straights}{table.caption.22}{}}
-\newlabel{tab:realv6-turning@cref}{{[table][10][4]I.10}{[1][11][]11}}
-\@writefile{lof}{\contentsline {figure}{\numberline {I.6}{\ignorespaces ORB-SLAM3 at replay rate 1.0 against the cleaned tracker truth after rigid SE(2) alignment. The estimate traces the figure-of-eight with its loops about \SI {7}{\percent } smaller than the tracker's (Sim(2) scale diagnostic 1.09, not applied).\relax }}{12}{figure.caption.19}\protected@file@percent }
-\newlabel{fig:realv6-traj}{{I.6}{12}{ORB-SLAM3 at replay rate 1.0 against the cleaned tracker truth after rigid SE(2) alignment. The estimate traces the figure-of-eight with its loops about \SI {7}{\percent } smaller than the tracker's (Sim(2) scale diagnostic 1.09, not applied).\relax }{figure.caption.19}{}}
-\newlabel{fig:realv6-traj@cref}{{[figure][6][4]I.6}{[1][11][]12}}
-\@writefile{lof}{\contentsline {figure}{\numberline {I.7}{\ignorespaces All four runs against the cleaned tracker truth after the same rigid SE(2) alignment. Left: ORB-SLAM3 at replay 1.0 and 0.5, both on the route. Right: VINS-Fusion at both rates, which leave the \SI {10}{\metre } floor within a minute; note the axis scale.\relax }}{12}{figure.caption.20}\protected@file@percent }
-\newlabel{fig:realv6-all}{{I.7}{12}{All four runs against the cleaned tracker truth after the same rigid SE(2) alignment. Left: ORB-SLAM3 at replay 1.0 and 0.5, both on the route. Right: VINS-Fusion at both rates, which leave the \SI {10}{\metre } floor within a minute; note the axis scale.\relax }{figure.caption.20}{}}
-\newlabel{fig:realv6-all@cref}{{[figure][7][4]I.7}{[1][11][]12}}
-\@writefile{lof}{\contentsline {figure}{\numberline {I.8}{\ignorespaces ORB-SLAM3 planar error against the cleaned tracker truth over the run, both replay rates. Grey bands: the aligned estimate's heading changes faster than \SI {10}{\degree \per \second }. Dotted red: the frames at which tracking left the OK state, all inside the first \SI {13}{\second } (the \texttt  {local_mapping_bad_imu} initialisation resets).\relax }}{13}{figure.caption.21}\protected@file@percent }
-\newlabel{fig:realv6-orb}{{I.8}{13}{ORB-SLAM3 planar error against the cleaned tracker truth over the run, both replay rates. Grey bands: the aligned estimate's heading changes faster than \SI {10}{\degree \per \second }. Dotted red: the frames at which tracking left the OK state, all inside the first \SI {13}{\second } (the \repo {local_mapping_bad_imu} initialisation resets).\relax }{figure.caption.21}{}}
-\newlabel{fig:realv6-orb@cref}{{[figure][8][4]I.8}{[1][11][]13}}
-\@writefile{lot}{\contentsline {table}{\numberline {I.11}{\ignorespaces Realv6: the two VINS-Fusion runs.}}{13}{table.caption.23}\protected@file@percent }
-\newlabel{tab:realv6-vins}{{I.11}{13}{Realv6: the two VINS-Fusion runs}{table.caption.23}{}}
-\newlabel{tab:realv6-vins@cref}{{[table][11][4]I.11}{[1][11][]13}}
-\@writefile{lof}{\contentsline {figure}{\numberline {I.9}{\ignorespaces VINS-Fusion on \texttt  {dataset_realv6_000} at both replay rates: distance of the estimate from its origin (log scale), estimated speed, and the accelerometer-bias magnitude the estimator holds. The dashed line is the difference between what the IMU measures at rest in this bag (\SI {9.878}{\metre \per \second \squared }) and the gravity norm the configuration fixes (\num {9.2642}).\relax }}{14}{figure.caption.24}\protected@file@percent }
-\newlabel{fig:realv6-vins}{{I.9}{14}{VINS-Fusion on \repo {dataset_realv6_000} at both replay rates: distance of the estimate from its origin (log scale), estimated speed, and the accelerometer-bias magnitude the estimator holds. The dashed line is the difference between what the IMU measures at rest in this bag (\SI {9.878}{\metre \per \second \squared }) and the gravity norm the configuration fixes (\num {9.2642}).\relax }{figure.caption.24}{}}
-\newlabel{fig:realv6-vins@cref}{{[figure][9][4]I.9}{[1][13][]14}}
-\@writefile{toc}{\contentsline {section}{\numberline {7}What these data cannot answer}{15}{section.4.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {8}Summary}{15}{section.4.8}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Consequences for Chapter 4.}{15}{section*.26}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {I.12}{\ignorespaces Questions, answers and the strength of the evidence.\relax }}{16}{table.caption.25}\protected@file@percent }
-\newlabel{tab:insight-summary}{{I.12}{16}{Questions, answers and the strength of the evidence.\relax }{table.caption.25}{}}
-\newlabel{tab:insight-summary@cref}{{[table][12][4]I.12}{[1][15][]16}}
-\gdef \@abspage@last{16}
+\@writefile{lot}{\contentsline {table}{\numberline {I.9}{\ignorespaces Realv6: every surviving run against the cleaned tracker truth.}}{11}{table.caption.20}\protected@file@percent }
+\newlabel{tab:realv6-final}{{I.9}{11}{Realv6: every surviving run against the cleaned tracker truth}{table.caption.20}{}}
+\newlabel{tab:realv6-final@cref}{{[table][9][4]I.9}{[1][11][]11}}
+\@writefile{lof}{\contentsline {figure}{\numberline {I.6}{\ignorespaces Every surviving run against the cleaned tracker truth after rigid SE(2) alignment, one panel per run: ORB-SLAM3 with GPU or CPU extractor and loop closing on or off, and VINS-Fusion, whose \SI {18}{\second } before its resets took over are all it tracked.\relax }}{12}{figure.caption.19}\protected@file@percent }
+\newlabel{fig:realv6-paths}{{I.6}{12}{Every surviving run against the cleaned tracker truth after rigid SE(2) alignment, one panel per run: ORB-SLAM3 with GPU or CPU extractor and loop closing on or off, and VINS-Fusion, whose \SI {18}{\second } before its resets took over are all it tracked.\relax }{figure.caption.19}{}}
+\newlabel{fig:realv6-paths@cref}{{[figure][6][4]I.6}{[1][11][]12}}
+\@writefile{lot}{\contentsline {table}{\numberline {I.10}{\ignorespaces Realv6: ORB-SLAM3 drift while turning versus on straights.}}{12}{table.caption.22}\protected@file@percent }
+\newlabel{tab:realv6-turning}{{I.10}{12}{Realv6: ORB-SLAM3 drift while turning versus on straights}{table.caption.22}{}}
+\newlabel{tab:realv6-turning@cref}{{[table][10][4]I.10}{[1][11][]12}}
+\@writefile{lof}{\contentsline {figure}{\numberline {I.7}{\ignorespaces ORB-SLAM3 planar error against the cleaned tracker truth over the run, one panel per configuration. Grey bands: the aligned estimate's heading changes faster than \SI {10}{\degree \per \second }. Dotted red: the frames at which tracking left the OK state (the \texttt  {local_mapping_bad_imu} initialisation resets, all inside the first \SI {13}{\second }).\relax }}{13}{figure.caption.21}\protected@file@percent }
+\newlabel{fig:realv6-orb}{{I.7}{13}{ORB-SLAM3 planar error against the cleaned tracker truth over the run, one panel per configuration. Grey bands: the aligned estimate's heading changes faster than \SI {10}{\degree \per \second }. Dotted red: the frames at which tracking left the OK state (the \repo {local_mapping_bad_imu} initialisation resets, all inside the first \SI {13}{\second }).\relax }{figure.caption.21}{}}
+\newlabel{fig:realv6-orb@cref}{{[figure][7][4]I.7}{[1][11][]13}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}How the setting was reached}{14}{subsection.4.6.1}\protected@file@percent }
+\newlabel{sec:realv6-stability}{{6.1}{14}{How the setting was reached}{subsection.4.6.1}{}}
+\newlabel{sec:realv6-stability@cref}{{[subsection][1][4,6]6.1}{[1][14][]14}}
+\@writefile{lot}{\contentsline {table}{\numberline {I.11}{\ignorespaces Realv6: the VINS-Fusion run.}}{14}{table.caption.23}\protected@file@percent }
+\newlabel{tab:realv6-vins}{{I.11}{14}{Realv6: the VINS-Fusion run}{table.caption.23}{}}
+\newlabel{tab:realv6-vins@cref}{{[table][11][4]I.11}{[1][14][]14}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}realv7: three recordings with a valid tracker truth, and an IMU initialisation that the map reset threw away}{14}{subsection.4.6.2}\protected@file@percent }
+\newlabel{sec:realv7-tilt}{{6.2}{14}{realv7: three recordings with a valid tracker truth, and an IMU initialisation that the map reset threw away}{subsection.4.6.2}{}}
+\newlabel{sec:realv7-tilt@cref}{{[subsection][2][4,6]6.2}{[1][14][]14}}
+\@writefile{lof}{\contentsline {figure}{\numberline {I.8}{\ignorespaces VINS-Fusion on \texttt  {dataset_realv6_000}: distance of the estimate from its origin with every \texttt  {imu_gap} reset marked (top), and the IMU messages the node received against the samples the estimator used (bottom).\relax }}{15}{figure.caption.24}\protected@file@percent }
+\newlabel{fig:realv6-vins}{{I.8}{15}{VINS-Fusion on \repo {dataset_realv6_000}: distance of the estimate from its origin with every \repo {imu_gap} reset marked (top), and the IMU messages the node received against the samples the estimator used (bottom).\relax }{figure.caption.24}{}}
+\newlabel{fig:realv6-vins@cref}{{[figure][8][4]I.8}{[1][14][]15}}
+\@writefile{lot}{\contentsline {table}{\numberline {I.12}{\ignorespaces Realv7: every ORB-SLAM3 run, tilt of the estimate and score.}}{16}{table.caption.25}\protected@file@percent }
+\newlabel{tab:realv7-tilt}{{I.12}{16}{Realv7: every ORB-SLAM3 run, tilt of the estimate and score}{table.caption.25}{}}
+\newlabel{tab:realv7-tilt@cref}{{[table][12][4]I.12}{[1][15][]16}}
+\@writefile{lof}{\contentsline {figure}{\numberline {I.9}{\ignorespaces Every \texttt  {realv7} run against its tracker truth after rigid SE(2) alignment, one panel per run: three recordings (rows) by four ORB-SLAM3 configurations and VINS-Fusion (columns). Where the estimate's plane is vertical, the planar alignment sees the route collapsed onto a line.\relax }}{16}{figure.caption.26}\protected@file@percent }
+\newlabel{fig:realv7-paths}{{I.9}{16}{Every \repo {realv7} run against its tracker truth after rigid SE(2) alignment, one panel per run: three recordings (rows) by four ORB-SLAM3 configurations and VINS-Fusion (columns). Where the estimate's plane is vertical, the planar alignment sees the route collapsed onto a line.\relax }{figure.caption.26}{}}
+\newlabel{fig:realv7-paths@cref}{{[figure][9][4]I.9}{[1][15][]16}}
+\@writefile{lot}{\contentsline {table}{\numberline {I.13}{\ignorespaces Realv7: every run after the frame repair, with its initialisation history.}}{17}{table.caption.28}\protected@file@percent }
+\newlabel{tab:realv7-results}{{I.13}{17}{Realv7: every run after the frame repair, with its initialisation history}{table.caption.28}{}}
+\newlabel{tab:realv7-results@cref}{{[table][13][4]I.13}{[1][17][]17}}
+\@writefile{lot}{\contentsline {table}{\numberline {I.14}{\ignorespaces Realv7: the VINS-Fusion runs.}}{17}{table.caption.30}\protected@file@percent }
+\newlabel{tab:realv7-vins}{{I.14}{17}{Realv7: the VINS-Fusion runs}{table.caption.30}{}}
+\newlabel{tab:realv7-vins@cref}{{[table][14][4]I.14}{[1][17][]17}}
+\@writefile{lof}{\contentsline {figure}{\numberline {I.10}{\ignorespaces The same twelve ORB-SLAM3 estimates seen from the side (estimate $x$ against $z$, centred). A floor robot's path should be a flat line; on \texttt  {realv7_000} every run is the route drawn in a vertical plane.\relax }}{18}{figure.caption.27}\protected@file@percent }
+\newlabel{fig:realv7-tilt}{{I.10}{18}{The same twelve ORB-SLAM3 estimates seen from the side (estimate $x$ against $z$, centred). A floor robot's path should be a flat line; on \repo {realv7_000} every run is the route drawn in a vertical plane.\relax }{figure.caption.27}{}}
+\newlabel{fig:realv7-tilt@cref}{{[figure][10][4]I.10}{[1][15][]18}}
+\@writefile{lof}{\contentsline {figure}{\numberline {I.11}{\ignorespaces The twelve \texttt  {realv7} ORB-SLAM3 runs after the scorer's frame repair, against the tracker truth after rigid SE(2) alignment; each panel's title gives the planar ATE and the share of tracked frames with the IMU initialised.\relax }}{18}{figure.caption.29}\protected@file@percent }
+\newlabel{fig:realv7-paths-repaired}{{I.11}{18}{The twelve \repo {realv7} ORB-SLAM3 runs after the scorer's frame repair, against the tracker truth after rigid SE(2) alignment; each panel's title gives the planar ATE and the share of tracked frames with the IMU initialised.\relax }{figure.caption.29}{}}
+\newlabel{fig:realv7-paths-repaired@cref}{{[figure][11][4]I.11}{[1][17][]18}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}What these data cannot answer}{19}{section.4.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {8}Summary}{19}{section.4.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Consequences for Chapter 4.}{19}{section*.32}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {I.15}{\ignorespaces Questions, answers and the strength of the evidence.\relax }}{20}{table.caption.31}\protected@file@percent }
+\newlabel{tab:insight-summary}{{I.15}{20}{Questions, answers and the strength of the evidence.\relax }{table.caption.31}{}}
+\newlabel{tab:insight-summary@cref}{{[table][15][4]I.15}{[1][19][]20}}
+\gdef \@abspage@last{20}

@@ -82,7 +82,7 @@ SPAWN = '5.250,19.995,-90'
 # Pass criteria, fixed before any map was scored. See H6.
 PASS = dict(precision=0.90, recall_seen=0.85, false_obstacle=0.01)
 
-# (key, database, world, independent probe GT, build bag on the flash drive)
+# (key, database, world, independent probe GT, build bag on the dataset root /media/ambushee/New Volume/wil_rescue)
 MAPS = [
     # The database named map_realistic is the build formerly held as
     # map_realistic_v2 (165 nodes, 417 MB, stamps 13.2-299 s); it was renamed
@@ -95,7 +95,7 @@ MAPS = [
          probe=os.path.join(ROOT, 'output/output_vins/simulation/'
                                   'dataset_allsensor_realistic_000/ground_truth.csv'),
          probe_name='dataset_allsensor_realistic_000',
-         build_bag='/media/ambushee/32E4AAB1E4AA772F/dataset_allsensor_realistic_mapv2'),
+         build_bag='/media/ambushee/New Volume/wil_rescue/dataset_allsensor_realistic_mapv2'),  # 2026-11-03: NOT on the rescued root (it holds _map, _01_map, _map_000, _map_dynamic); verify which bag built this DB before use
     dict(key='map_realistic_01',
          db=os.path.join(ROOT, 'map/map_realistic_01/map_realistic_01.db'),
          world=os.path.join(WORLDS,
@@ -103,7 +103,7 @@ MAPS = [
          probe=os.path.join(ROOT, 'output/output_vins/simulation/'
                                   'dataset_allsensor_realistic_001/ground_truth.csv'),
          probe_name='dataset_allsensor_realistic_001',
-         build_bag='/media/ambushee/32E4AAB1E4AA772F/dataset_allsensor_realistic_01_map'),
+         build_bag='/media/ambushee/New Volume/wil_rescue/dataset_allsensor_realistic_01_map'),
 ]
 
 # RTAB-Map Link::Type. Only 1-5 are closures; 0 is the odometry chain and 9 is
@@ -199,7 +199,7 @@ def print_commands(args):
     print('\n# ---- optional diagnostic: the trajectory the map was built on.')
     print('#      Only needed if a map fails H6 and the cause has to be placed on')
     print('#      the odometry rather than on the mapping. The bags are on the')
-    print('#      flash drive and are large; extraction is a few minutes each.')
+    print('#      dataset root (/media/ambushee/New Volume/wil_rescue) and are large; extraction is a few minutes each.')
     for m in MAPS:
         print('python3 script/extract_gt.py %s/$(basename %s)_0.db3 \\\n'
               '  %s/gt_build_%s.csv'

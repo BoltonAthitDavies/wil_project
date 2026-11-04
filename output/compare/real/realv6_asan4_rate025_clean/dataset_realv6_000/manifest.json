@@ -1,0 +1,180 @@
+{
+  "experiment_id": "realv6_asan4_rate025_clean",
+  "domain": "real",
+  "dataset": "dataset_realv6_000",
+  "generated": "2026-11-03T13:11:11",
+  "command": "script/eval_real_gt.py --dataset dataset_realv6_000 --dataset-root /media/ambushee/32E4AAB1E4AA772F --systems orb --run orb=asan4_rate025 --gt-dir /tmp/claude-1000/-home-ambushee-wil-project/88846a24-8e90-425d-beed-b9cdd3dcb9c4/scratchpad/realv6_clean_gt --experiment-id realv6_asan4_rate025_clean",
+  "git_superproject": "feced2f6e999",
+  "python": "3.10.12",
+  "numpy": "2.2.6",
+  "host": "ambushee-Katana-GF66-11UG",
+  "bag": {
+    "path": "/media/ambushee/32E4AAB1E4AA772F/dataset_realv6_000/dataset_realv6_000_0.db3",
+    "size_bytes": 5422137344,
+    "first_message_robotclock_s": 1793447932.2473178,
+    "duration_s": 220.05564774400003,
+    "message_count": 109995,
+    "wheel_topic": "/feedback/velocity",
+    "wheel_messages": 10763
+  },
+  "ground_truth": {
+    "path": "/tmp/claude-1000/-home-ambushee-wil-project/88846a24-8e90-425d-beed-b9cdd3dcb9c4/scratchpad/realv6_clean_gt/dataset_realv6_000",
+    "sha256": "46a086fef8cf3964aef2151d28d2e114efaff80fc23204687dc8efaf6000b979",
+    "header": [
+      "Date Time",
+      "Recorded Time (sec.)",
+      "X (cm.)",
+      "Y (cm.)"
+    ],
+    "samples": 276,
+    "duration_s": 229.932,
+    "median_dt_s": 0.6000000000000014,
+    "max_gap_s": 2.436399999999992,
+    "max_step_m": 0.3498132123433874,
+    "path_m": 27.094201711027303,
+    "first_stamp": "Sat 10/31/2026 07:06:17 PM",
+    "last_stamp": "Sat 10/31/2026 07:10:07 PM",
+    "checks": {
+      "samples_ok": true,
+      "gap_ok": false,
+      "step_ok": true,
+      "duration_ok": true
+    },
+    "valid": false,
+    "units": "centimetres converted to metres",
+    "dimensions": 2,
+    "heading": false
+  },
+  "time_alignment": {
+    "offset_s": -4.141049511090883,
+    "source": "wheel-speed correlation",
+    "ok": false,
+    "curves": {
+      "wheel /feedback/velocity": {
+        "offset_s": -4.141049511090883,
+        "peak_r": 0.6117813399169733,
+        "second_peak_r": 0.5616055140378523
+      },
+      "ORB-SLAM3": {
+        "offset_s": 4.553872958533963,
+        "peak_r": 0.06365991503121622,
+        "second_peak_r": 0.0382079784533371
+      }
+    },
+    "search_s": [
+      -5.0,
+      20.0
+    ],
+    "step_s": 0.01
+  },
+  "method": {
+    "alignment": "rigid SE(2), scale fixed (vio_metrics.umeyama on z=0 points)",
+    "association": "estimate linearly interpolated at tracker samples; nearest estimate sample within 0.15 s",
+    "rpe": "translational, relative displacements in the aligned frame, pairs within 25 % of delta",
+    "lever_arm": {
+      "forward_m": 0.0,
+      "left_m": 0.0,
+      "up_m": 0.0,
+      "measured": false,
+      "assumed": false
+    },
+    "trim_start_s": 0.0,
+    "jump_speed_mps": 10.0,
+    "diverged_m": 50.0
+  },
+  "runs": {
+    "ORB-SLAM3": {
+      "dir": "/home/ambushee/wil_project/output/output_orb/real/dataset_realv6_000/asan4_rate025",
+      "status": "failed (ground truth invalid)",
+      "reasons": [
+        "3 estimator reset(s) (local_mapping_bad_imu)",
+        "tracking loss 7.47 s"
+      ],
+      "body_axes": {
+        "forward": "-z",
+        "confidence": 11.081744857767353
+      },
+      "run_metadata": {
+        "pipeline": "orbslam3_ros2",
+        "experiment_id": "asan",
+        "dataset_path": "/media/ambushee/32E4AAB1E4AA772F/dataset_realv6_000",
+        "world_path": "",
+        "run_command": "",
+        "run_notes": "AddressSanitizer run - stray-read hunt",
+        "config_file": "/home/ambushee/wil_project/orbslam3_ros2/config/wil/stereo_imu.yaml",
+        "vocabulary_file": "/home/ambushee/wil_project/thirdparty/ORB_SLAM3/Vocabulary/ORBvoc.txt",
+        "output_path": "/home/ambushee/wil_project/output/output_orb/real/dataset_realv6_000/asan4_rate025",
+        "image0_topic": "/cam0/image_raw",
+        "image1_topic": "/cam1/image_raw",
+        "imu_topic": "/hwt101ct_yaw_publisher",
+        "image_transport": "compressed",
+        "world_frame_id": "orbslam3_world",
+        "body_frame_id": "base_footprint",
+        "use_imu": "true",
+        "filter": "false",
+        "publish_tf": "false",
+        "replay_rate": "1.000000",
+        "sync_slop_s": "0.020000",
+        "det_max_age_s": "0.150000",
+        "mask_dilate_px": "8",
+        "max_mask_fraction": "0.800000",
+        "filter_mode": "class",
+        "motion_iou": "0.300000",
+        "motion_min_points": "15",
+        "motion_inlier_ratio": "0.500000",
+        "motion_unknown_mask": "false",
+        "motion_revote_frames": "15",
+        "motion_min_point_age": "30",
+        "motion_min_box_age": "30",
+        "start_wall_time_unix_ns": "1793685159101932639"
+      },
+      "run_summary": {
+        "shutdown_status": "graceful",
+        "stereo_pairs_received": "6497",
+        "stereo_pairs_processed": "2396",
+        "decode_failures": "0",
+        "imu_messages_received": "43892",
+        "queue_dropped_frames": "4101",
+        "imu_starved_frames": "0",
+        "poses_written": "2217",
+        "tracking_state_changes": "8",
+        "tracking_loss_events": "3",
+        "tracking_loss_duration_s": "7.469161",
+        "initialization_time_s": "0.067296",
+        "tracking_initialization_time_s": "0.067296",
+        "imu_initialization_time_s": "2.833251",
+        "imu_initialized": "1",
+        "inertial_ba1": "1",
+        "inertial_ba2": "1",
+        "keyframes_created": "409",
+        "keyframes_in_final_map": "179",
+        "map_points_in_final_map": "10269",
+        "local_mapping_keyframes": "398",
+        "local_ba_executions": "275",
+        "local_ba_aborts": "237",
+        "place_recognition_checks": "397",
+        "loop_closures": "0",
+        "map_merges": "0",
+        "global_ba_executions": "0",
+        "global_ba_aborts": "0",
+        "active_map_reset_requests": "3",
+        "last_reset_reason": "local_mapping_bad_imu",
+        "detection_frames_matched": "0",
+        "detection_frames_missed": "0",
+        "detection_match_rate": "0.0000",
+        "filter_status": "none",
+        "filter_mode": "none",
+        "boxes_voted_moving": "0",
+        "boxes_voted_static": "0",
+        "masks_rejected": "0"
+      },
+      "ate_offset_sensitivity": {
+        "-0.2": 0.9488924219546686,
+        "-0.1": 0.9508218897160936,
+        "+0.1": 0.9589558035889063,
+        "+0.2": 0.9544711572268167
+      },
+      "fitted_lever_arm": null
+    }
+  }
+}

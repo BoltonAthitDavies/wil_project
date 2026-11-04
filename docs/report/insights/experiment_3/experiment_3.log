@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  2 NOV 2026 14:20
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  4 NOV 2026 09:25
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -974,43 +974,102 @@ LaTeX Warning: Float too large for page by 22.12495pt on input line 580.
 g>] [25 <../../final_report//figures/timeline_realistic__realistic_001.png>]
 [26 <../../final_report//figures/timeline_realistic__realistic_002.png>]
 [27 <../../final_report//figures/timeline_realistic__realistic_003.png>]
-[28] (../../../../output/compare/real/realv6-insights/gt_cleaning.tex)
-(../../../../output/compare/real/realv6-insights/orb_summary.tex)
-<../../../../output/compare/real/realv6_clean/dataset_realv6_000/trajectory_lig
-ht.png, id=311, 542.025pt x 469.755pt>
-File: ../../../../output/compare/real/realv6_clean/dataset_realv6_000/trajector
-y_light.png Graphic file (type png)
-<use ../../../../output/compare/real/realv6_clean/dataset_realv6_000/trajectory
-_light.png>
-Package pdftex.def Info: ../../../../output/compare/real/realv6_clean/dataset_r
-ealv6_000/trajectory_light.png  used on input line 678.
-(pdftex.def)             Requested size: 273.14923pt x 236.7334pt.
+Underfull \hbox (badness 2846) in paragraph at lines 637--637
+[]\T1/ptm/b/n/10.95 (+20) Status: par-tial. \T1/ptm/m/n/10.95 (+20) Four real r
+ecord-ings with an in-de-pen-dent pla-nar ref-er-ence. The first,
+ []
 
-(../../../../output/compare/real/realv6-insights/turning.tex) [29]
-(../../../../output/compare/real/realv6-insights/vins_summary.tex)
-<../../../../output/compare/real/realv6-insights/fig_all_runs_light.png, id=324
-, 794.97pt x 375.804pt>
-File: ../../../../output/compare/real/realv6-insights/fig_all_runs_light.png Gr
-aphic file (type png)
-<use ../../../../output/compare/real/realv6-insights/fig_all_runs_light.png>
-Package pdftex.def Info: ../../../../output/compare/real/realv6-insights/fig_al
-l_runs_light.png  used on input line 716.
-(pdftex.def)             Requested size: 455.24411pt x 215.214pt.
- [30 <../../../../output/compare/real/realv6_clean/dataset_realv6_000/trajector
-y_light.png>] [31 <../../../../output/compare/real/realv6-insights/fig_all_runs
-_light.png>]
+[28] (../../../../output/compare/real/realv6-insights/final_table.tex)
+<../../../../output/compare/real/realv6-insights/fig_paths_light.png, id=310, 9
+39.51pt x 621.522pt>
+File: ../../../../output/compare/real/realv6-insights/fig_paths_light.png Graph
+ic file (type png)
+<use ../../../../output/compare/real/realv6-insights/fig_paths_light.png>
+Package pdftex.def Info: ../../../../output/compare/real/realv6-insights/fig_pa
+ths_light.png  used on input line 686.
+(pdftex.def)             Requested size: 455.24411pt x 301.16278pt.
+
+(../../../../output/compare/real/realv6-insights/gt_cleaning.tex)
+<../../../../output/compare/real/realv6-insights/fig_orb_timeline_light.png, id
+=314, 722.7pt x 737.154pt>
+File: ../../../../output/compare/real/realv6-insights/fig_orb_timeline_light.pn
+g Graphic file (type png)
+<use ../../../../output/compare/real/realv6-insights/fig_orb_timeline_light.png
+>
+Package pdftex.def Info: ../../../../output/compare/real/realv6-insights/fig_or
+b_timeline_light.png  used on input line 715.
+(pdftex.def)             Requested size: 455.24411pt x 464.35324pt.
+
+(../../../../output/compare/real/realv6-insights/turning.tex) [29] [30 <../../.
+./../output/compare/real/realv6-insights/fig_paths_light.png>] [31 <../../../..
+/output/compare/real/realv6-insights/fig_orb_timeline_light.png>]
+(../../../../output/compare/real/realv6-insights/vins_table.tex
+Underfull \hbox (badness 10000) in paragraph at lines 4--4
+[]\T1/ptm/b/n/10 (+20) Table 3.17: |\T1/ptm/m/n/10 (+20) VINS-Fusion on \T1/pcr
+/m/n/10 dataset_realv6_000\T1/ptm/m/n/10 (+20) , 3 Novem-ber 2026
+ []
+
+)
+<../../../../output/compare/real/realv6-insights/fig_vins_light.png, id=339, 72
+2.7pt x 375.804pt>
+File: ../../../../output/compare/real/realv6-insights/fig_vins_light.png Graphi
+c file (type png)
+<use ../../../../output/compare/real/realv6-insights/fig_vins_light.png>
+Package pdftex.def Info: ../../../../output/compare/real/realv6-insights/fig_vi
+ns_light.png  used on input line 741.
+(pdftex.def)             Requested size: 455.24411pt x 236.7291pt.
+
+Overfull \hbox (3.63155pt too wide) in paragraph at lines 747--789
+ []\T1/ptm/b/n/10.95 (-20) Second record-ing set, re-alv7.[] \T1/ptm/m/n/10.95 
+(-20) Three fur-ther record-ings of 3 Novem-ber 2026 (\T1/pcr/m/n/10.95 dataset
+_realv7_000\T1/ptm/m/n/10.95 (-20) ,
+ []
+
+[32 <../../../../output/compare/real/realv6-insights/fig_vins_light.png>]
+(../../../../output/compare/real/realv7-insights/tilt_table.tex)
+<../../../../output/compare/real/realv7-insights/fig_paths_light.png, id=360, 1
+228.59pt x 758.835pt>
+File: ../../../../output/compare/real/realv7-insights/fig_paths_light.png Graph
+ic file (type png)
+<use ../../../../output/compare/real/realv7-insights/fig_paths_light.png>
+Package pdftex.def Info: ../../../../output/compare/real/realv7-insights/fig_pa
+ths_light.png  used on input line 794.
+(pdftex.def)             Requested size: 455.24411pt x 281.1814pt.
+<../../../../output/compare/real/realv7-insights/fig_tilt_light.png, id=361, 10
+11.78pt x 578.16pt>
+File: ../../../../output/compare/real/realv7-insights/fig_tilt_light.png Graphi
+c file (type png)
+<use ../../../../output/compare/real/realv7-insights/fig_tilt_light.png>
+Package pdftex.def Info: ../../../../output/compare/real/realv7-insights/fig_ti
+lt_light.png  used on input line 802.
+(pdftex.def)             Requested size: 455.24411pt x 260.14313pt.
+
+(../../../../output/compare/real/realv7-insights/results_table.tex)
+<../../../../output/compare/real/realv7-insights/fig_paths_lvl_light.png, id=36
+4, 1011.78pt x 758.835pt>
+File: ../../../../output/compare/real/realv7-insights/fig_paths_lvl_light.png G
+raphic file (type png)
+<use ../../../../output/compare/real/realv7-insights/fig_paths_lvl_light.png>
+Package pdftex.def Info: ../../../../output/compare/real/realv7-insights/fig_pa
+ths_lvl_light.png  used on input line 812.
+(pdftex.def)             Requested size: 455.24411pt x 341.43787pt.
+
+(../../../../output/compare/real/realv7-insights/vins_table.tex) [33] [34 <../.
+./../../output/compare/real/realv7-insights/fig_paths_light.png> <../../../../o
+utput/compare/real/realv7-insights/fig_tilt_light.png>] [35 <../../../../output
+/compare/real/realv7-insights/fig_paths_lvl_light.png>] [36]
 (./experiment_3.aux)
 Package rerunfilecheck Info: File `experiment_3.out' has not changed.
 (rerunfilecheck)             Checksum: F1824A061586484EA806FB736C6A1472;959.
  ) 
 Here is how much of TeX's memory you used:
- 21008 strings out of 480171
- 406186 string characters out of 5894489
+ 21092 strings out of 480171
+ 409350 string characters out of 5894489
  743728 words of memory out of 5000000
- 38035 multiletter control sequences out of 15000+600000
- 562451 words of font info for 442 fonts, out of 8000000 for 9000
+ 38081 multiletter control sequences out of 15000+600000
+ 564962 words of font info for 451 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
- 76i,13n,93p,1009b,873s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 76i,13n,115p,1210b,873s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
 e/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texm
 f-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/
@@ -1019,10 +1078,10 @@ type1/urw/courier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/sym
 bol/usyr.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></
 usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texli
 ve/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on experiment_3.pdf (31 pages, 5483904 bytes).
+Output written on experiment_3.pdf (36 pages, 6691045 bytes).
 PDF statistics:
- 399 PDF objects out of 1000 (max. 8388607)
- 291 compressed objects within 3 object streams
- 105 named destinations out of 1000 (max. 500000)
- 102536 words of extra memory for PDF output out of 106986 (max. 10000000)
+ 453 PDF objects out of 1000 (max. 8388607)
+ 328 compressed objects within 4 object streams
+ 118 named destinations out of 1000 (max. 500000)
+ 106652 words of extra memory for PDF output out of 106986 (max. 10000000)
 

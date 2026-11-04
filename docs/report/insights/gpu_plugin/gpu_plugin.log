@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  29 OCT 2026 14:57
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  3 NOV 2026 14:01
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1130,45 +1130,45 @@ Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 
-Underfull \hbox (badness 1292) in paragraph at lines 35--35
+Underfull \hbox (badness 1292) in paragraph at lines 36--36
 []\T1/ptm/b/n/10.95 (+20) Status: com-pleted. \T1/ptm/m/n/10.95 (+20) Im-ple-me
 nted and val-i-dated on the lap-top (RTX 3070) for the real-rig
  []
 
 
-Underfull \hbox (badness 1874) in paragraph at lines 35--35
+Underfull \hbox (badness 1874) in paragraph at lines 36--36
 \T1/ptm/m/n/10.95 (+20) con-fig-u-ra-tion: ex-trac-tor patch (10) and stereo-ma
 tcher patch (10b), en-abled by de-fault in
  []
 
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10.95> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 35.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 36.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <8> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 35.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 36.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <6> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 35.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 36.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 64.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 65.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <7.4> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 64.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 65.
 [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
 LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 1
-59.
+60.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ts1ptm.fd
 File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
 ) [2]
-Underfull \hbox (badness 1057) in paragraph at lines 194--194
+Underfull \hbox (badness 1057) in paragraph at lines 195--195
 [][]\T1/ptm/m/n/10 (+20) . Both arms use the GPU ex-trac-tor. Me-di-ans over fr
 ames in the tracking-OK state. Source:
  []
 
-Package pgfplots info on input line 227: Using 'lua backend=false' for axis: x 
+Package pgfplots info on input line 228: Using 'lua backend=false' for axis: x 
 coord trafo unsupported.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <5> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 231.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 232.
 [3] [4] [5] [6] [7
 
 ] (./gpu_plugin.aux)
@@ -1176,11 +1176,11 @@ Package rerunfilecheck Info: File `gpu_plugin.out' has not changed.
 (rerunfilecheck)             Checksum: F872E4712F27462B2DB2D63F629C3560;2308.
  ) 
 Here is how much of TeX's memory you used:
- 40890 strings out of 480171
- 959910 string characters out of 5894489
- 1347484 words of memory out of 5000000
+ 40887 strings out of 480171
+ 959880 string characters out of 5894489
+ 1346484 words of memory out of 5000000
  57892 multiletter control sequences out of 15000+600000
- 548282 words of font info for 323 fonts, out of 8000000 for 9000
+ 548155 words of font info for 321 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
  99i,19n,94p,1007b,2401s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
@@ -1190,10 +1190,10 @@ fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/
 type1/urw/courier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/tim
 es/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb><
 /usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on gpu_plugin.pdf (7 pages, 109367 bytes).
+Output written on gpu_plugin.pdf (7 pages, 109764 bytes).
 PDF statistics:
- 171 PDF objects out of 1000 (max. 8388607)
- 145 compressed objects within 2 object streams
+ 172 PDF objects out of 1000 (max. 8388607)
+ 146 compressed objects within 2 object streams
  32 named destinations out of 1000 (max. 500000)
  93797 words of extra memory for PDF output out of 106986 (max. 10000000)
 

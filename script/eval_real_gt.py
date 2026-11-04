@@ -61,6 +61,13 @@ Validity rules are fixed here, before any number is read:
 Failed runs are scored and plotted for diagnosis but excluded from the headline
 LaTeX table, which says so in its caption.
 
+Frame repair (4 November 2026, off by default): --join-imu-init rotates the poses an
+    ORB-SLAM3 run wrote before each IMU initialisation into the frame it used after
+    it (the rotation is measured at the initialisation frame), and --level-plane
+    rotates each map's fitted plane to the horizontal (side chosen by --body-up).
+    Both are recorded in the manifest and the metrics rows (frame_repair,
+    tilt_before_deg, tilt_after_deg, imu_init_fraction, reset times and reasons).
+
 Outputs, under --out/<dataset>/ (default output/compare/real/exp-estimator-baseline):
     manifest.json             provenance: paths, run metadata, offsets, git commit
     ground_truth_robotclock.csv  tracker samples re-stamped onto the robot clock
@@ -78,6 +85,7 @@ Example:
 """
 
 import argparse
+import csv
 import datetime as dt
 import hashlib
 import json
@@ -316,6 +324,196 @@ def apply_lever_arm(p, q, axes, forward_m, left_m, up_m=0.0):
     return p + np.einsum("nij,j->ni", R, r_b)
 
 
+# ------------------------------------------------------------- frame repair (4 Nov 2026)
+# ORB-SLAM3 writes its live poses in whatever world frame the active map has at
+# that moment. Before the IMU initialises that world is the first camera frame
+# (vertical along the camera's y axis); at the initialisation the whole map is
+# rotated about its origin so that gravity points down -z (LocalMapping::
+# InitializeIMU -> Map::ApplyScaledRotation; the scale is fixed for stereo), but
+# the poses already written keep the old frame. A run whose initialisation came
+# late, or never came (realv7: the upstream "insufficient motion" reset at 3-4 s
+# throws the first map away and the second map's initialisation is starved by
+# the local-mapping backlog), therefore lies in a tilted plane and carries a
+# multi-metre step at the late initialisation. Two optional, GT-free repairs:
+#   --join-imu-init  rotate the poses written BEFORE each initialisation by the
+#                    rotation measured at the initialisation frame (orientation
+#                    jump between consecutive poses), so a map is in one frame;
+#   --level-plane    rotate each map's own fitted plane to the horizontal, the
+#                    side chosen by the body's up axis (--body-up), which a floor
+#                    robot permits and which takes nothing from the truth.
+# Maps are delimited by the active-map resets recorded in performance.csv; a
+# reset restarts the position at the origin and is NOT stitched (it is a loss).
+
+BODY_UP = {"+x": (1, 0, 0), "-x": (-1, 0, 0), "+y": (0, 1, 0), "-y": (0, -1, 0), "+z": (0, 0, 1), "-z": (0, 0, -1)}
+JOIN_MIN_ANGLE_DEG = 10.0     # an initialisation rotation smaller than this is not trusted
+PLANE_MIN_POSES = 20
+PLANE_MIN_EXTENT_M = 0.15     # rms extent along the plane's second axis, else the fit is a line
+
+
+def run_events(run_dir):
+    """IMU-initialisation and active-map-reset events of an ORB-SLAM3 run, from the
+    node's performance.csv (one row per frame). None for other estimators."""
+    path = os.path.join(run_dir, "performance.csv")
+    if not os.path.exists(path):
+        return None
+    inits, resets = [], []
+    prev_init, max_cnt, n_ok, n_ok_init = None, None, 0, 0
+    with open(path) as f:
+        for r in csv.DictReader(f):
+            if "imu_initialized" not in r or "active_map_reset_requests" not in r:
+                return None
+            try:
+                state = int(r["tracking_state"])
+            except ValueError:
+                continue
+            if state < 0:          # node-side rows (frame not handed to the tracker) carry zeros
+                continue
+            t = int(r["timestamp_ns"]) * 1e-9
+            init = r["imu_initialized"] == "1"
+            if init and prev_init is False:
+                inits.append(t)
+            cnt = int(r["active_map_reset_requests"])
+            if max_cnt is not None and cnt > max_cnt:
+                resets.append((t, r.get("last_reset_reason", "")))
+            max_cnt = cnt if max_cnt is None else max(max_cnt, cnt)
+            prev_init = init
+            if state == 2:
+                n_ok += 1
+                n_ok_init += int(init)
+    return dict(inits=inits, resets=resets, init_fraction=(n_ok_init / n_ok) if n_ok else float("nan"))
+
+
+def R_to_quat(R):
+    """(N,3,3) -> (N,4) wxyz, Shepperd's method."""
+    N = len(R); q = np.zeros((N, 4))
+    tr = R[:, 0, 0] + R[:, 1, 1] + R[:, 2, 2]
+    for i in range(N):
+        m = R[i]
+        if tr[i] > 0:
+            S = np.sqrt(tr[i] + 1.0) * 2
+            q[i] = [0.25 * S, (m[2, 1] - m[1, 2]) / S, (m[0, 2] - m[2, 0]) / S, (m[1, 0] - m[0, 1]) / S]
+        elif m[0, 0] > m[1, 1] and m[0, 0] > m[2, 2]:
+            S = np.sqrt(1.0 + m[0, 0] - m[1, 1] - m[2, 2]) * 2
+            q[i] = [(m[2, 1] - m[1, 2]) / S, 0.25 * S, (m[0, 1] + m[1, 0]) / S, (m[0, 2] + m[2, 0]) / S]
+        elif m[1, 1] > m[2, 2]:
+            S = np.sqrt(1.0 + m[1, 1] - m[0, 0] - m[2, 2]) * 2
+            q[i] = [(m[0, 2] - m[2, 0]) / S, (m[0, 1] + m[1, 0]) / S, 0.25 * S, (m[1, 2] + m[2, 1]) / S]
+        else:
+            S = np.sqrt(1.0 + m[2, 2] - m[0, 0] - m[1, 1]) * 2
+            q[i] = [(m[1, 0] - m[0, 1]) / S, (m[0, 2] + m[2, 0]) / S, (m[1, 2] + m[2, 1]) / S, 0.25 * S]
+    return q
+
+
+def rot_a_to_b(a, b):
+    """Rotation matrix taking unit vector a onto unit vector b (Rodrigues)."""
+    a = a / np.linalg.norm(a); b = b / np.linalg.norm(b)
+    v = np.cross(a, b); s = np.linalg.norm(v); c = float(np.dot(a, b))
+    if s < 1e-9:
+        if c > 0:
+            return np.eye(3)
+        axis = np.cross(a, [1.0, 0, 0]) if abs(a[0]) < 0.9 else np.cross(a, [0, 1.0, 0])
+        axis /= np.linalg.norm(axis)
+        K = np.array([[0, -axis[2], axis[1]], [axis[2], 0, -axis[0]], [-axis[1], axis[0], 0]])
+        return np.eye(3) + 2 * K @ K
+    K = np.array([[0, -v[2], v[1]], [v[2], 0, -v[0]], [-v[1], v[0], 0]])
+    return np.eye(3) + K + K @ K * ((1 - c) / s ** 2)
+
+
+def rot_angle_deg(R):
+    return float(np.degrees(np.arccos(np.clip((np.trace(R) - 1) / 2, -1, 1))))
+
+
+def plane_normal(p):
+    """Unit normal of the least-squares plane and the rms extents along the three
+    principal axes (the third is the rms off-plane distance)."""
+    c = p - p.mean(0)
+    _, sv, vt = np.linalg.svd(c, full_matrices=False)
+    return vt[2], sv / np.sqrt(len(p))
+
+
+def plane_tilt_deg(p):
+    n, _ = plane_normal(p)
+    return float(np.degrees(np.arccos(abs(n[2]))))
+
+
+def repair_frame(run_dir, t, p, q, join, level, body_up):
+    """Apply the two frame repairs described above. Returns (p, q, report)."""
+    p = p.copy(); q = q.copy()
+    ev = run_events(run_dir) if join else None
+    report = dict(join=join, level=level, body_up=None if body_up is None else [float(x) for x in body_up],
+                  tilt_before_deg=plane_tilt_deg(p), events=ev, joins=[], levels=[])
+    # segments = maps: split at the resets (a reset restarts the position at the origin)
+    bounds = [0]
+    if ev:
+        for tr, _ in ev["resets"]:
+            b = int(np.searchsorted(t, tr))
+            if 0 < b < len(t) and b != bounds[-1]:
+                bounds.append(b)
+    bounds.append(len(t))
+    segments = [(bounds[i], bounds[i + 1]) for i in range(len(bounds) - 1) if bounds[i + 1] > bounds[i]]
+    report["segments"] = [dict(start_s=float(t[a] - t[0]), end_s=float(t[b - 1] - t[0]), poses=int(b - a)) for a, b in segments]
+    e_up = None if body_up is None else np.asarray(body_up, float)
+
+    for a, b in segments:
+        if join and ev:
+            for ti in ev["inits"]:
+                k0 = int(np.searchsorted(t, ti))
+                if not (a < k0 < b):
+                    continue
+                best = None
+                for k in (k0 - 1, k0, k0 + 1):
+                    if not (a < k < b):
+                        continue
+                    Rk = vm.quat_to_R(q[[k - 1, k]])
+                    R = Rk[1] @ Rk[0].T
+                    ang = rot_angle_deg(R)
+                    if best is None or ang > best[1]:
+                        best = (k, ang, R)
+                if best is None:
+                    continue
+                k, ang, R = best
+                step_before = float(np.linalg.norm(p[k] - p[k - 1]))
+                if ang < JOIN_MIN_ANGLE_DEG:
+                    report["joins"].append(dict(t_s=float(t[k] - t[0]), angle_deg=ang, applied=False,
+                                               step_before_m=step_before, note="rotation below threshold"))
+                    continue
+                p[a:k] = p[a:k] @ R.T
+                q[a:k] = R_to_quat(np.einsum("ij,njk->nik", R, vm.quat_to_R(q[a:k])))
+                step_after = float(np.linalg.norm(p[k] - p[k - 1]))
+                report["joins"].append(dict(t_s=float(t[k] - t[0]), angle_deg=ang, applied=True,
+                                           step_before_m=step_before, step_after_m=step_after))
+        if level:
+            seg = p[a:b]
+            n, ext = plane_normal(seg)
+            Rb = vm.quat_to_R(q[a:b])
+            u = None
+            if e_up is not None:
+                u = np.einsum("nij,j->ni", Rb, e_up).mean(0); u /= max(np.linalg.norm(u), 1e-9)
+            tilt0 = float(np.degrees(np.arccos(abs(n[2]))))
+            if (b - a) >= PLANE_MIN_POSES and ext[1] >= PLANE_MIN_EXTENT_M:
+                method = "plane"
+                if u is not None and np.dot(n, u) < 0:
+                    n = -n
+                elif u is None and n[2] < 0:
+                    n = -n
+                target = n
+            elif u is not None:
+                method = "body-up (plane undetermined)"
+                target = u
+            else:
+                report["levels"].append(dict(segment=[a, b], method="none", tilt_before_deg=tilt0))
+                continue
+            Rl = rot_a_to_b(target, np.array([0.0, 0.0, 1.0]))
+            p[a:b] = seg @ Rl.T
+            q[a:b] = R_to_quat(np.einsum("ij,njk->nik", Rl, Rb))
+            agree = None if u is None else float(np.degrees(np.arccos(np.clip(abs(np.dot(n, u)), -1, 1))))
+            report["levels"].append(dict(segment=[a, b], method=method, tilt_before_deg=tilt0,
+                                        tilt_after_deg=plane_tilt_deg(p[a:b]), rotation_deg=rot_angle_deg(Rl),
+                                        body_up_vs_normal_deg=agree, off_plane_rms_m=float(ext[2])))
+    report["tilt_after_deg"] = plane_tilt_deg(p)
+    return p, q, report
+
+
 def se2_align(src_xy, dst_xy):
     """Rigid planar fit (yaw + translation, scale 1) via the project's SE(3) Umeyama
     on z=0 points, so the algebra is literally the same routine as the simulation
@@ -466,10 +664,14 @@ def status_of(run_summary, pipeline, sc, align_ok, lever_known, lever_note="leve
             reasons.append(f"coverage {cov:.0%}")
         if sc["jumps"]:
             reasons.append(f"{sc['jumps']} jump(s)")
-    if not (PLAUSIBLE_PATH_RATIO[0] <= float(sc.get("path_ratio", 1) or 1) <= PLAUSIBLE_PATH_RATIO[1]):
-        reasons.append(f"path ratio {sc['path_ratio']:.2f}")
     else:
         label = "completed"
+    # Bug fixed 2026-11-04: the "completed" label used to sit on the else branch of the
+    # path-ratio test below, so any run with a plausible path ratio was relabelled
+    # "completed" whatever the resets or coverage said (realv6/realv7 runs with
+    # resets were reported as completed). Scorings before this date carry that label.
+    if not (PLAUSIBLE_PATH_RATIO[0] <= float(sc.get("path_ratio", 1) or 1) <= PLAUSIBLE_PATH_RATIO[1]):
+        reasons.append(f"path ratio {sc['path_ratio']:.2f}")
     prov = []
     if not lever_known:
         prov.append(lever_note)
@@ -685,7 +887,27 @@ def main():
     ap.add_argument("--fit-lever-arm", action="store_true", help="also fit the lever arm (diagnostic)")
     ap.add_argument("--time-offset", action="append", default=[],
                     help="DATASET=SECONDS: pin the tracker offset instead of estimating it")
+    ap.add_argument("--bag-from-runs", action="store_true",
+                    help="bag absent and no earlier manifest: take the bag's first-message time as the "
+                         "earliest vio.csv timestamp of the scored systems and its duration as the longest "
+                         "vio span; no wheel correlation, so the offset comes from the estimator-speed "
+                         "correlation and the alignment is labelled as such in the manifest")
+    ap.add_argument("--bag-manifest", default=None,
+                    help="manifest.json of an earlier scoring of the SAME bag; used only when the bag "
+                         "itself is absent AND the offset is pinned: supplies the bag's first-message "
+                         "time and duration, the wheel correlation is skipped, and the manifest records "
+                         "the substitution")
     ap.add_argument("--trim-start", type=float, default=0.0, help="seconds dropped from each estimate's start")
+    ap.add_argument("--join-imu-init", action="store_true",
+                    help="ORB-SLAM3 runs: rotate the poses written before each IMU initialisation by the "
+                         "rotation measured at the initialisation frame, so that each map is in one frame "
+                         "(the live log keeps pre-initialisation poses in the un-rotated camera frame)")
+    ap.add_argument("--level-plane", action="store_true",
+                    help="rotate each map's fitted plane to the horizontal before the planar alignment "
+                         "(a floor robot's path is horizontal; GT-free; removes genuine vertical drift too)")
+    ap.add_argument("--body-up", default="+y", choices=sorted(BODY_UP),
+                    help="body axis that points up, used to pick the side of the levelled plane and as the "
+                         "fallback when the plane is undetermined (this rig: +y, gravity reads on +y)")
     ap.add_argument("--experiment-id", default="exp-estimator-baseline")
     ap.add_argument("--out", default=None, help="default output/compare/real/<experiment-id>")
     ap.add_argument("--themes", default="light,dark")
@@ -727,9 +949,36 @@ def main():
         gt_path = os.path.join(args.gt_dir, dataset)
         if not os.path.exists(gt_path):
             print(f"  [skip] no ground truth at {gt_path}"); continue
-        db3, info = bag_db3(ds_dir)
-        wheel, t0_ns, t1_ns = load_wheel(db3, info)
-        t_bag0, bag_dur = t0_ns * 1e-9, (t1_ns - t0_ns) * 1e-9
+        bag_substituted = None
+        if os.path.exists(os.path.join(ds_dir, "metadata.yaml")):
+            db3, info = bag_db3(ds_dir)
+            wheel, t0_ns, t1_ns = load_wheel(db3, info)
+            t_bag0, bag_dur = t0_ns * 1e-9, (t1_ns - t0_ns) * 1e-9
+        elif args.bag_manifest and dataset in pinned:
+            # The bag is not on this machine. With the offset pinned, the only facts the
+            # scoring needs from it are its first-message time (to place the tracker on
+            # the robot clock) and its duration (the ground-truth duration check); both
+            # come from the earlier manifest and the substitution is recorded.
+            bm = json.load(open(args.bag_manifest))["bag"]
+            db3, info, wheel = bm["path"], None, None
+            t_bag0, bag_dur = float(bm["first_message_robotclock_s"]), float(bm["duration_s"])
+            bag_substituted = args.bag_manifest
+            print(f"  bag  ABSENT; first message and duration taken from {args.bag_manifest}")
+        elif args.bag_from_runs:
+            firsts, lasts = [], []
+            for key in systems:
+                rd = vm.run_dir(SYSTEMS[key][1], os.path.join("real", dataset), run_for[key])
+                rr = vm.load(os.path.join(rd, "vio.csv"))
+                if rr is not None:
+                    firsts.append(rr[0][0]); lasts.append(rr[0][-1])
+            if not firsts:
+                print(f"  [skip] no bag and no vio.csv to stand in for it"); continue
+            db3, info, wheel = os.path.join(ds_dir, "(absent)"), None, None
+            t_bag0, bag_dur = min(firsts), max(lasts) - min(firsts)
+            bag_substituted = "estimator logs (--bag-from-runs)"
+            print(f"  bag  ABSENT; first message and duration taken from the estimator logs (earliest vio.csv stamp)")
+        else:
+            print(f"  [skip] no bag under {ds_dir} (pass --time-offset and --bag-manifest, or --bag-from-runs, to score without it)"); continue
         gt = load_gt(gt_path)
         gt_checks = dict(samples_ok=gt["n"] >= 50, gap_ok=gt["gap_max"] <= 1.0,
                          step_ok=gt["step_max"] <= 0.5,
@@ -762,14 +1011,33 @@ def main():
             if r is None:
                 print(f"  [skip] {label}: no vio.csv in {rdir}"); continue
             t_e, p_e, q_e, _ = r
+            repair = None
+            if args.join_imu_init or args.level_plane:
+                p_e, q_e, repair = repair_frame(rdir, t_e, p_e, q_e, args.join_imu_init, args.level_plane,
+                                                BODY_UP[args.body_up])
             axes = body_axes(t_e, p_e, q_e)
             sp = speed_profile(t_e - t_bag0, p_e[:, :2], grid)
             curves[label] = (col, correlate_offset(grid, sp, gt["t_rel"], gt_fn))
-            loaded[key] = dict(dir=rdir, t=t_e, p=p_e, q=q_e, axes=axes, speed_grid=sp,
+            loaded[key] = dict(dir=rdir, t=t_e, p=p_e, q=q_e, axes=axes, speed_grid=sp, repair=repair,
                                meta=read_kv_csv(os.path.join(rdir, "run_metadata.csv")),
                                summary=read_kv_csv(os.path.join(rdir, "run_summary.csv")))
             ax_txt = ("forward=%s conf=%.1f" % (axes["fwd_name"], axes["confidence"])) if axes else "undetermined"
             print(f"  {label}: {rdir}\n       {len(t_e)} poses, {t_e[-1]-t_e[0]:.2f} s, body axes {ax_txt}")
+            if repair:
+                ev = repair["events"]
+                if ev:
+                    print(f"       events: IMU initialised at " + (", ".join(f"{x - t_e[0]:.1f}" for x in ev["inits"]) or "never")
+                          + " s; resets at " + (", ".join(f"{x - t_e[0]:.1f} ({why})" for x, why in ev["resets"]) or "none")
+                          + f"; IMU initialised for {100 * ev['init_fraction']:.0f} % of the tracked frames")
+                for j in repair["joins"]:
+                    print(f"       join at {j['t_s']:.1f} s: rotation {j['angle_deg']:.1f} deg, step {j['step_before_m']:.2f} m -> "
+                          + (f"{j['step_after_m']:.2f} m" if j["applied"] else f"not applied ({j['note']})"))
+                for lv in repair["levels"]:
+                    print(f"       level segment {lv['segment']}: {lv['method']}, tilt {lv['tilt_before_deg']:.1f} -> "
+                          + (f"{lv['tilt_after_deg']:.1f} deg, rotated {lv['rotation_deg']:.1f} deg, body-up vs normal "
+                             f"{lv['body_up_vs_normal_deg']:.1f} deg, off-plane rms {lv['off_plane_rms_m']:.2f} m"
+                             if "tilt_after_deg" in lv else "not levelled"))
+                print(f"       plane tilt of the whole run {repair['tilt_before_deg']:.1f} -> {repair['tilt_after_deg']:.1f} deg")
         if not loaded:
             continue
         for name, (_, c) in curves.items():
@@ -828,7 +1096,7 @@ def main():
             if not gt_ok:
                 status = "failed (ground truth invalid)"
             results[key] = dict(score=sc, status=status, reasons=reasons, sens=sens, fit=fit,
-                                speed_grid=L["speed_grid"], **{k: L[k] for k in ("dir", "meta", "summary", "axes")})
+                                speed_grid=L["speed_grid"], **{k: L[k] for k in ("dir", "meta", "summary", "axes", "repair", "t")})
             print(f"  {label}: {status}" + (f"  [{'; '.join(reasons)}]" if reasons else ""))
             if sc.get("valid"):
                 r1 = sc["rpe"].get(1.0)
@@ -861,6 +1129,14 @@ def main():
                        tracking_loss_s=L["summary"].get("tracking_loss_duration_s"),
                        init_time_s=L["summary"].get("initialization_time_s"),
                        replay_rate=L["meta"].get("replay_rate"))
+            if L.get("repair"):
+                rp = L["repair"]; ev = rp["events"] or {}
+                row.update(frame_repair=("join+level" if rp["join"] and rp["level"] else "join" if rp["join"] else "level"),
+                           tilt_before_deg=rp["tilt_before_deg"], tilt_after_deg=rp["tilt_after_deg"],
+                           imu_init_fraction=ev.get("init_fraction"), imu_init_times_s=[x - L["t"][0] for x in ev.get("inits", [])],
+                           reset_times_s=[x - L["t"][0] for x, _ in ev.get("resets", [])],
+                           reset_reasons=[w for _, w in ev.get("resets", [])],
+                           joins_applied=sum(1 for j in rp["joins"] if j["applied"]), segments=len(rp["segments"]))
             if sc.get("valid"):
                 row["rpe"] = sc["rpe"]
                 r1 = sc["rpe"].get(1.0)
@@ -889,9 +1165,10 @@ def main():
             experiment_id=args.experiment_id, domain="real", dataset=dataset, generated=now,
             command=" ".join(sys.argv), git_superproject=git_rev(ROOT),
             python=platform.python_version(), numpy=np.__version__, host=platform.node(),
-            bag=dict(path=os.path.abspath(db3), size_bytes=os.path.getsize(db3),
+            bag=dict(path=os.path.abspath(db3), size_bytes=(os.path.getsize(db3) if os.path.exists(db3) else None),
+                     substituted_from=bag_substituted,
                      first_message_robotclock_s=t_bag0, duration_s=bag_dur,
-                     message_count=info.get("message_count"),
+                     message_count=(info or {}).get("message_count"),
                      wheel_topic=WHEEL_TOPIC, wheel_messages=None if wheel is None else wheel["n"]),
             ground_truth=dict(path=gt["path"], sha256=sha256(gt["path"]), header=gt["header"],
                               samples=gt["n"], duration_s=gt["duration"], median_dt_s=gt["gap_median"],
@@ -908,11 +1185,15 @@ def main():
                         rpe="translational, relative displacements in the aligned frame, pairs within 25 % of delta",
                         lever_arm=dict(forward_m=lever[0], left_m=lever[1], up_m=lever[2],
                                        measured=lever_known, assumed=bool(args.lever_arm_assumed)),
-                        trim_start_s=args.trim_start, jump_speed_mps=vm.JUMP_SPEED, diverged_m=DIVERGED_M),
+                        trim_start_s=args.trim_start, jump_speed_mps=vm.JUMP_SPEED, diverged_m=DIVERGED_M,
+                        frame_repair=dict(join_imu_init=args.join_imu_init, level_plane=args.level_plane,
+                                          body_up=args.body_up if (args.join_imu_init or args.level_plane) else None,
+                                          join_min_angle_deg=JOIN_MIN_ANGLE_DEG, plane_min_poses=PLANE_MIN_POSES,
+                                          plane_min_extent_m=PLANE_MIN_EXTENT_M)),
             runs={SYSTEMS[k][0]: dict(dir=r["dir"], status=r["status"], reasons=r["reasons"],
                                       body_axes=None if r["axes"] is None else dict(
                                           forward=r["axes"]["fwd_name"], confidence=r["axes"]["confidence"]),
-                                      run_metadata=r["meta"], run_summary=r["summary"],
+                                      run_metadata=r["meta"], run_summary=r["summary"], frame_repair=r.get("repair"),
                                       ate_offset_sensitivity=r["sens"], fitted_lever_arm=r["fit"])
                   for k, r in results.items()})
         with open(os.path.join(out, "manifest.json"), "w") as f:

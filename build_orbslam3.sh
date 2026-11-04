@@ -561,6 +561,14 @@ PYEOF
     #      System.cc (YAML key Stereo.useGPUMatch, absent = follow useGPU).
     #      Bit-identical to the CPU matcher; 9-10 ms -> 0.44 ms per frame; node
     #      tracker 64 -> 45 ms at rate 1.0 on realv5 (ABBA, cool starts).
+    # (15) Inertial-initialisation switches (2026-11-04), committed in the fork like
+    #      (10): include/LocalMapping.h, src/LocalMapping.cc, src/System.cc. YAML keys
+    #      LocalMapping.initWithBacklog (1 = try InitializeIMU while keyframes are
+    #      queued; upstream gates it on an empty queue, which starved the
+    #      re-initialisation on realv7) and LocalMapping.resetOnLowMotion (0 = no
+    #      "insufficient motion" map reset for stereo / RGB-D, whose scale is fixed).
+    #      Absent = upstream. Set ON in config/wil*/stereo_imu.yaml for the real rig.
+    if grep -q 'sInitWithBacklog' "$ORB_SRC/src/LocalMapping.cc"; then echo "    patch (15) present     (inertial-initialisation switches in LocalMapping.cc)"; else echo "    patch (15) ABSENT      (LocalMapping.cc without the initialisation switches)"; fi
     if grep -q 'src/ORBextractorGPU.cc' "$ORB_SRC/CMakeLists.txt"; then
         echo "    patch (10) present     (GPU front end committed in the fork)"
         if grep -q 'GpuHamming::Knn2' "$ORB_SRC/src/Frame.cc"; then echo "    patch (10b) present    (GPU stereo matcher in Frame.cc)"; else echo "    patch (10b) ABSENT     (Frame.cc still calls cv::BFMatcher only)"; fi

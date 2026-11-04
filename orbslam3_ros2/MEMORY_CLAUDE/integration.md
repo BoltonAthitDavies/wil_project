@@ -82,7 +82,7 @@ the include path. Upstream's `build.sh` builds it anyway, which turns its tests 
 those are a known failure and pure disk waste. This is the main reason we do not use
 `build.sh`.
 
-### 3.1 The fork and its fourteen patches
+### 3.1 The fork and its seventeen patches
 
 Fork: **`BoltonAthitDavies/ORB_SLAM3`**, branch `wil`, pinned at commit
 `5c2b00f`, forked from upstream `UZ-SLAMLab/ORB_SLAM3 @ 4452a3c`. Pinned to a commit
@@ -108,6 +108,9 @@ tree.
 | 11 | `src/ORBmatcher.cc` | `NLeft` guard on the keypoint-angle lookup in the relocalisation `SearchByProjection` (fisheye stereo read past `mvKeysUn`) | **Segfault after tracking loss on the real rig** (`exit code -11`). gdb-confirmed 2026-10-29; applied by the script; see §7.10. |
 | 12 | `src/LocalMapping.cc`, `src/ORBmatcher.cc` (Fuse), `src/Optimizer.cc` (merge BA) | Five more right-camera index guards: `mvKeysRight[i]` → `[i - NLeft]` in `KeyFrameCulling`, `mvDepth`/`mvuRight` reads limited to left indices, `get<0> == -1` skipped | **Segfault while tracking normally on the real rig** (`-11` in the mapping thread). Kernel-log-confirmed 2026-11-02; applied by the script; see §7.12. |
 | 13 | `src/FrameDrawer.cc` | `FrameDrawer::Update` indexed the left-only `mvCurrentKeys` with `i` up to left+right on fisheye stereo | **Out-of-bounds read every frame** (drawer data only). AddressSanitizer, realv6, 2026-11-03; applied by the script. |
+| 14a | `src/Optimizer.cc` | `LocalInertialBA`: debug-only `assert(edges >= 3)` replaced by a diagnostic log (keyframe, optimised/fixed, count, time) | **Diagnostic.** Production never checked it; it fired at 66 s of realv6 under the sanitiser. 2026-11-03. |
+| 14b | `src/OptimizableTypes.cpp` | `auto projectJac = -pCamera->projectJac(...)` bound an Eigen expression to a dead temporary; materialised | **Garbage Jacobian in `LocalBundleAdjustment`** (stack-use-after-scope, 24 hits in 66 s). AddressSanitizer, 2026-11-03; applied by the script. |
+| 15 | `include/LocalMapping.h`, `src/LocalMapping.cc`, `src/System.cc` | YAML switches `LocalMapping.initWithBacklog` (1 = call `InitializeIMU` before the empty-queue gate; it drains the queue itself) and `LocalMapping.resetOnLowMotion` (0 = no "insufficient motion" map reset for stereo / RGB-D); absent = upstream | **The IMU stayed uninitialised for most of 9 of 12 realv7 runs**: low-motion reset at 3–4 s, then the re-initialisation starved by the keyframe backlog. Committed in the fork, 2026-11-04; ON in `config/wil*/stereo_imu.yaml`; **not yet exercised on a bag**; see §7.14. |
 
 Patches (6)–(9) keep the original upstream line as a comment next to the replacement, and
 each is guarded in `build_orbslam3.sh` so it applies once and only to unpatched source. All
@@ -947,16 +950,101 @@ recorded before 2026-11-02; `script/vio_metrics.py` and
 this caused any crash or the realv6 accuracy change (§7.12 and the open question
 below): a wrong offset inside a 149 kB object yields garbage rather than a fault.
 
-**Still open.** On `realv6`, two pre-reboot runs scored \SI{0.41}{\metre} while nine
-later runs, across every combination of culling threshold, loop closing, GPU and CPU
-extractor and replay rate, scored \SIrange{1.0}{4.6}{\metre} with a speed runaway at
-100--130 s. Bag, IMU delivery, initialisation and throughput were matched; the cause is
-not yet identified. Next: an AddressSanitizer run with matching layout, then repeat
-runs to measure the run-to-run spread.
+**Status 2026-11-03 13:00.** AddressSanitizer, recover mode, full bag, fully patched
+library (patches 11–14b): **no memory error left** on the CPU-extractor path, and that
+run tracked the whole bag without a runaway (ATE \SI{0.95}{\metre}, rate 0.25). Memory
+corruption is therefore excluded as the cause of the realv6 runaway. With the same
+patched library at rate 1.0 (self-calibrated config), two identical repeats gave
+\SI{1.10}{\metre} without a runaway and \SI{2.45}{\metre} with one at 105–130 s, followed
+by a SIGABRT in a loop-closing map merge (`SO3::exp` on NaN, a consequence of the
+garbage poses after tracking was lost). The run-to-run spread is real. Where it happens:
+the robot creeps at \SI{0.12}{\metre\per\second} behind a parked car; the tracker's
+inliers fall to 65 (min 30) for ~10 s in the bad run against 233 (min 18) briefly in the
+good one and ≥547 at rate 0.25; the velocity *state* then jumps to \SI{2.6}{\metre\per\second}
+together with the position, i.e. a bad visual update with few matches, not inertial
+drift. The IMU facts (§7.11 note, memory): a single-axis yaw gyro whose sign agrees with
+the configured rotation; the lever arm and the x/z accelerometer signs remain unverified.
+**Stereo-only answers it (13:30).** The same bag, same library, no IMU
+(`loopclosing_rate1_camonly`): no tracking loss, no reset, inliers never below 620 through
+the car segment, **ATE \SI{0.63}{\metre}, median 0.35, RPE(1 s) \SI{0.041}{\metre}**
+(scored after rotating the camera-frame trajectory to z-up; without an IMU the node's
+frame is the optical frame and `eval_real_gt.py` otherwise drops the forward axis). The
+visual pipeline is stable on this recording; every instability seen today is in the
+inertial fusion. A rate-0.5 inertial run with the 3 Nov extrinsic ran away at 20–60 s and
+160–200 s, nowhere near the car, so the trigger is not one scene but the IMU model.
+Open: the IMU-to-camera x/z axis signs, the lever arm, the IMU time offset and the noise
+parameters (copied from VINS) are all unverified; next A/Bs are inflated IMU noise and
+the z-flip rotation.
+
+**Inflated IMU noise works (user run, 13:50).** `IMU.NoiseGyro` 0.01 → 0.1 and
+`IMU.NoiseAcc` 0.1 → 1.0 (walks unchanged), `config/wil` file, 3 Nov extrinsic, loop
+closing on, GPU, rate 1.0 (`loopclosing_rate1_renoise`): **ATE \SI{0.49}{\metre},
+median 0.41, max 0.98, no runaway**, keyframes kept 238/439, the usual two
+initialisation resets. Two repeats: **0.47 m and 0.49 m** (median 0.38 / 0.41, max
+1.05 / 1.11, RPE(1 s) 0.055 / 0.072, no runaway) — three for three, against one in
+three with the copied values. Diagnosis confirmed: the optimiser was trusting an
+unverified IMU model too much. The ×10 values are now the real-rig setting in both
+inertial configs (`config/wil` and `wil_311026_selfcal`), previous values commented.
+The VINS file still carries the copied values and its stale `g_norm`.
 
 ### 7.4 Truncated CSV on hard kill
 See §5. `numpy.loadtxt` throws on a ragged file, so one truncated final line
 destroys the whole run's data.
+
+### 7.14 realv7: the IMU initialisation is thrown away by the low-motion reset, then starved  *(2026-11-04)*
+
+**Symptom.** Twelve stereo-inertial runs on `dataset_realv7_00{0,1,2}` (3 Nov, four
+configurations each): the estimate lies in a plane tilted up to 90° in nine of them, the
+plane normal exactly a body axis, with a 0.38 m step in the first seconds and a 1.9–6.8 m
+step later. Two wrong diagnoses preceded the right one and are retracted: a wrong gravity
+direction / IMU-to-camera rotation (3 Nov morning) and an output frame latched by the node
+before the gravity alignment (3 Nov evening) — `align_first_pose` and `wait_for_imu_init`
+are both false, the node writes ORB-SLAM3's world as it is.
+
+**Mechanism, from `performance.csv` / `local_mapping.csv` of every run.**
+1. The IMU initialises 3–4 s after the first pose (`imu_initialized` 0→1). ORB-SLAM3
+   rotates the map about its origin (`Map::ApplyScaledRotation`, scale fixed for stereo);
+   the 0.38 m step is that rotation applied to a robot 0.38 m out.
+2. Within 0.1–2 s the upstream check in `LocalMapping::Run` — two consecutive keyframes
+   closer than 2 cm while `mTinit < 10 s` → `"Not enough motion for initializing.
+   Reseting..."`, `mbBadImu`, `local_mapping_bad_imu` reset — discards the map, because the
+   robot started from rest. 9 of 12 runs (`insufficient_motion_during_imu_initialization`
+   in `local_mapping.csv`). The same reset was logged as "9× for lack of motion" in
+   September (§12), unexplained then. The four surviving realv6 runs (3 Nov) show it too,
+   but re-initialised at 8.6 / 26.6 / 9.3 / 33.9 s (IMU initialised 87–98 % of frames).
+3. The new map starts in the camera frame of the reset instant (vertical = camera y).
+   Before the IMU is initialised `NeedNewKeyFrame` inserts a keyframe every 0.25 s;
+   `CreateNewMapPoints` takes ~250 ms per keyframe once the robot moves (4000 fisheye
+   features; 1–8 ms in map 1 only because the baselines were below the stereo baseline
+   and triangulation was skipped). Upstream calls `InitializeIMU` only inside
+   `if(!CheckNewKeyFrames() && !stopRequested())`, and the queue was non-empty after
+   90–97 % of the keyframes (`queue_after`), so the initialisation was attempted 0–4 times
+   in 90–130 s (`imu_initialization_ms > 0`): never in 2 runs, after 37–92 s in 7, at
+   6.7 s in 1 (the run that was level). LBA ran for 3–10 % of the keyframes likewise.
+4. Until the re-initialisation every pose is pure stereo in that camera-frame map → tilted
+   plane; the re-initialisation rotates the map under the already-written poses → the
+   multi-metre step. Mid-route resets (`tracking_lost_before_inertial_ba2`, 002 at 49/59 s)
+   are genuine losses and restart the position at the origin.
+
+**Scorer repair (GT-free), `script/eval_real_gt.py`:** `--join-imu-init` rotates the poses
+written before each initialisation by the orientation jump measured at the initialisation
+frame (steps 0.38 / 6.82 m → 0.00 / 0.03 m); `--level-plane` levels each map's fitted
+plane, side from `--body-up +y` (agrees with the normal within 2° on every determined
+plane). Repaired ATE: 000 0.25–0.27 m (four configs, IMU initialised 0–23 % of frames —
+stereo-only in all but name); 001 0.44–0.82 m; 002 0.47 m (CPU, LC on), 1.67 m (drift),
+2.1 m ×2 (losses). Table/figure: `script/realv7_insights.py --levelled`. The same day the
+scorer's `status_of` was fixed: the "completed" label sat on the else-branch of the
+path-ratio test, so runs with resets were labelled completed (pre-4 Nov scorings carry it).
+
+**Fix in the fork (patch 15, two YAML switches, absent = upstream):**
+`LocalMapping.initWithBacklog: 1` — `InitializeIMU` is called before the empty-queue gate
+(it returns at once below 10 keyframes / 1 s and drains the queue itself when it runs);
+`LocalMapping.resetOnLowMotion: 0` — the low-motion reset is skipped for non-monocular
+sensors (scale fixed, the reset buys nothing). Both ON in `config/wil/stereo_imu.yaml`
+and `wil_311026_selfcal/stereo_imu.yaml` with a provenance comment; library and node
+rebuilt 4 Nov. **Untested on a bag**: the realv6 (3 Nov) and realv7 runs predate them; the
+verification is one realv7 replay with `imu_initialized` staying 1 from the first seconds
+and no `local_mapping_bad_imu`. Set `0 / 1` to reproduce the recorded runs.
 
 ---
 
@@ -1215,9 +1303,11 @@ sustained, no trajectory written. Blocked on calibration (§6.3), not code.
 | GPU stereo matcher (patch 10b) | **validated** 2026-10-29: bit-identical to `cv::BFMatcher`; ABBA on `realv5` rate 1.0: tracker 64 → 45 ms, frames processed +35 %, 0 losses; follows `ORBextractor.useGPU` — see §3.5.1 |
 | Segfault after tracking loss on the real rig (`-11`) | **root-caused, fixed and verified** 2026-10-29 (patch 11, §7.10): relocalisation matcher read past `mvKeysUn` on fisheye stereo; forced relocalisations under gdb survive |
 | Stereo-inertial on the real rig | **tracks continuously** on `realv5` since 2026-10-29 (§7.11): accelerometer scale re-measured (0.9923), IMU subscription in its own callback group, 64 MB socket buffers; 2 init-time resets remain (zero lever arm) |
+| realv6 inertial runaway | **resolved** 2026-11-03 (§7.13 status): fusion over-trusted an unverified IMU model; IMU noise ×10 gives 0.49 / 0.47 / 0.49 m in three runs, no runaway; stereo-only 0.63 m |
 | Mapping-thread segfault on the real rig (`-11` while tracking OK) | **root-caused and patched** 2026-11-02 (patch 12, §7.12): five right-index out-of-bounds reads in LocalMapping/Fuse/merge-BA; verification runs pending |
 | Node/library class-layout mismatch | **fixed** 2026-11-02 (§7.13): `-march=native` added to `orbslam3_ros2`; velocity columns of earlier runs are suspect, trajectories are not |
-| Whether the IMU truly initialises | **unresolved** — see §9 |
+| Whether the IMU truly initialises | **resolved** 2026-11-04 (§7.14): it initialises at 3–4 s, the upstream low-motion reset discards the map, and the re-initialisation is starved by the keyframe backlog (never in 2 of 12 realv7 runs, 37–92 s in 7). Patch 15 switches ON in the real-rig configs, not yet exercised |
+| realv7 tilted estimates | **explained and scored** 2026-11-04 (§7.14): GT-free frame repair in `eval_real_gt.py`; 000 0.25–0.27 m, 001 0.44–0.82 m, 002 0.47 m + two losses + one drift |
 | Real-rig trajectories | **plausible, unverified** — no ground truth exists for these bags |
 
 ---

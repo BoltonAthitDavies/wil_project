@@ -1,0 +1,300 @@
+{
+  "experiment_id": "realv7_002_lc_gpu_lvl",
+  "domain": "real",
+  "dataset": "dataset_realv7_002",
+  "generated": "2026-11-04T09:19:53",
+  "command": "script/eval_real_gt.py --dataset dataset_realv7_002 --dataset-root /media/ambushee/New Volume/wil_rescue --run orb=loopclosing_rate1 --systems orb --join-imu-init --level-plane --experiment-id realv7_002_lc_gpu_lvl --themes light",
+  "git_superproject": "feced2f6e999",
+  "python": "3.10.12",
+  "numpy": "2.2.6",
+  "host": "ambushee-Katana-GF66-11UG",
+  "bag": {
+    "path": "/media/ambushee/New Volume/wil_rescue/dataset_realv7_002/dataset_realv7_002_0.db3",
+    "size_bytes": 2794799104,
+    "substituted_from": null,
+    "first_message_robotclock_s": 1793448886.9411905,
+    "duration_s": 97.65773132800001,
+    "message_count": 49734,
+    "wheel_topic": "/feedback/velocity",
+    "wheel_messages": 4878
+  },
+  "ground_truth": {
+    "path": "/home/ambushee/wil_project/dataset/gt/dataset_realv7_002",
+    "sha256": "f76f7099fe552a49fd3f238c979aee87aa483be53f3c36f1f3a6b9aa8bb91afb",
+    "header": [
+      "Date Time",
+      "Recorded Time (sec.)",
+      "X (cm.)",
+      "Y (cm.)"
+    ],
+    "samples": 540,
+    "duration_s": 103.872,
+    "median_dt_s": 0.19999999999999574,
+    "max_gap_s": 0.3680000000000021,
+    "max_step_m": 0.10401038439021369,
+    "path_m": 23.448991490714,
+    "first_stamp": "Tue 11/03/2026 10:00:46 AM",
+    "last_stamp": "Tue 11/03/2026 10:02:29 AM",
+    "checks": {
+      "samples_ok": true,
+      "gap_ok": true,
+      "step_ok": true,
+      "duration_ok": true
+    },
+    "valid": true,
+    "units": "centimetres converted to metres",
+    "dimensions": 2,
+    "heading": false
+  },
+  "time_alignment": {
+    "offset_s": -2.6048442204748214,
+    "source": "wheel-speed correlation",
+    "ok": true,
+    "curves": {
+      "wheel /feedback/velocity": {
+        "offset_s": -2.6048442204748214,
+        "peak_r": 0.9320849114869425,
+        "second_peak_r": 0.8263700640351448
+      },
+      "ORB-SLAM3": {
+        "offset_s": -2.9042057257386746,
+        "peak_r": 0.2830681968455478,
+        "second_peak_r": 0.2390977304336749
+      }
+    },
+    "search_s": [
+      -5.0,
+      20.0
+    ],
+    "step_s": 0.01
+  },
+  "method": {
+    "alignment": "rigid SE(2), scale fixed (vio_metrics.umeyama on z=0 points)",
+    "association": "estimate linearly interpolated at tracker samples; nearest estimate sample within 0.15 s",
+    "rpe": "translational, relative displacements in the aligned frame, pairs within 25 % of delta",
+    "lever_arm": {
+      "forward_m": 0.0,
+      "left_m": 0.0,
+      "up_m": 0.0,
+      "measured": false,
+      "assumed": false
+    },
+    "trim_start_s": 0.0,
+    "jump_speed_mps": 10.0,
+    "diverged_m": 50.0,
+    "frame_repair": {
+      "join_imu_init": true,
+      "level_plane": true,
+      "body_up": "+y",
+      "join_min_angle_deg": 10.0,
+      "plane_min_poses": 20,
+      "plane_min_extent_m": 0.15
+    }
+  },
+  "runs": {
+    "ORB-SLAM3": {
+      "dir": "/home/ambushee/wil_project/output/output_orb/real/dataset_realv7_002/loopclosing_rate1",
+      "status": "partial (provisional: lever arm not provided)",
+      "reasons": [
+        "3 estimator reset(s) (timestamp_jump_before_imu_initialization)",
+        "tracking loss 10.73 s"
+      ],
+      "body_axes": {
+        "forward": "-z",
+        "confidence": 4.8091003158391725
+      },
+      "run_metadata": {
+        "pipeline": "orbslam3_ros2",
+        "experiment_id": "loopclosing_rate1",
+        "dataset_path": "/home/ambushee/wil_project/dataset/dataset_realv7_002",
+        "world_path": "",
+        "run_command": "",
+        "run_notes": "baseline logging validation",
+        "config_file": "/home/ambushee/wil_project/orbslam3_ros2/config/wil/stereo_imu.yaml",
+        "vocabulary_file": "/home/ambushee/wil_project/thirdparty/ORB_SLAM3/Vocabulary/ORBvoc.txt",
+        "output_path": "/home/ambushee/wil_project/output/output_orb/real/dataset_realv7_002/loopclosing_rate1",
+        "image0_topic": "/cam0/image_raw",
+        "image1_topic": "/cam1/image_raw",
+        "imu_topic": "/hwt101ct_yaw_publisher",
+        "image_transport": "compressed",
+        "world_frame_id": "orbslam3_world",
+        "body_frame_id": "imu_link",
+        "use_imu": "true",
+        "filter": "false",
+        "publish_tf": "true",
+        "replay_rate": "1.000000",
+        "sync_slop_s": "0.020000",
+        "det_max_age_s": "0.150000",
+        "mask_dilate_px": "8",
+        "max_mask_fraction": "0.800000",
+        "filter_mode": "class",
+        "motion_iou": "0.300000",
+        "motion_min_points": "15",
+        "motion_inlier_ratio": "0.500000",
+        "motion_unknown_mask": "false",
+        "motion_revote_frames": "15",
+        "motion_min_point_age": "30",
+        "motion_min_box_age": "30",
+        "start_wall_time_unix_ns": "1793697528180337860"
+      },
+      "run_summary": {
+        "shutdown_status": "graceful",
+        "stereo_pairs_received": "2879",
+        "stereo_pairs_processed": "1507",
+        "decode_failures": "0",
+        "imu_messages_received": "19483",
+        "queue_dropped_frames": "1372",
+        "imu_starved_frames": "0",
+        "poses_written": "1501",
+        "tracking_state_changes": "7",
+        "tracking_loss_events": "2",
+        "tracking_loss_duration_s": "10.732867",
+        "initialization_time_s": "0.800161",
+        "tracking_initialization_time_s": "0.800161",
+        "imu_initialization_time_s": "3.299918",
+        "imu_initialized": "1",
+        "inertial_ba1": "1",
+        "inertial_ba2": "0",
+        "keyframes_created": "278",
+        "keyframes_in_final_map": "106",
+        "map_points_in_final_map": "5895",
+        "local_mapping_keyframes": "243",
+        "local_ba_executions": "22",
+        "local_ba_aborts": "5",
+        "place_recognition_checks": "242",
+        "loop_closures": "0",
+        "map_merges": "0",
+        "global_ba_executions": "0",
+        "global_ba_aborts": "0",
+        "active_map_reset_requests": "3",
+        "last_reset_reason": "timestamp_jump_before_imu_initialization",
+        "detection_frames_matched": "0",
+        "detection_frames_missed": "0",
+        "detection_match_rate": "0.0000",
+        "filter_status": "none",
+        "filter_mode": "none",
+        "boxes_voted_moving": "0",
+        "boxes_voted_static": "0",
+        "masks_rejected": "0"
+      },
+      "frame_repair": {
+        "join": true,
+        "level": true,
+        "body_up": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "tilt_before_deg": 37.710550908113355,
+        "events": {
+          "inits": [
+            1793448890.3036225,
+            1793448925.7024705,
+            1793448978.3004563
+          ],
+          "resets": [
+            [
+              1793448890.437347,
+              "local_mapping_bad_imu"
+            ],
+            [
+              1793448936.5354505,
+              "tracking_lost_before_inertial_ba2"
+            ],
+            [
+              1793448947.1683838,
+              "timestamp_jump_before_imu_initialization"
+            ]
+          ],
+          "init_fraction": 0.22385076615589608
+        },
+        "joins": [
+          {
+            "t_s": 2.4997565746307373,
+            "angle_deg": 90.91675898355254,
+            "applied": true,
+            "step_before_m": 0.38245890472049415,
+            "step_after_m": 0.0003169196805380121
+          },
+          {
+            "t_s": 37.89860439300537,
+            "angle_deg": 87.19810878920889,
+            "applied": true,
+            "step_before_m": 1.7724832343917953,
+            "step_after_m": 0.0013381986234689792
+          },
+          {
+            "t_s": 90.49659037590027,
+            "angle_deg": 87.68656453018869,
+            "applied": true,
+            "step_before_m": 3.405160145573186,
+            "step_after_m": 0.0010801384948644478
+          }
+        ],
+        "levels": [
+          {
+            "segment": [
+              0,
+              63
+            ],
+            "method": "body-up (plane undetermined)",
+            "tilt_before_deg": 31.367283314497175,
+            "tilt_after_deg": 31.190582597353828,
+            "rotation_deg": 0.6383152497246969,
+            "body_up_vs_normal_deg": 31.190582597353828,
+            "off_plane_rms_m": 0.00021667319001402875
+          },
+          {
+            "segment": [
+              63,
+              880
+            ],
+            "method": "plane",
+            "tilt_before_deg": 1.8239243385272443,
+            "tilt_after_deg": 0.0,
+            "rotation_deg": 1.8239243385270445,
+            "body_up_vs_normal_deg": 0.5161232299330705,
+            "off_plane_rms_m": 0.004408526501196176
+          },
+          {
+            "segment": [
+              880,
+              1501
+            ],
+            "method": "plane",
+            "tilt_before_deg": 1.4163025553603983,
+            "tilt_after_deg": 0.0,
+            "rotation_deg": 1.4163025553603983,
+            "body_up_vs_normal_deg": 0.458765810049047,
+            "off_plane_rms_m": 0.0019205942649004207
+          }
+        ],
+        "segments": [
+          {
+            "start_s": 0.0,
+            "end_s": 2.6334807872772217,
+            "poses": 63
+          },
+          {
+            "start_s": 2.699725866317749,
+            "end_s": 48.66490888595581,
+            "poses": 817
+          },
+          {
+            "start_s": 59.43118333816528,
+            "end_s": 96.72990250587463,
+            "poses": 621
+          }
+        ],
+        "tilt_after_deg": 0.014762761174925651
+      },
+      "ate_offset_sensitivity": {
+        "-0.2": 2.1080693283265632,
+        "-0.1": 2.1103381758178843,
+        "+0.1": 2.1150946951469205,
+        "+0.2": 2.119416966310362
+      },
+      "fitted_lever_arm": null
+    }
+  }
+}

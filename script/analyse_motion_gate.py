@@ -2,7 +2,7 @@
 """Score ORB-SLAM3's motion gate against Gazebo ground truth, pooled over runs.
 
     python3 script/analyse_motion_gate.py \
-        --bag /media/ambushee/32E4AAB1E4AA772F/dataset_dynamic_nofloortexture_00_000 \
+        --bag "/media/ambushee/New Volume/wil_rescue/dataset_dynamic_nofloortexture_00_000" \
         --runs output/output_orb_yolo/simulation/dataset_dynamic_nofloortexture_00_000/motion_*/ \
         --out output/compare/simulation/exp3-motion-gate
 

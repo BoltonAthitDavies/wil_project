@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  2 NOV 2026 14:20
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  4 NOV 2026 09:25
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -554,8 +554,8 @@ Package siunitx Info: Option "detect-all" has been deprecated in this release.
 
 )
 Package translations Info: No language package found. I am going to use `englis
-h' as default language. on input line 18.
-LaTeX Font Info:    Trying to load font information for T1+ptm on input line 18
+h' as default language. on input line 19.
+LaTeX Font Info:    Trying to load font information for T1+ptm on input line 19
 .
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1ptm.fd
@@ -564,24 +564,24 @@ File: t1ptm.fd 2001/06/04 font definitions for T1/ptm.
 (./experiment_3_insight.aux)
 \openout1 = `experiment_3_insight.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 18.
-LaTeX Font Info:    ... okay on input line 18.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 18.
-LaTeX Font Info:    ... okay on input line 18.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 18.
-LaTeX Font Info:    ... okay on input line 18.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 18.
-LaTeX Font Info:    ... okay on input line 18.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 18.
-LaTeX Font Info:    ... okay on input line 18.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 18.
-LaTeX Font Info:    ... okay on input line 18.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 18.
-LaTeX Font Info:    ... okay on input line 18.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 18.
-LaTeX Font Info:    ... okay on input line 18.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 18.
-LaTeX Font Info:    ... okay on input line 18.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 19.
+LaTeX Font Info:    ... okay on input line 19.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 19.
+LaTeX Font Info:    ... okay on input line 19.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 19.
+LaTeX Font Info:    ... okay on input line 19.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 19.
+LaTeX Font Info:    ... okay on input line 19.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 19.
+LaTeX Font Info:    ... okay on input line 19.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 19.
+LaTeX Font Info:    ... okay on input line 19.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 19.
+LaTeX Font Info:    ... okay on input line 19.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 19.
+LaTeX Font Info:    ... okay on input line 19.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 19.
+LaTeX Font Info:    ... okay on input line 19.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -617,18 +617,18 @@ LaTeX Font Info:    ... okay on input line 18.
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-LaTeX Info: Redefining \microtypecontext on input line 18.
-Package microtype Info: Applying patch `item' on input line 18.
-Package microtype Info: Applying patch `toc' on input line 18.
-Package microtype Info: Applying patch `eqnum' on input line 18.
-Package microtype Info: Applying patch `footnote' on input line 18.
+LaTeX Info: Redefining \microtypecontext on input line 19.
+Package microtype Info: Applying patch `item' on input line 19.
+Package microtype Info: Applying patch `toc' on input line 19.
+Package microtype Info: Applying patch `eqnum' on input line 19.
+Package microtype Info: Applying patch `footnote' on input line 19.
 Package microtype Info: Generating PDF output.
 Package microtype Info: Character protrusion enabled (level 2).
 Package microtype Info: Using default protrusion set `alltext'.
 Package microtype Info: Automatic font expansion enabled (level 2),
 (microtype)             stretch: 20, shrink: 20, step: 1, non-selected.
 Package microtype Info: Using default expansion set `alltext-nott'.
-LaTeX Info: Redefining \showhyphens on input line 18.
+LaTeX Info: Redefining \showhyphens on input line 19.
 Package microtype Info: No adjustment of tracking.
 Package microtype Info: No adjustment of interword spacing.
 Package microtype Info: No adjustment of character kerning.
@@ -641,7 +641,7 @@ File: translations-basic-dictionary-english.trsl (english translation file `tra
 nslations-basic-dictionary')
 )
 Package translations Info: loading dictionary `translations-basic-dictionary' f
-or `english'. on input line 18.
+or `english'. on input line 19.
 
 (/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
@@ -677,7 +677,7 @@ Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: hyperref package is loaded.
 Package caption Info: rotating package is loaded.
 Package caption Info: End \AtBeginDocument code.
-Package hyperref Info: Link coloring OFF on input line 18.
+Package hyperref Info: Link coloring OFF on input line 19.
 
 (/usr/share/texlive/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2021-04-02 v2.47 Cross-referencing by name of section
@@ -690,16 +690,16 @@ Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 )
 \c@section@level=\count321
 )
-LaTeX Info: Redefining \ref on input line 18.
-LaTeX Info: Redefining \pageref on input line 18.
-LaTeX Info: Redefining \nameref on input line 18.
+LaTeX Info: Redefining \ref on input line 19.
+LaTeX Info: Redefining \pageref on input line 19.
+LaTeX Info: Redefining \nameref on input line 19.
 
 (./experiment_3_insight.out) (./experiment_3_insight.out)
 \@outlinefile=\write3
 \openout3 = `experiment_3_insight.out'.
 
 LaTeX Font Info:    Trying to load font information for OT1+ztmcm on input line
- 20.
+ 21.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1ztmcm.fd
 File: ot1ztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OT1/ztmcm.
@@ -709,35 +709,35 @@ Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 LaTeX Font Info:    Trying to load font information for OML+ztmcm on input line
- 20.
+ 21.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/omlztmcm.fd
 File: omlztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OML/ztmcm.
 )
 LaTeX Font Info:    Trying to load font information for OMS+ztmcm on input line
- 20.
+ 21.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/omsztmcm.fd
 File: omsztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OMS/ztmcm.
 )
 LaTeX Font Info:    Trying to load font information for OMX+ztmcm on input line
- 20.
+ 21.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/omxztmcm.fd
 File: omxztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OMX/ztmcm.
 )
 LaTeX Font Info:    Trying to load font information for OT1+ptm on input line 2
-0.
+1.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1ptm.fd
 File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
 )
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <12> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 20.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 21.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <9> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 20.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 21.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <7> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 20.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 21.
 
 (/usr/share/texlive/texmf-dist/tex/latex/microtype/mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
@@ -745,7 +745,7 @@ File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 (/usr/share/texlive/texmf-dist/tex/latex/microtype/mt-msb.cfg
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 )
-LaTeX Font Info:    Trying to load font information for T1+pcr on input line 22
+LaTeX Font Info:    Trying to load font information for T1+pcr on input line 23
 .
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1pcr.fd
@@ -756,13 +756,13 @@ Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10.95> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 22.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 23.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <8> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 22.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 23.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <6> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 22.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 23.
 LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 5
-1.
+2.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ts1ptm.fd
 File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
@@ -779,13 +779,13 @@ LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <5> not available
 )
 (../../../../output/compare/simulation/exp3-insights/lever_arm_argmin.tex)
 <../../../../output/compare/simulation/exp3-insights/fig_lever_sweep_light.png,
- id=55, 722.7pt x 303.534pt>
+ id=63, 722.7pt x 303.534pt>
 File: ../../../../output/compare/simulation/exp3-insights/fig_lever_sweep_light
 .png Graphic file (type png)
 <use ../../../../output/compare/simulation/exp3-insights/fig_lever_sweep_light.
 png>
 Package pdftex.def Info: ../../../../output/compare/simulation/exp3-insights/fi
-g_lever_sweep_light.png  used on input line 99.
+g_lever_sweep_light.png  used on input line 100.
 (pdftex.def)             Requested size: 455.24411pt x 191.20427pt.
 
 [2 <../../../../output/compare/simulation/exp3-insights/fig_lever_sweep_light.p
@@ -795,26 +795,26 @@ ng>] [3]
 (../../../../output/compare/simulation/exp3-insights/contrast_realistic_lever0p
 338.tex)
 <../../../../output/compare/simulation/exp3-insights/fig_turn_contrast_lever0p3
-38_light.png, id=79, 722.7pt x 332.442pt>
+38_light.png, id=87, 722.7pt x 332.442pt>
 File: ../../../../output/compare/simulation/exp3-insights/fig_turn_contrast_lev
 er0p338_light.png Graphic file (type png)
 <use ../../../../output/compare/simulation/exp3-insights/fig_turn_contrast_leve
 r0p338_light.png>
 Package pdftex.def Info: ../../../../output/compare/simulation/exp3-insights/fi
-g_turn_contrast_lever0p338_light.png  used on input line 160.
+g_turn_contrast_lever0p338_light.png  used on input line 161.
 (pdftex.def)             Requested size: 455.24411pt x 209.4142pt.
  [4] [5 <../../../../output/compare/simulation/exp3-insights/fig_turn_contrast_
 lever0p338_light.png>]
 (../../../../output/compare/simulation/exp3-insights/onset_context_extreme.tex)
 (../../../../output/compare/simulation/exp3-insights/mechanism_extreme.tex)
 <../../../../output/compare/simulation/exp3-insights/fig_onset_epoch_light.png,
- id=95, 722.7pt x 758.835pt>
+ id=103, 722.7pt x 758.835pt>
 File: ../../../../output/compare/simulation/exp3-insights/fig_onset_epoch_light
 .png Graphic file (type png)
 <use ../../../../output/compare/simulation/exp3-insights/fig_onset_epoch_light.
 png>
 Package pdftex.def Info: ../../../../output/compare/simulation/exp3-insights/fi
-g_onset_epoch_light.png  used on input line 188.
+g_onset_epoch_light.png  used on input line 189.
 (pdftex.def)             Requested size: 455.24411pt x 478.0107pt.
 
 [6] [7 <../../../../output/compare/simulation/exp3-insights/fig_onset_epoch_lig
@@ -822,244 +822,483 @@ ht.png>]
 (../../../../output/compare/simulation/exp3-insights/traffic_realistic_lever0p3
 38.tex)
 <../../../../output/compare/simulation/exp3-insights/fig_traffic_timeline_lever
-0p338_light.png, id=115, 722.7pt x 895.69632pt>
+0p338_light.png, id=123, 722.7pt x 895.69632pt>
 File: ../../../../output/compare/simulation/exp3-insights/fig_traffic_timeline_
 lever0p338_light.png Graphic file (type png)
 <use ../../../../output/compare/simulation/exp3-insights/fig_traffic_timeline_l
 ever0p338_light.png>
 Package pdftex.def Info: ../../../../output/compare/simulation/exp3-insights/fi
-g_traffic_timeline_lever0p338_light.png  used on input line 239.
+g_traffic_timeline_lever0p338_light.png  used on input line 240.
 (pdftex.def)             Requested size: 455.24411pt x 564.22334pt.
  [8] [9 <../../../../output/compare/simulation/exp3-insights/fig_traffic_timeli
 ne_lever0p338_light.png>]
 (../../../../output/compare/real/realv6-insights/gt_cleaning.tex)
 <../../../../output/compare/real/realv6-insights/fig_gt_cleaning_light.png, id=
-132, 722.7pt x 303.534pt>
+140, 722.7pt x 303.534pt>
 File: ../../../../output/compare/real/realv6-insights/fig_gt_cleaning_light.png
  Graphic file (type png)
 <use ../../../../output/compare/real/realv6-insights/fig_gt_cleaning_light.png>
 
 Package pdftex.def Info: ../../../../output/compare/real/realv6-insights/fig_gt
-_cleaning_light.png  used on input line 320.
+_cleaning_light.png  used on input line 337.
 (pdftex.def)             Requested size: 455.24411pt x 191.20427pt.
  [10]
-(../../../../output/compare/real/realv6-insights/orb_summary.tex)
-<../../../../output/compare/real/realv6_clean/dataset_realv6_000/trajectory_lig
-ht.png, id=146, 542.025pt x 469.755pt>
-File: ../../../../output/compare/real/realv6_clean/dataset_realv6_000/trajector
-y_light.png Graphic file (type png)
-<use ../../../../output/compare/real/realv6_clean/dataset_realv6_000/trajectory
-_light.png>
-Package pdftex.def Info: ../../../../output/compare/real/realv6_clean/dataset_r
-ealv6_000/trajectory_light.png  used on input line 345.
-(pdftex.def)             Requested size: 282.24911pt x 244.62523pt.
-<../../../../output/compare/real/realv6-insights/fig_all_runs_light.png, id=147
-, 794.97pt x 375.804pt>
-File: ../../../../output/compare/real/realv6-insights/fig_all_runs_light.png Gr
-aphic file (type png)
-<use ../../../../output/compare/real/realv6-insights/fig_all_runs_light.png>
-Package pdftex.def Info: ../../../../output/compare/real/realv6-insights/fig_al
-l_runs_light.png  used on input line 355.
-(pdftex.def)             Requested size: 455.24411pt x 215.214pt.
+<../../../../output/compare/real/realv6-insights/fig_paths_light.png, id=155, 9
+39.51pt x 621.522pt>
+File: ../../../../output/compare/real/realv6-insights/fig_paths_light.png Graph
+ic file (type png)
+<use ../../../../output/compare/real/realv6-insights/fig_paths_light.png>
+Package pdftex.def Info: ../../../../output/compare/real/realv6-insights/fig_pa
+ths_light.png  used on input line 358.
+(pdftex.def)             Requested size: 455.24411pt x 301.16278pt.
+
+(../../../../output/compare/real/realv6-insights/final_table.tex)
 <../../../../output/compare/real/realv6-insights/fig_orb_timeline_light.png, id
-=148, 722.7pt x 433.62pt>
+=156, 722.7pt x 737.154pt>
 File: ../../../../output/compare/real/realv6-insights/fig_orb_timeline_light.pn
 g Graphic file (type png)
 <use ../../../../output/compare/real/realv6-insights/fig_orb_timeline_light.png
 >
 Package pdftex.def Info: ../../../../output/compare/real/realv6-insights/fig_or
-b_timeline_light.png  used on input line 365.
-(pdftex.def)             Requested size: 455.24411pt x 273.14896pt.
+b_timeline_light.png  used on input line 370.
+(pdftex.def)             Requested size: 455.24411pt x 464.35324pt.
 
-(../../../../output/compare/real/realv6-insights/turning.tex)
-(../../../../output/compare/real/realv6-insights/vins_summary.tex [11 <../../..
-/../output/compare/real/realv6-insights/fig_gt_cleaning_light.png>] [12 <../../
-../../output/compare/real/realv6_clean/dataset_realv6_000/trajectory_light.png>
- <../../../../output/compare/real/realv6-insights/fig_all_runs_light.png>])
-<../../../../output/compare/real/realv6-insights/fig_vins_divergence_light.png,
- id=168, 722.7pt x 578.16pt>
-File: ../../../../output/compare/real/realv6-insights/fig_vins_divergence_light
-.png Graphic file (type png)
-<use ../../../../output/compare/real/realv6-insights/fig_vins_divergence_light.
-png>
+(../../../../output/compare/real/realv6-insights/turning.tex) [11 <../../../../
+output/compare/real/realv6-insights/fig_gt_cleaning_light.png>] [12 <../../../.
+./output/compare/real/realv6-insights/fig_paths_light.png>] [13 <../../../../ou
+tput/compare/real/realv6-insights/fig_orb_timeline_light.png>]
+(../../../../output/compare/real/realv6-insights/vins_table.tex
+Underfull \hbox (badness 10000) in paragraph at lines 4--4
+[]\T1/ptm/b/n/10 (+20) Table I.11: |\T1/ptm/m/n/10 (+20) VINS-Fusion on \T1/pcr
+/m/n/10 dataset_realv6_000\T1/ptm/m/n/10 (+20) , 3 Novem-ber 2026
+ []
+
+)
+<../../../../output/compare/real/realv6-insights/fig_vins_light.png, id=182, 72
+2.7pt x 375.804pt>
+File: ../../../../output/compare/real/realv6-insights/fig_vins_light.png Graphi
+c file (type png)
+<use ../../../../output/compare/real/realv6-insights/fig_vins_light.png>
 Package pdftex.def Info: ../../../../output/compare/real/realv6-insights/fig_vi
-ns_divergence_light.png  used on input line 400.
-(pdftex.def)             Requested size: 455.24411pt x 364.19861pt.
+ns_light.png  used on input line 426.
+(pdftex.def)             Requested size: 455.24411pt x 236.7291pt.
+ [14] (../../../../output/compare/real/realv7-insights/tilt_table.tex)
+<../../../../output/compare/real/realv7-insights/fig_paths_light.png, id=203, 1
+228.59pt x 758.835pt>
+File: ../../../../output/compare/real/realv7-insights/fig_paths_light.png Graph
+ic file (type png)
+<use ../../../../output/compare/real/realv7-insights/fig_paths_light.png>
+Package pdftex.def Info: ../../../../output/compare/real/realv7-insights/fig_pa
+ths_light.png  used on input line 471.
+(pdftex.def)             Requested size: 455.24411pt x 281.1814pt.
+<../../../../output/compare/real/realv7-insights/fig_tilt_light.png, id=204, 10
+11.78pt x 578.16pt>
+File: ../../../../output/compare/real/realv7-insights/fig_tilt_light.png Graphi
+c file (type png)
+<use ../../../../output/compare/real/realv7-insights/fig_tilt_light.png>
+Package pdftex.def Info: ../../../../output/compare/real/realv7-insights/fig_ti
+lt_light.png  used on input line 481.
+(pdftex.def)             Requested size: 455.24411pt x 260.14313pt.
 
-[13 <../../../../output/compare/real/realv6-insights/fig_orb_timeline_light.png
->] [14 <../../../../output/compare/real/realv6-insights/fig_vins_divergence_lig
-ht.png>]
-Underfull \hbox (badness 1325) in paragraph at lines 483--483
-[]|\T1/ptm/m/n/10 (+20) Yes: [][] of
+[15 <../../../../output/compare/real/realv6-insights/fig_vins_light.png>]
+[16 <../../../../output/compare/real/realv7-insights/fig_paths_light.png>]
+(../../../../output/compare/real/realv7-insights/results_table.tex)
+<../../../../output/compare/real/realv7-insights/fig_paths_lvl_light.png, id=22
+4, 1011.78pt x 758.835pt>
+File: ../../../../output/compare/real/realv7-insights/fig_paths_lvl_light.png G
+raphic file (type png)
+<use ../../../../output/compare/real/realv7-insights/fig_paths_lvl_light.png>
+Package pdftex.def Info: ../../../../output/compare/real/realv7-insights/fig_pa
+ths_lvl_light.png  used on input line 557.
+(pdftex.def)             Requested size: 455.24411pt x 341.43787pt.
+
+(../../../../output/compare/real/realv7-insights/vins_table.tex) [17] [18 <../.
+./../../output/compare/real/realv7-insights/fig_tilt_light.png> <../../../../ou
+tput/compare/real/realv7-insights/fig_paths_lvl_light.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) of for-ward
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 483--483
-\T1/ptm/m/n/10 (+20) two es-ti-ma-tors,
+Underfull \hbox (badness 3713) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) off-set is in
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 483--483
-[]|\T1/ptm/m/n/10 (+20) No, once the
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) the sweep
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 483--483
-\T1/ptm/m/n/10 (+20) lever arm is
+Underfull \hbox (badness 3138) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) at the SDF
  []
 
 
-Underfull \hbox (badness 4341) in paragraph at lines 483--483
-[]|\T1/ptm/m/n/10 (+20) contrasts of []ta-
+Underfull \hbox (badness 1888) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) value in 30
  []
 
 
-Underfull \hbox (badness 4048) in paragraph at lines 483--483
-[]|\T1/ptm/m/n/10 (+20) Not mea-sur-able
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) runs, two
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 483--483
-\T1/ptm/m/n/10 (+20) within a bag;
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) es-ti-ma-tors,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 483--483
-\T1/ptm/m/n/10 (+20) not mod-u-late
+Underfull \hbox (badness 4832) in paragraph at lines 629--629
+[]|\T1/ptm/m/n/10 (+20) contrasts of
  []
 
 
-Underfull \hbox (badness 1152) in paragraph at lines 483--483
-\T1/ptm/m/n/10 (+20) track-ing loss or
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+[]\T1/ptm/m/n/10 (+20) ta-bles I.3[]
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 483--483
-\T1/ptm/m/n/10 (+20) un-fil-tered drift;
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) and []I.4[];
  []
 
 
-Underfull \hbox (badness 4699) in paragraph at lines 483--483
-\T1/ptm/m/n/10 (+20) the class mask
+Underfull \hbox (badness 1796) in paragraph at lines 629--629
+[]|\T1/ptm/m/n/10 (+20) Not mea-sur-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 483--483
-[]|[]\T1/ptm/m/n/10 (+20) table I.7[], []fig-
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) area does
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 483--483
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+[]|\T1/ptm/m/n/10 (+20) No ef-fect
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) tered drift;
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) the class
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) mask loses
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) gains drift
+ []
+
+
+Underfull \hbox (badness 1642) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) while traf-fic
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) is in view
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
 []|\T1/ptm/m/n/10 (+20) ORB-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 483--483
-\T1/ptm/m/n/10 (+20) SLAM3+YOLO
+Overfull \hbox (11.84245pt too wide) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (-20) SLAM3+YOLO
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 483--483
-\T1/ptm/m/n/10 (+20) yes (col-lapse
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) to one
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 483--483
-\T1/ptm/m/n/10 (+20) to one fifth);
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 483--483
+Underfull \hbox (badness 1226) in paragraph at lines 629--629
 []|\T1/ptm/m/n/10 (+20) On the first
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 483--483
-\T1/ptm/m/n/10 (+20) straight, not
+Underfull \hbox (badness 1874) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) turn-ing; ob-
  []
 
 
-Underfull \hbox (badness 1622) in paragraph at lines 483--483
-\T1/ptm/m/n/10 (+20) turn-ing; ob-jects
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+[]|\T1/ptm/m/n/10 (+20) Tracks the
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 483--483
-[][] \T1/ptm/m/n/10 (+20) route;
+Underfull \hbox (badness 3919) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) whole [][]
  []
 
 
-Underfull \hbox (badness 2809) in paragraph at lines 483--483
-\T1/ptm/m/n/10 (+20) ing ef-fect; [][]
+Underfull \hbox (badness 2376) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) route in all
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 483--483
-\T1/ptm/m/n/10 (+20) scale short-fall
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) four con-
  []
 
 
-Underfull \hbox (badness 1721) in paragraph at lines 483--483
-\T1/ptm/m/n/10 (+20) rates from [][];
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) fig-u-ra-tions;
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 483--483
-\T1/ptm/m/n/10 (+20) ac-celerom-e-ter
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) pro-vi-sional
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 483--483
-\T1/ptm/m/n/10 (+20) bias frozen at
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) ATE []
  []
 
 
-Underfull \hbox (badness 1418) in paragraph at lines 483--483
-\T1/ptm/m/n/10 (+20) the [] gap be-
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) and [][]
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 483--483
-\T1/ptm/m/n/10 (+20) grav-ity norm
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) with the
  []
 
 
-Underfull \hbox (badness 2318) in paragraph at lines 483--483
-\T1/ptm/m/n/10 (+20) and the IMU's;
+Underfull \hbox (badness 1082) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) GPU ex-trac-
  []
 
 
-Underfull \hbox (badness 6204) in paragraph at lines 483--483
-[]|[]\T1/ptm/m/n/10 (+20) table I.11[], []fig-
+Underfull \hbox (badness 6047) in paragraph at lines 629--629
+[][] \T1/ptm/m/n/10 (+20) with
  []
 
 
-Underfull \hbox (badness 1400) in paragraph at lines 483--483
-\T1/ptm/m/n/10 (+20) ple set the raw
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) the CPU
  []
 
 
-Underfull \hbox (badness 2837) in paragraph at lines 483--483
-\T1/ptm/m/n/10 (+20) ATE to [][];
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) ex-trac-tor
  []
 
 
-Underfull \hbox (badness 6300) in paragraph at lines 483--483
-\T1/ptm/m/n/10 (+20) truth at [][]
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) (two thirds
  []
 
-[15] [16] (./experiment_3_insight.aux)
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) of frames
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) dropped);
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) no turn-ing
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) ef-fect; []--
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+[][][] \T1/ptm/m/n/10 (+20) scale
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) short-fall
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+[]|[]\T1/ptm/m/n/10 (+20) table I.9[]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+[]|\T1/ptm/m/n/10 (+20) Valid truth;
+ []
+
+
+Underfull \hbox (badness 5563) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) of 12 runs
+ []
+
+
+Underfull \hbox (badness 2376) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) is the IMU
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) ini-tial-i-sa-
+ []
+
+
+Underfull \hbox (badness 5490) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) tion thrown
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) up-stream
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) low-motion
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) re-set and
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) starved in
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) re-paired
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) with-out the
+ []
+
+
+Underfull \hbox (badness 6220) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) truth, ORB
+ []
+
+
+Underfull \hbox (badness 1048) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) scores 0.25--
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) (001), 0.47
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) run), with
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) two losses
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+[]|[]\T1/ptm/m/n/10 (+20) table I.13[]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) and []fig-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+[]|\T1/ptm/m/n/10 (+20) No valid
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) run: 217
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/pcr/m/n/10 imu_gap
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) re-sets, [][]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) of poses;
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+[]|[]\T1/ptm/m/n/10 (+20) table I.11[],
+ []
+
+
+Underfull \hbox (badness 4120) in paragraph at lines 629--629
+[]|\T1/ptm/m/n/10 (+20) One tracker
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) sam-ple set
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) to [][];
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+\T1/ptm/m/n/10 (+20) truth at
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 629--629
+[][] \T1/ptm/m/n/10 (+20) fails
+ []
+
+
+LaTeX Warning: Float too large for page by 531.40144pt on input line 630.
+
+[19] [20] (./experiment_3_insight.aux)
 Package rerunfilecheck Info: File `experiment_3_insight.out' has not changed.
-(rerunfilecheck)             Checksum: 9F8F42BE29766D5E5662D5FFBB725587;3938.
+(rerunfilecheck)             Checksum: 5EA4FB26204E93FED624CAD052C0ECD1;4827.
  ) 
 Here is how much of TeX's memory you used:
- 20777 strings out of 480171
- 399294 string characters out of 5894489
+ 20886 strings out of 480171
+ 401808 string characters out of 5894489
  708752 words of memory out of 5000000
- 37918 multiletter control sequences out of 15000+600000
- 563043 words of font info for 415 fonts, out of 8000000 for 9000
+ 37957 multiletter control sequences out of 15000+600000
+ 568399 words of font info for 449 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
- 76i,14n,112p,1200b,905s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 76i,14n,115p,1228b,905s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
 e/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texm
 f-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/
@@ -1069,10 +1308,10 @@ rier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/symbol/usyr.pfb>
 </usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/tex
 live/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist
 /fonts/type1/urw/times/utmri8a.pfb>
-Output written on experiment_3_insight.pdf (16 pages, 1602669 bytes).
+Output written on experiment_3_insight.pdf (20 pages, 2536182 bytes).
 PDF statistics:
- 289 PDF objects out of 1000 (max. 8388607)
- 208 compressed objects within 3 object streams
- 56 named destinations out of 1000 (max. 500000)
- 102510 words of extra memory for PDF output out of 106986 (max. 10000000)
+ 349 PDF objects out of 1000 (max. 8388607)
+ 253 compressed objects within 3 object streams
+ 68 named destinations out of 1000 (max. 500000)
+ 107144 words of extra memory for PDF output out of 128383 (max. 10000000)
 

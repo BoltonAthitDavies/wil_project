@@ -748,3 +748,5 @@ observations* rather than this frame's inlier flag.
 dataset_allsensor_realistic_003/motion_20261014_0{2,3,4}` and
 `output/output_vins_yolo/.../motion_20261014_0{1,4}`, each with
 `motion_votes.csv` and `calibration.txt`.
+
+> **2026-11-03:** every bag was rescued from the flash drive to `/media/ambushee/New Volume/wil_rescue/` (rsync, `rescue.log` there); paths to `/media/ambushee/32E4AAB1E4AA772F/` in this record mean that root now.

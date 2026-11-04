@@ -446,23 +446,23 @@ mean anything and is not a result.
             initialisation that the map reset threw away}
 \label{sec:realv7-tilt}
 
-The three \repo{dataset_realv7} recordings of 3 November 2026 (routes of
-\SI{21.6}{}, \SI{31.7}{} and \SI{23.4}{\metre} over \SI{97}{}, \SI{134}{} and
-\SI{104}{\second}, a rounded rectangle, a figure-of-eight and a rounded
-rectangle) are the first whose tracker export passes every validity rule of the
-scorer: \SIrange{5}{6}{\hertz}, no gap above \SI{1}{\second}, no step. On them
-the same ORB-SLAM3 setting that tracked realv6 produces an estimate that lies in
-a tilted plane in nine of twelve runs, and the tilt, not the configuration,
-decides the score. \Cref{tab:realv7-tilt,tab:realv7-vins} and
-\cref{fig:realv7-paths,fig:realv7-tilt} carry the observation as scored on
-3 November. The tilt was read first as a wrong gravity direction and then as a
-frame fixed by the node; the per-frame diagnostics of the runs, read on
-4 November, give the mechanism (below), and a repair in the scorer that takes
-nothing from the truth makes all twelve runs scorable
-(\cref{tab:realv7-results}, \cref{fig:realv7-paths-repaired}). The 3 November
-scoring of \repo{001} and \repo{002} took the time offset from the estimate's
-own speed because their bags were not on the machine; the repaired scoring uses
-the wheel speed on all three.
+The three \repo{dataset_realv7} recordings of 3 November 2026 are the first
+whose tracker export passes every validity rule of the scorer:
+\SIrange{5}{6}{\hertz}, no gap above \SI{1}{\second}, no step. Their routes
+are \SI{21.6}{}, \SI{31.7}{} and \SI{23.4}{\metre} over \SI{97}{}, \SI{134}{}
+and \SI{104}{\second}: a rounded rectangle, a figure-of-eight and a rounded
+rectangle.
+
+On them the ORB-SLAM3 setting that tracked realv6 gives an estimate in a tilted
+plane in nine of twelve runs, and the tilt, not the configuration, decides the
+3 November score (\cref{tab:realv7-tilt,tab:realv7-vins},
+\cref{fig:realv7-paths,fig:realv7-tilt}). That scoring took the time offset of
+\repo{001} and \repo{002} from the estimate's own speed, their bags being
+absent from the machine. The tilt was read first as a wrong gravity direction
+and then as a frame fixed by the node; the per-frame diagnostics read on
+4 November give the mechanism, and a repair in the scorer that takes nothing
+from the truth makes all twelve runs scorable with wheel-speed offsets
+(\cref{tab:realv7-results}, \cref{fig:realv7-paths-repaired}).
 
 \insrealb{tilt_table.tex}
 
@@ -485,70 +485,77 @@ the wheel speed on all three.
   \label{fig:realv7-tilt}
 \end{figure}
 
-The tilt is real, and it is neither the gravity estimate nor the node: it is
-the inertial initialisation being thrown away. A plane fitted to each
-estimate's three-dimensional positions lies within \SI{10}{\degree} of
-horizontal in three of the twelve runs and at \SIrange{88}{90}{\degree} in
-five, with the rest in between (\cref{tab:realv7-tilt}); on \repo{realv7_000}
-all four configurations give a vertical plane with the route intact in it
-(\cref{fig:realv7-tilt}, top row), and the normal of that plane is in every run
-exactly one of the body axes. The node writes ORB-SLAM3's world frame as it is
-(its first-pose alignment option is off), and the per-frame diagnostics of the
-runs tell one story in nine of the twelve. The IMU initialised
-\SIrange{3}{4}{\second} after the first pose, at which moment ORB-SLAM3
-rotated its map so that gravity points down $z$ (the \SI{0.38}{\metre} step in
-the log is that rotation applied to a robot \SI{0.38}{\metre} from the origin).
-Within two seconds the upstream rule that resets a map whose consecutive
-keyframes lie closer than \SI{2}{\centi\metre} in the ten seconds after the
-initialisation fired, because the robot was still standing or crawling, and the
-map was discarded. The new map starts in the camera frame of the reset instant,
-whose vertical is the camera's $y$ axis, and in it the initialisation was
-starved: before the IMU is initialised a keyframe is inserted every
-\SI{0.25}{\second}, creating map points for one takes about
-\SI{250}{\milli\second} on this rig, and upstream attempts the initialisation
-only when its keyframe queue is empty, which it was for \SIrange{3}{9}{\percent}
-of the keyframes. The IMU re-initialised after \SIrange{37}{92}{\second} in
-seven runs and never in two (\repo{000} without loop closing and \repo{001}
-with it, both GPU front end); only \repo{001} with the CPU front end and loop
-closing re-initialised early, at \SI{6.7}{\second}, and it is the run that was
-level. Until the re-initialisation every pose is a stereo-only estimate in a
-map whose vertical is the camera's $y$ axis, which is the body-axis normal; at
-the re-initialisation the map is rotated about its origin under the
-already-written poses, which is the \SIrange{1.9}{6.8}{\metre} step of the
-late-initialising runs. The IMU noise weighting that stopped the realv6 runaway
-and the IMU-to-camera rotation, whose axis signs remain unverified, play no
-part in this. The four surviving realv6 runs of \cref{tab:realv6-final} show
-the same reset at \SIrange{3}{5}{\second}; their re-initialisation came after
-\SIrange{9}{34}{\second}, which is why they were level.
+The tilt is the inertial initialisation being thrown away, not the gravity
+estimate and not the node. A plane fitted to each estimate's positions lies
+within \SI{10}{\degree} of horizontal in three runs and at
+\SIrange{88}{90}{\degree} in five, the rest between (\cref{tab:realv7-tilt});
+on \repo{realv7_000} every configuration draws the route in a vertical plane
+(\cref{fig:realv7-tilt}, top row), and the plane normal is in every run exactly
+one body axis. The node writes ORB-SLAM3's world frame as it is, its first-pose
+alignment option being off.
+
+The per-frame diagnostics tell one story in nine runs of twelve. The IMU
+initialised \SIrange{3}{4}{\second} after the first pose, and ORB-SLAM3 rotated
+its map so that gravity points down $z$; the \SI{0.38}{\metre} step in the log
+is that rotation applied to a robot \SI{0.38}{\metre} from the origin. Within
+two seconds the upstream rule that resets a map whose consecutive keyframes lie
+closer than \SI{2}{\centi\metre} in the ten seconds after the initialisation
+fired, because the robot was still standing or crawling, and the map was
+discarded.
+
+In the new map the initialisation was starved. That map starts in the camera
+frame of the reset instant, whose vertical is the camera's $y$ axis. Before the
+IMU is initialised a keyframe is inserted every \SI{0.25}{\second}, creating
+map points for one takes about \SI{250}{\milli\second} on this rig, and
+upstream attempts the initialisation only when its keyframe queue is empty,
+which it was for \SIrange{3}{9}{\percent} of the keyframes. The IMU
+re-initialised after \SIrange{37}{92}{\second} in seven runs and never in two
+(\repo{000} without loop closing and \repo{001} with it, both GPU front end);
+only \repo{001} with the CPU front end and loop closing re-initialised early, at
+\SI{6.7}{\second}, and it is the run that was level.
+
+Until the re-initialisation every pose is a stereo-only estimate in a map whose
+vertical is the camera's $y$ axis, which is the body-axis normal. At the
+re-initialisation the map is rotated about its origin under the already-written
+poses, which is the \SIrange{1.9}{6.8}{\metre} step of the late-initialising
+runs. The IMU noise weighting that stopped the realv6 runaway and the
+IMU-to-camera rotation, whose axis signs remain unverified, play no part. The
+four surviving realv6 runs of \cref{tab:realv6-final} show the same reset at
+\SIrange{3}{5}{\second} but re-initialised after \SIrange{9}{34}{\second},
+which is why they were level.
 
 Repaired, the twelve runs score (\cref{tab:realv7-results},
-\cref{fig:realv7-paths-repaired}). The scorer gained two switches on
-4 November, neither of which looks at the truth: it rotates the poses written
-before each initialisation by the rotation it measures at the initialisation
-frame, which brings the \SI{0.38}{} and \SI{6.8}{\metre} steps to \SI{0.00}{}
-and \SI{0.03}{\metre}, and it levels each map's own fitted plane, the side
-chosen by the body's up axis, which agrees with the fitted normal within
-\SI{2}{\degree} wherever the plane is determined. On \repo{000} the four
-configurations give \SIrange{0.25}{0.27}{\metre} planar ATE over
-\SI{89}{\second}, an RPE at \SI{1}{\second} of \SI{0.05}{\metre} and path
-ratios of 1.05 to 1.09, with the IMU initialised for at most a quarter of the
-frames: stereo-only figures in all but name, and the best real-robot numbers of
-the project. On \repo{001} the four give \SIrange{0.44}{0.82}{\metre} over
-\SI{126}{\second}; the run with the IMU initialised for \SI{94}{\percent} of the
-frames scores \SI{0.44}{\metre}, no better than the run with
-\SI{3}{\percent}, and the \SI{0.56}{\metre} run (CPU front end, loop closing
-off) keeps a vertical scatter of \SI{1.02}{\metre} after levelling, two
-centimetres over the scorer's vertical-range rule, which labels it failed. On
-\repo{002} one run tracks (\SI{0.47}{\metre}, CPU front end, loop closing),
-two lose tracking inside the route (resets at \SI{49}{} and \SI{59}{\second},
+\cref{fig:realv7-paths-repaired}). The scorer's two new switches take nothing
+from the truth. One rotates the poses written before each initialisation by the
+rotation measured at the initialisation frame, which brings the \SI{0.38}{} and
+\SI{6.8}{\metre} steps to \SI{0.00}{} and \SI{0.03}{\metre}; the other levels
+each map's own fitted plane, the side chosen by the body's up axis, which agrees
+with the fitted normal within \SI{2}{\degree} wherever the plane is determined.
+
+On \repo{000} the four configurations give \SIrange{0.25}{0.27}{\metre} planar
+ATE over \SI{89}{\second}, an RPE at \SI{1}{\second} of \SI{0.05}{\metre} and
+path ratios of 1.05 to 1.09, the best real-robot numbers of the project; with
+the IMU initialised for at most a quarter of the frames they are stereo-only
+figures in all but name. On \repo{001} the four give
+\SIrange{0.44}{0.82}{\metre} over \SI{126}{\second}; the run with the IMU
+initialised for \SI{94}{\percent} of the frames scores \SI{0.44}{\metre}, no
+better than the run with \SI{3}{\percent}. The \SI{0.56}{\metre} run (CPU front
+end, loop closing off) keeps a vertical scatter of \SI{1.02}{\metre} after
+levelling, two centimetres over the scorer's vertical-range rule, which labels
+it failed.
+
+On \repo{002} one run tracks (\SI{0.47}{\metre}, CPU front end, loop closing).
+Two lose tracking inside the route (resets at \SI{49}{} and \SI{59}{\second},
 \SI{2.1}{\metre} ATE) and the fourth drifts without a reset (\SI{1.67}{\metre},
 RPE \SI{0.70}{\metre}, vertical range \SI{4.3}{\metre}, failed by the same
-rule). The init-time resets of the other runs make them \emph{partial} under
-the scorer's rules, as the table says. The remedy in the estimator is
-fork patch 15: two switches in the local mapper that attempt the initialisation
-while keyframes are queued and skip the insufficient-motion reset for stereo,
-whose scale is fixed. They are on in the real-rig configuration and untested on
-a recording; every number above was obtained without them.
+rule). The init-time resets make every other run \emph{partial} under the
+scorer's rules, as the table says.
+
+The remedy in the estimator is fork patch 15: two switches in the local mapper
+that attempt the initialisation while keyframes are queued and skip the
+insufficient-motion reset for stereo, whose scale is fixed. They are on in the
+real-rig configuration and untested on a recording; every number above was
+obtained without them.
 
 \insrealb{results_table.tex}
 

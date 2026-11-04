@@ -1,5 +1,5 @@
 # Fdb version 3
-["pdflatex"] 1793759147 "experiment_3_insight.tex" "experiment_3_insight.pdf" "experiment_3_insight" 1793759151
+["pdflatex"] 1793759656 "experiment_3_insight.tex" "experiment_3_insight.pdf" "experiment_3_insight" 1793759659
   "../../../../output/compare/real/realv6-insights/fig_gt_cleaning_light.png" 1793718249 99582 a5fe72b59addbc88667b1edbd421d7ca ""
   "../../../../output/compare/real/realv6-insights/fig_orb_timeline_light.png" 1793718250 264276 61486fa8adbf6215483770719a4ee310 ""
   "../../../../output/compare/real/realv6-insights/fig_paths_light.png" 1793718249 276145 face91c7bd247aad0e74269e4c014fdb ""
@@ -171,9 +171,9 @@
   "/usr/share/texmf/web2c/texmf.cnf" 1644012257 39432 7155514e09a3d69036fac785183a21c2 ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1789525526 165012 f177baa1c39a3ebd62c3096a43521a0d ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1789525528 1435854 f4f5f67aa9d1ba2a312ed1460dac1994 ""
-  "experiment_3_insight.aux" 1793759151 17713 03efb5ec92037940d634bdc394844dd2 "pdflatex"
-  "experiment_3_insight.out" 1793759151 4827 5ea4fb26204e93fed624cad052c0ecd1 "pdflatex"
-  "experiment_3_insight.tex" 1793759147 38346 7de9aaa024deda6f14447cb0b6410532 ""
+  "experiment_3_insight.aux" 1793759659 17713 03efb5ec92037940d634bdc394844dd2 "pdflatex"
+  "experiment_3_insight.out" 1793759659 4827 5ea4fb26204e93fed624cad052c0ecd1 "pdflatex"
+  "experiment_3_insight.tex" 1793759656 38072 40deced32a4f07f2c8c7525a314b2204 ""
   (generated)
   "experiment_3_insight.aux"
   "experiment_3_insight.log"

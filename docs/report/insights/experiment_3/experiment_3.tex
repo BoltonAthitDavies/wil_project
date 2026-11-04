@@ -754,32 +754,36 @@ configurations and one VINS-Fusion run. As scored on 3 November
 fitted to the ORB-SLAM3 estimate lies within \SI{10}{\degree} of horizontal in
 three runs of twelve and at \SIrange{88}{90}{\degree} in five, every
 \repo{000} run among them, with the plane normal exactly a body axis in every
-run. The per-frame diagnostics of the runs give the mechanism: the IMU
-initialised \SIrange{3}{4}{\second} after the first pose, the upstream rule
-that resets a map with less than \SI{2}{\centi\metre} between consecutive
-keyframes in the first ten seconds after the initialisation then discarded it
-(the robot was still at rest), and in the new map, which starts in the camera
-frame of the reset instant, the re-initialisation was starved because upstream
-attempts it only with an empty keyframe queue, which a keyframe every
-\SI{0.25}{\second} and \SI{250}{\milli\second} of map-point creation per
-keyframe never allowed: the IMU re-initialised after \SIrange{37}{92}{\second}
-in seven runs, never in two, and early (\SI{6.7}{\second}) in the one run that
-was level. Until then the estimate is stereo-only in a map whose vertical is the
-camera's $y$ axis, and the late re-initialisation rotates the map under the
-already-written poses (the \SIrange{1.9}{6.8}{\metre} steps). The scorer
-repairs both without the truth (the pre-initialisation poses rotated by the
-rotation measured at the initialisation frame, each map's fitted plane
-levelled), and with the bags now on the dataset drive the time offsets come
-from the wheel speed on all three recordings
-(\cref{tab:realv7-results}, \cref{fig:realv7-paths-repaired}): \repo{000}
+run.
+
+The per-frame diagnostics give the mechanism. The IMU initialised
+\SIrange{3}{4}{\second} after the first pose. The upstream rule that resets a
+map with less than \SI{2}{\centi\metre} between consecutive keyframes in the
+first ten seconds after the initialisation then discarded it, the robot being
+still at rest. The new map starts in the camera frame of the reset instant, and
+in it the re-initialisation was starved: upstream attempts it only with an
+empty keyframe queue, which a keyframe every \SI{0.25}{\second} and
+\SI{250}{\milli\second} of map-point creation per keyframe never allowed. The
+IMU re-initialised after \SIrange{37}{92}{\second} in seven runs, never in two,
+and early (\SI{6.7}{\second}) in the one run that was level. Until then the
+estimate is stereo-only in a map whose vertical is the camera's $y$ axis, and
+the late re-initialisation rotates the map under the already-written poses (the
+\SIrange{1.9}{6.8}{\metre} steps).
+
+The scorer repairs both without the truth: the pre-initialisation poses are
+rotated by the rotation measured at the initialisation frame, and each map's
+fitted plane is levelled. With the bags on the dataset drive the time offsets
+come from the wheel speed on all three recordings (\cref{tab:realv7-results},
+\cref{fig:realv7-paths-repaired}). \repo{000} scores
 \SIrange{0.25}{0.27}{\metre} in all four configurations over \SI{89}{\second}
-(RPE at \SI{1}{\second} \SI{0.05}{\metre}, IMU initialised for at most a
-quarter of the frames); \repo{001} \SIrange{0.44}{0.82}{\metre} over
-\SI{126}{\second}, one of them failing the scorer's one-metre vertical-range
-rule by two centimetres; \repo{002} \SI{0.47}{\metre} for the CPU front end
-with loop closing, two runs with a tracking loss inside the route and one that
-drifts (vertical range \SI{4.3}{\metre}, failed). The init-time resets leave
-every other run \emph{partial} under the scorer's rules.
+(RPE at \SI{1}{\second} \SI{0.05}{\metre}), with the IMU initialised for at
+most a quarter of the frames. \repo{001} scores \SIrange{0.44}{0.82}{\metre}
+over \SI{126}{\second}, one run failing the scorer's one-metre vertical-range
+rule by two centimetres. \repo{002} scores \SI{0.47}{\metre} for the CPU front
+end with loop closing; two runs lose tracking inside the route and one drifts
+(vertical range \SI{4.3}{\metre}, failed). The init-time resets leave every
+other run \emph{partial} under the scorer's rules.
+
 The fork's patch 15 adds two switches that attempt the initialisation with a
 queued backlog and skip the low-motion reset for stereo; they are on in the
 real-rig configuration and not yet exercised on a recording. VINS-Fusion

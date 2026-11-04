@@ -167,6 +167,17 @@ a requested dataset with another run. `script/eval_real_gt.py` takes the root
 through `--dataset-root`; `--bag-manifest` scores a run whose bag is offline from
 a saved manifest, labelled as such.
 
+ORB-SLAM3 stereo-inertial runs recorded before fork patch 15 (every realv6 and
+realv7 run, 3 November 2026) are scored with `--join-imu-init --level-plane`:
+the live log keeps the poses written before each IMU initialisation in the
+un-rotated camera frame, and in 9 of 12 realv7 runs the initialisation was
+discarded by the upstream low-motion reset and starved afterwards, so most of
+the run is stereo-only in a tilted frame. Both repairs are GT-free and recorded
+in the manifest; quote the IMU-initialised share (`imu_init_fraction`) and the
+reset times beside every such result. Runs made with the patch-15 switches on
+(`LocalMapping.initWithBacklog: 1`, `LocalMapping.resetOnLowMotion: 0`) are
+scored first without the repairs, to show the switches work.
+
 ### 3.3 World naming
 
 - `aws-robomaker-small-warehouse-world/worlds/small_warehouse` is the original

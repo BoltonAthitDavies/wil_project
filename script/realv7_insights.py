@@ -15,7 +15,8 @@ measures how far the gravity direction found at initialisation is from vertical.
 This needs no time alignment and no ground truth.
 
 Writes to output/compare/real/realv7-insights/:
-  tilt_table.tex        every ORB run: plane tilt, rms off-plane, z range, ATE, path ratio, resets, offset source
+  tilt_table.tex        every ORB run as written in the live log: plane tilt, rms off-plane, z range, resets
+                        (the 3 Nov wrong-frame scores were dropped from it on 4 Nov; scores live in results_table.tex)
   results_table.tex     (--levelled, 4 Nov) every ORB run after the frame repair: IMU-initialised share,
                         reset times, raw tilt, ATE, median, RPE, path ratio, status (from realv7_<ds>_<key>_lvl)
   fig_paths_lvl_light.png  (--levelled) the repaired ORB estimates against the truth
@@ -81,26 +82,30 @@ def main():
             rdir = ROOT / "output" / "output_orb" / "real" / ds / run
             ang, thick, zr, c, vt = tilt(rdir / "vio.csv")
             m = metrics(d, "ORB"); ta = manifest(d)["time_alignment"]
+            # reset times from the repaired scoring's event log (performance.csv), which exists for every run;
+            # run_summary.csv is missing where the node was not shut down gracefully (three realv7_000 runs)
+            dl = R / f"realv7_{ds[-3:]}_{key}_lvl" / ds
+            if (dl / "metrics.json").exists():
+                rt = [t for t in (metrics(dl, "ORB").get("reset_times_s") or []) if t >= 0]
+                rtxt = ", ".join(f"{t:.0f} s" for t in rt) if rt else "none"
+            else:
+                rtxt = m.get("resets", "---")
             rows.append(dict(ds=ds, key=key, label=label, tilt=ang, thick=thick, zr=zr, ate=m["ate_rmse"], med=m["ate_median"],
-                             ratio=m["path_ratio"], resets=m.get("resets", "---"), dropped=m.get("frames_dropped", "---"),
+                             ratio=m["path_ratio"], resets=rtxt, dropped=m.get("frames_dropped", "---"),
                              src=("wheel" if ta.get("source", "").startswith("wheel") else "estimator"), ok=ta.get("ok"), c=c, vt=vt,
                              status=m.get("status", "")))
     # ---- tilt table
     L = [r"\begin{table}[htbp]", r"\centering", r"\scriptsize\setlength{\tabcolsep}{3pt}",
-         r"\caption[Realv7: every ORB-SLAM3 run, tilt of the estimate and score.]{ORB-SLAM3 on the three "
-         r"\repo{dataset_realv7} recordings, 3 November 2026 afternoon, same setting as the realv6 runs. ``Tilt'' is "
-         r"the angle between the plane fitted to the estimate's 3-D positions and the horizontal; ``off-plane'' the rms "
-         r"distance of the positions from that plane. A floor robot's estimate should be horizontal: a tilt near "
-         r"\SI{90}{\degree} means the poses were written while the map was not yet gravity-aligned (IMU not "
-         r"initialised: the vertical is then the camera's $y$ axis), see \cref{tab:realv7-results} for the "
-         r"initialisation history and the repaired scores. ATE is planar "
-         r"after SE(2) alignment against the raw tracker export (which passes the validity rules on all three "
-         r"recordings); ``offset'' says how the time offset was found: \emph{wheel} = wheel-speed cross-correlation "
-         r"with the bag present (realv7\_000), \emph{estimator} = the estimate's own speed with the bag absent "
-         r"(uncertain; superseded by the wheel offsets of \cref{tab:realv7-results}). Lever arm unmeasured (zero).}",
+         r"\caption[Realv7: the plane of every ORB-SLAM3 estimate as written in the live log.]{ORB-SLAM3 on the three "
+         r"\repo{dataset_realv7} recordings, 3 November 2026 afternoon, same setting as the realv6 runs: the plane of "
+         r"each estimate as written in the live log, before any repair. ``Tilt'' is the angle between the plane fitted "
+         r"to the estimate's 3-D positions and the horizontal; ``off-plane'' the rms distance of the positions from "
+         r"that plane. A floor robot's estimate should be horizontal: a tilt near \SI{90}{\degree} means the poses "
+         r"were written while the map was not gravity-aligned (IMU not initialised; the vertical is then the camera's "
+         r"$y$ axis). The scores are in \cref{tab:realv7-results}, after the repair.}",
          r"\label{tab:realv7-tilt}",
-         r"\begin{tabular}{llrrrrrrrl}", r"\toprule",
-         r"Recording & Run & tilt [\si{\degree}] & off-plane [m] & z range [m] & ATE [m] & median [m] & path ratio & resets & offset \\", r"\midrule"]
+         r"\begin{tabular}{llrrrr}", r"\toprule",
+         r"Recording & Run & tilt [\si{\degree}] & off-plane [m] & z range [m] & resets \\", r"\midrule"]
     last = None
     for r in rows:
         if last and r["ds"] != last:
@@ -109,7 +114,7 @@ def main():
         flag = "" if r["tilt"] <= TILT_OK_DEG else r"\textcolor{flagred}{"
         end = "" if r["tilt"] <= TILT_OK_DEG else "}"
         L.append(f"\\repo{{{r['ds'][8:]}}} & {r['label']} & {flag}{r['tilt']:.1f}{end} & {r['thick']:.2f} & {r['zr']:.2f} & "
-                 f"{r['ate']:.2f} & {r['med']:.2f} & {r['ratio']:.2f} & {r['resets']} & {r['src']} \\\\")
+                 f"{r['resets']} \\\\")
     L += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
     (OUT / "tilt_table.tex").write_text("\n".join(L) + "\n")
 

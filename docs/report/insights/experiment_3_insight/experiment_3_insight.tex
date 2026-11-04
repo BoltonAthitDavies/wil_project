@@ -453,35 +453,26 @@ are \SI{21.6}{}, \SI{31.7}{} and \SI{23.4}{\metre} over \SI{97}{}, \SI{134}{}
 and \SI{104}{\second}: a rounded rectangle, a figure-of-eight and a rounded
 rectangle.
 
-On them the ORB-SLAM3 setting that tracked realv6 gives an estimate in a tilted
-plane in nine of twelve runs, and the tilt, not the configuration, decides the
-3 November score (\cref{tab:realv7-tilt,tab:realv7-vins},
-\cref{fig:realv7-paths,fig:realv7-tilt}). That scoring took the time offset of
-\repo{001} and \repo{002} from the estimate's own speed, their bags being
-absent from the machine. The tilt was read first as a wrong gravity direction
-and then as a frame fixed by the node; the per-frame diagnostics read on
-4 November give the mechanism, and a repair in the scorer that takes nothing
-from the truth makes all twelve runs scorable with wheel-speed offsets
-(\cref{tab:realv7-results}, \cref{fig:realv7-paths-repaired}).
+On them the ORB-SLAM3 setting that tracked realv6 writes an estimate that lies
+in a tilted plane in nine of twelve runs (\cref{tab:realv7-tilt},
+\cref{fig:realv7-tilt}); scored as written, those nine runs are not scorable.
+The tilt was read first as a wrong gravity direction and then as a frame fixed
+by the node; the per-frame diagnostics read on 4 November give the mechanism,
+and a repair in the scorer that takes nothing from the truth makes all twelve
+runs scorable, with the time offsets from the wheel speed now that the bags are
+on the dataset drive (\cref{tab:realv7-results},
+\cref{fig:realv7-paths-repaired}).
 
 \insrealb{tilt_table.tex}
 
 \begin{figure}[p]
   \centering
-  \includegraphics[width=\textwidth]{\realdir/realv7-insights/fig_paths_light.png}
-  \caption{Every \repo{realv7} run against its tracker truth after rigid SE(2)
-  alignment, one panel per run: three recordings (rows) by four ORB-SLAM3
-  configurations and VINS-Fusion (columns). Where the estimate's plane is
-  vertical, the planar alignment sees the route collapsed onto a line.}
-  \label{fig:realv7-paths}
-\end{figure}
-
-\begin{figure}[p]
-  \centering
   \includegraphics[width=\textwidth]{\realdir/realv7-insights/fig_tilt_light.png}
-  \caption{The same twelve ORB-SLAM3 estimates seen from the side (estimate $x$
-  against $z$, centred). A floor robot's path should be a flat line; on
-  \repo{realv7_000} every run is the route drawn in a vertical plane.}
+  \caption{The twelve \repo{realv7} ORB-SLAM3 estimates as written in the live
+  log, seen from the side (estimate $x$ against $z$, centred). A floor robot's
+  path should be a flat line; on \repo{realv7_000} every run is the route drawn
+  in a vertical plane. The repaired estimates are in
+  \cref{fig:realv7-paths-repaired}.}
   \label{fig:realv7-tilt}
 \end{figure}
 

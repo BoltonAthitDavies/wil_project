@@ -749,12 +749,12 @@ configuration still fixes a gravity norm of \num{9.2642} against the
 \SI{31.7}{} and \SI{23.4}{\metre} over \SI{97}{}, \SI{134}{} and
 \SI{104}{\second}) have tracker exports that pass every validity rule
 (\SIrange{5}{6}{\hertz}, no gap, no step). Each carries the same four ORB-SLAM3
-configurations and one VINS-Fusion run. As scored on 3 November
-(\cref{tab:realv7-tilt}, \cref{fig:realv7-paths,fig:realv7-tilt}), a plane
-fitted to the ORB-SLAM3 estimate lies within \SI{10}{\degree} of horizontal in
-three runs of twelve and at \SIrange{88}{90}{\degree} in five, every
-\repo{000} run among them, with the plane normal exactly a body axis in every
-run.
+configurations and one VINS-Fusion run. As written in the live log
+(\cref{tab:realv7-tilt}, \cref{fig:realv7-tilt}), a plane fitted to the
+ORB-SLAM3 estimate lies within \SI{10}{\degree} of horizontal in three runs of
+twelve and at \SIrange{88}{90}{\degree} in five, every \repo{000} run among
+them, with the plane normal exactly a body axis in every run; scored as
+written, those nine runs are not scorable.
 
 The per-frame diagnostics give the mechanism. The IMU initialised
 \SIrange{3}{4}{\second} after the first pose. The upstream rule that resets a
@@ -795,17 +795,10 @@ gravity norm has since been set to the measured \SI{9.886}{\metre\per\second\squ
 
 \begin{figure}[p]
   \centering
-  \includegraphics[width=\textwidth]{../../../../output/compare/real/realv7-insights/fig_paths_light.png}
-  \caption{Every \repo{realv7} run against its tracker truth after rigid SE(2)
-  alignment: three recordings by four ORB-SLAM3 configurations and VINS-Fusion.}
-  \label{fig:realv7-paths}
-\end{figure}
-
-\begin{figure}[p]
-  \centering
   \includegraphics[width=\textwidth]{../../../../output/compare/real/realv7-insights/fig_tilt_light.png}
-  \caption{The twelve \repo{realv7} ORB-SLAM3 estimates seen from the side
-  ($x$ against $z$, centred); a floor robot's path should be a flat line.}
+  \caption{The twelve \repo{realv7} ORB-SLAM3 estimates as written in the live
+  log, seen from the side ($x$ against $z$, centred); a floor robot's path should
+  be a flat line. The repaired estimates are in \cref{fig:realv7-paths-repaired}.}
   \label{fig:realv7-tilt}
 \end{figure}
 

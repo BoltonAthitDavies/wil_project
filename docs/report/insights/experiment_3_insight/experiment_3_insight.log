@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  4 NOV 2026 09:34
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  4 NOV 2026 09:38
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -883,420 +883,411 @@ Package pdftex.def Info: ../../../../output/compare/real/realv6-insights/fig_vi
 ns_light.png  used on input line 426.
 (pdftex.def)             Requested size: 455.24411pt x 236.7291pt.
  [14] (../../../../output/compare/real/realv7-insights/tilt_table.tex)
-<../../../../output/compare/real/realv7-insights/fig_paths_light.png, id=203, 1
-228.59pt x 758.835pt>
-File: ../../../../output/compare/real/realv7-insights/fig_paths_light.png Graph
-ic file (type png)
-<use ../../../../output/compare/real/realv7-insights/fig_paths_light.png>
-Package pdftex.def Info: ../../../../output/compare/real/realv7-insights/fig_pa
-ths_light.png  used on input line 471.
-(pdftex.def)             Requested size: 455.24411pt x 281.1814pt.
-<../../../../output/compare/real/realv7-insights/fig_tilt_light.png, id=204, 10
+<../../../../output/compare/real/realv7-insights/fig_tilt_light.png, id=197, 10
 11.78pt x 578.16pt>
 File: ../../../../output/compare/real/realv7-insights/fig_tilt_light.png Graphi
 c file (type png)
 <use ../../../../output/compare/real/realv7-insights/fig_tilt_light.png>
 Package pdftex.def Info: ../../../../output/compare/real/realv7-insights/fig_ti
-lt_light.png  used on input line 481.
+lt_light.png  used on input line 470.
 (pdftex.def)             Requested size: 455.24411pt x 260.14313pt.
 
 [15 <../../../../output/compare/real/realv6-insights/fig_vins_light.png>]
-[16 <../../../../output/compare/real/realv7-insights/fig_paths_light.png>]
 (../../../../output/compare/real/realv7-insights/results_table.tex)
-<../../../../output/compare/real/realv7-insights/fig_paths_lvl_light.png, id=22
+<../../../../output/compare/real/realv7-insights/fig_paths_lvl_light.png, id=21
 4, 1011.78pt x 758.835pt>
 File: ../../../../output/compare/real/realv7-insights/fig_paths_lvl_light.png G
 raphic file (type png)
 <use ../../../../output/compare/real/realv7-insights/fig_paths_lvl_light.png>
 Package pdftex.def Info: ../../../../output/compare/real/realv7-insights/fig_pa
-ths_lvl_light.png  used on input line 564.
+ths_lvl_light.png  used on input line 555.
 (pdftex.def)             Requested size: 455.24411pt x 341.43787pt.
 
-(../../../../output/compare/real/realv7-insights/vins_table.tex) [17] [18 <../.
-./../../output/compare/real/realv7-insights/fig_tilt_light.png> <../../../../ou
-tput/compare/real/realv7-insights/fig_paths_lvl_light.png>]
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+(../../../../output/compare/real/realv7-insights/vins_table.tex) [16] [17 <../.
+./../../output/compare/real/realv7-insights/fig_tilt_light.png>] [18 <../../../
+../output/compare/real/realv7-insights/fig_paths_lvl_light.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) of for-ward
  []
 
 
-Underfull \hbox (badness 3713) in paragraph at lines 636--636
+Underfull \hbox (badness 3713) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) off-set is in
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) the sweep
  []
 
 
-Underfull \hbox (badness 3138) in paragraph at lines 636--636
+Underfull \hbox (badness 3138) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) at the SDF
  []
 
 
-Underfull \hbox (badness 1888) in paragraph at lines 636--636
+Underfull \hbox (badness 1888) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) value in 30
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) runs, two
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) es-ti-ma-tors,
  []
 
 
-Underfull \hbox (badness 4832) in paragraph at lines 636--636
+Underfull \hbox (badness 4832) in paragraph at lines 627--627
 []|\T1/ptm/m/n/10 (+20) contrasts of
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 []\T1/ptm/m/n/10 (+20) ta-bles I.3[]
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) and []I.4[];
  []
 
 
-Underfull \hbox (badness 1796) in paragraph at lines 636--636
+Underfull \hbox (badness 1796) in paragraph at lines 627--627
 []|\T1/ptm/m/n/10 (+20) Not mea-sur-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) area does
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 []|\T1/ptm/m/n/10 (+20) No ef-fect
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) tered drift;
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) the class
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) mask loses
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) gains drift
  []
 
 
-Underfull \hbox (badness 1642) in paragraph at lines 636--636
+Underfull \hbox (badness 1642) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) while traf-fic
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) is in view
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 []|\T1/ptm/m/n/10 (+20) ORB-
  []
 
 
-Overfull \hbox (11.84245pt too wide) in paragraph at lines 636--636
+Overfull \hbox (11.84245pt too wide) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (-20) SLAM3+YOLO
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) to one
  []
 
 
-Underfull \hbox (badness 1226) in paragraph at lines 636--636
+Underfull \hbox (badness 1226) in paragraph at lines 627--627
 []|\T1/ptm/m/n/10 (+20) On the first
  []
 
 
-Underfull \hbox (badness 1874) in paragraph at lines 636--636
+Underfull \hbox (badness 1874) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) turn-ing; ob-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 []|\T1/ptm/m/n/10 (+20) Tracks the
  []
 
 
-Underfull \hbox (badness 3919) in paragraph at lines 636--636
+Underfull \hbox (badness 3919) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) whole [][]
  []
 
 
-Underfull \hbox (badness 2376) in paragraph at lines 636--636
+Underfull \hbox (badness 2376) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) route in all
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) four con-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) fig-u-ra-tions;
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) pro-vi-sional
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) ATE []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) and [][]
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) with the
  []
 
 
-Underfull \hbox (badness 1082) in paragraph at lines 636--636
+Underfull \hbox (badness 1082) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) GPU ex-trac-
  []
 
 
-Underfull \hbox (badness 6047) in paragraph at lines 636--636
+Underfull \hbox (badness 6047) in paragraph at lines 627--627
 [][] \T1/ptm/m/n/10 (+20) with
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) the CPU
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) ex-trac-tor
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) (two thirds
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) of frames
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) dropped);
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) no turn-ing
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) ef-fect; []--
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 [][][] \T1/ptm/m/n/10 (+20) scale
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) short-fall
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 []|[]\T1/ptm/m/n/10 (+20) table I.9[]
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 []|\T1/ptm/m/n/10 (+20) Valid truth;
  []
 
 
-Underfull \hbox (badness 5563) in paragraph at lines 636--636
+Underfull \hbox (badness 5563) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) of 12 runs
  []
 
 
-Underfull \hbox (badness 2376) in paragraph at lines 636--636
+Underfull \hbox (badness 2376) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) is the IMU
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) ini-tial-i-sa-
  []
 
 
-Underfull \hbox (badness 5490) in paragraph at lines 636--636
+Underfull \hbox (badness 5490) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) tion thrown
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) up-stream
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) low-motion
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) re-set and
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) starved in
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) re-paired
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) with-out the
  []
 
 
-Underfull \hbox (badness 6220) in paragraph at lines 636--636
+Underfull \hbox (badness 6220) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) truth, ORB
  []
 
 
-Underfull \hbox (badness 1048) in paragraph at lines 636--636
+Underfull \hbox (badness 1048) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) scores 0.25--
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) (001), 0.47
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) run), with
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) two losses
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 []|[]\T1/ptm/m/n/10 (+20) table I.13[]
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) and []fig-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 []|\T1/ptm/m/n/10 (+20) No valid
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) run: 217
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/pcr/m/n/10 imu_gap
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) re-sets, [][]
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) of poses;
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 []|[]\T1/ptm/m/n/10 (+20) table I.11[],
  []
 
 
-Underfull \hbox (badness 4120) in paragraph at lines 636--636
+Underfull \hbox (badness 4120) in paragraph at lines 627--627
 []|\T1/ptm/m/n/10 (+20) One tracker
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) sam-ple set
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) to [][];
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 \T1/ptm/m/n/10 (+20) truth at
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--636
+Underfull \hbox (badness 10000) in paragraph at lines 627--627
 [][] \T1/ptm/m/n/10 (+20) fails
  []
 
 
-LaTeX Warning: Float too large for page by 531.40144pt on input line 637.
+LaTeX Warning: Float too large for page by 531.40144pt on input line 628.
 
 [19] [20] (./experiment_3_insight.aux)
 Package rerunfilecheck Info: File `experiment_3_insight.out' has not changed.
 (rerunfilecheck)             Checksum: 5EA4FB26204E93FED624CAD052C0ECD1;4827.
  ) 
 Here is how much of TeX's memory you used:
- 20888 strings out of 480171
- 401825 string characters out of 5894489
+ 20870 strings out of 480171
+ 401243 string characters out of 5894489
  708752 words of memory out of 5000000
- 37957 multiletter control sequences out of 15000+600000
- 568508 words of font info for 450 fonts, out of 8000000 for 9000
+ 37949 multiletter control sequences out of 15000+600000
+ 568023 words of font info for 444 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
  76i,14n,115p,1228b,905s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
@@ -1308,10 +1299,10 @@ rier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/symbol/usyr.pfb>
 </usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/tex
 live/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist
 /fonts/type1/urw/times/utmri8a.pfb>
-Output written on experiment_3_insight.pdf (20 pages, 2535957 bytes).
+Output written on experiment_3_insight.pdf (20 pages, 2198565 bytes).
 PDF statistics:
- 349 PDF objects out of 1000 (max. 8388607)
- 253 compressed objects within 3 object streams
- 68 named destinations out of 1000 (max. 500000)
- 107144 words of extra memory for PDF output out of 128383 (max. 10000000)
+ 344 PDF objects out of 1000 (max. 8388607)
+ 250 compressed objects within 3 object streams
+ 67 named destinations out of 1000 (max. 500000)
+ 107139 words of extra memory for PDF output out of 128383 (max. 10000000)
 

@@ -1273,12 +1273,6 @@ INPUT ../../../../output/compare/real/realv7-insights/tilt_table.tex
 INPUT ../../../../output/compare/real/realv7-insights/tilt_table.tex
 INPUT ../../../../output/compare/real/realv7-insights/tilt_table.tex
 INPUT ../../../../output/compare/real/realv7-insights/tilt_table.tex
-INPUT /usr/share/texlive/texmf-dist/fonts/tfm/adobe/times/ptmri8t.tfm
-INPUT ../../../../output/compare/real/realv7-insights/fig_paths_light.png
-INPUT ../../../../output/compare/real/realv7-insights/fig_paths_light.png
-INPUT ../../../../output/compare/real/realv7-insights/fig_paths_light.png
-INPUT ../../../../output/compare/real/realv7-insights/fig_paths_light.png
-INPUT ../../../../output/compare/real/realv7-insights/fig_paths_light.png
 INPUT ../../../../output/compare/real/realv7-insights/fig_tilt_light.png
 INPUT ../../../../output/compare/real/realv7-insights/fig_tilt_light.png
 INPUT ../../../../output/compare/real/realv7-insights/fig_tilt_light.png
@@ -1297,7 +1291,6 @@ INPUT ../../../../output/compare/real/realv7-insights/vins_table.tex
 INPUT ../../../../output/compare/real/realv7-insights/vins_table.tex
 INPUT ../../../../output/compare/real/realv7-insights/vins_table.tex
 INPUT ../../../../output/compare/real/realv7-insights/vins_table.tex
-INPUT /usr/share/texlive/texmf-dist/fonts/vf/adobe/times/ptmri8t.vf
 INPUT experiment_3.aux
 INPUT ./experiment_3.out
 INPUT ./experiment_3.out

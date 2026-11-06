@@ -75,7 +75,7 @@ def generate_launch_description():
                               description='true for bag replay, false on the robot'),
         DeclareLaunchArgument('bridge_dry_run', default_value='true',
                               description='false only on the robot after the chassis values are verified'),
-        DeclareLaunchArgument('wheel_base', default_value='0.42'),
+        DeclareLaunchArgument('wheel_base', default_value='0.46'),
         DeclareLaunchArgument('max_speed', default_value='0.6'),
         DeclareLaunchArgument('rtabmap_delay', default_value='5.0'),
         DeclareLaunchArgument('rviz', default_value='true'),

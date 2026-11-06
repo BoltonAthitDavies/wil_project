@@ -1,0 +1,27 @@
+[ERROR] [1793934745.882194728] []: error parsing command line arguments: Failed to parse --x argument as float
+usage: static_transform_publisher [--x X] [--y Y] [--z Z] [--qx QX] [--qy QY] [--qz QZ] [--qw QW] [--roll ROLL] [--pitch PITCH] [--yaw YAW] --frame-id FRAME_ID --child-frame-id CHILD_FRAME_ID
+
+A command line utility for manually sending a static transform.
+
+If no translation or orientation is provided, the identity transform will be published.
+
+The translation offsets are in meters.
+
+The rotation may be provided with roll, pitch, yaw euler angles in radians, or as a quaternion.
+
+required arguments:
+  --frame-id FRAME_ID parent frame
+  --child-frame-id CHILD_FRAME_ID child frame id
+
+optional arguments:
+  --x X                 x component of translation
+  --y Y                 y component of translation
+  --z Z                 z component of translation
+  --qx QX               x component of quaternion rotation
+  --qy QY               y component of quaternion rotation
+  --qz QZ               z component of quaternion rotation
+  --qw QW               w component of quaternion rotation
+  --roll ROLL           roll component Euler rotation
+  --pitch PITCH         pitch component Euler rotation
+  --yaw YAW             yaw component Euler rotation
+[ros2run]: Process exited with failure 1

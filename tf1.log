@@ -1,0 +1,5 @@
+[INFO] [1793934745.901751355] [static_transform_publisher_wZKzbNitqgoxuYhm]: Spinning until stopped - publishing transform
+translation: ('0.000000', '0.000000', '0.000000')
+rotation: ('0.000000', '0.000000', '0.000000', '1.000000')
+from 'map' to 'orbslam3_world'
+[INFO] [1793934855.681455196] [rclcpp]: signal_handler(SIGINT/SIGTERM)

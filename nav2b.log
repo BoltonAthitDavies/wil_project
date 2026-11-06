@@ -1,0 +1,140 @@
+[INFO] [launch]: All log files can be found below /home/ambushee/.ros/log/2026-11-06-10-12-26-006240-ambushee-Katana-GF66-11UG-8411
+[INFO] [launch]: Default logging verbosity is set to INFO
+[nav2_real] params     = /home/ambushee/wil_project/install/vslam_navigation/share/vslam_navigation/params/nav2_real.yaml
+[nav2_real] map        = map_server /tmp/claude-1000/-home-ambushee-wil-project/94304c62-18f1-48cb-8626-1b4d31c1145b/scratchpad/nav2test/prior.yaml
+[nav2_real] lifecycle  = started by pose_gate
+[nav2_real] bridge     = dry run
+[INFO] [map_server-1]: process started with pid [8426]
+[INFO] [controller_server-2]: process started with pid [8428]
+[INFO] [smoother_server-3]: process started with pid [8430]
+[INFO] [planner_server-4]: process started with pid [8432]
+[INFO] [behavior_server-5]: process started with pid [8434]
+[INFO] [bt_navigator-6]: process started with pid [8436]
+[INFO] [velocity_smoother-7]: process started with pid [8438]
+[INFO] [lifecycle_manager-8]: process started with pid [8440]
+[INFO] [python3-9]: process started with pid [8442]
+[INFO] [python3-10]: process started with pid [8444]
+[lifecycle_manager-8] [INFO] [1793934746.345150069] [lifecycle_manager_navigation]: Creating
+[velocity_smoother-7] [INFO] [1793934746.358271259] [velocity_smoother]: 
+[velocity_smoother-7] 	velocity_smoother lifecycle node launched. 
+[velocity_smoother-7] 	Waiting on external lifecycle transitions to activate
+[velocity_smoother-7] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[smoother_server-3] [INFO] [1793934746.358363652] [smoother_server]: 
+[smoother_server-3] 	smoother_server lifecycle node launched. 
+[smoother_server-3] 	Waiting on external lifecycle transitions to activate
+[smoother_server-3] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[planner_server-4] [INFO] [1793934746.358931031] [planner_server]: 
+[planner_server-4] 	planner_server lifecycle node launched. 
+[planner_server-4] 	Waiting on external lifecycle transitions to activate
+[planner_server-4] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[lifecycle_manager-8] [INFO] [1793934746.359774582] [lifecycle_manager_navigation]: [34m[1mCreating and initializing lifecycle service clients[0m[0m
+[controller_server-2] [INFO] [1793934746.359969834] [controller_server]: 
+[controller_server-2] 	controller_server lifecycle node launched. 
+[controller_server-2] 	Waiting on external lifecycle transitions to activate
+[controller_server-2] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[bt_navigator-6] [INFO] [1793934746.364885096] [bt_navigator]: 
+[bt_navigator-6] 	bt_navigator lifecycle node launched. 
+[bt_navigator-6] 	Waiting on external lifecycle transitions to activate
+[bt_navigator-6] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[bt_navigator-6] [INFO] [1793934746.365017607] [bt_navigator]: Creating
+[behavior_server-5] [INFO] [1793934746.365914818] [behavior_server]: 
+[behavior_server-5] 	behavior_server lifecycle node launched. 
+[behavior_server-5] 	Waiting on external lifecycle transitions to activate
+[behavior_server-5] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[smoother_server-3] [INFO] [1793934746.370445595] [smoother_server]: Creating smoother server
+[planner_server-4] [INFO] [1793934746.370452575] [planner_server]: Creating
+[controller_server-2] [INFO] [1793934746.374646926] [controller_server]: Creating controller server
+[planner_server-4] [INFO] [1793934746.383525885] [global_costmap.global_costmap]: 
+[planner_server-4] 	global_costmap lifecycle node launched. 
+[planner_server-4] 	Waiting on external lifecycle transitions to activate
+[planner_server-4] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[planner_server-4] [INFO] [1793934746.386773044] [global_costmap.global_costmap]: Creating Costmap
+[map_server-1] [INFO] [1793934746.386951010] [map_server]: 
+[map_server-1] 	map_server lifecycle node launched. 
+[map_server-1] 	Waiting on external lifecycle transitions to activate
+[map_server-1] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[controller_server-2] [INFO] [1793934746.387264044] [local_costmap.local_costmap]: 
+[controller_server-2] 	local_costmap lifecycle node launched. 
+[controller_server-2] 	Waiting on external lifecycle transitions to activate
+[controller_server-2] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[map_server-1] [INFO] [1793934746.387388584] [map_server]: Creating
+[controller_server-2] [INFO] [1793934746.388206743] [local_costmap.local_costmap]: Creating Costmap
+[python3-10] [INFO] [1793934746.745101510] [ackermann_bridge]: wheel_base 0.46 m, steering limit 20 deg, max speed 0.6 m/s (command cap 2.5 units, scale 4.3/m/s, steering sign -1 in degrees), require_localization True, dry_run True
+[python3-9] [ERROR] [1793934746.746881228] [rcl]: Failed to parse global arguments
+[python3-10] [INFO] [1793934746.781525996] [ackermann_bridge]: DRY RUN would send velocity +0.000 steering -0.000 (no cmd_vel)
+[python3-9] Traceback (most recent call last):
+[python3-9]   File "/home/ambushee/wil_project/install/vslam_navigation/lib/vslam_navigation/pose_gate.py", line 221, in <module>
+[python3-9]     main()
+[python3-9]   File "/home/ambushee/wil_project/install/vslam_navigation/lib/vslam_navigation/pose_gate.py", line 208, in main
+[python3-9]     rclpy.init()
+[python3-9]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/__init__.py", line 88, in init
+[python3-9]     context.init(args, domain_id=domain_id)
+[python3-9]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/context.py", line 72, in init
+[python3-9]     self.__context = _rclpy.Context(
+[python3-9] rclpy._rclpy_pybind11.RCLError: failed to initialize rcl: Couldn't parse parameter override rule: '-p log_file:='. Error: error not set, at ./src/rcl/arguments.c:343
+[ERROR] [python3-9]: process has died [pid 8442, exit code 1, cmd 'python3 /home/ambushee/wil_project/install/vslam_navigation/lib/vslam_navigation/pose_gate.py --ros-args -p use_sim_time:=false -p database:=/tmp/claude-1000/-home-ambushee-wil-project/94304c62-18f1-48cb-8626-1b4d31c1145b/scratchpad/nav2test/prior.db -p odom_frame:=orbslam3_world -p init_ignore_s:=8.0 -p max_step:=1.0 -p margin:=2.0 -p manage_lifecycle:=true -p log_file:='].
+[WARNING] [launch]: user interrupted with ctrl-c (SIGINT)
+[map_server-1] [INFO] [1793934850.682149440] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[map_server-1] [INFO] [1793934850.682281593] [map_server]: Running Nav2 LifecycleNode rcl preshutdown (map_server)
+[planner_server-4] [INFO] [1793934850.682139801] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[planner_server-4] [INFO] [1793934850.682280613] [planner_server]: Running Nav2 LifecycleNode rcl preshutdown (planner_server)
+[planner_server-4] [INFO] [1793934850.682348474] [planner_server]: Destroying bond (planner_server) to lifecycle manager.
+[smoother_server-3] [INFO] [1793934850.682141125] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[smoother_server-3] [INFO] [1793934850.682280572] [smoother_server]: Running Nav2 LifecycleNode rcl preshutdown (smoother_server)
+[smoother_server-3] [INFO] [1793934850.682348470] [smoother_server]: Destroying bond (smoother_server) to lifecycle manager.
+[controller_server-2] [INFO] [1793934850.682137936] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[controller_server-2] [INFO] [1793934850.682280561] [controller_server]: Running Nav2 LifecycleNode rcl preshutdown (controller_server)
+[controller_server-2] [INFO] [1793934850.682356533] [controller_server]: Destroying bond (controller_server) to lifecycle manager.
+[INFO] [python3-10]: sending signal 'SIGINT' to process[python3-10]
+[INFO] [lifecycle_manager-8]: sending signal 'SIGINT' to process[lifecycle_manager-8]
+[INFO] [velocity_smoother-7]: sending signal 'SIGINT' to process[velocity_smoother-7]
+[INFO] [bt_navigator-6]: sending signal 'SIGINT' to process[bt_navigator-6]
+[INFO] [behavior_server-5]: sending signal 'SIGINT' to process[behavior_server-5]
+[INFO] [planner_server-4]: sending signal 'SIGINT' to process[planner_server-4]
+[ERROR] [velocity_smoother-7]: process has died [pid 8438, exit code -2, cmd '/opt/ros/humble/lib/nav2_velocity_smoother/velocity_smoother --ros-args -r __node:=velocity_smoother --params-file /tmp/tmpxxb45re5 -r cmd_vel:=cmd_vel_nav -r cmd_vel_smoothed:=cmd_vel'].
+[INFO] [smoother_server-3]: sending signal 'SIGINT' to process[smoother_server-3]
+[ERROR] [bt_navigator-6]: process has died [pid 8436, exit code -2, cmd '/opt/ros/humble/lib/nav2_bt_navigator/bt_navigator --ros-args -r __node:=bt_navigator --params-file /tmp/tmpeqa8anof'].
+[INFO] [controller_server-2]: sending signal 'SIGINT' to process[controller_server-2]
+[ERROR] [behavior_server-5]: process has died [pid 8434, exit code -2, cmd '/opt/ros/humble/lib/nav2_behaviors/behavior_server --ros-args -r __node:=behavior_server --params-file /tmp/tmpmljkkn9_'].
+[INFO] [map_server-1]: sending signal 'SIGINT' to process[map_server-1]
+[ERROR] [planner_server-4]: process has died [pid 8432, exit code -2, cmd '/opt/ros/humble/lib/nav2_planner/planner_server --ros-args -r __node:=planner_server --params-file /tmp/tmpw5lzlkw6'].
+[ERROR] [smoother_server-3]: process has died [pid 8430, exit code -2, cmd '/opt/ros/humble/lib/nav2_smoother/smoother_server --ros-args -r __node:=smoother_server --params-file /tmp/tmpa2p6goqv'].
+[lifecycle_manager-8] [INFO] [1793934850.682209010] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[lifecycle_manager-8] [INFO] [1793934850.682278756] [lifecycle_manager_navigation]: Running Nav2 LifecycleManager rcl preshutdown (lifecycle_manager_navigation)
+[velocity_smoother-7] [INFO] [1793934850.682209264] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[velocity_smoother-7] [INFO] [1793934850.682304928] [velocity_smoother]: Running Nav2 LifecycleNode rcl preshutdown (velocity_smoother)
+[velocity_smoother-7] [INFO] [1793934850.682370559] [velocity_smoother]: Destroying bond (velocity_smoother) to lifecycle manager.
+[ERROR] [controller_server-2]: process has died [pid 8428, exit code -2, cmd '/opt/ros/humble/lib/nav2_controller/controller_server --ros-args -r __node:=controller_server --params-file /tmp/tmpyl3bpg6q -r cmd_vel:=cmd_vel_nav'].
+[bt_navigator-6] [INFO] [1793934850.682213942] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[bt_navigator-6] [INFO] [1793934850.682360472] [bt_navigator]: Running Nav2 LifecycleNode rcl preshutdown (bt_navigator)
+[bt_navigator-6] [INFO] [1793934850.682427671] [bt_navigator]: Destroying bond (bt_navigator) to lifecycle manager.
+[map_server-1] [INFO] [1793934850.682347056] [map_server]: Destroying bond (map_server) to lifecycle manager.
+[map_server-1] [INFO] [1793934850.684070513] [map_server]: Destroying
+[behavior_server-5] [INFO] [1793934850.683398198] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[behavior_server-5] [INFO] [1793934850.683514292] [behavior_server]: Running Nav2 LifecycleNode rcl preshutdown (behavior_server)
+[behavior_server-5] [INFO] [1793934850.683577439] [behavior_server]: Destroying bond (behavior_server) to lifecycle manager.
+[behavior_server-5] [INFO] [1793934850.684925534] [behavior_server]: Destroying
+[bt_navigator-6] [INFO] [1793934850.683466262] [bt_navigator]: Destroying
+[ERROR] [map_server-1]: process has died [pid 8426, exit code -2, cmd '/opt/ros/humble/lib/nav2_map_server/map_server --ros-args -r __node:=map_server --params-file /tmp/tmprl8cnper'].
+[smoother_server-3] [INFO] [1793934850.683707487] [smoother_server]: Destroying
+[planner_server-4] [INFO] [1793934850.683911687] [global_costmap.global_costmap]: Destroying
+[velocity_smoother-7] [INFO] [1793934850.684757295] [velocity_smoother]: Destroying
+[controller_server-2] [INFO] [1793934850.684985224] [local_costmap.local_costmap]: Destroying
+[python3-10] Traceback (most recent call last):
+[python3-10]   File "/home/ambushee/wil_project/install/vslam_navigation/lib/vslam_navigation/ackermann_bridge.py", line 128, in <module>
+[python3-10]     main()
+[python3-10]   File "/home/ambushee/wil_project/install/vslam_navigation/lib/vslam_navigation/ackermann_bridge.py", line 122, in main
+[python3-10]     node.destroy_node()
+[python3-10]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/node.py", line 1691, in destroy_node
+[python3-10]     self.destroy_service(self._services[0])
+[python3-10]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/node.py", line 1615, in destroy_service
+[python3-10]     service.destroy()
+[python3-10]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/service.py", line 93, in destroy
+[python3-10]     self.__service.destroy_when_not_in_use()
+[python3-10] KeyboardInterrupt
+[lifecycle_manager-8] [INFO] [1793934850.701012741] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[lifecycle_manager-8] [INFO] [1793934850.701111687] [lifecycle_manager_navigation]: Destroying lifecycle_manager_navigation
+[controller_server-2] [INFO] [1793934850.701701109] [controller_server]: Destroying
+[planner_server-4] [INFO] [1793934850.701709935] [planner_server]: Destroying
+[ERROR] [python3-10]: process has died [pid 8444, exit code -2, cmd 'python3 /home/ambushee/wil_project/install/vslam_navigation/lib/vslam_navigation/ackermann_bridge.py --ros-args -p use_sim_time:=false -p dry_run:=true -p require_localization:=true -p wheel_base:=0.46 -p max_speed:=0.6'].
+[INFO] [lifecycle_manager-8]: process has finished cleanly [pid 8440]

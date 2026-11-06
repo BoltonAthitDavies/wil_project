@@ -329,10 +329,10 @@ IMU.T_b_c1: !!opencv-matrix
 # here; it is handled by the node's imu_accel_scale instead. See PROBLEM 2.
 # 2026-11-03: IMU noise densities x10, same as config/wil/stereo_imu.yaml (three realv6 runs 0.47-0.49 m, no
 # runaway; the VINS-copied values below gave 1.1-9.6 m with runaways). Previous values kept:
-# IMU.NoiseGyro: 0.01     # rad/s/sqrt(Hz)
-# IMU.NoiseAcc: 0.1       # m/s^2/sqrt(Hz)
-IMU.NoiseGyro: 0.1      # rad/s/sqrt(Hz)
-IMU.NoiseAcc: 1.0        # m/s^2/sqrt(Hz)
+IMU.NoiseGyro: 0.01     # rad/s/sqrt(Hz)
+IMU.NoiseAcc: 0.1       # m/s^2/sqrt(Hz)
+# IMU.NoiseGyro: 0.1      # rad/s/sqrt(Hz)
+# IMU.NoiseAcc: 1.0        # m/s^2/sqrt(Hz)
 
 # 2026-11-04, fork patch (15) -- two switches for the inertial initialisation (absent = upstream).
 # dataset_realv7 (12 stereo-inertial runs, 3 Nov): the IMU initialised at 3-4 s, upstream then

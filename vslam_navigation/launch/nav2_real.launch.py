@@ -98,8 +98,10 @@ def _setup(context, *args, **kwargs):
                  '-p', f'init_ignore_s:={cfg("init_ignore_s")}',
                  '-p', f'max_step:={cfg("max_step")}',
                  '-p', f'margin:={cfg("extent_margin")}',
-                 '-p', f'manage_lifecycle:={str(not autostart).lower()}',
-                 '-p', f'log_file:={cfg("gate_log")}'],
+                 '-p', f'manage_lifecycle:={str(not autostart).lower()}']
+                # an EMPTY `-p log_file:=` is a parse error for rcl ("Couldn't parse
+                # parameter override rule"), so the option is added only when set
+                + (['-p', f'log_file:={cfg("gate_log")}'] if cfg('gate_log') else []),
             output='screen'))
     if bridge:
         nodes.append(ExecuteProcess(
@@ -140,7 +142,7 @@ def generate_launch_description():
         DeclareLaunchArgument('bridge_dry_run', default_value='true',
                               description='true (default) logs the robot commands instead of publishing them. '
                                           'Set false only on the robot, after wheel_base and the topic units are verified.'),
-        DeclareLaunchArgument('wheel_base', default_value='0.42'),
+        DeclareLaunchArgument('wheel_base', default_value='0.46'),
         DeclareLaunchArgument('max_speed', default_value='0.6'),
         OpaqueFunction(function=_setup),
     ])

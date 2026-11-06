@@ -24,9 +24,20 @@
 #   * speed is capped at 0.6 m/s for the first trials (project target 1.5 m/s).
 #   * use_sim_time is REWRITTEN at launch (true on bag replay, false live).
 #
-# UNVERIFIED FOR THE REAL CHASSIS (values copied from the simulated car):
-#   wheel_base 0.42 m, steering limit 0.6109 rad, footprint rectangle. Measure
-#   them on the robot and update here AND in ackermann_bridge.py before driving.
+# REAL CHASSIS (user measurements, 6 Nov 2026) and what follows from them:
+#   wheel_base L = 0.46 m, steering limit d = 20 deg (0.349 rad)
+#   footprint about base_link (on the floor under the IMU): +0.13 m forward,
+#   -0.52 m back, +-0.21 m sideways -> circumscribed radius 0.56 m
+#       rear axle   k = tan(d)/L = 0.791 1/m        (R = 1.264 m)
+#       base_link   R = sqrt(1.264^2 + 0.46^2) = 1.345 m, taking base_link at the
+#                   front axle (0.13 m of body ahead of it); planned at 1.45 m
+#       RPP lookahead must satisfy 2/L_d <= 1/1.345 -> L_d >= 2.69 m: 2.70 here.
+#       max yaw rate = 0.791 * 1.5 m/s = 1.19 rad/s.
+#   Cross-check from dataset_realv7_001 (ORB trajectory vs /cmd_steering +-30):
+#   turn rate 0.19-0.26 rad/s at 0.29 m/s -> R ~1.4 m at the IMU, i.e. the
+#   +-30 commands saturate at a wheel angle of ~18-20 deg, consistent with d.
+#   This car turns in a 2.7 m circle: in a 10 x 7 m zone give goals that do not
+#   need a U-turn next to a wall, and expect Smac to reject some.
 
 bt_navigator:
   ros__parameters:
@@ -68,22 +79,24 @@ controller_server:
 
     FollowPath:
       plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"
-      desired_linear_vel: 0.60
+      # 1.5 m/s is the project target; the bridge's max_speed launch argument
+      # (default 0.6) caps what reaches the robot during the first trials.
+      desired_linear_vel: 1.50
       min_approach_linear_velocity: 0.15
-      approach_velocity_scaling_dist: 0.60
+      approach_velocity_scaling_dist: 1.00
       use_velocity_scaled_lookahead_dist: true
-      lookahead_time: 2.20
-      lookahead_dist: 1.30
-      min_lookahead_dist: 1.30
-      max_lookahead_dist: 2.00
+      lookahead_time: 2.00
+      lookahead_dist: 2.70
+      min_lookahead_dist: 2.70                 # >= 2 x 1.345 m (see header)
+      max_lookahead_dist: 3.50
       use_regulated_linear_velocity_scaling: true
-      regulated_linear_scaling_min_radius: 1.20
+      regulated_linear_scaling_min_radius: 1.60
       regulated_linear_scaling_min_speed: 0.25
       use_cost_regulated_linear_velocity_scaling: false
       use_rotate_to_heading: false
       allow_reversing: false
       rotate_to_heading_min_angle: 3.15
-      max_angular_accel: 1.50
+      max_angular_accel: 1.00
       max_robot_pose_search_dist: 5.0
       # The real transform chain arrives through two nodes (ORB at frame rate,
       # RTAB-Map's correction at its detection rate); give it room.
@@ -108,7 +121,7 @@ planner_server:
       max_planning_time: 3.0
       motion_model_for_search: "DUBIN"
       angle_quantization_bins: 72
-      minimum_turning_radius: 0.75
+      minimum_turning_radius: 1.45          # base_link floor 1.345 m + margin
       reverse_penalty: 2.0
       change_penalty: 0.0
       non_straight_penalty: 1.20
@@ -150,9 +163,9 @@ behavior_server:
     wait:
       plugin: "nav2_behaviors/Wait"
     simulate_ahead_time: 2.0
-    max_rotational_vel: 1.0
-    min_rotational_vel: 0.4
-    rotational_acc_lim: 1.5
+    max_rotational_vel: 1.2
+    min_rotational_vel: 0.3
+    rotational_acc_lim: 1.0
 
 velocity_smoother:
   ros__parameters:
@@ -160,10 +173,15 @@ velocity_smoother:
     smoothing_frequency: 20.0
     scale_velocities: true
     feedback: "OPEN_LOOP"
-    max_velocity: [0.60, 0.0, 1.00]
-    min_velocity: [-0.30, 0.0, -1.00]
-    max_accel: [0.50, 0.0, 2.00]
-    max_decel: [-1.50, 0.0, -2.50]
+    # yaw 1.2 = 0.791 1/m x 1.5 m/s. Accelerations chosen, not measured: 0.5 m/s^2
+    # reaches 1.5 m/s in 3 s and keeps the front end's IMU excitation gentle;
+    # -1.0 m/s^2 stops from 1.5 m/s in 1.5 s / 1.1 m, inside the 2.7 m lookahead
+    # and the planner's inflation. Nothing here senses live obstacles, so braking
+    # authority is the only margin against what the prior map does not show.
+    max_velocity: [1.50, 0.0, 1.20]
+    min_velocity: [-0.30, 0.0, -1.20]
+    max_accel: [0.50, 0.0, 1.00]
+    max_decel: [-1.00, 0.0, -1.50]
     odom_topic: /orbslam3/odometry
     odom_duration: 0.10
     deadband_velocity: [0.0, 0.0, 0.0]
@@ -204,8 +222,8 @@ global_costmap:
       origin_x: -10.0
       origin_y: -10.0
       resolution: 0.05
-      footprint: "[[-0.31, 0.25], [0.52, 0.25], [0.52, -0.25], [-0.31, -0.25]]"
-      footprint_padding: 0.01
+      footprint: "[[-0.52, 0.21], [0.13, 0.21], [0.13, -0.21], [-0.52, -0.21]]"
+      footprint_padding: 0.05
       transform_tolerance: 0.30
       plugins: ["static_layer", "inflation_layer"]
       static_layer:
@@ -229,8 +247,8 @@ local_costmap:
       width: 10
       height: 10
       resolution: 0.05
-      footprint: "[[-0.31, 0.25], [0.52, 0.25], [0.52, -0.25], [-0.31, -0.25]]"
-      footprint_padding: 0.01
+      footprint: "[[-0.52, 0.21], [0.13, 0.21], [0.13, -0.21], [-0.52, -0.21]]"
+      footprint_padding: 0.05
       transform_tolerance: 0.30
       plugins: ["static_layer", "inflation_layer"]
       static_layer:

@@ -288,7 +288,7 @@ ORBextractor.minThFAST: 7
 #            (rate 1.0), frames processed +23 % / +64 %, inliers and map points at
 #            parity, 0 losses and 0 resets in both arms.
 # The sim configs keep 0 so results stay comparable with stock ORB-SLAM3.
-ORBextractor.useGPU: 0
+ORBextractor.useGPU: 1
 # (2026-11-02 evening A/B: 0 reproduced the morning's throughput, 53 % drops, and still ran away at 100-110 s, ATE 1.00 m -- the GPU path is not the cause)
 
 # GPU stereo matcher -- orbslam3_ros2 patch (10b), 2026-10-29

@@ -60,7 +60,9 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from make_dock_models import DOORS_BY_LAYOUT, DOOR_W, DOOR_H, YI1, YO1   # noqa: E402  the dock doors
 PKG = os.path.join(ROOT, 'aws-robomaker-small-warehouse-world')
-WORLD_U = os.path.join(PKG, 'worlds', 'small_warehouse_dynamic',
+# All world files live in one directory since the 6 Nov 2026 flatten; the
+# dynamic/static split is now only in the file NAME, not the path.
+WORLD_U = os.path.join(PKG, 'worlds', 'small_warehouse',
                        'small_warehouse_dynamic_realistic_nofloortexture.world')
 WORLD_I = WORLD_U[:-6] + '_01.world'      # the I-shape (through-flow) variant
 WORLD = WORLD_U                           # set by select_layout()

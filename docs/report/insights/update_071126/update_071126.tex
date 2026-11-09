@@ -1,0 +1,537 @@
+\documentclass[11pt,aspectratio=169]{beamer}
+% WiL progress update, 7 November 2026.  Same conventions as update_221026:
+% one claim per slide, the slide title IS the claim, and the data that shows it
+% sits on the same slide.  Every figure is the project's own output.
+\usetheme{default}
+\usecolortheme{seagull}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+\setbeamerfont{frametitle}{size=\large,series=\bfseries}
+\setbeamercolor{frametitle}{fg=black!85}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\sisetup{detect-all,range-phrase=--,range-units=single}
+\newcommand{\repo}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\FIG}{../../final_report/figures}
+\newcommand{\OUT}{../../../../output/compare/simulation}
+\newcommand{\OUTR}{../../../../output/compare/real}
+\newcommand{\src}[1]{\vfill{\tiny\color{black!55}Source: #1}}
+\definecolor{neg}{HTML}{B00020}
+\definecolor{pos}{HTML}{1B5E20}
+\newcommand{\bad}[1]{\textcolor{neg}{#1}}
+\newcommand{\good}[1]{\textcolor{pos}{#1}}
+
+\title{WiL update, 7 November 2026}
+\subtitle{Dataset decision \textperiodcentered\ The loop closer \textperiodcentered\
+          A real non-visual baseline \textperiodcentered\ Detector \textperiodcentered\ Maps}
+\author{Bolton Athit Davies}
+\date{}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Contents}
+  \begin{enumerate}
+    \item Dataset decision: what the report is now built from
+    \item Experiment 3: the loop closer decides ORB-SLAM3's error
+    \item Experiment 3: what each pipeline costs
+    \item Experiment 1: a non-visual baseline on the real robot
+    \item Experiment 2: the detector on the realistic worlds
+    \item Experiment 4: four maps, all failing the criterion
+    \item Where the report stands, and what is open
+  \end{enumerate}
+\end{frame}
+
+% ===================================================================== Part 1
+\section{Dataset decision}
+
+\begin{frame}{1. The dataset set is fixed: eleven recordings, everything else retired}
+  \begin{columns}[T]
+    \column{0.56\textwidth}
+      \scriptsize\setlength{\tabcolsep}{3pt}
+      \begin{tabular}{lll}
+        \toprule
+        Recording & Role & Layout \\
+        \midrule
+        \repo{realistic_000} & Exp.\ 1, 3; Exp.\ 4 probe & U static \\
+        \repo{realistic_001} & Exp.\ 1, 3; Exp.\ 4 probe & I static \\
+        \repo{realistic_002} & Exp.\ 1, 3 & U traffic \\
+        \repo{realistic_003} & Exp.\ 1, 3 & I traffic \\
+        \repo{realistic_map} & Exp.\ 4 build; Exp.\ 3 cost & U static \\
+        \repo{realistic_01_map} & Exp.\ 4 build; Exp.\ 3 cost & I static \\
+        \repo{map_tiny} & Exp.\ 4 build & tiny \\
+        \repo{realv6_000} & Exp.\ 1, 3 (real) & Gensurv \\
+        \repo{realv7_000}--\repo{002} & Exp.\ 1, 3 (real) & Gensurv \\
+        \bottomrule
+      \end{tabular}
+    \column{0.44\textwidth}
+      \footnotesize
+      \begin{itemize}
+        \item Retired on 6 November: the \repo{allsensor} and
+              \repo{nofloortexture} campaign, \repo{relogged_20260916}, the
+              October filtered runs, \repo{realv2}--\repo{realv5}
+        \item Their results went to \repo{trash/output/}, logged, and are
+              cited nowhere
+        \item \textbf{Dynamic environment} is now a \emph{condition} of a
+              recording, not a factor: no two recordings share a route
+        \item Filtered arms are blank in both domains until the repeat is run
+      \end{itemize}
+  \end{columns}
+  \src{\repo{trash/output/RETIRED_20261106.txt}; registry in chapter~3}
+\end{frame}
+
+\begin{frame}{1. Six of eight result slots now hold data}
+  \centering\small\setlength{\tabcolsep}{4pt}
+  \begin{tabular}{p{0.26\textwidth}p{0.33\textwidth}p{0.33\textwidth}}
+    \toprule
+    Experiment & Simulation & Real robot \\
+    \midrule
+    1. Non-visual baseline & \good{completed}: 4 recordings, EKF at the VSLAM
+      noise model & \good{partial}: wheel+gyro, fitted scale \\
+    2. YOLO detector & \good{completed}: 4 recordings, 4-class checkpoint &
+      planned: no annotated frames \\
+    3. VIO + filtering & \good{partial}: 20 unfiltered runs + 18 cost repeats;
+      \bad{no filtered run} & \good{partial}: ORB-SLAM3 provisional;
+      \bad{VINS no valid run} \\
+    4. Dense map & \good{partial}: tiny passes, 4 realistic
+      \bad{fail}; large \bad{failed} & planned \\
+    \bottomrule
+  \end{tabular}
+  \par\vspace{0.8em}
+  \footnotesize Changed since 22 October: Experiment~2 moved from untested to
+  completed, Experiment~1 gained its real-robot half, and Experiment~3 gained
+  both its cost measurement and a mechanism for ORB-SLAM3's error.
+  \src{\repo{chapter_4_experiments.tex}, table 4.1}
+\end{frame}
+
+% ===================================================================== Part 2
+\section{Experiment 3: the loop closer}
+
+\begin{frame}{2. Twenty unfiltered runs: VINS is steady, ORB-SLAM3 is bimodal}
+  \begin{columns}[T]
+    \column{0.40\textwidth}
+      \footnotesize
+      \begin{itemize}
+        \item Factors: estimator, front end (CPU / GPU), loop closer
+              (on / off). One run per cell, replay rate 1.0
+        \item VINS-Fusion \SIrange{0.22}{0.66}{\metre}, no jump, on every
+              recording
+        \item ORB-SLAM3 \SIrange{0.14}{6.02}{\metre}: eleven runs of sixteen
+              between \SI{0.14}{} and \SI{0.52}{\metre}, five diverge
+        \item Neither front end ever loses tracking: zero loss events, zero
+              resets in twenty runs
+      \end{itemize}
+    \column{0.60\textwidth}
+      \includegraphics[width=\textwidth,height=0.80\textheight,keepaspectratio]{\FIG/realistic_metrics.png}
+  \end{columns}
+  \src{\repo{output/compare/simulation/exp-realistic-ab/runs_metrics.csv}}
+\end{frame}
+
+\begin{frame}{2. Every ORB-SLAM3 divergence is the loop closer, in both directions}
+  \centering\scriptsize\setlength{\tabcolsep}{4pt}
+  \begin{tabular}{llrr>{\raggedright\arraybackslash}p{0.34\textwidth}}
+    \toprule
+    Recording & Layout & Closer on & Closer off & What the closer did \\
+    \midrule
+    \repo{realistic_000} & U static & 0.34 / 0.29 & 0.48 / 0.52 &
+      two closures of \SIrange{0.07}{0.12}{\metre}: inert \\
+    \repo{realistic_001} & I static & \bad{6.02 / 4.78} & 0.50 / 0.40 &
+      \bad{one false closure of \SI{14}{\metre}} \\
+    \repo{realistic_002} & U traffic & 1.39 / 0.40 & 0.29 / 0.17 &
+      one closure of \SI{0.26}{\metre}; the 1.39 is an init offset \\
+    \repo{realistic_003} & I traffic & \good{0.14 / 0.50} & 1.76 / 1.91 &
+      \good{one closure removes \SI{5}{\metre} of vertical drift} \\
+    \bottomrule
+  \end{tabular}
+  \par\vspace{0.6em}
+  \scriptsize Each cell is aligned ATE in metres, CPU front end / GPU front
+  end. The closer state is read from each run's own log, never from its name.
+  \src{\repo{loop_closing.csv} per run; \repo{exp-realistic-ab}}
+\end{frame}
+
+\begin{frame}{2. The I layout's repeated aisles produce a false 14 m closure}
+  \begin{columns}[T]
+    \column{0.36\textwidth}
+      \footnotesize
+      \begin{itemize}
+        \item Both front ends accept \textbf{one} closure at
+              \SI{73.2}{\second}, \SI{76}{\percent} along the route
+        \item Correction \SI{14.7}{\metre} (CPU) and \SI{13.3}{\metre} (GPU)
+        \item The estimate had drifted about \SI{0.5}{\metre} before it: no
+              real revisit needs a \SI{14}{\metre} shift
+        \item Matched keyframes are \textbf{one aisle apart}
+        \item Four later candidates were rejected by the inertial geometry
+              check, after the damage
+        \item Both front ends failing at the same frame points at place
+              recognition, not the extractor
+      \end{itemize}
+    \column{0.64\textwidth}
+      \includegraphics[width=\textwidth,height=0.84\textheight,keepaspectratio]{\FIG/timeline_realistic__realistic_001.png}
+  \end{columns}
+  \src{\repo{timeline_realistic__realistic_001.png}; step at \SI{73}{\second}}
+\end{frame}
+
+\begin{frame}{2. On the same layout with traffic, only a closure removes the vertical drift}
+  \begin{columns}[T]
+    \column{0.36\textwidth}
+      \footnotesize
+      \begin{itemize}
+        \item Closure-free runs read \SI{1.76}{} and
+              \SI{1.91}{\metre} ATE, yet their \emph{planar} error never
+              exceeds \SI{0.7}{\metre}
+        \item The difference is vertical: they climb to \SI{4.7}{} and
+              \SI{5.1}{\metre} above the floor
+        \item The loop-closing runs stay within \SI{1.4}{\metre} and read
+              \SI{0.14}{} and \SI{0.50}{\metre}
+        \item Our ATE is three-dimensional, so it charges that climb to a
+              floor robot: the planar onset table is the complement
+      \end{itemize}
+    \column{0.64\textwidth}
+      \includegraphics[width=\textwidth,height=0.84\textheight,keepaspectratio]{\FIG/timeline_realistic__realistic_003.png}
+  \end{columns}
+  \src{No run crosses its planar threshold on this recording}
+\end{frame}
+
+\begin{frame}{2. The GPU front end changes how many frames survive, not accuracy}
+  \begin{columns}[T]
+    \column{0.52\textwidth}
+      \footnotesize
+      \begin{itemize}
+        \item GPU extractor keeps \SIrange{97}{99}{\percent} of each bag's
+              frames; CPU keeps \SIrange{72}{94}{\percent}
+        \item Tracking median \SIrange{30}{37}{\milli\second} against
+              \SIrange{49}{55}{\milli\second}
+        \item Across the eight CPU/GPU pairs at the same closer state, five
+              differ by at most \SI{0.16}{\metre}
+        \item The three larger differences are each one run's discrete event,
+              and go in both directions
+        \item \textbf{Consequence:} at this frame budget the extractor is not
+              the limiting stage of accuracy
+      \end{itemize}
+    \column{0.48\textwidth}
+      \includegraphics[width=\textwidth,height=0.78\textheight,keepaspectratio]{\FIG/realistic_trajectories.png}
+  \end{columns}
+  \src{Solid = closer active, dashed = disabled, lighter = GPU front end}
+\end{frame}
+
+% ===================================================================== Part 3
+\section{Experiment 3: cost}
+
+\begin{frame}{3. Cost is measured on the two mapping runs, three repeats each}
+  \begin{columns}[T]
+    \column{0.44\textwidth}
+      \footnotesize
+      \begin{itemize}
+        \item The four short recordings cannot support an uncertainty: one run
+              per cell
+        \item The mapping runs are \SI{288}{} and \SI{315}{\second} over
+              \SI{374}{} and \SI{385}{\metre}, every aisle entered
+        \item They are also the only recordings that reach the project's
+              \SI{1.5}{\metre\per\second}: median \SI{1.49}{} and
+              \SI{1.48}{\metre\per\second}
+        \item Eighteen runs: ORB-SLAM3 CPU and GPU closure-free, and
+              VINS-Fusion, three repeats of each
+      \end{itemize}
+    \column{0.56\textwidth}
+      \centering
+      \includegraphics[width=0.80\textwidth,height=0.66\textheight,keepaspectratio]{\FIG/scene_dataset_allsensor_realistic_map.png}\\
+      {\scriptsize \repo{realistic_map}: the U-layout mapping route}
+  \end{columns}
+  \src{\repo{exp3-rules/mapping_resources.csv}, 18 runs}
+\end{frame}
+
+\begin{frame}{3. Neither pipeline is cheaper: it is a memory-against-cores trade}
+  \centering\scriptsize\setlength{\tabcolsep}{4pt}
+  \begin{tabular}{llrrrrr}
+    \toprule
+    Recording & Pipeline & Front [\si{\milli\second}] & Back [\si{\milli\second}]
+      & Kept & CPU [\si{\percent}] & RSS [MiB] \\
+    \midrule
+    \repo{realistic_map} & ORB-SLAM3 CPU & 42.0 & 211.3 & 93 & 379 & 1732 \\
+      & ORB-SLAM3 GPU & 36.7 & 284.2 & 96 & 332 & 1794 \\
+      & VINS-Fusion & 38.1 & \good{44.3} & 91 & \bad{819} & \good{479} \\
+    \addlinespace
+    \repo{realistic_01_map} & ORB-SLAM3 CPU & 43.9 & 220.4 & 91 & 381 & 1816 \\
+      & ORB-SLAM3 GPU & 51.9 & 405.7 & 75 & 361 & 1719 \\
+      & VINS-Fusion & 38.6 & \good{44.5} & 90 & \bad{814} & \good{497} \\
+    \bottomrule
+  \end{tabular}
+  \par\vspace{0.6em}
+  \footnotesize Mean over three repeats. VINS-Fusion optimises five to nine
+  times faster than ORB-SLAM3's local mapping and holds its state in a quarter
+  of the memory, for more than twice the processor time: about eight cores of
+  one against three and a half. Front ends are within \SI{6}{\milli\second}.
+  \src{Mean of three repeats per configuration}
+\end{frame}
+
+\begin{frame}{3. The I-layout front-end comparison is confounded with heat}
+  \footnotesize
+  \begin{itemize}
+    \item On the U recording the GPU front end behaves as the single runs
+          showed: \SI{37}{} against \SI{42}{\milli\second},
+          \SI{96}{} against \SI{93}{\percent} kept
+    \item On the I recording the sign reverses: \SI{52}{} against
+          \SI{44}{\milli\second}, \SI{75}{} against \SI{91}{\percent} kept
+    \item \textbf{But} each configuration was run as its own block: six GPU
+          runs 21:04--22:04, six CPU runs 23:27--00:18, six VINS runs the next
+          midday, on a laptop that throttles at \SI{90}{\celsius}
+    \item VINS-Fusion reads the \emph{same} on both recordings
+          (\SI{38.1}{} and \SI{38.6}{\milli\second} front end), so the
+          recordings themselves do not impose a difference of that size
+    \item \bad{Quote the U figures} until the three configurations are
+          repeated interleaved from a cool start
+  \end{itemize}
+  \src{Run start times from each run's \repo{run_metadata.csv}}
+\end{frame}
+
+% ===================================================================== Part 4
+\section{Experiment 1: real baseline}
+
+\begin{frame}{4. In simulation the EKF loses to VINS once both share a noise model}
+  \begin{columns}[T]
+    \column{0.46\textwidth}
+      \footnotesize
+      \begin{itemize}
+        \item Design decision: the EKF baseline now runs on the inertial noise
+              the \emph{visual} configurations declare, not its own measured
+              model
+        \item Reason: the two families must share one hand-set model before
+              their accuracies compare at all
+        \item At that model the EKF holds
+              \SIrange{0.68}{2.80}{\metre} and loses to VINS-Fusion
+              (\SIrange{0.22}{0.66}{\metre}) on all four
+        \item The same filter on its measured model holds
+              \SIrange{0.21}{0.58}{\metre} and would beat VINS on three of four
+        \item \textbf{So the whole gap is the noise model, none of it the
+              architecture}
+      \end{itemize}
+    \column{0.54\textwidth}
+      \includegraphics[width=\textwidth,height=0.80\textheight,keepaspectratio]{\FIG/proprio_trajectories_grid_realistic.png}
+  \end{columns}
+  \src{Configured gyroscope density is 5--7$\times$ the measured value}
+\end{frame}
+
+\begin{frame}{4. The real robot now has a non-visual baseline, and vision does not win}
+  \begin{columns}[T]
+    \column{0.44\textwidth}
+      \footnotesize
+      \begin{itemize}
+        \item The rig publishes no metric wheel speed and no joint states; its
+              steering feedback is a two-valued command echo, so no bicycle
+              model and no EKF
+        \item What works: speed feedback $\times$ one scale $k$, heading from
+              the gyroscope with its rest bias removed
+        \item $k$, the gyro \emph{axis} and its sign are fitted on
+              \repo{realv7_000} only, then held
+        \item The yaw rate is on the sensor's \textbf{y} axis; its z axis
+              integrates to zero over a \SI{6.3}{\radian} heading sweep
+      \end{itemize}
+    \column{0.56\textwidth}
+      \includegraphics[width=\textwidth,height=0.52\textheight,keepaspectratio]{\OUTR/exp1-wheel/wheel_paths_light.png}
+      \par\centering\scriptsize\setlength{\tabcolsep}{3pt}
+      \begin{tabular}{llrr}
+        \toprule
+        Recording & Role & Wheel+gyro & Best ORB-SLAM3 \\
+        \midrule
+        \repo{realv7_000} & fit & 0.06 & 0.25 \\
+        \repo{realv7_001} & held & \good{0.26} & 0.44 \\
+        \repo{realv7_002} & held & \good{0.22} & 0.47 \\
+        \repo{realv6_000} & held & 0.46 & 0.46 \\
+        \bottomrule
+      \end{tabular}
+  \end{columns}
+  \src{Planar ATE in metres; lever arm zero on both sides}
+\end{frame}
+
+\begin{frame}{4. What bounds that comparison}
+  \footnotesize
+  \begin{itemize}
+    \item \bad{One tuned constant.} $k$ is fitted against the same tracker the
+          baseline is scored on, albeit on a different recording. The fit
+          recording's \SI{0.06}{\metre} is a calibration, not a result
+    \item The fitted $k=0.325$ agrees with the plain path-length ratio of each
+          \repo{realv7} bag (0.323--0.329), which is a weak independent check
+    \item Path ratios come out within \SI{4}{\percent} of one, where the visual
+          runs read \SIrange{5}{15}{\percent} long
+    \item Routes are \SIrange{22}{37}{\metre} at \SI{0.2}{\metre\per\second};
+          gyroscope drift grows with route length and vision's need not
+    \item The marker-to-IMU lever arm is unmeasured on both sides
+    \item \textbf{Fix:} a measured scale from wheel circumference and gear
+          ratio, and the steering angle recorded as a measurement, which would
+          also restore the EKF with the \SI{0.60}{\metre} wheelbase
+  \end{itemize}
+  \src{\repo{script/real_wheel_baseline.py}, \repo{output/compare/real/exp1-wheel/}}
+\end{frame}
+
+% ===================================================================== Part 5
+\section{Experiment 2: detector}
+
+\begin{frame}{5. The four-class checkpoint makes the pallet jacks scorable}
+  \begin{columns}[T]
+    \column{0.52\textwidth}
+      \footnotesize
+      \begin{itemize}
+        \item \repo{weight/runs_1/.../best.pt}: bin, box, bucket,
+              \textbf{forklift}; the fourth fires on the pallet jacks, which
+              are the moving objects
+        \item Scored on all four realistic recordings, \num{12698} frames
+        \item Pooled precision \textbf{0.747}; class F1 \textbf{0.994} given a
+              match
+        \item Recall \textbf{0.502} over the boxes the exemptions keep,
+              \textbf{0.288} over everything in view
+        \item Moving-object recall \textbf{0.288} --- the ceiling on any
+              filtering benefit downstream
+        \item \bad{The walking people are simulator actors}: no pose, no mesh,
+              outside the class set, so unscorable \emph{and} unmaskable
+      \end{itemize}
+    \column{0.48\textwidth}
+      \includegraphics[width=\textwidth,height=0.72\textheight,keepaspectratio]{\FIG/yolo_fig_size.png}
+  \end{columns}
+  \src{\repo{output/yolo_eval/*_4class/}; confidence 0.35, matching IoU 0.5}
+\end{frame}
+
+\begin{frame}{5. The miss is a size effect; the false positives are near misses}
+  \begin{columns}[T]
+    \column{0.40\textwidth}
+      \footnotesize
+      \begin{itemize}
+        \item Frame-level recall rises monotonically with truth-box side:
+              0.02 at 24--32\,px to 0.64 above 192\,px
+        \item The moving pallet jacks lie on the \emph{same} curve as the
+              parked ones, so 0.29 is a distance effect, not a motion effect
+        \item Of the unmatched predictions,
+              \SIrange{74}{79}{\percent} overlap the right object below the
+              IoU threshold; only \SIrange{8}{9}{\percent} land on nothing
+        \item A filter that masks by box does not care which
+        \item Misses come as flicker: \SIrange{39}{47}{\percent} of gaps are a
+              single frame
+      \end{itemize}
+    \column{0.60\textwidth}
+      \includegraphics[width=\textwidth,height=0.80\textheight,keepaspectratio]{\FIG/yolo_fig_fp_anatomy.png}
+  \end{columns}
+  \src{\repo{output/compare/simulation/exp2-insights/}}
+\end{frame}
+
+% ===================================================================== Part 6
+\section{Experiment 4: maps}
+
+\begin{frame}{6. All four realistic maps fail the criterion fixed before scoring}
+  \centering\scriptsize\setlength{\tabcolsep}{5pt}
+  \begin{tabular}{llrrrr}
+    \toprule
+    Database & Layout, build & Precision & Recall seen & False obstacles & Drivable \\
+    \midrule
+    \repo{map_realistic} & U, October & \bad{81.2} & \bad{82.5} & \bad{3.84} & 96.1 \\
+    \repo{..._realistic_map} & U, November & \bad{77.8} & \bad{74.9} & \bad{5.00} & 94.9 \\
+    \repo{map_realistic_01} & I, October & \bad{84.8} & \bad{81.4} & \bad{4.39} & 94.9 \\
+    \repo{..._realistic_01_map} & I, November & \bad{82.2} & \bad{77.1} & \bad{10.19} & 89.4 \\
+    \midrule
+    Criterion & fixed before scoring & $\ge 90$ & $\ge 85$ & $\le 1$ & --- \\
+    \bottomrule
+  \end{tabular}
+  \par\vspace{0.6em}
+  \footnotesize All values in percent, probed with a recording that did not
+  build the map. Two configurations $\times$ two layouts, one build each, so
+  the parameter differences below are signatures rather than ablations.
+  \src{\repo{exp4-realistic-maps/realistic_map_metrics.csv}}
+\end{frame}
+
+\begin{frame}{6. The November configuration is worse, through three parameters}
+  \footnotesize
+  \begin{itemize}
+    \item The November builds differ from the October ones in exactly three
+          RTAB-Map parameters, and each leaves its own signature:
+    \begin{itemize}\footnotesize
+      \item lower detection rate $\rightarrow$ fewer nodes, fewer views per cell
+      \item longer grid range $\rightarrow$ phantom cells along the west wall
+      \item higher ground-height cut $\rightarrow$ obstacles in the aisles, and
+            on the I layout the blocking phantoms appear \emph{mid-route}
+            (median first node 27, against 1 everywhere else)
+    \end{itemize}
+    \item The false obstacles are \textbf{not} thickened shelving: they are
+          phantoms laid during the inertial initialisation transient at the
+          spawn, plus wall bands displaced about \SI{0.5}{\metre}
+    \item \textbf{The correction the data predict:} discard the cells of the
+          first few nodes, or start mapping after the transient settles
+    \item The three parameters changed together, so which one dominates is
+          untested
+  \end{itemize}
+  \src{\repo{script/exp4_insights.py --realistic}, Insight 6}
+\end{frame}
+
+% ===================================================================== Part 7
+\section{Report and next steps}
+
+\begin{frame}{7. The report is rebuilt on the fixed dataset set}
+  \footnotesize
+  \begin{itemize}
+    \item \textbf{Chapter 3} purged of the retired campaign: nine fragments of
+          the old report dropped and rewritten from current measurements ---
+          registry, worlds, sensor fidelity, the four experiments' methods,
+          status and deviations, real rig
+    \item Every number in it re-measured on the recordings in use: wheel slip
+          under \SI{0.4}{\percent}, gyroscope noise 5--7$\times$ below the
+          configured value, the inertial orientation field confirmed to be
+          ground truth
+    \item \textbf{Chapter 4} slots 1--3 are now generated from the insight
+          notes by \repo{script/build_chapter4.py}; edit the note, regenerate
+    \item \textbf{Chapter 5} rewritten; the two hypotheses the project is named
+          for still have no real-robot evidence
+    \item 129 pages, no undefined references, four overfull lines, all
+          pre-existing
+  \end{itemize}
+  \src{\repo{script/build_final_report.sh}}
+\end{frame}
+
+\begin{frame}{7. What is open, in the order it should be closed}
+  \footnotesize
+  \begin{enumerate}
+    \item \textbf{Give Experiment~3 its test.} Both pipelines filtered and
+          unfiltered on \repo{realistic_002} and \repo{_003}, paired under the
+          admissibility gates, with the closer \emph{disabled} on the I layout
+          so the false closure does not dominate both arms
+    \item \textbf{Bound the loop closer.} A maximum correction against the
+          inertial drift bound, tested on \repo{realistic_001} where the
+          \SI{14}{\metre} closure is reproducible in both front ends
+    \item \textbf{Repeat the cost runs interleaved} from a cool start, so the
+          I-layout front-end comparison is readable
+    \item \textbf{Real robot:} exercise the fork's initialisation switches,
+          re-run VINS with the corrected gravity norm, measure the
+          marker-to-IMU lever arm, measure the wheel-speed scale
+    \item \textbf{Detector:} a person class with projectable geometry, or an
+          annotated frame subset, so the agents the filter exists for are
+          scorable
+    \item \textbf{Maps:} start mapping after the inertial transient, and
+          reconsider the November range and ground-height parameters
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Summary}
+  \footnotesize
+  \begin{itemize}
+    \item The report is now built from eleven recordings and nothing else;
+          everything retired is logged, not deleted
+    \item \textbf{ORB-SLAM3's error in simulation is its loop closer}, in both
+          directions: a false \SI{14}{\metre} closure on the I layout's
+          repeated aisles, and a vertical drift on the same layout that only a
+          closure removes. The front end changes retention, not accuracy
+    \item \textbf{VINS-Fusion} is the steadier estimator in simulation and
+          costs a quarter of the memory for twice the cores, but still has no
+          valid run on the real robot
+    \item \textbf{Vision has not earned its place over dead reckoning} in
+          either domain, on routes of this length
+    \item \textbf{The detector finds under a third of the moving objects},
+          which bounds any filtering benefit before the filter is tested
+    \item \textbf{All four realistic maps fail} the map-quality criterion, and
+          the cause is the initialisation transient, not the shelving
+  \end{itemize}
+\end{frame}
+
+\end{document}

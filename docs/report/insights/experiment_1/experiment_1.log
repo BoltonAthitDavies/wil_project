@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  22 OCT 2026 14:21
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  7 NOV 2026 14:07
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -755,106 +755,86 @@ Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10.95> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 28.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 32.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <8> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 28.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 32.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <6> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 28.
-LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 69.
-LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <7.4> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 69.
-LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 8
-6.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 32.
+LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 4
+7.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ts1ptm.fd
 File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
-) [1
+)
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 65.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <7.4> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 65.
 
-{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
-<../../final_report//figures/proprio_trajectories_grid.png, id=30, 809.424pt x 
-1257.498pt>
-File: ../../final_report//figures/proprio_trajectories_grid.png Graphic file (t
-ype png)
-<use ../../final_report//figures/proprio_trajectories_grid.png>
-Package pdftex.def Info: ../../final_report//figures/proprio_trajectories_grid.
-png  used on input line 195.
-(pdftex.def)             Requested size: 437.0374pt x 678.98125pt.
-
-
-LaTeX Warning: Float too large for page by 46.19817pt on input line 205.
-
-</home/ambushee/wil_project/output/compare/simulation/exp-estimator-baseline/pr
-oprio_covariance_dataset_allsensor_001_light.png, id=35, 939.51pt x 650.43pt>
-File: /home/ambushee/wil_project/output/compare/simulation/exp-estimator-baseli
-ne/proprio_covariance_dataset_allsensor_001_light.png Graphic file (type png)
-<use /home/ambushee/wil_project/output/compare/simulation/exp-estimator-baselin
-e/proprio_covariance_dataset_allsensor_001_light.png>
-Package pdftex.def Info: /home/ambushee/wil_project/output/compare/simulation/e
-xp-estimator-baseline/proprio_covariance_dataset_allsensor_001_light.png  used 
-on input line 295.
-(pdftex.def)             Requested size: 455.24411pt x 315.17035pt.
-[2] [3] [4 <../../final_report//figures/proprio_trajectories_grid.png>]
-[5 </home/ambushee/wil_project/output/compare/simulation/exp-estimator-baseline
-/proprio_covariance_dataset_allsensor_001_light.png>] [6] [7] [8]
-Overfull \hbox (2.09645pt too wide) in paragraph at lines 577--588
-\T1/ptm/m/n/10.95 (-20) was re-cal-i-brated on 21 Oc-to-ber 2026 (\T1/pcr/m/n/1
-0.95 camera_parameters/211026camera1_rot_trans.dat\T1/ptm/m/n/10.95 (-20) ,
+Overfull \hbox (39.96498pt too wide) in paragraph at lines 77--99
+\T1/pcr/m/n/10.95 noise/\T1/ptm/m/n/10.95 (-20) ), run di-rec-to-ries un-der $\
+T1/pcr/m/n/10.95 output / output _ {wheel ,[] imu ,[] ekf ,[] ekf _ measured} /
+ simulation/$\T1/ptm/m/n/10.95 (-20) .
  []
 
-(../../final_report/tables/real_gt_table.tex)
-(../../final_report/tables/real_gt_rpe_table.tex)
-<../../final_report//figures/real_gt_trajectory_realv3_000_orb.png, id=100, 542
-.025pt x 469.755pt>
-File: ../../final_report//figures/real_gt_trajectory_realv3_000_orb.png Graphic
- file (type png)
-<use ../../final_report//figures/real_gt_trajectory_realv3_000_orb.png>
-Package pdftex.def Info: ../../final_report//figures/real_gt_trajectory_realv3_
-000_orb.png  used on input line 603.
-(pdftex.def)             Requested size: 223.07211pt x 193.33192pt.
-<../../final_report//figures/real_gt_error_realv3_000.png, id=101, 650.43pt x 4
-69.755pt>
-File: ../../final_report//figures/real_gt_error_realv3_000.png Graphic file (ty
-pe png)
-<use ../../final_report//figures/real_gt_error_realv3_000.png>
-Package pdftex.def Info: ../../final_report//figures/real_gt_error_realv3_000.p
-ng  used on input line 607.
-(pdftex.def)             Requested size: 223.07211pt x 161.10515pt.
-<../../final_report//figures/real_gt_trajectory_realv3_000.png, id=102, 542.025
-pt x 469.755pt>
-File: ../../final_report//figures/real_gt_trajectory_realv3_000.png Graphic fil
-e (type png)
-<use ../../final_report//figures/real_gt_trajectory_realv3_000.png>
-Package pdftex.def Info: ../../final_report//figures/real_gt_trajectory_realv3_
-000.png  used on input line 623.
-(pdftex.def)             Requested size: 364.19667pt x 315.64453pt.
- [9] [10 <../../final_report//figures/real_gt_trajectory_realv3_000_orb.png> <.
-./../final_report//figures/real_gt_error_realv3_000.png> <../../final_report//f
-igures/real_gt_trajectory_realv3_000.png>] [11] (./experiment_1.aux)
+[1
+
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <5> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 155.
+<../../final_report//figures/proprio_trajectories_grid_realistic.png, id=32, 80
+9.424pt x 838.332pt>
+File: ../../final_report//figures/proprio_trajectories_grid_realistic.png Graph
+ic file (type png)
+<use ../../final_report//figures/proprio_trajectories_grid_realistic.png>
+Package pdftex.def Info: ../../final_report//figures/proprio_trajectories_grid_
+realistic.png  used on input line 210.
+(pdftex.def)             Requested size: 437.0374pt x 452.65416pt.
+ [2] [3] [4] [5 <../../final_report//figures/proprio_trajectories_grid_realisti
+c.png>]
+Overfull \hbox (57.62207pt too wide) in paragraph at lines 325--335
+ []\T1/ptm/b/n/10.95 (-20) Process.[] \T1/ptm/m/n/10.95 (-20) The bags carry \T
+1/pcr/m/n/10.95 /feedback/velocity \T1/ptm/m/n/10.95 (-20) and \T1/pcr/m/n/10.9
+5 /feedback/steering \T1/ptm/m/n/10.95 (-20) ([][], \T1/pcr/m/n/10.95 std_msgs/
+Float64\T1/ptm/m/n/10.95 (-20) )
+ []
+
+[6] (../../../../output/compare/real/exp1-wheel/wheel_table.tex)
+<../../../../output/compare/real/exp1-wheel/wheel_paths_light.png, id=71, 1214.
+136pt x 317.988pt>
+File: ../../../../output/compare/real/exp1-wheel/wheel_paths_light.png Graphic 
+file (type png)
+<use ../../../../output/compare/real/exp1-wheel/wheel_paths_light.png>
+Package pdftex.def Info: ../../../../output/compare/real/exp1-wheel/wheel_paths
+_light.png  used on input line 374.
+(pdftex.def)             Requested size: 455.24411pt x 119.23064pt.
+ [7 <../../../../output/compare/real/exp1-wheel/wheel_paths_light.png>] [8]
+(./experiment_1.aux)
 Package rerunfilecheck Info: File `experiment_1.out' has not changed.
 (rerunfilecheck)             Checksum: 15D077211A6091F6EC564D80FF2672A6;193.
  ) 
 Here is how much of TeX's memory you used:
- 20580 strings out of 480171
- 392465 string characters out of 5894489
- 731728 words of memory out of 5000000
- 37839 multiletter control sequences out of 15000+600000
- 547397 words of font info for 351 fonts, out of 8000000 for 9000
+ 20511 strings out of 480171
+ 389989 string characters out of 5894489
+ 719728 words of memory out of 5000000
+ 37812 multiletter control sequences out of 15000+600000
+ 551111 words of font info for 345 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
- 76i,15n,82p,1025b,884s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 76i,13n,82p,1009b,847s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
 e/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texm
 f-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/
 fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/
-type1/urw/courier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/sym
-bol/usyr.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/symbol/usyr.pfb></u
-sr/share/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texliv
-e/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fo
-nts/type1/urw/times/utmri8a.pfb>
-Output written on experiment_1.pdf (11 pages, 1297278 bytes).
+type1/urw/courier/ucrb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/cou
+rier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/symbol/usyr.pfb>
+</usr/share/texlive/texmf-dist/fonts/type1/urw/symbol/usyr.pfb></usr/share/texl
+ive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/
+fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw
+/times/utmri8a.pfb>
+Output written on experiment_1.pdf (8 pages, 597843 bytes).
 PDF statistics:
- 184 PDF objects out of 1000 (max. 8388607)
- 139 compressed objects within 2 object streams
- 45 named destinations out of 1000 (max. 500000)
- 93226 words of extra memory for PDF output out of 106986 (max. 10000000)
+ 144 PDF objects out of 1000 (max. 8388607)
+ 108 compressed objects within 2 object streams
+ 32 named destinations out of 1000 (max. 500000)
+ 96795 words of extra memory for PDF output out of 106986 (max. 10000000)
 

@@ -150,7 +150,27 @@ def _loop_closure_params(enabled):
     map is a direct picture of odometry drift, the A/B against the stitched map.
     """
     if enabled:
-        return {}
+        # Explicit values, NOT an empty dict. RTAB-Map restores its parameter set
+        # FROM THE DATABASE, so a prior built with loop_closure:=false comes back
+        # with LoopThr 1.0 and ProximityBySpace false even when this launch is
+        # asked for closures. In mode:=localize that is fatal and silent, because
+        # relocalising against a prior IS accepting a loop closure against it:
+        # the node comes up, publishes /localization_pose, and never localises.
+        #
+        # Measured on the real rig, 6 Nov 2026, which is what exposed this:
+        #   map_prior_v2    (0 closures in the db)  all 76 poses cov_trace 3e+04,
+        #                                           RTAB-Map's no-information value
+        #   realv7_001_prior (32 closures in the db) cov_trace median 0.022
+        # The launch already refuses mode:=localize with loop_closure:=false, so
+        # the intent was there; it just did not defend against the database
+        # putting the closure-free values back. rosparam wins over the stored
+        # value, hence setting them here.
+        #
+        # 0.11 and true are RTAB-Map's own defaults for these two.
+        return {
+            'Rtabmap/LoopThr': '0.11',
+            'RGBD/ProximityBySpace': 'true',
+        }
     return {
         # Bayes posterior is a probability; a threshold of 1.0 is never crossed.
         'Rtabmap/LoopThr': '1.0',

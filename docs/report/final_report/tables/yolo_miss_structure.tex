@@ -1,0 +1,18 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption[Structure of the misses.]{Structure of the misses, per recording, from the gaps between consecutive matches of the same object (gaps under \SI{2}{\second} only). ``Single-frame'' is the share of gaps one frame long; ``in long gaps'' the share of the gap frames that lie in gaps of \SI{1}{\second} or more. ``Short-gap misses / FN'' compares the misses this reading finds with the scorer's total false negatives: the remainder are misses at the ends of tracks or in gaps longer than \SI{2}{\second}, which this reading cannot separate from objects leaving the view. ``Objects under 0.5'': objects with at least 30 frames whose in-track recall is below one half. Source: \path{miss_structure.csv}.}
+\label{tab:e2i-miss}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrrrr}
+\toprule
+Recording & objects & gaps & median & p90 & single-frame & in long gaps & short-gap misses / FN \\
+ & & & [frames] & [frames] & & & \\
+\midrule
+\repo{dataset_allsensor_realistic_000_4class} & 45 (4 under 0.5) & 513 & 2 & 9 & 47\,\% & 20\,\% & 2038 / 27461 (7\,\%) \\
+\repo{dataset_allsensor_realistic_001_4class} & 51 (12 under 0.5) & 513 & 2 & 17 & 40\,\% & 24\,\% & 2952 / 24426 (12\,\%) \\
+\repo{dataset_allsensor_realistic_002_4class} & 45 (7 under 0.5) & 288 & 2 & 8 & 44\,\% & 30\,\% & 1330 / 19228 (7\,\%) \\
+\repo{dataset_allsensor_realistic_003_4class} & 45 (4 under 0.5) & 646 & 2 & 15 & 39\,\% & 32\,\% & 3658 / 28646 (13\,\%) \\
+\bottomrule
+\end{tabular}}
+\end{table}

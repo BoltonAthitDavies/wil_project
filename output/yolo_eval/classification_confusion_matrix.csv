@@ -1,4 +1,5 @@
-actual\predicted,bin,box,bucket
-bin,2638,1,0
-box,0,28051,25
-bucket,1,110,6235
+actual\predicted,bin,box,bucket,forklift
+bin,2657,0,24,0
+box,0,21561,5,27
+bucket,0,16,11803,2
+forklift,20,6,42,4345

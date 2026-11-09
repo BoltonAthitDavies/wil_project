@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  22 OCT 2026 13:01
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  7 NOV 2026 12:58
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -754,77 +754,95 @@ Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `pcr' (encoding: T1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
-LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10.95> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 25.
-LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <8> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 25.
-LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <6> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 25.
-LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 50.
-LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <7.4> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 50.
-LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 6
-6.
 
-(/usr/share/texlive/texmf-dist/tex/latex/psnfss/ts1ptm.fd
-File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
-) [1
+Underfull \hbox (badness 1688) in paragraph at lines 31--31
+[]\T1/ptm/b/n/10.95 (+20) Status: com-pleted. \T1/ptm/m/n/10.95 (+20) Four real
+istic-warehouse record-ings, 12698 left-camera frames, scored
+ []
+
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10.95> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 31.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <8> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 31.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <6> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 31.
+
+Overfull \hbox (14.84253pt too wide) in paragraph at lines 53--62
+\T1/pcr/m/n/10.95 realistic _ * _ 4class/$ \T1/ptm/m/n/10.95 (-20) (\T1/pcr/m/n
+/10.95 yolo_eval.csv\T1/ptm/m/n/10.95 (-20) , \T1/pcr/m/n/10.95 yolo_detections
+.csv\T1/ptm/m/n/10.95 (-20) , \T1/pcr/m/n/10.95 yolo_confusion.csv\T1/ptm/m/n/1
+0.95 (-20) ,
+ []
+
+
+Overfull \hbox (16.70403pt too wide) in paragraph at lines 53--62
+\T1/pcr/m/n/10.95 overlay/\T1/ptm/m/n/10.95 (-20) ), $\T1/pcr/m/n/10.95 output 
+/ yolo _ eval / summary _ metrics . csv$\T1/ptm/m/n/10.95 (-20) , $\T1/pcr/m/n/
+10.95 output / compare / simulation /
+ []
+
+[1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
-<../../final_report//../../../output/yolo_eval/summary_light.png, id=34, 859.21
-pt x 343.684pt>
-File: ../../final_report//../../../output/yolo_eval/summary_light.png Graphic f
-ile (type png)
-<use ../../final_report//../../../output/yolo_eval/summary_light.png>
-Package pdftex.def Info: ../../final_report//../../../output/yolo_eval/summary_
-light.png  used on input line 137.
-(pdftex.def)             Requested size: 455.24411pt x 182.09921pt.
-<../../final_report//../../../output/yolo_eval/dyn_00_001/overlay/01116.jpg, id
-=36, 1284.8pt x 722.7pt>
-File: ../../final_report//../../../output/yolo_eval/dyn_00_001/overlay/01116.jp
-g Graphic file (type jpg)
-<use ../../final_report//../../../output/yolo_eval/dyn_00_001/overlay/01116.jpg
->
-Package pdftex.def Info: ../../final_report//../../../output/yolo_eval/dyn_00_0
-01/overlay/01116.jpg  used on input line 146.
-(pdftex.def)             Requested size: 455.24411pt x 256.06956pt.
-<../../final_report//../../../output/yolo_eval/classification_confusion_light.p
-ng, id=37, 699.0115pt x 340.0705pt>
-File: ../../final_report//../../../output/yolo_eval/classification_confusion_li
-ght.png Graphic file (type png)
-<use ../../final_report//../../../output/yolo_eval/classification_confusion_lig
-ht.png>
-Package pdftex.def Info: ../../final_report//../../../output/yolo_eval/classifi
-cation_confusion_light.png  used on input line 157.
-(pdftex.def)             Requested size: 455.24411pt x 221.47908pt.
- [2] [3 <../../final_report//../../../output/yolo_eval/summary_light.png> <../.
-./final_report//../../../output/yolo_eval/dyn_00_001/overlay/01116.jpg>] [4] [5
- <../../final_report//../../../output/yolo_eval/classification_confusion_light.
-png>] [6
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 86.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <7.4> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 86.
 
-] (./experiment_2.aux)
+(../../final_report/tables/yolo_recall_by_size.tex
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <5> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 22.
+)
+(../../final_report/tables/yolo_fp_anatomy.tex)
+(../../final_report/tables/yolo_miss_structure.tex)
+(../../final_report/tables/yolo_threshold_sweep.tex)
+(../../final_report/tables/yolo_per_class.tex)
+<../../final_report//figures/yolo_fig_size.png, id=32, 722.7pt x 303.534pt>
+File: ../../final_report//figures/yolo_fig_size.png Graphic file (type png)
+<use ../../final_report//figures/yolo_fig_size.png>
+Package pdftex.def Info: ../../final_report//figures/yolo_fig_size.png  used on
+ input line 131.
+(pdftex.def)             Requested size: 455.24411pt x 191.20427pt.
+<../../final_report//figures/yolo_fig_fp_anatomy.png, id=34, 722.7pt x 303.534p
+t>
+File: ../../final_report//figures/yolo_fig_fp_anatomy.png Graphic file (type pn
+g)
+<use ../../final_report//figures/yolo_fig_fp_anatomy.png>
+Package pdftex.def Info: ../../final_report//figures/yolo_fig_fp_anatomy.png  u
+sed on input line 141.
+(pdftex.def)             Requested size: 455.24411pt x 191.20427pt.
+ [2] [3] [4 <../../final_report//figures/yolo_fig_size.png>] [5 <../../final_re
+port//figures/yolo_fig_fp_anatomy.png>]
+Overfull \hbox (21.04982pt too wide) in paragraph at lines 187--194
+ []\T1/ptm/b/n/10.95 (-20) Next ac-tion.[] \T1/ptm/m/n/10.95 (-20) An-no-tate a
+ strat-i-fied frame sub-set of \T1/pcr/m/n/10.95 dataset_realv6_000 \T1/ptm/m/n
+/10.95 (-20) and \T1/pcr/m/n/10.95 dataset_realv7_000
+ []
+
+[6] (./experiment_2.aux)
 Package rerunfilecheck Info: File `experiment_2.out' has not changed.
 (rerunfilecheck)             Checksum: 15D077211A6091F6EC564D80FF2672A6;193.
  ) 
 Here is how much of TeX's memory you used:
- 20364 strings out of 480171
- 388880 string characters out of 5894489
- 697728 words of memory out of 5000000
- 37787 multiletter control sequences out of 15000+600000
- 533841 words of font info for 258 fonts, out of 8000000 for 9000
+ 20458 strings out of 480171
+ 389958 string characters out of 5894489
+ 720728 words of memory out of 5000000
+ 37797 multiletter control sequences out of 15000+600000
+ 547324 words of font info for 317 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
- 76i,10n,82p,1009b,849s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 76i,13n,82p,1009b,857s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
 e/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texm
-f-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist
-/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/
-urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8
-a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on experiment_2.pdf (6 pages, 374241 bytes).
+f-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/
+fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/
+type1/urw/courier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/sym
+bol/usyr.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></
+usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texli
+ve/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on experiment_2.pdf (6 pages, 292323 bytes).
 PDF statistics:
- 109 PDF objects out of 1000 (max. 8388607)
- 82 compressed objects within 1 object stream
- 25 named destinations out of 1000 (max. 500000)
- 78880 words of extra memory for PDF output out of 89155 (max. 10000000)
+ 119 PDF objects out of 1000 (max. 8388607)
+ 90 compressed objects within 1 object stream
+ 27 named destinations out of 1000 (max. 500000)
+ 86043 words of extra memory for PDF output out of 89155 (max. 10000000)
 

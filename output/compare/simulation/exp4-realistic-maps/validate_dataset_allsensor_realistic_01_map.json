@@ -1,0 +1,20 @@
+{
+  "clearance_median_m": 1.9780040444852485,
+  "clearance_p05_m": 0.18027756377319948,
+  "drivable": 0.8949865896430782,
+  "false_obstacle": 0.10191871260573551,
+  "figure": "/home/ambushee/wil_project/output/compare/simulation/exp4-realistic-maps/validate_dataset_allsensor_realistic_01_map.png",
+  "gt": "/home/ambushee/wil_project/dataset/gt/dataset_allsensor_realistic_001/ground_truth.csv",
+  "gt_poses": 4847,
+  "known_cells": 633757,
+  "map": "/home/ambushee/wil_project/map/dataset_allsensor_realistic_01_map/dataset_allsensor_realistic_01_map.db",
+  "map_pose": "4.950,20.400,-179.90",
+  "occupied_cells": 23255,
+  "precision": 0.8218877660718125,
+  "recall_seen": 0.770516717325228,
+  "recall_whole": 0.5526681841173495,
+  "tol_m": 0.25,
+  "true_edge_cells": 15816,
+  "unmapped": 0.004951516401898081,
+  "world": "/home/ambushee/wil_project/aws-robomaker-small-warehouse-world/worlds/small_warehouse/small_warehouse_static_realistic_nofloortexture_01.world"
+}

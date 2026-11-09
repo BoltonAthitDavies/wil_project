@@ -6,68 +6,58 @@
 \contentsline {table}{\numberline {3.1}{\ignorespaces The four experiments and the architecture block each one tests.\relax }}{17}{table.caption.32}%
 \contentsline {table}{\numberline {3.2}{\ignorespaces Implementation status at the reporting cutoff.\relax }}{18}{table.3.2}%
 \contentsline {table}{\numberline {3.3}{\ignorespaces Design comparison of the two pipeline architectures, as proposed.\relax }}{21}{table.caption.36}%
-\contentsline {table}{\numberline {3.4}{\ignorespaces ORB-SLAM3 configuration at the cutoff.}}{23}{table.caption.38}%
-\contentsline {table}{\numberline {3.5}{\ignorespaces VINS-Fusion simulation configuration at the cutoff, from \repo {vins_fusion_ros2/config/wil_sim/stereo_imu.yaml}.}}{25}{table.caption.40}%
-\contentsline {table}{\numberline {3.6}{\ignorespaces Computing and software environment.}}{27}{table.caption.41}%
-\contentsline {table}{\numberline {3.7}{\ignorespaces Simulated sensor configuration.}}{28}{table.caption.43}%
-\contentsline {table}{\numberline {3.8}{\ignorespaces Inertial noise parameters supplied to the visual-inertial estimators, beside the values measured from the recorded IMU stream in \cref {sec:proprio-method}.}}{29}{table.caption.44}%
-\contentsline {table}{\numberline {3.9}{\ignorespaces Platform geometry and drivetrain limits used by the wheel-odometry and EKF baselines.}}{29}{table.caption.45}%
-\contentsline {table}{\numberline {3.10}{\ignorespaces Noise injected by the simulator, from the \repo {<imu>} and \repo {<camera>} sensor blocks of the robot model.}}{30}{table.caption.47}%
-\contentsline {table}{\numberline {3.11}{\ignorespaces Gazebo physics configuration, identical in all 26 world files.}}{31}{table.caption.50}%
-\contentsline {table}{\numberline {3.12}{\ignorespaces Measured wheel slip on the five multi-sensor recordings.}}{32}{table.caption.52}%
-\contentsline {table}{\numberline {3.13}{\ignorespaces What the visual estimators are configured to expect, against what the simulator injects.}}{32}{table.caption.54}%
-\contentsline {table}{\numberline {3.14}{\ignorespaces Ground models and the floor conditions they produce.}}{35}{table.caption.58}%
-\contentsline {table}{\numberline {3.15}{\ignorespaces What each dataset contains.}}{37}{table.caption.60}%
-\contentsline {table}{\numberline {3.16}{\ignorespaces Controlled experimental factors available in the simulation environment, with the levels realised at the reporting cutoff.}}{38}{table.caption.61}%
-\contentsline {table}{\numberline {3.17}{\ignorespaces Zones of the two realistic worlds and the number of object instances each holds.}}{41}{table.caption.65}%
-\contentsline {table}{\numberline {3.18}{\ignorespaces What \repo {dataset_map_realistic} contains, read from the bag.}}{43}{table.caption.73}%
-\contentsline {table}{\numberline {3.19}{\ignorespaces Complete dataset registry at the reporting cutoff, across both storage locations.}}{44}{table.caption.74}%
-\contentsline {table}{\numberline {3.20}{\ignorespaces Specification of the AC-IMX390-H190 camera.\relax }}{48}{table.caption.79}%
-\contentsline {table}{\numberline {3.21}{\ignorespaces Summary of the hardware technical specification.\relax }}{49}{table.caption.82}%
-\contentsline {table}{\numberline {3.22}{\ignorespaces Real sensor rig, and the calibration status of each quantity.}}{50}{table.caption.83}%
-\contentsline {table}{\numberline {3.23}{\ignorespaces Sensor noise and scale measured from each bag by \repo {proprio_estimator.py calibrate}.}}{52}{table.caption.86}%
-\contentsline {table}{\numberline {3.24}{\ignorespaces Implemented non-visual estimators.}}{53}{table.caption.89}%
-\contentsline {table}{\numberline {3.25}{\ignorespaces Parameters of the detection evaluation.}}{56}{table.caption.97}%
-\contentsline {table}{\numberline {3.26}{\ignorespaces Principal stored artifacts.\relax }}{61}{table.caption.101}%
-\contentsline {table}{\numberline {3.27}{\ignorespaces Planned-versus-implemented deviations at the reporting cutoff.}}{63}{table.caption.102}%
-\contentsline {table}{\numberline {3.28}{\ignorespaces Original objectives (\cref {sec:objectives}) against the work reported here.\relax }}{63}{table.caption.103}%
+\contentsline {table}{\numberline {3.4}{\ignorespaces ORB-SLAM3 configuration at the cutoff.}}{24}{table.caption.38}%
+\contentsline {table}{\numberline {3.5}{\ignorespaces VINS-Fusion simulation configuration at the cutoff, from \repo {vins_fusion_ros2/config/wil_sim/stereo_imu.yaml}.}}{24}{table.caption.40}%
+\contentsline {table}{\numberline {3.6}{\ignorespaces Navigation parameters for the two platforms.}}{30}{table.caption.46}%
+\contentsline {table}{\numberline {3.7}{\ignorespaces Tasks provided by the \repo {vslam_navigation} package.}}{31}{table.caption.48}%
+\contentsline {table}{\numberline {3.8}{\ignorespaces Computing and software environment.}}{32}{table.caption.50}%
+\contentsline {table}{\numberline {3.9}{\ignorespaces Simulated sensor configuration.}}{33}{table.caption.52}%
+\contentsline {table}{\numberline {3.10}{\ignorespaces Inertial noise: configured against measured.}}{34}{table.caption.53}%
+\contentsline {table}{\numberline {3.11}{\ignorespaces Platform geometry and drivetrain limits.}}{34}{table.caption.54}%
+\contentsline {table}{\numberline {3.12}{\ignorespaces Noise injected by the simulator.}}{35}{table.caption.56}%
+\contentsline {table}{\numberline {3.13}{\ignorespaces Gazebo physics configuration.}}{36}{table.caption.59}%
+\contentsline {table}{\numberline {3.14}{\ignorespaces Measured wheel slip on the four recordings.}}{37}{table.caption.61}%
+\contentsline {table}{\numberline {3.15}{\ignorespaces Configured against injected inertial noise.}}{37}{table.caption.63}%
+\contentsline {table}{\numberline {3.16}{\ignorespaces Controlled experimental factors and the levels realised.}}{40}{table.caption.65}%
+\contentsline {table}{\numberline {3.17}{\ignorespaces Zones of the two realistic worlds and the number of object instances each holds.}}{41}{table.caption.70}%
+\contentsline {table}{\numberline {3.18}{\ignorespaces Dataset registry: the eleven recordings in use.}}{47}{table.caption.78}%
+\contentsline {table}{\numberline {3.19}{\ignorespaces Specification of the AC-IMX390-H190 camera.\relax }}{49}{table.caption.84}%
+\contentsline {table}{\numberline {3.20}{\ignorespaces Summary of the hardware technical specification.\relax }}{51}{table.caption.87}%
+\contentsline {table}{\numberline {3.21}{\ignorespaces Real sensor rig, and the calibration status of each quantity.}}{51}{table.caption.88}%
+\contentsline {table}{\numberline {3.22}{\ignorespaces Sensor noise and scale measured from each recording.}}{54}{table.caption.91}%
+\contentsline {table}{\numberline {3.23}{\ignorespaces Implemented non-visual estimators.}}{55}{table.caption.94}%
+\contentsline {table}{\numberline {3.24}{\ignorespaces Parameters of the detection evaluation.}}{58}{table.caption.104}%
+\contentsline {table}{\numberline {3.25}{\ignorespaces Principal stored artifacts.\relax }}{63}{table.caption.108}%
+\contentsline {table}{\numberline {3.26}{\ignorespaces Planned-versus-implemented deviations at the reporting cutoff.}}{65}{table.caption.109}%
+\contentsline {table}{\numberline {3.27}{\ignorespaces Original objectives (\cref {sec:objectives}) against the work reported here.\relax }}{66}{table.caption.110}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {4.1}{\ignorespaces Status of the eight result slots at the reporting cutoff.\relax }}{64}{table.caption.104}%
-\contentsline {table}{\numberline {4.2}{\ignorespaces Conditions for the estimator comparison.}}{66}{table.caption.106}%
-\contentsline {table}{\numberline {4.3}{\ignorespaces Loop-closing activity in the enabled ORB-SLAM3 configuration (\repo {logging_20260916_01}).}}{66}{table.caption.108}%
-\contentsline {table}{\numberline {4.4}{\ignorespaces Estimator comparison on the five \repo {allsensor} bags, which span four worlds and both floor conditions; they are not repeats of one another except for \repo {allsensor_000} and \repo {allsensor_001}.}}{68}{table.caption.110}%
-\contentsline {table}{\numberline {4.5}{\ignorespaces Wheel-odometry heading drift against the fitted yaw-rate scale.}}{69}{table.caption.113}%
-\contentsline {table}{\numberline {4.6}{\ignorespaces The EKF's heading error follows the quality of the wheel yaw rate it uses to observe its gyroscope bias.}}{70}{table.caption.114}%
-\contentsline {table}{\numberline {4.7}{\ignorespaces Covariance consistency of the non-visual estimators.}}{71}{table.caption.116}%
-\contentsline {table}{\numberline {4.8}{\ignorespaces EKF accuracy with an in-sample and an out-of-sample noise model.}}{72}{table.caption.119}%
-\contentsline {table}{\numberline {4.9}{\ignorespaces Which of the four IMU noise terms costs the EKF its accuracy.}}{74}{table.caption.125}%
-\contentsline {table}{\numberline {4.10}{\ignorespaces Visual estimators against the optical-tracker ground truth on the real \repo {dataset_realv3_000} recording. Planar ATE after rigid $SE(2)$ alignment with scale fixed at one, evaluated at the tracker's own samples ($n$); the time offset between the unsynchronised robot clock and the tracker is estimated from wheel-speed correlation (\cref {sec:method-trajectory}). Translational RPE at $\Delta =\SI {1}{\second }$ compares relative displacements in the aligned frame; the tracker has no heading, so rotational RPE is not defined. ``Path'' is the estimate's planar path length over the matched interval divided by the tracker's. The marker-to-sensor lever arm is not measured (horizontal offset assumed zero), so every value is provisional. Failed runs (\repo {dataset_realv3_000} VINS-Fusion) are excluded and reported in the text. Lower is better.\relax }}{77}{table.caption.132}%
-\contentsline {table}{\numberline {4.11}{\ignorespaces Offline YOLO performance against projected Gazebo object ground truth.}}{79}{table.caption.138}%
-\contentsline {table}{\numberline {4.12}{\ignorespaces Object-class assignment conditional on successful IoU association, pooled across the four dynamic datasets.\relax }}{82}{table.caption.142}%
-\contentsline {table}{\numberline {4.13}{\ignorespaces The two simulation testbeds of Experiment\nobreakspace {}3. Both use the live detector at replay time; the September campaign ran at half replay rate with three repeats per condition, the October runs at full rate with one.\relax }}{84}{table.caption.146}%
-\contentsline {table}{\numberline {4.14}{\ignorespaces Relogged experiment progress and validity.}}{85}{table.caption.149}%
-\contentsline {table}{\numberline {4.15}{\ignorespaces Anomaly catalogue for the relogged campaign.}}{85}{table.4.15}%
-\contentsline {table}{\numberline {4.16}{\ignorespaces Extreme world, unfiltered arms: the best of the three September repeats per recording, ``best'' being the lowest aligned ATE. Rotation, jump-free RPE and jump count are those of the selected run; the median and worst ATE of the three are kept beside the best so the selection is visible. Jump-free RPE excludes pairs spanning a step above \SI {10}{\metre \per \second }; the rotational figure is the median over pairs, because a single orientation step inflates the RMSE (\cref {sec:realistic-ab}).\relax }}{88}{table.caption.154}%
-\contentsline {table}{\numberline {4.17}{\ignorespaces Extreme world, filtered arms: every run outside the September repeat set, one row each (October 2026, replay rate 1.0, live detector). ``Match'' is \repo {detection_match_rate}; a run below 0.98 did not filter on every frame. ``Kept'' is the processed fraction of received frames. Loop-closer state is read from the log. ``Overlap'' is the span over which estimate and ground truth coexist, against the recording's length; a run covering less than \SI {80}{\percent } of it is a partial run and its ATE describes only that span. These runs are reported on their own, not as pairs: their baselines are the September repeats of \cref {tab:extreme-accuracy-best}, a different session and node build.\relax }}{88}{table.caption.158}%
-\contentsline {table}{\numberline {4.18}{\ignorespaces Extreme world, unfiltered runs: onset of sustained error and its place on the route, per run, under the same definitions as \cref {tab:extreme-timelines-filtered}. One entry per run, in repeat order; ``never'' means the error stayed below the threshold for the whole run.\relax }}{93}{table.caption.161}%
-\contentsline {table}{\numberline {4.19}{\ignorespaces Extreme world, filtered runs: when the error rises, where, and how long the filter ran. ``Onset'' is the first time the start-anchored position error stays above $3\times $ the estimator's static median for \SI {1}{\second } (threshold in the text); ``where'' gives the route progress at that moment and whether the robot was on a straight or in a heading change (ground-truth yaw rate above \SI {10}{\degree \per \second }). ``Filter until'' is the end of the initial stretch of \SI {5}{\second } windows with a mask on at least \SI {98}{\percent } of frames; ``unmasked'' is the image area left after masking on matched frames, median (minimum). Times are seconds from the ground-truth start.\relax }}{93}{table.caption.162}%
-\contentsline {table}{\numberline {4.20}{\ignorespaces Extreme world, real-time and resource measurements: mean $\pm $ SD over the three September repeats per recording ($n$), with a pooled row per scene. Front-end and back-end are each run's median module latency (ORB-SLAM3: tracking and local mapping; VINS-Fusion: feature tracking and back-end optimisation); throughput is processed frames per second of sensor time; ``Kept'' the processed fraction of received frames; CPU is process time over wall time, in percent of one core; RSS the peak resident set. Replay rate $0.5\times $. The VINS-Fusion+YOLO rows are the September runs, in which the filter did not activate except on \repo {dynamic_00_000} repeat\nobreakspace {}1 (re-run 15 October).\relax }}{101}{table.caption.171}%
-\contentsline {table}{\numberline {4.21}{\ignorespaces Unfiltered arms on the four realistic-warehouse recordings, 21 October 2026, replay rate 1.0. Aligned ATE is RMSE after a rigid $SE(3)$ fit with scale fixed; RPE is translational, at $\Delta =\SI {1}{\second }$ over pairs that do not span a jump; ``Jumps'' counts steps above \SI {10}{\metre \per \second }; ``Kept'' is the fraction of the bag's stereo pairs the estimator processed (frames lost before the node's own queue count as lost). Loop-closer state is read from \repo {loop_closing.csv}, not from the run name. Static and dynamic rows of one layout share a world geometry and differ in traffic only.\relax }}{103}{table.caption.175}%
-\contentsline {table}{\numberline {4.22}{\ignorespaces Every filtered run on the dynamic realistic recordings, with the three admissibility gates of \cref {sec:vio-filter-method}. ``Match'' is \repo {detection_match_rate}, the fraction of frames that carried a current detector mask; below 0.98 the filter did not run. ``Input'' is the processed-frame count relative to the paired baseline. ``Binary'' says whether the run and its baseline share the node build of 16 October 2026. A run passes only when all three hold; ATE and RPE are listed for every run but may be read as a treatment effect only on a passing row. Runs that loaded a prior atlas are outside the A/B and carry no baseline.\relax }}{105}{table.caption.179}%
-\contentsline {table}{\numberline {4.23}{\ignorespaces Realistic world, real-time and resource measurements, one row per run (replay rate 1.0, live detector). Columns as in \cref {tab:extreme-resources}; ``Kept'' here is the processed fraction of the bag's frames, so frames lost before the node's own queue count as lost. Accuracy for the same runs is in \cref {tab:realistic-baseline,tab:realistic-filtered}.\relax }}{106}{table.caption.182}%
-\contentsline {table}{\numberline {4.24}{\ignorespaces Realistic world, unfiltered runs: onset of sustained error and its place on the route, per run, under the same definitions as \cref {tab:realistic-timelines-filtered}. One entry per run, in repeat order; ``never'' means the error stayed below the threshold for the whole run.\relax }}{107}{table.caption.184}%
-\contentsline {table}{\numberline {4.25}{\ignorespaces Realistic world, filtered runs: when the error rises, where, and how long the filter ran. ``Onset'' is the first time the start-anchored position error stays above $3\times $ the estimator's static median for \SI {1}{\second } (threshold in the text); ``where'' gives the route progress at that moment and whether the robot was on a straight or in a heading change (ground-truth yaw rate above \SI {10}{\degree \per \second }). ``Filter until'' is the end of the initial stretch of \SI {5}{\second } windows with a mask on at least \SI {98}{\percent } of frames; ``unmasked'' is the image area left after masking on matched frames, median (minimum). Times are seconds from the ground-truth start.\relax }}{107}{table.caption.185}%
-\contentsline {table}{\numberline {4.26}{\ignorespaces Conditions for the dense-map evaluation.}}{113}{table.caption.194}%
-\contentsline {table}{\numberline {4.27}{\ignorespaces Stored contents of \repo {map/map_tiny.db}.}}{114}{table.caption.197}%
-\contentsline {table}{\numberline {4.28}{\ignorespaces Occupied-cell geometry of \repo {map/map_tiny.db} against \repo {small_warehouse_static_tinymap.world} at \SI {0.25}{\metre } tolerance.\relax }}{114}{table.caption.199}%
-\contentsline {table}{\numberline {4.29}{\ignorespaces Drivability of \repo {map/map_tiny.db} under the true $0.83\times 0.50$\nobreakspace {}m nav2 footprint, evaluated against two different routes.}}{115}{table.caption.201}%
-\contentsline {table}{\numberline {4.30}{\ignorespaces Occupied-cell geometry of the two realistic-warehouse databases against their world files at \SI {0.25}{\metre } tolerance, beside the tiny map. Bold marks a value below the fixed criterion.\relax }}{119}{table.caption.208}%
-\contentsline {table}{\numberline {4.31}{\ignorespaces Drivability of the realistic-warehouse databases under the true nav2 footprint, against independent routes.}}{120}{table.caption.209}%
-\contentsline {table}{\numberline {4.32}{\ignorespaces Stored contents of the realistic-warehouse databases.}}{120}{table.caption.210}%
-\contentsline {table}{\numberline {4.33}{\ignorespaces Per-block evidence for \textbf {ORB-SLAM3} in the static condition, \cref {fig:blockperf-static}.}}{127}{table.caption.217}%
-\contentsline {table}{\numberline {4.34}{\ignorespaces Per-block evidence for \textbf {VINS-Fusion} in the static condition, \cref {fig:blockperf-static}.}}{128}{table.caption.218}%
-\contentsline {table}{\numberline {4.35}{\ignorespaces Per-block evidence for the \textbf {EKF wheel\,+\,IMU} baseline, \cref {fig:blockperf-static}.}}{129}{table.caption.219}%
-\contentsline {table}{\numberline {4.36}{\ignorespaces Per-block evidence for \textbf {ORB-SLAM3} in the dynamic condition, \cref {fig:blockperf-dynamic}.}}{131}{table.caption.221}%
-\contentsline {table}{\numberline {4.37}{\ignorespaces Per-block evidence for \textbf {VINS-Fusion} in the dynamic condition, \cref {fig:blockperf-dynamic}.}}{132}{table.caption.222}%
-\contentsline {table}{\numberline {4.38}{\ignorespaces Limitations of the results reported in this chapter, and what each one prevents.}}{134}{table.caption.223}%
+\contentsline {table}{\numberline {4.1}{\ignorespaces Status of the eight result slots at the reporting cutoff.\relax }}{67}{table.caption.111}%
+\contentsline {table}{\numberline {4.2}{\ignorespaces Recordings of Experiment 1.}}{68}{table.caption.112}%
+\contentsline {table}{\numberline {4.3}{\ignorespaces Estimator comparison on the four realistic recordings.}}{69}{table.caption.114}%
+\contentsline {table}{\numberline {4.4}{\ignorespaces Relative pose error at $\Delta t=\SI {1}{\second }$ on the four realistic recordings.}}{70}{table.caption.115}%
+\contentsline {table}{\numberline {4.5}{\ignorespaces Wheel+gyro dead reckoning against the optical tracker.}}{74}{table.caption.121}%
+\contentsline {table}{\numberline {4.6}{\ignorespaces Detector scores per recording and pooled.}}{75}{table.caption.126}%
+\contentsline {table}{\numberline {4.7}{\ignorespaces Recall against truth-box size.}}{76}{table.caption.128}%
+\contentsline {table}{\numberline {4.8}{\ignorespaces What the unmatched predictions are.}}{76}{table.caption.129}%
+\contentsline {table}{\numberline {4.9}{\ignorespaces Structure of the misses.}}{77}{table.caption.130}%
+\contentsline {table}{\numberline {4.10}{\ignorespaces Score-threshold sweep.}}{77}{table.caption.131}%
+\contentsline {table}{\numberline {4.11}{\ignorespaces Misses and false positives by class.}}{77}{table.caption.132}%
+\contentsline {table}{\numberline {4.12}{\ignorespaces Unfiltered arms on the four realistic-warehouse recordings.}}{82}{table.caption.138}%
+\contentsline {table}{\numberline {4.13}{\ignorespaces Realistic world: onset of sustained error, unfiltered runs.}}{84}{table.caption.145}%
+\contentsline {table}{\numberline {4.14}{\ignorespaces Real-time and resource measurements on the mapping recordings.}}{86}{table.caption.152}%
+\contentsline {table}{\numberline {4.15}{\ignorespaces Realv6: every surviving run against the cleaned tracker truth.}}{90}{table.caption.157}%
+\contentsline {table}{\numberline {4.16}{\ignorespaces Realv6: raw versus cleaned tracker export.}}{90}{table.caption.159}%
+\contentsline {table}{\numberline {4.17}{\ignorespaces Realv6: ORB-SLAM3 drift while turning versus on straights.}}{91}{table.caption.162}%
+\contentsline {table}{\numberline {4.18}{\ignorespaces Realv6: the VINS-Fusion run.}}{92}{table.caption.163}%
+\contentsline {table}{\numberline {4.19}{\ignorespaces Realv7: the plane of every ORB-SLAM3 estimate as written in the live log.}}{93}{table.caption.166}%
+\contentsline {table}{\numberline {4.20}{\ignorespaces Realv7: every run after the frame repair, with its initialisation history.}}{94}{table.caption.168}%
+\contentsline {table}{\numberline {4.21}{\ignorespaces Realv7: the VINS-Fusion runs.}}{95}{table.caption.170}%
+\contentsline {table}{\numberline {4.22}{\ignorespaces Conditions for the dense-map evaluation.}}{97}{table.caption.173}%
+\contentsline {table}{\numberline {4.23}{\ignorespaces Stored contents of \repo {map/map_tiny.db}.}}{98}{table.caption.176}%
+\contentsline {table}{\numberline {4.24}{\ignorespaces Occupied-cell geometry of \repo {map/map_tiny.db} against \repo {small_warehouse_static_tinymap.world} at \SI {0.25}{\metre } tolerance.\relax }}{98}{table.caption.178}%
+\contentsline {table}{\numberline {4.25}{\ignorespaces Drivability of \repo {map/map_tiny.db} under the true $0.83\times 0.50$\nobreakspace {}m nav2 footprint, evaluated against two different routes.}}{99}{table.caption.180}%
+\contentsline {table}{\numberline {4.26}{\ignorespaces Occupied-cell geometry of the four realistic databases.}}{103}{table.caption.187}%
+\contentsline {table}{\numberline {4.27}{\ignorespaces Drivability of the realistic-warehouse databases under the true nav2 footprint, against independent routes.}}{104}{table.caption.188}%
+\contentsline {table}{\numberline {4.28}{\ignorespaces Stored contents and build parameters of the realistic-warehouse databases.}}{104}{table.caption.189}%
+\contentsline {table}{\numberline {4.29}{\ignorespaces Limitations of the results reported in this chapter, and what each one prevents.}}{114}{table.caption.198}%
 \addvspace {10\p@ }

@@ -3,6 +3,7 @@
 \small
 \caption[Realv6: ORB-SLAM3 drift while turning versus on straights.]{ORB-SLAM3 on \repo{dataset_realv6_000}, cleaned truth: growth rate of the planar error while the aligned estimate's heading changes faster than \SI{10}{\degree\per\second} and on straights, with the time in each state. Positive = error growing. One run per configuration, so no test is possible.}
 \label{tab:realv6-turning}
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{lrrrr}
 \toprule
 Run & turning [mm/s] & straight [mm/s] & time turning [s] & time straight [s] \\
@@ -12,5 +13,5 @@ ORB-SLAM3, CPU, LC on & -29.8 & -1.4 & 23 & 162 \\
 ORB-SLAM3, GPU, LC off & 4.9 & -2.1 & 11 & 185 \\
 ORB-SLAM3, CPU, LC off & -49.9 & -0.9 & 20 & 182 \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}

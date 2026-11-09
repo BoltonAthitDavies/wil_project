@@ -1,0 +1,59 @@
+provenance:
+  bag: /media/ambushee/New Volume/wil_rescue/dataset_allsensor_realistic_001/dataset_allsensor_realistic_001_0.db3
+  generated: '2026-11-06T21:57:06'
+  script: /home/ambushee/wil_project/script/proprio_estimator.py
+  git_commit: 32baaed876cabbddc19b0d89eb14a69bb6932d7e
+  note: Derived from data. Every covariance field in the source bag is identically
+    zero; Gazebo Fortress does not populate them.
+window:
+  static_start_s: 17.52
+  static_end_s: 19.68
+  static_duration_s: 2.16
+  static_imu_samples: 432
+  run_start_s: 17.52
+  run_end_s: 114.44
+  imu_dt_s: 0.004999999999999005
+  max_tilt_deg: 0.0016710974373370722
+imu:
+  gyro_bias_xyz:
+  - 0.00010259041925816381
+  - 3.8519153833319274e-05
+  - 7.715718167405573e-05
+  gyro_sigma_xyz:
+  - 0.004892836214861102
+  - 0.0047059108337598335
+  - 0.005021727234117849
+  gyro_noise_density:
+  - 0.00034597576667630604
+  - 0.00033275814622104867
+  - 0.0003550897380513543
+  accel_bias_xyz:
+  - 0.012745426275698702
+  - -0.004208978305294685
+  - 0.0
+  accel_sigma_xyz:
+  - 0.21410704176212614
+  - 0.057185661988196836
+  - 0.05634240104957371
+  accel_noise_density:
+  - 0.015139654112977565
+  - 0.004043636937849175
+  - 0.003984009385048165
+  gravity_z: 9.800759263052262
+  gyro_z_scale_vs_gt: 1.0001220175912702
+  gyro_z_sigma_vs_gt: 0.005545002146510935
+  accel_x_scale_vs_gt: 1.095354562476073
+  accel_x_sigma_vs_gt: 0.4106792460735698
+  gyro_bias_rw: 1.0e-05
+  gyro_bias_rw_source: assumed (static window too short to measure)
+wheel:
+  speed_scale: 0.9965930958018068
+  speed_sigma: 0.04320918511487596
+  yaw_rate_model: bicycle
+  yaw_rate_scale_bicycle: 0.9321326125419569
+  yaw_rate_sigma_bicycle: 0.06769863003670379
+  yaw_rate_scale_differential: 1.187294205948963
+  yaw_rate_sigma_differential: 0.22874499138792873
+  wheel_radius: 0.0585
+  wheel_base: 0.42
+  wheel_separation: 0.42

@@ -7,7 +7,7 @@
 \title{Experiment 3: Visual-Inertial Odometry With Dynamic-Environment Filtering\\
        \large Raw write-up for Chapter 4, Section 4.3}
 \author{Bolton Athit Davies}
-\date{Reporting cutoff: 22 October 2026; real-robot section revised 4 November 2026}
+\date{Reporting cutoff: 7 November 2026; real-robot section revised 4 November 2026}
 \begin{document}
 \maketitle
 
@@ -15,606 +15,342 @@
 of Experiment~3, written before the thesis chapter; Section~4.3 of the final
 report is extracted from it. It holds both result slots, every table and
 figure, and the analysis. Every number traces to a file under \repo{output/}
-named in the ``Reporting rules'' paragraph of its testbed. Open concerns are
-set in red where they arise.
+named in the ``Reporting rules'' paragraph of its slot. Open concerns are set
+in red where they arise. The extreme-world campaign of September and October
+2026 (scripted kinematic props, 66 repeats and 14 filtered runs) was retired
+on 6 November 2026 with its datasets and is not reported; its artefacts are
+under \repo{trash/output/}.
 
 % =====================================================================
 \FloatBarrier
 \section{Simulation}
 \label{sec:exp3-sim}
 
-\slotstatus{partial}{Two testbeds, analysed separately. The extreme world
-(scripted \repo{small_warehouse_dynamic_*_nofloortexture} warehouses, 66
-September runs and 14 October filtered runs) left the filtering hypothesis
-untested: the VINS-Fusion filter never activated in September, eleven of
-twelve ORB-SLAM3 treatment pairs were not input-matched, and the testbed
-itself is not physical. The realistic world (physically simulated traffic,
-32 runs of 14--21 October 2026) gives the environment-dynamics factor its
-first valid test from one run per condition; its twenty filtered runs yield
-no admissible pair.}
+\slotstatus{partial}{Unfiltered baselines only. Twenty runs on the four
+\repo{dataset_allsensor_realistic} recordings (two layouts, each without and
+with physically simulated traffic): VINS-Fusion once per recording, ORB-SLAM3
+with a CPU or GPU feature extractor and its loop closer active or disabled.
+Traffic is noted as a condition, not tested as a factor. No filtered run exists in the
+current dataset set, so the filtering hypothesis is untested, and the latency
+and resource measurement is taken from eighteen repeated runs on the two
+mapping recordings: closure-free ORB-SLAM3 with each front end, and
+VINS-Fusion, three repeats of every configuration.}
 
 \paragraph{Objective.} Determine whether masking dynamic-object features
 improves localisation, at what compute cost, and whether tracking survives it.
+In the present state of the slot the question answered is the precondition:
+how each unfiltered pipeline behaves on the realistic warehouse, with and
+without traffic, and which of its own switches (front end, loop closer)
+decides its error.
 
-\paragraph{Why two testbeds.} The two environments differ in what ``dynamic''
-means, so their results are not pooled (\cref{tab:testbeds}). In the extreme
-world the props follow scripted routes through a kinematic plugin: they move
-continuously through the camera's view and carry no physical response. In the
-realistic world the moving objects are pallet jacks on logistics jobs and
-people on foot, in two layouts, each with a static twin that differs in
-traffic only.
+\paragraph{Process.} Every run replayed at rate 1.0 from the bag with the
+node live on the laptop, the deployment condition; no detector ran. VINS-Fusion
+ran once per recording (run \repo{cpu}). ORB-SLAM3 ran four times per
+recording: the CPU or the GPU feature extractor (fork patches 10/10b, runs
+\repo{*_cpu} and \repo{*_gpu}), each with the loop closer active
+(\repo{loopclosing_*}) or disabled (\repo{noloopclosing_*}), all on 6 November
+2026 with the same node binary and configuration
+(\repo{config/wil_sim/stereo_imu.yaml}). One run per cell, so no
+within-condition spread exists.
 
-\begin{table}[htbp]
-\centering
-\caption{The two simulation testbeds of Experiment~3. Both use the live
-detector at replay time.}
-\label{tab:testbeds}
-\small
-\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X}
-\toprule
- & Extreme world & Realistic world \\
-\midrule
-Worlds & \path{small_warehouse_dynamic_{00,01,02}_nofloortexture}; static
-  controls \path{small_warehouse_static[_01]_nofloortexture} &
-  \path{small_warehouse_dynamic_realistic_nofloortexture} (U) and \repo{_01}
-  (I); static twins of each \\
-Moving objects & scripted kinematic props, continuous motion, no physical
-  response & four pallet jacks on pick--carry--drop jobs, four walking
-  people; 10 and 12 props move during the recording \\
-Recordings & 3 static, 4 dynamic (\repo{*_nofloortexture_*}) & 2 static,
-  2 dynamic (\repo{allsensor_realistic_000}--\repo{003}) \\
-Runs & 66 September repeats (both pipelines, baseline and class mask, three
-  per condition) plus 14 October filtered runs & 32: 12 baseline
-  (VINS-Fusion; ORB-SLAM3 with and without loop closer), 20 filtered (class
-  mask, motion gate; 8 with a prior atlas) \\
-Replay & $0.5\times$, 16 September 2026 & $1.0\times$, 14--21 October 2026 \\
-Standing & dynamic trajectories withheld; two comparable treatment pairs of
-  twenty-four, in an invalid testbed & baselines valid; no admissible
-  treatment pair \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-% =============================================================== testbed A
-\FloatBarrier
-\subsection{Extreme world: scripted dynamic warehouses}
-\label{sec:extreme-world}
-
-\paragraph{Objective.} Measure both pipelines, unfiltered and class-masked,
-on warehouses whose props move continuously through the camera's view.
-
-\paragraph{Process.} The relogged campaign of 16 September 2026 ran both
-pipelines on seven featureless-floor recordings, baseline and class-mask
-treatments as separate processes on identical input at $0.5\times$ replay,
-three repeats per condition. Fourteen further filtered runs were made in
-October 2026 on the same recordings at replay rate 1.0 with the live
-detector, adding the motion gate and an ORB-SLAM3 arm with its loop closer
-disabled.
-
-\paragraph{Datasets.} Three static and four dynamic \repo{nofloortexture}
-recordings (\cref{tab:testbeds}); routes are drawn in every trajectory figure
-below.
-
-\paragraph{Reporting rules.} Fixed on 21 October 2026, before the tables were
-read. Unfiltered arms: the \emph{best of three repeats} per recording, best
-being the lowest aligned ATE, with median and worst ATE beside it. Filtered
-arms: every run outside the September repeat set, \emph{one by one}, never
-as treatment pairs, because their baselines are a different session, node
-build and replay rate. Real-time and resource figures: mean $\pm$ SD over the
-three September repeats. Alignment is a rigid $SE(3)$ fit with scale fixed to
-the rosbag ground truth; jump-free RPE excludes pairs spanning a step above
-\SI{10}{\metre\per\second}; the rotational RPE is quoted as the median
-because ORB-SLAM3's single \SI{90}{\degree} re-alignment at inertial
-initialisation inflates any RMSE. Estimates are scored against the ground truth
-moved from the model origin to the IMU point both estimators report, a lever
-arm of \SI{0.338}{\metre} forward and \SI{0.192}{\metre} up taken from the
-robot model (\path{models/ackermann_robot/model.sdf}), and every figure draws
-that moved ground-truth path. The campaign was re-analysed from the run
-tree on 21 October; two September runs on \repo{dynamic_00_000} repeat~1 had
-been overwritten by 15 October re-runs, and under the re-analysis the
-campaign holds two comparable treatment pairs, one per estimator, both in
-this invalid testbed. Sources: \path{output/compare/relogged_20260916/},
-\path{output/compare/simulation/exp3-rules/},
-\path{output/compare/simulation/exp3-timelines/}.
-
-\paragraph{Validity.} All 66 September runs are operational, but the campaign
-holds no valid test of the filter (\cref{tab:validity}). The VINS-Fusion
-filter never activated: every nominal VINS+YOLO run reports zero matched
-detector frames and zero mask coverage. The ORB-SLAM3 filter ran, but eleven
-of twelve baseline/filter pairs differ in received-frame count by
-\SIrange{10}{30}{\percent}, outside the \SI{5}{\percent} pairing rule. Every
-one of the 48 dynamic runs contains impossible-speed steps, with a median
-affected-step fraction of \SI{60}{\percent} (VINS-Fusion) and
-\SI{30}{\percent} (ORB-SLAM3), so a global ATE in this testbed is not
-ordinary drift. The anomaly catalogue of \cref{tab:anomalies} records what
-the logs show without assigning causes; \cref{fig:anomalies} draws it.
-
-\begin{table}[htbp]
-\centering
-\caption{September campaign, progress and validity. ``Operational'' requires
-graceful shutdown, initialisation, at least ten processed frames and a
-trajectory; a valid treatment pair additionally requires an active filter and
-paired input counts within \SI{5}{\percent}.}
-\label{tab:validity}
-\small
-\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.22\textwidth}rrr>{\raggedright\arraybackslash}X}
-\toprule
-Run family & Attempted & Operational & Valid pairs & Note \\
-\midrule
-Static baseline & 18 & 18 & -- & two ORB-SLAM3 run summaries incomplete; frame logs confirm initialised operation \\
-Dynamic baseline & 24 & 24 & -- & every run has impossible-speed steps \\
-Dynamic ORB-SLAM3+YOLO & 12 & 12 & 1 of 12 & eleven pairs input-mismatched \\
-Dynamic VINS-Fusion+YOLO & 12 & 12 & 0 of 12 & filter inactive in every run \\
-\midrule
-Total & 66 & 66 & 1 (2 after re-analysis) & \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-\begin{table}[htbp]
-\centering
-\caption{Anomaly catalogue of the September campaign. Observations only; no
-root cause is assigned.}
-\label{tab:anomalies}
-\small
-\begin{tabularx}{\textwidth}{p{0.05\textwidth}p{0.10\textwidth}>{\raggedright\arraybackslash}X}
-\toprule
-ID & Severity & Observation and consequence \\
-\midrule
-A1 & Critical & VINS-Fusion+YOLO filtering inactive: 28\,038 mask rows, zero matched detector messages. Cannot measure a treatment. \\
-A2 & High & ORB-SLAM3+YOLO exposure varies between repeats: positive-box fraction \SIrange{1.4}{99.2}{\percent}. Match count is not dose. \\
-A3 & Critical & Every dynamic trajectory has discontinuities: median affected-step fraction \SI{59.6}{\percent} (VINS), \SI{30.3}{\percent} (ORB). Global ATE is not drift. \\
-A4 & High & Global-to-clean ATE ratios of 100--239: locally coherent intervals coexist with catastrophic jumps. \\
-A5 & Medium & Static ORB-SLAM3 has one initialisation-adjacent jump near \SI{2.6}{\second}, preceding the inertial transition by \SIrange{0.10}{0.17}{\second}. \\
-A6 & Medium & Two static ORB-SLAM3 run summaries omit final fields; retained on frame-log evidence. \\
-A7 & High & ORB-SLAM3 baseline/filter inputs unpaired in 11 of 12 cases (\SIrange{9.95}{30.06}{\percent} frame difference, durations within \SI{0.13}{\percent}). \\
-A8 & Medium & VINS-Fusion failure detection disabled, zero resets in all 33 runs: resets cannot signal health. \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\textwidth]{/home/ambushee/wil_project/output/compare/relogged_20260916/anomaly_diagnostics_light.png}
-  \caption{Run-level anomaly diagnostics of the September campaign:
-  detector-message and positive-box exposure, dynamic jump fractions, global
-  versus clean-segment ATE, ORB-SLAM3 paired-input mismatch and static
-  ORB-SLAM3 jump timing.}
-  \label{fig:anomalies}
-\end{figure}
-
-\paragraph{Results.} Unfiltered, the best repeat on every dynamic recording
-is wrong by more than the robot travels, \SIrange{11}{2311}{\metre} aligned
-ATE, while the static recordings hold \SIrange{0.10}{0.56}{\metre}
-(\cref{tab:extreme-accuracy-best}). \Cref{fig:extreme-static,fig:extreme-dynamic}
-show every repeat behind the table.
-
-The static best-of-three is a best case, not a typical one. The medians are
-\SIrange{0.12}{0.30}{\metre} for VINS-Fusion and \SIrange{0.20}{0.74}{\metre}
-for ORB-SLAM3, and the worst ORB-SLAM3 repeat on \repo{static_000} reaches
-\SI{1.15}{\metre}.
-
-ORB-SLAM3's rotational RMSE of about \SI{17}{\degree} on the static
-recordings is one event, not its tracking. Each selected run carries exactly
-one discontinuity near inertial initialisation; the median rotational RPE at
-\SI{1}{\second} is \SIrange{0.05}{0.13}{\degree} for both estimators.
-
-The dynamic numbers are withheld as findings and listed as excluded evidence.
-The one run under \SI{12}{\metre}, VINS-Fusion on \repo{dynamic_02_000}, still
-carries 58 jumps.
-
-\reporttable{extreme_accuracy_best}
-
-\begin{figure}[p]
-  \centering
-  \includegraphics[width=0.9\textwidth]{figures/extreme_trajectories_static.png}
-  \caption{Extreme world, static recordings: every repeat of both front ends,
-  top-down after rigid $SE(3)$ alignment to the rosbag ground truth (pale
-  green) on the warehouse footprint. Each panel's footer counts runs with an
-  implausible mean speed and the discontinuities found.}
-  \label{fig:extreme-static}
-\end{figure}
-
-\begin{figure}[p]
-  \centering
-  \includegraphics[width=0.84\textwidth]{figures/extreme_trajectories_dynamic.png}
-  \caption{Extreme world, dynamic recordings: every repeat of the two
-  unfiltered arms after rigid alignment, axes pinned to the ground-truth
-  extent. Each panel names the systems that leave its frame. The VINS-Fusion
-  trace of \repo{dynamic_00_000} repeat~1 is the 15 October re-run.}
-  \label{fig:extreme-dynamic}
-\end{figure}
-
-\paragraph{Filtered runs, October.} A filter that actually runs changes the
-outcome, but nothing here is a treatment effect
-(\cref{tab:extreme-filtered}, \cref{fig:extreme-october}). The fourteen runs are
-unpaired and the testbed is invalid; they are recorded as the only evidence so
-far that a running mask alters what happens on these recordings.
-
-Where the mask was present on most frames, ORB-SLAM3 stays within
-\SIrange{8}{20}{\metre} with \SIrange{62}{96}{\percent} fewer discontinuities
-than the best unfiltered repeat. The exception is the class mask with loop
-closure on \repo{dynamic_02_000}, which diverges to \SI{1391}{\metre} where
-the same mask without the closer holds \SI{10.1}{\metre}.
-
-VINS-Fusion separates by mask rate. The three class runs with a mask on
-\SIrange{15}{24}{\percent} of frames diverge to \SIrange{1500}{2900}{\metre};
-the class run with a mask on \SI{93}{\percent} of frames holds
-\SI{6.4}{\metre} over \SI{73}{\second} on \repo{dynamic_00_001}, the only
-VINS-Fusion result under \SI{10}{\metre} on any dynamic recording of this
-testbed. \flag{The motion-gated run on \repo{dynamic_00_001} overlaps the
-ground truth for \SI{5}{\second} and is not read; the four ORB-SLAM3 runs on
-\repo{dynamic_00_000} cover \SI{49}{} of \SI{77}{\second}.}
-
-\reporttable{extreme_filtered_october}
-
-\begin{figure}[p]
-  \centering
-  \includegraphics[width=0.8\textwidth]{figures/extreme_trajectories_october.png}
-  \caption{Extreme world, dynamic recordings: every October filtered run, one
-  panel each, after rigid alignment with axes pinned to the ground-truth
-  extent. Each footer gives ATE, discontinuities and the fraction of frames
-  that carried a mask.}
-  \label{fig:extreme-october}
-\end{figure}
-
-\paragraph{Analysis: when, where, and how long the filter ran.} Unfiltered,
-every dynamic run fails on the first aisle, before any corner
-(\cref{tab:extreme-timelines-baseline}). The error series is the position
-error after a rigid fit on an anchor window near the start (after the
-initialisation transient, until the ground truth has turned \SI{60}{\degree});
-the onset is the first time it stays above three times the estimator's
-static median for \SI{1}{\second}, here \SI{0.34}{\metre} for VINS-Fusion and
-\SI{0.75}{\metre} for ORB-SLAM3. All 24 dynamic baseline runs cross, 23 on
-a straight, ORB-SLAM3 at \SIrange{3}{18}{\second} and VINS-Fusion at
-\SIrange{13}{32}{\second}, all but one within the first quarter of the route.
-That is the
-signature of props moving continuously through the view, not of a turn the
-tracker cannot follow.
-
-A running mask delays the failure by tens of seconds but does not prevent
-it (\cref{tab:extreme-timelines-filtered}). In the September repeats the
-filter worked for the whole run in two, for \SIrange{5}{60}{\second} in five
-and never in seventeen, and where it never ran the onsets fall where the
-baselines' do. All four October ORB-SLAM3 runs on \repo{dynamic_00_000}
-survive the first two aisles and cross at \SIrange{42}{43}{\second} in the
-south-west corner, at about half the route (\cref{fig:tl-dyn-00-000}); on
-\repo{dynamic_01_000} and \repo{02_000} they cross at
-\SIrange{20}{36}{\second}, part-way down the first aisles where the unfiltered
-runs had failed at \SIrange{3}{18}{\second}, one of four in a heading change.
-Of the seventeen filtered runs with a working filter and an onset, thirteen
-crossed while the filter was still working.
-
-The class mask leaves most of the image, the motion gate nearly all of it.
-The class mask leaves a median \SIrange{88}{94}{\percent} of the image area,
-with per-run minima down to \SI{5}{\percent} on \repo{dynamic_00_000} when a
-prop fills the view; the motion gate leaves \SI{100}{\percent} at the median
-and \SIrange{45}{100}{\percent} at the minimum, because it rarely paints. The
-feature rows of \cref{fig:tl-static-000,fig:tl-static-001,fig:tl-static-002,fig:tl-dyn-00-000,fig:tl-dyn-00-001,fig:tl-dyn-01-000,fig:tl-dyn-02-000}
-show the cost of masking as a percentage of each estimator's feature budget
-(ORB-SLAM3 keypoints after extraction against \repo{ORBextractor.nFeatures},
-VINS-Fusion tracked features against \repo{max_cnt}), one figure per
-recording.
-
-\reporttable{extreme_baseline_timeline}
-\reporttable{extreme_filtered_timeline}
-
-\begin{figure}[p]
-  \centering
-  \includegraphics[width=0.98\textwidth]{figures/timeline_extreme__static_000.png}
-  \caption{Extreme world, \repo{static_000}, every run. Rows: ORB-SLAM3,
-  VINS-Fusion; columns: unfiltered and filtered output trees; one hue per run
-  (runs five to eight dashed). Each error panel is the start-anchored
-  position error on a log scale with the estimator's threshold (dotted) and
-  each run's onset (dot); beneath it the features per frame as a percentage
-  of the estimator's budget; beneath each filtered cell the image area left
-  after masking, with a gap wherever no mask was present. Bottom: the
-  ground-truth route on the warehouse footprint, heading-change segments in
-  amber, every onset placed on it (circles unfiltered, squares filtered).}
-  \label{fig:tl-static-000}
-\end{figure}
-\begin{figure}[p]
-  \centering
-  \includegraphics[width=0.98\textwidth]{figures/timeline_extreme__static_001.png}
-  \caption{Extreme world, \repo{static_001}, every run; panels as in \cref{fig:tl-static-000}.}
-  \label{fig:tl-static-001}
-\end{figure}
-\begin{figure}[p]
-  \centering
-  \includegraphics[width=0.98\textwidth]{figures/timeline_extreme__static_002.png}
-  \caption{Extreme world, \repo{static_002}, every run; panels as in \cref{fig:tl-static-000}.}
-  \label{fig:tl-static-002}
-\end{figure}
-\begin{figure}[p]
-  \centering
-  \includegraphics[width=0.98\textwidth]{figures/timeline_extreme__dynamic_00_000.png}
-  \caption{Extreme world, \repo{dynamic_00_000}, every run; panels as in
-  \cref{fig:tl-static-000}. The four October ORB-SLAM3 runs survive the first
-  two aisles and cross in the south-west corner at \SIrange{42}{43}{\second};
-  the September runs cross on the first aisle.}
-  \label{fig:tl-dyn-00-000}
-\end{figure}
-\begin{figure}[p]
-  \centering
-  \includegraphics[width=0.98\textwidth]{figures/timeline_extreme__dynamic_00_001.png}
-  \caption{Extreme world, \repo{dynamic_00_001}, every run; panels as in \cref{fig:tl-static-000}.}
-  \label{fig:tl-dyn-00-001}
-\end{figure}
-\begin{figure}[p]
-  \centering
-  \includegraphics[width=0.98\textwidth]{figures/timeline_extreme__dynamic_01_000.png}
-  \caption{Extreme world, \repo{dynamic_01_000}, every run; panels as in \cref{fig:tl-static-000}.}
-  \label{fig:tl-dyn-01-000}
-\end{figure}
-\begin{figure}[p]
-  \centering
-  \includegraphics[width=0.98\textwidth]{figures/timeline_extreme__dynamic_02_000.png}
-  \caption{Extreme world, \repo{dynamic_02_000}, every run; panels as in \cref{fig:tl-static-000}.}
-  \label{fig:tl-dyn-02-000}
-\end{figure}
-
-\paragraph{Real-time and resources.} Neither pipeline keeps up with the
-input at half replay rate, and the detector's cost lands on ORB-SLAM3's
-tracking thread (\cref{tab:extreme-resources}). ORB-SLAM3 kept
-\SI{61}{\percent} of received frames on the static recordings and
-\SI{89}{\percent} on the dynamic ones; VINS-Fusion keeps every frame that
-reaches it and absorbs the load as latency. With the class mask ORB-SLAM3's
-tracking median rises from \SI{63}{} to \SI{113}{\milli\second} on the dynamic
-recordings and its kept fraction falls to \SI{67}{\percent}, at the same CPU.
-The VINS-Fusion+YOLO rows equal the VINS-Fusion rows, as they must: the
-filter did not activate in those runs.
-
-\reporttable{extreme_resources}
-
-\paragraph{Loop closure.} The native ORB-SLAM3 back-end paths executed, but
-no correction benefit can be claimed. Baseline ORB-SLAM3 recorded six loop
-closures, two in each repeat of \repo{static_002}, each with two global
-bundle adjustments; one baseline dynamic run and one ORB-SLAM3+YOLO run
-recorded a map merge. Without an event-aligned before/after counterfactual,
-and with the dynamic trajectories failing plausibility, these counters show
-only that the code ran.
-
-\paragraph{Summary.} In the static recordings the best of three repeats
-reaches \SIrange{0.11}{0.25}{\metre} for VINS-Fusion and
-\SIrange{0.10}{0.56}{\metre} for ORB-SLAM3, with medians up to
-\SI{0.74}{\metre}. The dynamic numbers are withheld: even the best repeat is
-wrong by more than the distance travelled, and the environment is not
-physical. The filtering hypothesis is untested here: the two comparable pairs
-lie in an invalid testbed and the fourteen October runs are unpaired.
-Unfiltered, every dynamic run fails on the first aisle; a running mask delays
-the failure by tens of seconds, to the first corner on one recording, but does
-not prevent it.
-
-% =============================================================== testbed B
-\FloatBarrier
-\subsection{Realistic world: physically simulated traffic}
-\label{sec:realistic-ab}
-
-\paragraph{Objective.} Measure what warehouse traffic, physically simulated,
-does to each pipeline, and whether a filter treatment can be tested at
-deployment rate.
-
-\paragraph{Process.} Every run replayed at rate 1.0 with the detector live,
-the deployment condition. Both estimators ran on all four recordings with the
-filter off (VINS-Fusion once; ORB-SLAM3 with its loop closer active and
-disabled), and on the two dynamic recordings with the class mask and the
-motion gate; eight ORB-SLAM3 runs additionally loaded a prior atlas. There is
-one run per condition, so no within-condition spread exists.
-
-\paragraph{Datasets.} \repo{realistic_000} and \repo{_001} static, \repo{_002}
-and \repo{_003} dynamic with ten and twelve props moving during the recording,
-in the U and I layouts respectively. The U-layout recordings do not share a
+\paragraph{Datasets.} \repo{realistic_000} (U layout) and \repo{_001} (I
+layout) are the static twins; \repo{_002} (U) and \repo{_003} (I) carry ten and
+twelve moving props, pallet jacks on pick--carry--drop jobs and walking people.
+Routes are 103 to \SI{171}{\metre} over 80 to \SI{126}{\second}
+(the dataset table of the Experiment~1 write-up); no two recordings share a
 route.
 
 \paragraph{Reporting rules.}
 \label{sec:vio-filter-method}
-Every run is reported on its own; accuracy, latency and resources per method
-and filter separately. Alignment and RPE as in the extreme world. The
-loop-closer state is read from \repo{loop_closing.csv}, not from the run
-name. A filtered run is paired with the baseline of the same estimator and
+Every run is reported on its own. Aligned ATE is RMSE after a rigid $SE(3)$
+fit with scale fixed, in three dimensions; RPE at \SI{1}{\second} is
+translational over pairs that span no jump (a step above
+\SI{10}{\metre\per\second} between consecutive poses). The loop-closer state
+is read from \repo{loop_closing.csv} (sub-millisecond rows mean a disabled
+closer), not from the run name, and every closure the closer accepted is
+listed with its time and correction. Ground truth is the bag's
+\repo{/ground_truth/odometry}, moved from the model origin to the IMU point
+both estimators report (lever arm \SI{0.338}{\metre} forward,
+\SI{0.192}{\metre} up) before alignment; the figures draw that moved path.
+``Kept'' is the fraction of the bag's stereo pairs the node processed, so
+frames lost before the node's own counter count as lost. The onset analysis
+uses the start-anchored planar error against a threshold of three times the
+estimator's median error over its two static runs (VINS-Fusion
+\SI{1.07}{\metre}, ORB-SLAM3 \SI{1.31}{\metre}). A filtered run, when one
+exists, is paired with the baseline of the same estimator, front end and
 loop-closer state, and the pair is admissible only under three gates: an
 active filter (\repo{detection_match_rate} $\ge 0.98$), processed frames and
 duration within \SI{5}{\percent} of the baseline, and both runs on the same
-node binary (built 16 October 2026). Prior-atlas runs are relocalisation
-experiments and are listed but not paired. Ground truth is the bag's
-\repo{/ground_truth/odometry}, moved from the model origin to the IMU point
-both estimators report (lever arm \SI{0.338}{\metre} forward,
-\SI{0.192}{\metre} up, from the robot model) before alignment; the figures
-draw that moved path. Sources:
-\path{output/compare/simulation/exp-realistic-ab/},
-\path{output/compare/simulation/exp3-timelines/}.
+node binary. Sources: \path{output/compare/simulation/exp-realistic-ab/}
+(\repo{runs_metrics.csv}, \repo{baseline_table.tex}),
+\path{output/compare/simulation/exp3-timelines/}
+(\repo{timelines.csv}, \repo{thresholds.csv}), run directories under
+\path{output/output_orb/simulation/} and \path{output/output_vins/simulation/}.
+The run that first occupied \path{realistic_002/loopclosing_gpu} had been
+launched on the \repo{realistic_003} bag with the wrong output path (its
+manifest names that bag and world, and it received 3\,535 stereo pairs where
+\repo{realistic_002} holds 2\,409); it is set aside under
+\path{trash/output/misfiled_20261106/} and the cell was re-run on the right
+bag on the evening of 6 November.
 
-\paragraph{Results.} With physically simulated traffic neither front end
-loses tracking: across both dynamic recordings ORB-SLAM3 holds
-\SIrange{0.34}{0.70}{\metre} aligned ATE against \SIrange{0.29}{0.59}{\metre}
-on the static twins
-(\cref{tab:realistic-baseline}, \cref{fig:realistic-traj,fig:realistic-metrics}).
-In the extreme world the same estimators produced hundreds of metres of error
-per run.
-
-Traffic degrades VINS-Fusion on one of two layouts. On the U layout,
-\repo{realistic_002}, it reads \SI{1.85}{\metre} against \SI{0.32}{\metre} on
-the static twin, with a jump-free RPE of \SI{0.21}{\metre} against
-\SIrange{0.07}{0.09}{\metre} everywhere else: a continuous degradation with
-no jump, which is what a tracker following features on moving objects looks
-like. \begin{queried}[Confound] Traffic is not separated from route: the
-U-layout recordings do not share a route, and there is one run per cell.
-\end{queried}
-
-Loop closure changes nothing attributable to it. The closer fired zero to two
-times per run, and the two ORB-SLAM3 arms differ by
-\SIrange{0.05}{0.30}{\metre} in either direction.
-
-ORB-SLAM3's rotational RMSE of \SIrange{13}{17}{\degree} is one event. On
-every run the median rotational RPE at \SI{1}{\second} is
-\SIrange{0.06}{0.16}{\degree} and \SI{99}{\percent} of pairs lie under
-\SI{5}{\degree}; the remainder span a single orientation step of about
-\SI{90}{\degree} at \SIrange{2.5}{2.7}{\second}, where inertial
-initialisation re-aligns the world frame to gravity. The jump detector is
-translational, so the jump-free rotational statistic does not exclude it; the
-median is the number to read.
-
-No run is at input rate. At replay rate 1.0 the estimators processed
-\SIrange{58}{82}{\percent} of each bag's frames, ORB-SLAM3 by dropping at its
-queue, VINS-Fusion by losing frames before its own counter sees them.
+\paragraph{Results.} VINS-Fusion holds \SIrange{0.22}{0.66}{\metre} aligned
+ATE on the four recordings with no jump and \SIrange{1.2}{3.6}{\degree} of
+rotation error; its worst recording is the U layout with traffic,
+\SI{0.66}{\metre} against \SI{0.29}{\metre} on that layout's static twin,
+while on the I layout traffic changes nothing (\SI{0.27}{} against
+\SI{0.22}{\metre}). ORB-SLAM3 spans \SIrange{0.14}{6.02}{\metre}: eleven of its
+sixteen runs lie between \SI{0.14}{} and \SI{0.52}{\metre} and five diverge, and
+which five is decided by the loop closer and the recording, not by the front
+end (\cref{tab:realistic-baseline}, \cref{fig:realistic-traj,fig:realistic-metrics}).
+Neither front end loses tracking on any recording, with or without traffic:
+zero tracking-loss events and zero resets in twenty runs.
 
 \reporttable{realistic_baseline_table}
 
 \begin{figure}[p]
   \centering
   \includegraphics[width=0.92\textwidth]{figures/realistic_trajectories.png}
-  \caption{Unfiltered estimates on the four realistic-warehouse recordings
-  after rigid $SE(3)$ alignment with scale fixed, on the warehouse footprint;
-  black is ground truth. Top: the static twins; bottom: the same layouts with
-  traffic. Dashed purple is ORB-SLAM3 with its loop closer disabled. The only
-  visible departure is VINS-Fusion on \repo{realistic_002}.}
+  \caption[Unfiltered estimates on the four realistic recordings.]{Unfiltered
+  estimates on the four realistic-warehouse recordings
+  after rigid $SE(3)$ alignment with scale fixed, on the warehouse footprint.
+  Top: the static twins; bottom: the same layouts with traffic. Solid magenta
+  is ORB-SLAM3 with its loop closer active, dashed with it disabled, lighter
+  for the GPU front end; orange is VINS-Fusion. The two excursions on
+  \repo{realistic_001} are the loop-closing runs after their false closure;
+  the \SI{1.4}{\metre} run on \repo{realistic_002} is the CPU loop-closing
+  run; the closure-free runs on \repo{realistic_003} lie on the route in plan
+  and diverge vertically.}
   \label{fig:realistic-traj}
 \end{figure}
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{figures/realistic_metrics.png}
-  \caption{Aligned ATE (left) and jump-free translational RPE at
-  \SI{1}{\second} (right) of the unfiltered arms, one marker per run.}
+  \caption[Aligned ATE and jump-free RPE of the unfiltered arms.]{Aligned ATE
+  (left) and jump-free translational RPE at
+  \SI{1}{\second} (right) of every unfiltered run, one marker per run; filled
+  markers are the CPU front end, open markers the GPU front end of the same
+  configuration. The relative error is \SIrange{0.07}{0.12}{\metre} for every
+  run, so the ATE differences are discrete events, not tracking quality.}
   \label{fig:realistic-metrics}
 \end{figure}
 
-\paragraph{Filtered runs: no admissible pair.} Of twenty filtered runs, the
-three gates leave none (\cref{tab:realistic-filtered}). Eight loaded a prior
-atlas and are excluded as relocalisation runs. All four VINS-Fusion runs
-carried a current mask on \SIrange{18}{39}{\percent} of frames
-(\repo{filter_status} \texttt{degraded}): the live detector could not keep up
-at rate 1.0, so the filter did not run. Three ORB-SLAM3 runs had an active
-filter; two processed \SIrange{15}{33}{\percent} fewer frames than their
-baseline, and the third, the class mask with loop closure on
-\repo{realistic_002}, is input-matched (\SI{+4.7}{\percent}) but was recorded
-on 14 October with a node binary older than its baseline's.
-\flag{That pair reads \SI{1.47}{\metre} filtered against \SI{0.70}{\metre}
-unfiltered, four jumps against two; a number, not an effect.}
+\paragraph{Analysis: the loop closer decides, in both directions.} On the
+static I layout both loop-closing runs accept one closure at \SI{73.2}{\second},
+in the heading change at \SI{76}{\percent} of the route, with a correction of
+\SI{14.7}{\metre} (CPU) and \SI{13.3}{\metre} (GPU) and \SIrange{1.9}{2.8}{\degree};
+a global bundle adjustment follows and the trajectory is \SI{6.02}{} and
+\SI{4.78}{\metre} off for the rest of the run, where the two closure-free runs
+on the same recording hold \SI{0.50}{} and \SI{0.40}{\metre}
+(\cref{fig:tl-real-001}). A route with half a metre of accumulated error
+cannot need a fourteen-metre correction, so the match is false: the I layout's
+long parallel aisles present the same rack faces twice, and the matched
+keyframes (97 against 255, 104 against 272) are one aisle apart. The same
+candidate was then re-proposed four times and rejected by the inertial
+geometry check, after the damage. That both front ends accept it at the same
+frame with the same correction says the place-recognition stage, not the
+extractor, is where the fault lies.
 
-Two patterns in the inadmissible runs are hypotheses for the repeat. The
-class-masked ORB-SLAM3 runs on the I layout carry \numrange{11}{45} jumps where
-their baselines carry one or two, which would mean the mask removes features
-the tracker needs on the long rack faces. On that layout every run with the
-mask present on at least \SI{97}{\percent} of frames processed
-\SIrange{15}{50}{\percent} fewer frames than its baseline, which is the
-detector's cost and, under the deployment definition, part of the result.
+On the I layout with traffic the sign reverses. Both loop-closing runs accept
+one closure at \SI{56.5}{\second} (\SI{48}{\percent} of the route) with a
+\SI{0.33}{\metre} correction and hold \SI{0.14}{} and \SI{0.50}{\metre}; the
+closure-free runs read \SI{1.76}{} and \SI{1.91}{\metre}, yet their planar
+error never exceeds \SI{0.7}{\metre} (\cref{fig:tl-real-003}). The difference
+is vertical: the closure-free estimates climb to \SI{4.7}{} and
+\SI{5.1}{\metre} above the floor by the end of the run while the loop-closing
+runs stay within \SI{0.6}{} and \SI{1.4}{\metre}, and the three-dimensional
+ATE reports that climb. The GPU loop-closing run on this recording also
+rejected 148 further candidates by inertial geometry, every one of them after
+its single accepted closure. On the U layout the closer is nearly inert: two
+accepted closures per run on \repo{realistic_000} with corrections of
+\SIrange{0.07}{0.12}{\metre}, one of \SIrange{0.26}{0.33}{\metre} per run on
+\repo{realistic_002}, and the eight U-layout ORB-SLAM3 runs within
+\SIrange{0.17}{0.52}{\metre} except the CPU loop-closing run on
+\repo{realistic_002}, whose \SI{1.39}{\metre} is an offset present from
+\SI{6.5}{\second} on, before any closure (\cref{fig:tl-real-002}); with four
+jumps and the lowest relative error on the recording it is an initialisation
+event, not a tracking one, and the GPU run of the same configuration, which
+accepts the same closure at \SI{65}{\second}, does not reproduce it
+(\SI{0.40}{\metre}).
 
-\reporttable{realistic_filtered_table}
+\paragraph{Analysis: the front end changes throughput, not accuracy.} The GPU
+extractor processes \SIrange{97}{99}{\percent} of each bag's frames where the
+CPU extractor processes \SIrange{72}{94}{\percent}, and its tracking median
+is \SIrange{30}{37}{\milli\second} against \SIrange{49}{55}{\milli\second}
+(from the per-run \repo{performance.csv}). Across the eight CPU/GPU pairs
+with the same closer state the ATE differs by at most \SI{0.16}{\metre} in
+five; the three larger differences (\SI{-1.2}{}, \SI{-1.0}{} and
+\SI{+0.4}{\metre}) are each one run's discrete event, in both directions,
+and the two divergence patterns above occur in both front ends alike. At this frame budget the extractor is not the limiting
+stage of accuracy on these recordings.
 
-\paragraph{Resources.} The class mask costs ORB-SLAM3 almost nothing; the
-motion gate and the prior atlas halve its throughput; the live detector
-starves VINS-Fusion (\cref{tab:realistic-resources}). Unfiltered, both
-pipelines run at \SIrange{18}{25}{\hertz}, VINS-Fusion on about seven cores to
-ORB-SLAM3's four and with half the memory. ORB-SLAM3 with the class mask and
-loop closure keeps \SIrange{69}{70}{\percent} of frames at
-\SIrange{54}{60}{\milli\second} tracking, whereas the motion gate and every
-atlas run roughly double the tracking median and keep
-\SIrange{22}{50}{\percent}. VINS-Fusion filtered keeps
-\SIrange{43}{56}{\percent} of frames, which is the mechanism behind its low
-mask rates.
+\paragraph{Analysis: traffic as a condition.} VINS-Fusion is \SI{0.37}{\metre}
+worse on the U layout with traffic than on its static twin and \SI{0.05}{\metre}
+worse on the I layout; its relative error on \repo{realistic_002} is the
+highest of any run (\SI{0.116}{\metre}) and its error trace carries two
+waves of \SI{0.7}{\metre} at \SI{25}{} and \SI{45}{\second} on the western and
+southern aisles, where the pallet jacks work, that no static run shows
+(\cref{fig:tl-real-002}). ORB-SLAM3's closure-free runs are \emph{better} on
+the U traffic recording (\SI{0.29}{}, \SI{0.17}{\metre}) than on its static
+twin (\SI{0.48}{}, \SI{0.52}{\metre}). With one run per cell and routes that
+differ between twin and traffic recording, neither number is a traffic effect;
+what the slot establishes is that physically simulated traffic degrades the
+tracker that follows features longest, and breaks neither.
 
-\reporttable{realistic_resources}
-
-\paragraph{Analysis: when, where, and how long the filter ran.} Unfiltered,
-only one of six runs on the dynamic recordings ever crosses its threshold
-(\SI{0.83}{\metre} VINS-Fusion, \SI{1.41}{\metre} ORB-SLAM3): VINS-Fusion on
-\repo{realistic_002} at \SI{30}{\second}, in the heading change at
-\SI{39}{\percent} of the route (\cref{tab:realistic-timelines-baseline},
-\cref{fig:tl-real-002}). Neither ORB-SLAM3 arm crosses on either dynamic
-recording.
-
-Filtered, the class-masked ORB-SLAM3 runs fail at or just after the first
-heading change following the long rack aisle, with the mask present
-(\cref{tab:realistic-timelines-filtered}). Fourteen of twenty filtered runs
-cross, eight in a heading change; on \repo{realistic_003} all four
-class-masked ORB-SLAM3 runs cross, two in the first corner at
-\SIrange{33}{34}{\second} (\SIrange{28}{29}{\percent} of the route) and two on
-the straights after it at \SI{39}{} and \SI{87}{\second}
-(\cref{fig:tl-real-003}), including the run whose mask was present on every
-frame. The six that never cross are
-motion-gated ORB-SLAM3 runs and VINS-Fusion runs whose masks were present on
-\SIrange{1}{39}{\percent} of frames, with one exception: ORB-SLAM3's motion
-gate without loop closure on \repo{realistic_003}, mask present on
-\SI{99}{\percent} of frames, no onset. With one run per cell this is where to
-look first in the repeat, not an effect.
-
-The class mask leaves a median \SIrange{90}{93}{\percent} of the image
-(minima \SIrange{49}{85}{\percent}); the motion gate leaves
-\SI{100}{\percent} (minima \SIrange{62}{100}{\percent}). The features-left
-rows of \cref{fig:tl-real-000,fig:tl-real-001,fig:tl-real-002,fig:tl-real-003}
-give the per-frame cost against each estimator's budget.
+\paragraph{Analysis: the rotation column.} ORB-SLAM3's \SIrange{13}{19}{\degree}
+rotational RMSE is one event on every run: the first jump lies at
+\SIrange{2.5}{4.8}{\second} (\cref{tab:realistic-timelines-baseline}), where
+inertial initialisation re-aligns the world frame to gravity, and after it the
+clean rotational RPE is \SIrange{0.07}{0.33}{\degree}. The jump detector is
+translational, so the column includes the event; the median is the number to
+read.
 
 \reporttable{realistic_baseline_timeline}
-\reporttable{realistic_filtered_timeline}
 
 \begin{figure}[p]
   \centering
   \includegraphics[width=0.98\textwidth]{figures/timeline_realistic__realistic_000.png}
-  \caption{Realistic world, \repo{realistic_000}, every run; panels as in \cref{fig:tl-static-000}.}
+  \caption[Timelines, static U-layout recording.]{\repo{realistic_000} (U,
+  static), every run. Left: start-anchored
+  planar error on a log axis, solid for loop closing active, dotted for
+  disabled, lighter for the GPU front end, with each estimator's threshold;
+  the dot marks the onset of sustained excess. Right: the route with heading
+  changes in orange and every onset placed on it. The one onset is the GPU
+  closure-free run at \SI{60}{\second}, a sustained \SI{1.3}{\metre} offset on
+  the straight, not a jump.}
   \label{fig:tl-real-000}
 \end{figure}
 \begin{figure}[p]
   \centering
   \includegraphics[width=0.98\textwidth]{figures/timeline_realistic__realistic_001.png}
-  \caption{Realistic world, \repo{realistic_001}, every run; panels as in \cref{fig:tl-static-000}.}
+  \caption[Timelines, static I-layout recording.]{\repo{realistic_001} (I,
+  static), every run; panels as in
+  \cref{fig:tl-real-000}. Both loop-closing runs step to \SI{14}{\metre} of
+  error at \SI{73}{\second}, in the heading change at \SI{76}{\percent} of the
+  route, at the single accepted closure; the closure-free runs and VINS-Fusion
+  never cross.}
   \label{fig:tl-real-001}
 \end{figure}
 \begin{figure}[p]
   \centering
   \includegraphics[width=0.98\textwidth]{figures/timeline_realistic__realistic_002.png}
-  \caption{Realistic world, \repo{realistic_002}, every run; panels as in
-  \cref{fig:tl-static-000}. VINS-Fusion unfiltered crosses at
-  \SI{30}{\second} in the heading change at \SI{39}{\percent} of the route.}
+  \caption[Timelines, U-layout recording with traffic.]{\repo{realistic_002}
+  (U, traffic), every run; panels as in
+  \cref{fig:tl-real-000}. The CPU loop-closing run carries a \SI{1.5}{\metre}
+  offset from \SI{6.5}{\second}, which the GPU loop-closing run does not
+  share; VINS-Fusion's two \SI{0.7}{\metre} waves at \SI{25}{} and
+  \SI{45}{\second} lie on the aisles where the pallet jacks work.}
   \label{fig:tl-real-002}
 \end{figure}
 \begin{figure}[p]
   \centering
   \includegraphics[width=0.98\textwidth]{figures/timeline_realistic__realistic_003.png}
-  \caption{Realistic world, \repo{realistic_003}, every run; panels as in
-  \cref{fig:tl-static-000}. The class-masked ORB-SLAM3 runs cross at or
-  after the first heading change following the long aisle, at
-  \SIrange{33}{87}{\second}, with the mask present on nearly every frame; the
-  unfiltered runs never cross.}
+  \caption[Timelines, I-layout recording with traffic.]{\repo{realistic_003}
+  (I, traffic), every run; panels as in
+  \cref{fig:tl-real-000}. No run crosses its threshold in the plane; the
+  \SI{1.8}{} and \SI{1.9}{\metre} ATE of the closure-free runs is vertical
+  drift, which the single accepted closure of the loop-closing runs removes.}
   \label{fig:tl-real-003}
 \end{figure}
 
-\paragraph{Summary.} With physically simulated traffic neither front end
-loses tracking: ORB-SLAM3 stays near its static range and VINS-Fusion
-degrades on one of two layouts, to \SI{1.85}{\metre}, continuously and
-without a jump, from one run per condition with traffic not separated from
-route. The filter had no admissible test: the VINS-Fusion filter did not run
-at deployment rate, and every ORB-SLAM3 pair fails on input match or node
-binary. Where the class-masked ORB-SLAM3 runs fail, it is at or just after
-the first heading change following the long rack aisle, with the mask present;
-the unfiltered runs do not fail there.
+\paragraph{Filtered arms.} \status{untested}. The current dataset set holds no
+filtered run: the October 2026 filtered runs on these recordings were retired
+on 6 November 2026 with the rest of the earlier campaign, and the filter has
+not been re-run under the present pipeline (GPU front end, patch-15
+initialisation switches). When it is, each filtered run pairs with the
+baseline of the same estimator, front end and closer state under the three
+gates above, and the loop-closer finding here fixes the pairing that matters:
+on the I layout the comparison must be made with the closer disabled, or the
+false closure will dominate both arms.
 
-% =============================================================== shared
-\FloatBarrier
-\subsection{Summary and future plan}
+\paragraph{Latency and resources.} By the design decision of 6 November
+2026 the real-time and resource measurement of this experiment is taken only
+on the two mapping recordings, each configuration run three times:
+\repo{dataset_allsensor_realistic_map} (U layout, \SI{286}{\second}, 8\,725
+stereo pairs) and \repo{dataset_allsensor_realistic_01_map} (I layout,
+\SI{315}{\second}, 9\,552 pairs). Eighteen runs exist, six configurations of
+three repeats each at replay rate 1.0 with no detector: ORB-SLAM3 with the
+CPU and with the GPU front end, loop closer disabled, and VINS-Fusion
+(\cref{tab:mapping-resources}). The repeats are tight, front-end medians
+within \SIrange{1}{7}{\milli\second} of their mean and peak memory within
+\SI{30}{\mebi\byte}.
 
-\paragraph{Summary.} The two testbeds answer different questions and neither
-answers the one the experiment was designed for. The extreme world shows what
-the estimators do when the scene is not physical, and that is withheld. The
-realistic world shows that warehouse traffic degrades rather than breaks
-tracking, and by how much, from single runs. The filtering hypothesis has had
-no admissible test in either: zero valid pairs in the realistic world, two in
-the extreme world that cannot be read because the testbed is invalid. The
-motion gate is a negative result in both: it rarely paints, so it costs
-throughput without changing what it was meant to change. Neither pipeline
-runs at input rate in either testbed. Why the error rises when it does, and
-the lever-arm correction behind this document's scoring, are analysed in
-\path{insights/experiment_3_insight/}.
+The two pipelines divide the cost differently, and neither is cheaper than
+the other outright. VINS-Fusion optimises in \SI{44}{\milli\second} where
+ORB-SLAM3's local mapping takes \SIrange{211}{406}{\milli\second}, and holds
+its state in a quarter of the memory, but spends more than twice the
+processor time: about eight cores of one against three and a half. Their
+front ends are within \SI{6}{\milli\second} of each other, and every
+configuration keeps \SIrange{75}{96}{\percent} of the bag's frames, so the
+choice between them is a memory-against-cores trade, not a speed one.
 
-\paragraph{Future plan.} Repeat the three-way test on the realistic
-recordings with three runs per condition, every arm on the same node build,
-the baseline arm replayed through the same launch file as the filtered arms,
-and \repo{detection_match_rate} and the processed-frame count checked against
-the gates before a run is kept. Raise the detector's delivered mask rate at
-rate 1.0 for VINS-Fusion, or state the deployment result as ``the filter
-cannot run at this rate on this machine''. Record a second route in each
-layout so that traffic and route are separable. Report the prior-atlas runs
-under relocalisation, where they belong.
+Between ORB-SLAM3's two front ends the recordings disagree. On the U
+recording the GPU extractor behaves as the single runs showed, tracking in
+\SI{37}{} against \SI{42}{\milli\second} and keeping \SI{96}{} against
+\SI{93}{\percent} of frames; on the I recording the sign reverses, \SI{52}{}
+against \SI{44}{\milli\second} and \SI{75}{} against \SI{91}{\percent} kept,
+with the local-mapping median at \SI{406}{\milli\second}. VINS-Fusion reads
+the same on both recordings (front end \SI{38.1}{} and \SI{38.6}{},
+back end \SI{44.3}{} and \SI{44.5}{\milli\second}), so the recordings
+themselves do not impose a difference of that size.
+
+\begin{queried}[Confound: run order] The six GPU runs were made consecutively
+from 21:04 to 22:04 and the six CPU runs from 23:27 to 00:18, so the
+I-recording GPU repeats were the fourth to sixth GPU runs of a session on a
+laptop that throttles at \SI{90}{\celsius}; the front-end record notes that
+timing comparisons need a cool-start, interleaved order. The six VINS-Fusion
+runs are a separate session of 7 November and are not a control for that
+state. The U-recording figures are the ones to quote until the I recording is
+repeated interleaved. \end{queried} The per-run resources of the twenty
+accuracy runs above are generated beside this table
+(\repo{realistic_resources.tex}) and are not reported, except the frame
+retention already in \cref{tab:realistic-baseline}.
+
+\reporttable{mapping_resources}
+
+\paragraph{Limitations, each stated once.} \emph{$n$:} one run per cell; the
+only run-to-run figure is the agreement of the two front ends on where and
+how the closer fails. \emph{Route and traffic confounded:} no two recordings
+share a route. \emph{Three-dimensional ATE:} the metric charges vertical
+drift to a floor robot; the planar onset table is the complement, not a
+replacement. \emph{Deployment rate on one laptop:} frame retention and every latency
+figure are properties of this machine at rate 1.0, and the mapping-bag
+repeats were not interleaved between front ends.
+
+\begin{queried}[Open: the false closure is diagnosed from its correction, not from the images]
+The \SI{14}{\metre} correction and the one-aisle keyframe separation identify
+the \repo{realistic_001} closure as false, and both front ends agree; the
+matched image pair has not been inspected, and the two April-style guards
+that would catch it (a covisibility-consistency window, or a maximum
+correction against the inertial drift bound) are untested. Until one is, the
+finding is a diagnosis, not a fix.
+\end{queried}
+
+\paragraph{Summary.} On the realistic warehouse neither pipeline loses
+tracking, with or without traffic. VINS-Fusion holds \SIrange{0.22}{0.66}{\metre}
+with no jump and is worst on the U layout with traffic; ORB-SLAM3 holds
+\SIrange{0.14}{0.52}{\metre} in eleven runs of sixteen, and its five divergences
+are the loop closer's: a false closure on the I layout's repeated aisles that
+puts both front ends \SIrange{4.8}{6.0}{\metre} off, a vertical drift on the
+same layout with traffic that only the closer corrects, and one
+initialisation offset. The front end changes throughput
+(\SIrange{97}{99}{\percent} of frames kept against \SIrange{72}{94}{\percent})
+and not accuracy. The filtering hypothesis is untested in the current dataset
+set. On the mapping recordings VINS-Fusion optimises five to nine times faster
+than ORB-SLAM3's local mapping and in a quarter of the memory, for more than
+twice the processor time; within ORB-SLAM3 the GPU front end tracks in
+\SI{37}{\milli\second} and keeps \SI{96}{\percent} of frames against the CPU
+front end's \SI{42}{\milli\second} and \SI{93}{\percent} on the U layout, in
+three repeats each, and the I-layout repeats contradict that and were run in
+a thermally confounded order.
+
+\paragraph{Future plan.} Run both pipelines filtered on \repo{realistic_002} and \repo{_003}
+with the detector live, paired under the three gates and with the closer
+disabled on the I layout; add a correction bound to the loop closer and test
+it on \repo{realistic_001}; repeat the mapping-recording runs interleaved
+between all three configurations from a cool start, so that the thermal state
+is shared rather than confounded with the configuration; and record
+a second route in each layout so that traffic and route are separable.
 
 % =====================================================================
 \FloatBarrier
@@ -684,7 +420,8 @@ and has no entry in the accuracy table.
 \begin{figure}[p]
   \centering
   \includegraphics[width=\textwidth]{../../../../output/compare/real/realv6-insights/fig_paths_light.png}
-  \caption{Every run against the cleaned tracker truth after rigid SE(2)
+  \caption[Real runs against the cleaned tracker truth.]{Every run against the
+  cleaned tracker truth after rigid SE(2)
   alignment, one panel per run: ORB-SLAM3 with GPU or CPU extractor and loop
   closing on or off, and VINS-Fusion's \SI{18}{\second}.}
   \label{fig:realv6-paths}
@@ -713,7 +450,8 @@ time alignment (\cref{tab:realv6-cleaning}).
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{../../../../output/compare/real/realv6-insights/fig_orb_timeline_light.png}
-  \caption{ORB-SLAM3 planar error over the run, one panel per configuration;
+  \caption[ORB-SLAM3 planar error over the run.]{ORB-SLAM3 planar error over
+  the run, one panel per configuration;
   grey bands are turns, dotted red the initialisation resets.}
   \label{fig:realv6-orb}
 \end{figure}
@@ -739,7 +477,8 @@ configuration still fixes a gravity norm of \num{9.2642} against the
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{../../../../output/compare/real/realv6-insights/fig_vins_light.png}
-  \caption{VINS-Fusion: distance from origin with every \repo{imu_gap} reset
+  \caption[VINS-Fusion resets and IMU sample use.]{VINS-Fusion: distance from
+  origin with every \repo{imu_gap} reset
   marked, and IMU messages received against samples used.}
   \label{fig:realv6-vins}
 \end{figure}
@@ -796,7 +535,8 @@ gravity norm has since been set to the measured \SI{9.886}{\metre\per\second\squ
 \begin{figure}[p]
   \centering
   \includegraphics[width=\textwidth]{../../../../output/compare/real/realv7-insights/fig_tilt_light.png}
-  \caption{The twelve \repo{realv7} ORB-SLAM3 estimates as written in the live
+  \caption[The twelve realv7 estimates as written in the live log.]{The twelve
+  \repo{realv7} ORB-SLAM3 estimates as written in the live
   log, seen from the side ($x$ against $z$, centred); a floor robot's path should
   be a flat line. The repaired estimates are in \cref{fig:realv7-paths-repaired}.}
   \label{fig:realv7-tilt}
@@ -807,7 +547,8 @@ gravity norm has since been set to the measured \SI{9.886}{\metre\per\second\squ
 \begin{figure}[p]
   \centering
   \includegraphics[width=\textwidth]{../../../../output/compare/real/realv7-insights/fig_paths_lvl_light.png}
-  \caption{The twelve \repo{realv7} ORB-SLAM3 runs after the scorer's frame
+  \caption[The twelve realv7 runs after the frame repair.]{The twelve
+  \repo{realv7} ORB-SLAM3 runs after the scorer's frame
   repair, against the tracker truth after rigid SE(2) alignment; each panel's
   title gives the planar ATE and the share of tracked frames with the IMU
   initialised.}

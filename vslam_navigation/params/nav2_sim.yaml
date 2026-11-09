@@ -1,0 +1,290 @@
+# Nav2 for the simulated ackermann_robot, localised by ORB-SLAM3 or VINS plus
+# RTAB-Map on a PRIOR MAP -- not by ground truth.
+#
+# Derived from aws-robomaker-small-warehouse-world/params/nav2_ackermann.yaml.
+# READ THAT HEADER FIRST: it derives every curvature number used here (rear-axle
+# bound 1.6673 1/m, base_link minimum radius 0.6355 m, why min_lookahead_dist is
+# 1.30, why slowing down makes saturation worse, why rotate-to-heading must be off
+# and why the velocity smoother must scale all components together). The chassis
+# is unchanged from that file: wheel_base 0.42 m, steering limit 35 deg.
+#
+# WHAT DIFFERS FROM nav2_ackermann.yaml, and why
+#   * map -> odom is RTAB-Map's LIVE CORRECTION, not an identity. The source file
+#     is explicit that its non-rolling local costmap in the odom frame is safe
+#     "only because map->odom is a permanent, exact identity (the gz
+#     OdometryPublisher sets no xyz/rpy offset)". That premise is false under SLAM
+#     localisation: the correction jumps whenever RTAB-Map relocalises. So the
+#     local costmap here is a ROLLING 10x10 m window, as on the real rig.
+#   * odom_topic is /orbslam3/odometry (the front end's own), not /odom. Nothing
+#     publishes /odom in this chain: ground_truth_localization is deliberately not
+#     running, because it is what we are replacing.
+#   * the prior map arrives on /map from RTAB-Map's use_saved_map, latched. There
+#     is no map_server unless the launch is given a map yaml for offline tests.
+#   * autostart is false: scripts/pose_gate.py starts the stack once the
+#     localisation is judged sound and pauses it when it stops being sound. Under
+#     ground truth there was nothing to gate on.
+#   * the frame chain is map -> odom -> vio_body -> base_footprint -> base_link,
+#     published by localization_rtabmap.launch.py. robot_base_frame stays
+#     base_link, as in the source file.
+#
+# WHAT IS DELIBERATELY UNCHANGED
+#   The whole kinematic half: desired_linear_vel, both lookahead bounds,
+#   minimum_turning_radius 0.75, the footprint, and the smoother limits. Those
+#   follow from the chassis and the chassis did not change. Do not "retune" them
+#   because localisation changed.
+
+bt_navigator:
+  ros__parameters:
+    use_sim_time: true
+    global_frame: map
+    robot_base_frame: base_link
+    odom_topic: /orbslam3/odometry
+    bt_loop_duration: 10
+    default_server_timeout: 20
+    # Absolute path, rewritten at launch. A local copy of nav2's tree with
+    # RemovePassedGoals' radius raised: RPP cuts corners by up to
+    # min_lookahead_dist as normal tracking, so a via-point is routinely passed at
+    # more than the stock hard-coded 0.7 m and is never consumed.
+    default_nav_through_poses_bt_xml: REWRITTEN_AT_LAUNCH
+    navigators: ["navigate_to_pose", "navigate_through_poses"]
+    navigate_to_pose:
+      plugin: "nav2_bt_navigator/NavigateToPoseNavigator"
+    navigate_through_poses:
+      plugin: "nav2_bt_navigator/NavigateThroughPosesNavigator"
+
+controller_server:
+  ros__parameters:
+    use_sim_time: true
+    controller_frequency: 20.0
+    min_x_velocity_threshold: 0.001
+    min_y_velocity_threshold: 0.50
+    min_theta_velocity_threshold: 0.001
+    failure_tolerance: 0.30
+    progress_checker_plugin: "progress_checker"
+    goal_checker_plugins: ["general_goal_checker"]
+    controller_plugins: ["FollowPath"]
+
+    progress_checker:
+      plugin: "nav2_controller::SimpleProgressChecker"
+      required_movement_radius: 0.50
+      movement_time_allowance: 15.0
+
+    general_goal_checker:
+      plugin: "nav2_controller::SimpleGoalChecker"
+      xy_goal_tolerance: 1.0
+      yaw_goal_tolerance: 3.15
+      stateful: true
+
+    FollowPath:
+      plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"
+      desired_linear_vel: 1.5
+      min_approach_linear_velocity: 0.15
+      approach_velocity_scaling_dist: 0.60
+      use_velocity_scaled_lookahead_dist: true
+      lookahead_time: 2.20
+      lookahead_dist: 1.30
+      min_lookahead_dist: 1.30          # >= 2/1.6673; see the source header's sweep
+      max_lookahead_dist: 2.00
+      use_regulated_linear_velocity_scaling: true
+      regulated_linear_scaling_min_radius: 1.20
+      regulated_linear_scaling_min_speed: 0.25
+      use_cost_regulated_linear_velocity_scaling: false
+      use_rotate_to_heading: false
+      allow_reversing: false
+      rotate_to_heading_min_angle: 3.15
+      max_angular_accel: 1.50
+      max_robot_pose_search_dist: 5.0
+      # Looser than the source file's 0.20: this chain arrives through two nodes,
+      # the front end at frame rate and RTAB-Map's correction at its detection
+      # rate, same reasoning as the real rig.
+      transform_tolerance: 0.30
+      # OFF here, unlike the ground-truth file. Two reasons, and the first is
+      # measured in the source file's own sweep: with collision detection ON at
+      # lookahead 1.30 the run went to "paralysis, 155 vetoes, 0.10 m/s", because
+      # what it actually vetoes is the controller's own corner-cutting against the
+      # inflation ring. Second, that file's map is baked from the world's collision
+      # meshes and is exact; a prior built by RTAB-Map stereo is not, so the
+      # geometry being checked against is itself uncertain. Smac still does a full
+      # SE(2) footprint check when it plans.
+      # NOTE: nav2_ackermann.yaml carries a long comment saying OFF while its value
+      # says true. The comment and the value disagree there; this file states its
+      # own choice explicitly.
+      use_collision_detection: false
+      max_allowed_time_to_collision_up_to_carrot: 1.00
+
+planner_server:
+  ros__parameters:
+    use_sim_time: true
+    expected_planner_frequency: 1.0
+    planner_plugins: ["GridBased"]
+    GridBased:
+      plugin: "nav2_smac_planner/SmacPlannerHybrid"
+      tolerance: 0.30
+      downsample_costmap: false
+      # Unlike the baked map, an RTAB-Map prior HAS unknown space wherever the
+      # stereo pair never saw. Refusing to plan through it is the safe default
+      # with no live sensor; expect some goals to be rejected for that reason
+      # rather than because the planner is broken.
+      allow_unknown: false
+      max_iterations: 1000000
+      max_on_approach_iterations: 1000
+      max_planning_time: 3.0
+      motion_model_for_search: "DUBIN"
+      angle_quantization_bins: 72
+      minimum_turning_radius: 0.75      # base_link floor 0.6355 m plus margin
+      reverse_penalty: 2.0
+      change_penalty: 0.0
+      non_straight_penalty: 1.20
+      cost_penalty: 2.0
+      retrospective_penalty: 0.015
+      analytic_expansion_ratio: 3.5
+      analytic_expansion_max_length: 3.0
+      # false, unlike the ground-truth file: that map never changes, but the
+      # static layer here is re-published whenever RTAB-Map updates the grid.
+      cache_obstacle_heuristic: false
+      smooth_path: true
+      smoother:
+        max_iterations: 1000
+        w_smooth: 0.3
+        w_data: 0.2
+        tolerance: 1.0e-10
+
+smoother_server:
+  ros__parameters:
+    use_sim_time: true
+    smoother_plugins: ["simple_smoother"]
+    simple_smoother:
+      plugin: "nav2_smoother::SimpleSmoother"
+      tolerance: 1.0e-10
+      max_its: 1000
+      do_refinement: true
+
+behavior_server:
+  ros__parameters:
+    use_sim_time: true
+    global_frame: odom                  # matches the local costmap
+    robot_base_frame: base_link
+    transform_tolerance: 0.30
+    behavior_plugins: ["spin", "backup", "drive_on_heading", "wait"]
+    spin:
+      plugin: "nav2_behaviors/Spin"
+    backup:
+      plugin: "nav2_behaviors/BackUp"
+    drive_on_heading:
+      plugin: "nav2_behaviors/DriveOnHeading"
+    wait:
+      plugin: "nav2_behaviors/Wait"
+    simulate_ahead_time: 2.0
+    max_rotational_vel: 1.0
+    min_rotational_vel: 0.4
+    rotational_acc_lim: 1.5
+    # `spin` will ALWAYS fail on a car: it commands rotation in place. The
+    # RecoveryNode falls through to `backup`, which is feasible. Seeing Spin fail
+    # is correct behaviour, not a bug to chase.
+
+velocity_smoother:
+  ros__parameters:
+    use_sim_time: true
+    smoothing_frequency: 20.0
+    # MANDATORY. With the default false, every start-from-rest ramps v up from 0
+    # while w passes through unchanged, so k = w/v -> infinity and the robot slams
+    # to full steering lock at the start of every motion.
+    scale_velocities: true
+    feedback: "OPEN_LOOP"
+    max_velocity: [1.5, 0.0, 1.00]      # 1.00 = 1.6673 * 0.60, fastest feasible yaw
+    min_velocity: [-0.60, 0.0, -1.00]
+    max_accel: [0.80, 0.0, 2.00]
+    max_decel: [-1.50, 0.0, -2.50]
+    odom_topic: "/orbslam3/odometry"    # NOT /odom: no ground truth in this chain
+    odom_duration: 0.10
+    deadband_velocity: [0.0, 0.0, 0.0]
+    velocity_timeout: 1.0
+
+map_server:
+  ros__parameters:
+    use_sim_time: true
+    yaml_filename: ""                   # set by the launch for offline tests only
+
+lifecycle_manager_navigation:
+  ros__parameters:
+    use_sim_time: true
+    # false: the pose gate starts the stack once localisation is sound.
+    autostart: false
+    # 4.0 (the nav2_bringup default) tears the stack down spuriously here: the
+    # bond heartbeat is checked in WALL time while the sim runs at RTF 0.2-0.4
+    # under load, so a merely descheduled server looks dead.
+    bond_timeout: 20.0
+    attempt_respawn_reconnection: true
+    node_names:                         # overridden by the launch (map_server optional)
+      - controller_server
+      - smoother_server
+      - planner_server
+      - behavior_server
+      - bt_navigator
+      - velocity_smoother
+
+# ---------------------------------------------------------------------------
+# COSTMAPS
+# footprint, NOT robot_radius: the true collision extent is x in [-0.30, +0.506]
+# (the camera boom) and y in +/-0.2425, a circumscribed radius of 0.54 m, but the
+# spawn pose has only 0.55 m of clearance to ClutteringA_01_017, so a robot_radius
+# of 0.54 would make the first ComputePathToPose report an invalid start about
+# half the time. The rectangle is a conservative superset.
+# ---------------------------------------------------------------------------
+
+global_costmap:
+  global_costmap:
+    ros__parameters:
+      use_sim_time: true
+      global_frame: map
+      robot_base_frame: base_link
+      update_frequency: 2.0
+      publish_frequency: 1.0
+      rolling_window: false
+      width: 15
+      height: 22
+      origin_x: -7.0
+      origin_y: -10.5
+      resolution: 0.05
+      footprint: "[[-0.31, 0.25], [0.52, 0.25], [0.52, -0.25], [-0.31, -0.25]]"
+      footprint_padding: 0.01
+      transform_tolerance: 0.30
+      plugins: ["static_layer", "inflation_layer"]
+      static_layer:
+        plugin: "nav2_costmap_2d::StaticLayer"
+        map_subscribe_transient_local: true
+      inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        cost_scaling_factor: 3.0
+        # Must exceed the padded circumscribed radius (0.637) or Smac's
+        # findCircumscribedCost() returns a nonsense threshold.
+        inflation_radius: 0.80
+      always_send_full_costmap: true
+
+local_costmap:
+  local_costmap:
+    ros__parameters:
+      use_sim_time: true
+      # ROLLING, unlike the ground-truth file. map -> odom is a live correction
+      # under SLAM localisation, so a world-sized costmap pinned in the odom frame
+      # would smear every time RTAB-Map relocalises.
+      global_frame: odom
+      robot_base_frame: base_link
+      update_frequency: 2.0
+      publish_frequency: 1.0
+      rolling_window: true
+      width: 10
+      height: 10
+      resolution: 0.05
+      footprint: "[[-0.31, 0.25], [0.52, 0.25], [0.52, -0.25], [-0.31, -0.25]]"
+      footprint_padding: 0.01
+      transform_tolerance: 0.30
+      plugins: ["static_layer", "inflation_layer"]
+      static_layer:
+        plugin: "nav2_costmap_2d::StaticLayer"
+        map_subscribe_transient_local: true
+      inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        cost_scaling_factor: 3.0
+        inflation_radius: 0.80
+      always_send_full_costmap: true

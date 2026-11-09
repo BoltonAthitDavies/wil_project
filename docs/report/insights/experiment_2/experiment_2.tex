@@ -7,7 +7,7 @@
 \title{Experiment 2: Offline YOLO Detector Performance\\
        \large Raw write-up for Chapter 4, Section 4.2}
 \author{Bolton Athit Davies}
-\date{Reporting cutoff: 22 October 2026}
+\date{Reporting cutoff: 7 November 2026}
 \begin{document}
 \maketitle
 
@@ -20,194 +20,156 @@ report is extracted from it. Every number traces to a file under
 \section{Simulation}
 \label{sec:exp2-sim}
 
-\slotstatus{completed}{Four dynamic recordings, \num{9860} left-camera frames,
-scored against projected simulator ground truth at a single confidence
-threshold.}
+\slotstatus{completed}{Four realistic-warehouse recordings, 12\,698 left-camera
+frames, scored on 7 November 2026 against projected simulator ground truth
+with the four-class checkpoint
+(\repo{weight/runs_1/detect/train/weights/best.pt}: bin, box, bucket,
+forklift), whose fourth class fires on the pallet jacks that are the moving
+objects of these recordings. Pooled precision 0.747; recall 0.502 over the
+truth boxes the exemptions keep and 0.288 over every truth box;
+moving-object recall 0.288. The walking people are simulator actors with no
+pose and no class, so they are outside the score on both sides.}
 
 \paragraph{Objective.} Measure how well the project detector localises and
-names warehouse objects, independently of either SLAM integration, so that the
-dynamic filters of Experiment~3 have a known input quality.
+names warehouse objects, independently of either SLAM integration, so that
+the dynamic filters of Experiment~3 have a known input quality; the
+moving-object recall is the headline, because it is the ceiling of any
+filtering benefit.
 
-\paragraph{Process.} The collision mesh of every prop was projected into
-\repo{cam0} at each frame to form ground-truth boxes, the project checkpoint
-\repo{weight/best.pt} was run on the same frames, and predictions were matched
-to truth by IoU. Overlays from every recording were inspected before the
-aggregates were accepted (\cref{fig:exp2-overlay}). Class assignment was then
-scored separately, on the matched pairs only, so that a naming error is never
-confused with a localisation error.
+\paragraph{Process.} \repo{script/yolo_eval.py} projected the collision mesh of
+every model it has a class for into \repo{cam0} from the simulator's pose
+stream to form truth boxes (the pallet jacks included, moving or parked), ran
+the checkpoint at confidence 0.35 with NMS at IoU 0.5 on the GPU, matched
+predictions greedily by class at IoU 0.5, and wrote per-frame and
+per-detection records; twelve overlays per recording were inspected before
+the aggregates were accepted. Truth boxes under 12 pixels or more than
+\SI{70}{\percent} covered by nearer geometry are exempt (scored as neither hit
+nor miss), and predictions on unlabelled box-like scenery (loaded shelves,
+desks) are ignored. The three-class checkpoint of the retired evaluation is
+not used: it has no class for the moving objects. The earlier evaluation on
+the scripted worlds was retired on 6 November with its recordings and is not
+cited.
 
-\paragraph{Datasets.} The four scripted dynamic recordings of the extreme
-world (\cref{tab:exp2-datasets}). Every recording has the plain floor and 68
-or 69 placed props, of which the moving ones follow scripted paths.
+\paragraph{Datasets.} The four \repo{dataset_allsensor_realistic} recordings:
+\repo{000} and \repo{001} static (U and I layout), \repo{002} and \repo{003}
+with four pallet jacks on logistics jobs and four walking people. Ten pallet
+jacks stand in each world, so the forklift class has truth in every recording
+and \emph{moving} truth only in \repo{002} and \repo{003} (3\,333 and 4\,562
+moving truth boxes). Sources: \path{output/yolo_eval/dataset_allsensor_realistic_*_4class/}
+(\repo{yolo_eval.csv}, \repo{yolo_detections.csv}, \repo{yolo_confusion.csv},
+\repo{overlay/}), \path{output/yolo_eval/summary_metrics.csv},
+\path{output/compare/simulation/exp2-insights/}.
+
+\paragraph{Reporting rules.} Precision is over all retained predictions that
+were not ignored; recall is quoted on two bases, over the truth boxes the
+exemptions keep (the detector's task) and over every projected truth box
+(what is physically in view); moving-object recall counts a truth box as
+moving when its model moved more than \SI{0.05}{\metre} between frames.
+Class metrics are conditional on a correct localisation.
+
+\paragraph{Results.} \Cref{tab:exp2-summary}. The detector names what it
+finds and finds about half of what the exemptions leave it: pooled
+precision 0.747, recall 0.502 on the scored basis and 0.288 on the all-box
+basis, class F1 0.994 conditional on a match. Moving pallet jacks are found
+in 0.283 and 0.291 of their frames on \repo{002} and \repo{003}. The forklift
+class is the weakest on the all-box basis (recall 0.12 to 0.18 against 0.18
+to 0.45 for the others, \cref{tab:e2i-class}), and the box class carries
+\SIrange{34}{70}{\percent} of the false positives.
 
 \begin{table}[htbp]
 \centering
-\caption{Recordings scored in Experiment~2 (names without the \repo{dataset_} prefix). Objects, route length and
-simulated span are from the dataset registry; frames are the left-camera
-images the detector was scored on.}
-\label{tab:exp2-datasets}
+\caption[Detector scores per recording and pooled.]{Detector scores per
+recording and pooled, four-class checkpoint,
+confidence 0.35, matching IoU 0.5. ``Truth'' counts every projected box and
+``exempt'' those under 12 pixels or more than \SI{70}{\percent} covered;
+$R_{\mathrm{scored}}$ is recall over the rest, $R_{\mathrm{all}}$ over every
+box, $R_{\mathrm{mov}}$ over the moving truth boxes.}
+\label{tab:exp2-summary}
 \small
-\begin{tabular}{llrrrr}
-\toprule
-Recording & Arrangement & Objects & Route [\si{\metre}] & Span [\si{\second}] & Frames \\
-\midrule
-\repo{dynamic_nofloortexture_00_000} & dynamic\_00 & 69 & 97.1 & 77.4 & \num{2347} \\
-\repo{dynamic_nofloortexture_00_001} & dynamic\_00 & 69 & 97.3 & 74.2 & \num{2236} \\
-\repo{dynamic_nofloortexture_01_000} & dynamic\_01 & 68 & 122.8 & 84.6 & \num{2564} \\
-\repo{dynamic_nofloortexture_02_000} & dynamic\_02 & 68 & 126.6 & 89.5 & \num{2713} \\
-\midrule
-Pooled & & & & & \num{9860} \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\paragraph{Reporting rules.} Confidence threshold \num{0.35}, NMS IoU
-\num{0.50}, matching IoU \num{0.50}; an object counts as moving above
-\SI{0.05}{\metre\per\second} from its pose history. Three exemptions remove
-objects from scoring: truth boxes under \SI{12}{px} on a side are dropped,
-truth covered more than \SI{70}{\percent} by a nearer object is neither hit
-nor miss, and a prediction more than half covered by unlabelled scenery is
-neither credited nor penalised. Pooled scores are micro-averages of the TP,
-FP and FN counts over all frames, not means of the four per-recording scores.
-Class metrics are computed only on pairs associated at IoU $\ge 0.50$ without
-requiring class agreement. Average precision is not reported because only
-predictions above the single threshold were retained. Source: \path{script/yolo_eval.py}, which writes
-\path{summary_metrics.csv}, \path{classification_metrics.csv} and the
-per-recording overlay folders under \path{output/yolo_eval/}; the
-exemption-matched recall is from \path{script/yolo_generalization.py}, file
-\path{generalization_metrics.csv} under
-\path{output/compare/simulation/exp-yolo-generalization/}.
-
-\paragraph{Results.} The detector is reliable at naming and unreliable at
-finding: conditional class F1 is \num{0.995}, while it misses \SI{41}{\percent}
-of the moving objects it is scored on (moving-object recall \num{0.591}).
-
-\Cref{tab:exp2-detection} gives the localisation scores per recording and
-pooled; the spread between recordings is small, moving-object recall
-\numrange{0.568}{0.617}, so the miss rate is a property of the detector and
-not of one scene. \Cref{fig:exp2-summary} plots the same scores with the
-image area that truth and predictions cover.
-
-\begin{table}[htbp]
-\centering
-\caption{Offline detection against projected simulator ground truth. A
-detector-capability measurement, not a measurement of delivery to the online
-SLAM filters.}
-\label{tab:exp2-detection}
 \resizebox{\textwidth}{!}{%
-\begin{tabular}{lrrrrrrrr}
+\begin{tabular}{lrrrrrrrrr}
 \toprule
-Recording & Frames & TP & FP & FN & Precision & Recall & F1 & Moving recall \\
+Recording & Frames & Truth & Exempt & Pred. & TP & FP & $P$ & $R_{\mathrm{scored}}$ & $R_{\mathrm{all}}$ / $R_{\mathrm{mov}}$ \\
 \midrule
-dynamic\_00\_000 & 2,347 & 9,987 & 4,826 & 5,900 & 0.674 & 0.629 & 0.651 & 0.617 \\
-dynamic\_00\_001 & 2,236 & 10,158 & 4,265 & 6,868 & 0.704 & 0.597 & 0.646 & 0.599 \\
-dynamic\_01\_000 & 2,564 & 8,142 & 4,226 & 6,064 & 0.658 & 0.573 & 0.613 & 0.568 \\
-dynamic\_02\_000 & 2,713 & 8,661 & 3,743 & 6,502 & 0.698 & 0.571 & 0.628 & 0.581 \\
+\repo{realistic_000} & 3\,805 & 38\,401 & 16\,157 & 16\,673 & 10\,940 & 2\,693 & 0.802 & 0.492 & 0.285 / --- \\
+\repo{realistic_001} & 2\,937 & 33\,260 & 14\,286 & 14\,359 & 8\,834 & 3\,907 & 0.693 & 0.466 & 0.266 / --- \\
+\repo{realistic_002} & 2\,409 & 28\,049 & 10\,907 & 13\,002 & 8\,821 & 2\,332 & 0.791 & 0.515 & 0.314 / 0.283 \\
+\repo{realistic_003} & 3\,547 & 40\,498 & 18\,235 & 19\,148 & 11\,852 & 4\,757 & 0.714 & 0.532 & 0.293 / 0.291 \\
 \midrule
-Pooled & 9,860 & 36,948 & 17,060 & 25,334 & 0.684 & 0.593 & 0.635 & 0.591 \\
+Pooled & 12\,698 & 140\,208 & 59\,585 & 63\,182 & 40\,447 & 13\,689 & 0.747 & 0.502 & 0.288 / 0.288 \\
 \bottomrule
 \end{tabular}}
 \end{table}
 
-\Cref{tab:exp2-class} shows that once an object is localised its class is
-almost never wrong: 137 substitutions in \num{37061} associated pairs, 110 of
-them buckets labelled as boxes (\cref{fig:exp2-confusion}).
+\paragraph{Analysis.} The misses are a size effect and the false positives
+are near misses. Frame-level recall rises monotonically with the truth-box
+side, from 0.02 at 24--32 pixels to 0.64 above 192 pixels
+(\cref{tab:e2i-size}, \cref{fig:exp2-size}); at object level every object is
+found in most of the frames where its box is large, and the moving pallet
+jacks follow the same curve as the parked ones, so the moving-object recall
+of 0.29 is what the pallet jacks' typical distance from the camera gives,
+not a motion effect. Of the unmatched predictions, \SIrange{74}{79}{\percent}
+overlap the right object below the IoU threshold and only
+\SIrange{8}{9}{\percent} land on nothing (\cref{tab:e2i-fp},
+\cref{fig:exp2-fp}): a looser matching threshold would move most false
+positives into the hits, and a filter that masks by box does not care which.
+The misses come as flicker rather than blindness: \SIrange{39}{47}{\percent}
+of the gaps between consecutive detections of one object are a single frame,
+and gaps longer than \SI{2}{\second} hold \SIrange{20}{32}{\percent} of the
+misses (\cref{tab:e2i-miss}). Raising the confidence threshold buys
+precision at a steep price in recall: at 0.75 precision is 0.84 to 0.91 and
+moving-object recall 0.16 to 0.20 (\cref{tab:e2i-threshold}).
 
-\begin{table}[htbp]
-\centering
-\caption{Class assignment conditional on IoU association, pooled over the four
-recordings. Objects never localised do not enter this table; they are
-detection errors in \cref{tab:exp2-detection}.}
-\label{tab:exp2-class}
-\begin{tabular}{lrrrr}
-\toprule
-Class & Associated objects & Precision & Recall & F1 \\
-\midrule
-Bin & 2,639 & 1.000 & 1.000 & 1.000 \\
-Box & 28,076 & 0.996 & 0.999 & 0.998 \\
-Bucket & 6,346 & 0.996 & 0.983 & 0.989 \\
-\midrule
-Macro average & 37,061 & 0.997 & 0.994 & 0.995 \\
-\bottomrule
-\end{tabular}
-\end{table}
+\reporttable{yolo_recall_by_size}
+\reporttable{yolo_fp_anatomy}
+\reporttable{yolo_miss_structure}
+\reporttable{yolo_threshold_sweep}
+\reporttable{yolo_per_class}
 
-\begin{figure}[p]
+\begin{figure}[htbp]
   \centering
-  \includegraphics[width=\textwidth]{../../../output/yolo_eval/summary_light.png}
-  \caption{Per-recording and pooled detector scores and box-area coverage.
-  Pooled values come from pooled counts, not from averaging the four
-  recording scores.}
-  \label{fig:exp2-summary}
+  \includegraphics[width=\textwidth]{figures/yolo_fig_size.png}
+  \caption[Recall against truth-box size.]{Recall against truth-box size: per
+  frame (left, the frame's mean
+  truth-box side) and per object (right, the object's median matched-box
+  side; solid moving, dashed parked). The curves of the four recordings
+  coincide, and the moving pallet jacks lie on the parked objects' curve.}
+  \label{fig:exp2-size}
+\end{figure}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{figures/yolo_fig_fp_anatomy.png}
+  \caption[What the unmatched predictions are.]{What the unmatched predictions
+  are, per recording: near misses
+  (right object, IoU 0.2--0.5), slight overlaps, boxes on nothing, and
+  predictions ignored on unlabelled scenery.}
+  \label{fig:exp2-fp}
 \end{figure}
 
-\begin{figure}[p]
-  \centering
-  \includegraphics[width=\textwidth]{../../../output/yolo_eval/dyn_00_001/overlay/01116.jpg}
-  \caption{Validation overlay of the kind inspected before the metrics were
-  accepted (\repo{dynamic_00_001}, frame 01116). Green: projected ground truth,
-  scored. Red: predictions. Yellow: truth covered more than \SI{70}{\percent}
-  by a nearer object, exempt from scoring. An asterisk marks an object
-  classified as moving from its pose history.}
-  \label{fig:exp2-overlay}
-\end{figure}
+\textbf{Limitations, each stated once.} \emph{Projected truth:} boxes are the
+projection of collision meshes, tighter than a human would draw and exempted
+by rules a human would not apply; the scored basis is the easier one and both
+are given. \emph{People:} the walking people are actors without pose or mesh
+and outside the checkpoint's classes; no truth exists for them, their
+detections (if any) are charged as false positives, and a filter built on
+this detector cannot mask them at all. \emph{One operating point:} a single
+confidence threshold was retained, so no average precision. \emph{Checkpoint
+provenance:} the four-class checkpoint was trained on 8 October 2026 and its
+training set is not registered in this write-up.
 
-\begin{figure}[p]
-  \centering
-  \includegraphics[width=\textwidth]{../../../output/yolo_eval/classification_confusion_light.png}
-  \caption{Class confusion conditional on class-agnostic IoU association.
-  Rows are true classes, columns predicted. Left: counts on a logarithmic
-  colour scale. Right: normalised within each true class. Background is
-  excluded by construction.}
-  \label{fig:exp2-confusion}
-\end{figure}
+\paragraph{Summary.} The detector is reliable at naming and unreliable at
+finding: class F1 0.994 given a match, recall 0.50 over the boxes it is
+asked to find and 0.29 over everything in view, moving-object recall 0.29.
+The miss is a size effect and the false positives are mostly boxes a little
+off the right object. For the filters of Experiment~3 the input is a mask
+that covers under a third of the moving pallet jacks' frames and none of the
+people.
 
-\paragraph{Analysis.} The recall figure is an upper bound, because it is
-computed over the easier subset that the exemptions leave. Of the \num{96758}
-projected truth boxes, \num{34476} are exempt as occluded or too small;
-counting every one of them as a miss moves pooled recall from \num{0.593} to
-\num{0.382}. The training-set validation of the same checkpoint reports
-precision \num{0.958} and recall \num{0.882} on human-drawn boxes, so the
-drop to \num{0.684} and \num{0.382} on projected boxes mixes a real domain gap
-with a stricter scoring convention, and the two cannot be separated without
-relabelling a subset by hand.
-
-\emph{Limitation, scoring convention.} Projected boxes are the exact mesh
-silhouette, tighter than any annotator draws; a detector fitted to loose human
-boxes loses IoU here that represents no error on its part. This is the one
-difference from the training convention that no setting of the evaluator can
-remove.
-
-\begin{queried}[Ground truth never checked by hand]
-The projected ground truth was accepted on visual inspection of sampled
-overlays only. No frame has been annotated manually, so the agreement between
-projected and human boxes, and therefore the size of the convention effect
-above, is unmeasured.
-\end{queried}
-
-The miss rate bounds every downstream filter. A class mask built from these
-detections can at best remove the \SI{59}{\percent} of moving objects that
-are found; the remaining \SI{41}{\percent} stay in the image and reach the
-feature extractors of both pipelines regardless of how the mask is applied.
-That bound, not the mask mechanism, is the first thing Experiment~3 inherits.
-
-The result does not bear on the online delivery anomaly of Experiment~3. The
-detector produces boxes on every recording offline; a filter arm that logged
-zero masks failed at message delivery or timestamp matching, which is a
-different mechanism from detector capability.
-
-\paragraph{Summary.} The detector names what it finds almost perfectly and
-finds about six moving objects in ten, or fewer than four in ten when exempt
-objects are counted. Precision \num{0.684} means one prediction in three is a
-false box. These are the input limits of the dynamic filters tested in
-Experiment~3.
-
-\paragraph{Future plan.} Annotate a stratified subset of frames by hand to
-measure the projected-versus-human box convention and separate it from the
-domain gap. Re-score on the realistic warehouse recordings, where the moving
-objects are pallet jacks on logistics jobs rather than scripted props. Add
-object velocity from consecutive detections so that a mask can target moving
-objects rather than object classes.
+\paragraph{Future plan.} Add a person class and give the actors projectable
+geometry, or annotate a frame subset by hand, so that the moving agents the
+filter exists for are all scorable; raise the input resolution or the
+training set's share of small boxes, since the miss is a size effect; and
+report a precision--recall curve from a run with the threshold at zero.
 
 % =====================================================================
 \FloatBarrier
@@ -217,15 +179,17 @@ objects rather than object classes.
 \slotstatus{planned}{Real imagery exists; no real ground-truth boxes do.}
 
 \paragraph{Reason.} Projected ground truth needs object poses and meshes,
-which the real site does not provide. The three real recordings hold
-\numrange{2562}{3405} usable stereo pairs each, so the detector can be run on
-them, but nothing can score it until frames are annotated by hand.
+which the real site does not provide. The four real recordings in use
+(\repo{realv6_000}, \repo{realv7_000}--\repo{002}) hold the imagery, so the
+detector can be run on them, but nothing can score it until frames are
+annotated by hand.
 
 \paragraph{Next action.} Annotate a stratified frame subset of
-\repo{dataset_real_000} to \repo{dataset_real_002} across the three
-illumination levels of the test site, run the detector at the thresholds of
-\cref{sec:exp2-sim}, and report the same metrics. The same annotated subset
-calibrates the projected and manual box conventions against each other for the
-simulation slot.
+\repo{dataset_realv6_000} and \repo{dataset_realv7_000} to \repo{_002} across
+the illumination levels of the test site, run the detector at confidence 0.35
+and matching IoU 0.5, and report precision, recall, F1 and moving-object
+recall; the same annotated subset is the only route to a scored simulation
+slot as well, since the realistic worlds give the detector nothing projectable
+to find.
 
 \end{document}

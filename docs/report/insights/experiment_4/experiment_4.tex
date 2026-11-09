@@ -21,10 +21,11 @@ slot. Open concerns are set in red where they arise.
 \section{Simulation}
 \label{sec:map-sim}
 
-\slotstatus{partial}{Three databases are scored for geometry and drivability:
-the tiny warehouse, which passes, and two realistic-warehouse maps, one per
-layout, built on 26 October 2026 with loop closure deliberately disabled, which
-fail the quality criterion fixed before scoring. The tiny map's independent drivability
+\slotstatus{partial}{Five databases are scored for geometry and drivability:
+the tiny warehouse, which passes, and four realistic-warehouse maps --- two
+mapping recordings, one per layout, each built closure-free under the October
+and the current November configuration --- all of which fail the quality
+criterion fixed before scoring. The tiny map's independent drivability
 reference remains lost.}
 
 \paragraph{Objective.} Verify that the reconstructed map reflects the physical
@@ -76,8 +77,8 @@ bags. U and I are the two layouts described there and in Chapter 3.}
 \toprule
 Recording & World & Span (s) & Truth & Role \\
 \midrule
-\repo{realistic_mapv2} & U, static & 285.7 & 14\,411 & built \repo{map/map_realistic} \\
-\repo{realistic_01_map} & I, static & 314.9 & 15\,760 & built \repo{map/map_realistic_01} \\
+\repo{realistic_map} & U, static & 285.7 & 14\,411 & formerly \repo{_mapv2}; built U-Oct and U-Nov \\
+\repo{realistic_01_map} & I, static & 314.9 & 15\,760 & built I-Oct and I-Nov \\
 \repo{realistic_000} & U, static & 125.5 & 6\,278 & independent probe, \SI{171.3}{\metre} \\
 \repo{realistic_001} & I, static & 96.9 & 4\,847 & independent probe, \SI{133.0}{\metre} \\
 \bottomrule
@@ -265,22 +266,23 @@ the front end under repeated structure, not to RTAB-Map. The mapping recording
 registered, so the result rests on the progress record alone and cannot be
 audited.}
 
-\begin{queried}[Queried: unregistered databases]
-Four further databases exist beside the tiny map: \repo{map/map_01.db}
-(\SI{0.77}{\mega\byte}), \repo{map/map_02.db} (\SI{55.3}{\mega\byte}),
-\repo{map/map_02_vins.db} (\SI{9.3}{\mega\byte}) and \repo{map/map_03.db}
-(\SI{29.2}{\mega\byte}), all written on 21 September 2026. None is named in the
-progress record, the engineering record or any analysis output, so which
-recording, world and front end produced each is unknown. If any is the large
-warehouse, the attempt has retained an artefact after all and can be placed and
-scored with the unchanged evaluator before this slot is closed.
+\begin{queried}[Resolved and retired: unregistered databases]
+Four further databases sat beside the tiny map until 6 November 2026
+(\repo{map_01.db}, \repo{map_02.db}, \repo{map_02_vins.db},
+\repo{map_03.db}, all written on 21 September). The insight analysis of
+22 October identified them from their contents: two aborted two-node starts,
+a second tiny-warehouse map on a different route, and an 18-node run that
+left the floor along one aisle and fits no large world, the large-warehouse
+attempt. All four were deleted on 6 November with the dataset decision,
+unplaced and unscored, so the attempt is again without an artefact.
 \end{queried}
 
-\paragraph{Realistic-warehouse maps.} Two databases, one per layout, built on
-26 October 2026 in the realistic worlds of Chapter 3 replace the unauditable
-large-warehouse attempt: each has a registered build recording, a fitted
-placement, a score and a figure. Both fail the quality criterion fixed before
-they were scored.
+\paragraph{Realistic-warehouse maps.} Four databases built in the realistic
+worlds of Chapter 3 replace the unauditable large-warehouse attempt: two
+mapping recordings, one per layout, each built twice, on 26 October 2026 and on
+6 November 2026 under the pipeline's current configuration. Every one has a
+registered build recording, a fitted placement, a score and a figure, and all
+four fail the quality criterion fixed before they were scored.
 
 \textbf{Reporting rules.} The criterion, fixed in
 \repo{script/eval_realistic_maps.py} before any map was placed, is occupied-cell
@@ -290,198 +292,287 @@ tiny map's result; whole-building recall is reported, not tested. Placement was
 measured by \repo{script/fit_map_pose.py} with the realistic spawn
 $(5.250, 19.995, \SI{-90}{\degree})$ and confirmed on the overlays before
 scoring. Scoring is the unchanged \repo{script/validate_map.py} at
-\SI{0.25}{\metre} tolerance with the $0.83\times0.50$~m footprint, each
-map probed by the static twin of its own layout. The databases store their full
-parameter set, unlike the tiny map: \repo{Rtabmap/LoopThr} 1.0 and
-\repo{RGBD/ProximityBySpace} false (\repo{loop_closure:=false}, RTAB-Map record
-\S7c). The grid was built to \SI{8.0}{\metre} range (\repo{Grid/RangeMax};
-the record's measured default is 10.0) at \SI{0.05}{\metre} cells and
-optimised with GTSAM (\repo{Optimizer/Strategy} 2). Every number is under the
+\SI{0.25}{\metre} tolerance with the $0.83\times0.50$~m footprint, each map
+probed by the static twin of its own layout, a recording that built none of
+them. All four databases are closure-free (\repo{Rtabmap/LoopThr} 1.0,
+\repo{RGBD/ProximityBySpace} false; \repo{loop_closure:=false}, RTAB-Map record
+\S7c) and optimised with GTSAM. The two builds of each recording differ in
+exactly three back-end parameters, \repo{Rtabmap/DetectionRate} 4 against
+\SI{1}{\hertz}, \repo{Grid/RangeMax} 8 against \SI{10}{\metre} and
+\repo{Grid/MaxGroundHeight} 0.29 against \SI{0.10}{\metre} (October against
+November), and in front-end session, which neither database records; they are
+two configurations, not a repeat pair, so $n=1$ per cell and no difference
+between builds is attributable to one parameter. The recording now named
+\repo{dataset_allsensor_realistic_map} is the one held until 26 October as
+\repo{_mapv2} (identical message counts); the original 103--316\,s mapping
+recording and the 114-node database built from it were deleted that day, and
+\repo{map/map_realistic} is the former \repo{map_realistic_v2}. Node stamps fix
+the pairing: the U databases span 13--300\,s and the I databases 20--335\,s,
+which the 125\,s and 97\,s probes cannot have produced. The November U
+placement was fitted in the \SI{-180}{\degree} basin with \repo{--yaw-near},
+because the global winner, \SI{4.2}{\percent} better by agreement, was the
+rotational rival the overlay rejects; both candidates are in
+\repo{fit_dataset_allsensor_realistic_map.log}. Every number is under the
 experiment directory \repo{exp4-realistic-maps} of
 \repo{output/compare/simulation}: the scores in
-\repo{realistic_map_metrics.csv}, one \repo{validate_*.json} per map, and the
-graph inventory in \repo{map_inventory.json}. The
-experimental unit is one database, $n=1$ per layout. \repo{map/map_realistic}
-is the build held until 26 October as \repo{map_realistic_v2}; an earlier
-114-node database of the same name was deleted that day, and its scores are
-retained under \repo{superseded/} in the experiment directory.
+\repo{realistic_map_metrics.csv}, one \repo{validate_*.json} per map, the
+inventory with the three parameters in \repo{map_inventory.json}, and the
+placement logs.
 
-\textbf{Results.} \Cref{tab:map-realistic-geometry} gives geometry and
+\textbf{Results.} \Cref{tab:map-realistic-geometry} gives geometry,
 \cref{tab:map-realistic-drivability} drivability against the independent
-probes; \cref{tab:map-realistic-graph} summarises the stored graphs.
-\Cref{fig:map-realistic-fit} is the placement overlay of the weaker fit and
-\cref{fig:map-realistic-validate,fig:map-realistic-01-validate} the evaluation
-overlays.
+probes, and \cref{tab:map-realistic-graph} the stored graphs and the three
+parameters that separate the builds.
+\Cref{fig:map-realistic-fit,fig:map-realistic-nov-fit} are the placement
+overlays of the two U builds and
+\cref{fig:map-realistic-validate,fig:map-realistic-nov-validate,fig:map-realistic-01-validate,fig:map-realistic-01-nov-validate}
+the evaluation overlays.
 
 \begin{table}[htbp]
 \centering
-\caption{Occupied-cell geometry of the two realistic-warehouse databases
+\caption[Occupied-cell geometry of the four realistic databases.]{Occupied-cell
+geometry of the four realistic-warehouse databases
 against their world files at \SI{0.25}{\metre} tolerance, beside the tiny map.
 Bold marks a value below the fixed criterion.}
 \label{tab:map-realistic-geometry}
 \small
-\begin{tabular}{lrrrrr}
+\setlength{\tabcolsep}{4pt}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llrrrrr}
 \toprule
-Database & Nodes & Occupied & Precision & Recall & Recall \\
- & & cells & & observed & building \\
- & & & [\si{\percent}] & [\si{\percent}] & [\si{\percent}] \\
+Database & Built & Nodes & Occupied & Precision & Recall & Recall \\
+ & & & cells & & observed & building \\
+ & & & & [\si{\percent}] & [\si{\percent}] & [\si{\percent}] \\
 \midrule
-\repo{map_tiny} & 30 & 11\,634 & 96.6 & 89.5 & 67.2 \\
-\repo{map_realistic} & 165 & 26\,728 & \textbf{81.2} & \textbf{82.5} & 55.7 \\
-\repo{map_realistic_01} & 185 & 25\,440 & \textbf{84.8} & \textbf{81.4} & 54.5 \\
+\repo{map_tiny} & Sep & 30 & 11\,634 & 96.6 & 89.5 & 67.2 \\
+\repo{map_realistic} & Oct & 165 & 26728 & \textbf{81.2} & \textbf{82.5} & 55.7 \\
+\repo{dataset_allsensor_realistic_map} & Nov & 148 & 22715 & \textbf{77.8} & \textbf{74.9} & 57.1 \\
+\repo{map_realistic_01} & Oct & 185 & 25440 & \textbf{84.8} & \textbf{81.4} & 54.5 \\
+\repo{dataset_allsensor_realistic_01_map} & Nov & 127 & 23255 & \textbf{82.2} & \textbf{77.1} & 55.3 \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}
 
 \begin{table}[htbp]
 \centering
 \caption[Drivability of the realistic-warehouse databases under the true nav2
-footprint, against independent routes.]{Drivability of the realistic-warehouse
-databases under the true $0.83\times0.50$~m nav2 footprint, against the
-independent probe of each layout; column heads drop the \repo{map_} prefix.
-The tiny map's independent column is repeated for scale; its probe was one
-loop of the wide central aisle, whereas these probes thread the shelf aisles,
-so the two are not route-matched.}
+footprint, against independent routes.]{Drivability of the four
+realistic-warehouse databases under the true $0.83\times0.50$~m nav2
+footprint, against the independent probe of each layout; U-Oct is
+\repo{map_realistic}, U-Nov \repo{dataset_allsensor_realistic_map}, I-Oct
+\repo{map_realistic_01}, I-Nov \repo{dataset_allsensor_realistic_01_map}. The
+tiny map's independent figures were 2\,973 poses, \SI{0.7}{\percent} false
+obstacles, clearance 1.07 and \SI{0.45}{\metre}; its probe was one loop of a
+wide aisle, so the comparison is not route-matched.}
 \label{tab:map-realistic-drivability}
-\small
+\footnotesize
 \setlength{\tabcolsep}{4pt}
-\begin{tabular}{lrrr}
+\begin{tabular}{lrrrr}
 \toprule
-Metric & \repo{tiny} & \repo{realistic} & \repo{realistic_01} \\
+Metric & U-Oct & U-Nov & I-Oct & I-Nov \\
 \midrule
-Probe poses & 2\,973 & 6\,278 & 4\,847 \\
-Clear and mapped [\si{\percent}] & 99.3 & 96.2 & 94.9 \\
-False obstacle [\si{\percent}] & 0.7 & \textbf{3.8} & \textbf{4.4} \\
-Unmapped under footprint [\si{\percent}] & 0.0 & 2.4 & 0.7 \\
-Clearance, median [\si{\metre}] & 1.07 & 1.96 & 2.16 \\
-Clearance, 5th percentile [\si{\metre}] & 0.45 & 0.62 & 0.36 \\
+Probe poses & 6278 & 6278 & 4847 & 4847 \\
+Clear and mapped [\si{\percent}] & 96.2 & 95.0 & 94.9 & 89.5 \\
+False obstacle [\si{\percent}] & \textbf{3.8} & \textbf{5.0} & \textbf{4.4} & \textbf{10.2} \\
+Unmapped under footprint [\si{\percent}] & 2.4 & 1.9 & 0.7 & 0.5 \\
+Clearance, median [\si{\metre}] & 1.96 & 2.00 & 2.16 & 1.98 \\
+Clearance, 5th percentile [\si{\metre}] & 0.62 & 0.38 & 0.36 & 0.18 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \begin{table}[htbp]
 \centering
-\caption[Stored contents of the realistic-warehouse databases.]{Stored contents
-of the realistic-warehouse databases, read in read-only mode. Neighbour links are
-stored per direction; closure and gravity rows once. ``Spanning'' closures join
-nodes more than three apart; none exists, by configuration.}
+\caption[Stored contents and build parameters of the realistic-warehouse
+databases.]{Stored contents and build parameters of the four
+realistic-warehouse databases, read in read-only mode. The three parameter rows
+are the only ones that differ between the builds of a recording. Neighbour
+links are stored per direction; a ``spanning'' closure joins nodes more than
+three apart and none exists, by configuration. The margin is the agreement
+over the best rival more than \SI{5}{\degree} away; ``basin'' marks the
+placement chosen with \repo{--yaw-near}.}
 \label{tab:map-realistic-graph}
-\small
-\begin{tabular}{lrr}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrr}
 \toprule
-Element & \repo{map_realistic} & \repo{map_realistic_01} \\
+ & U-Oct & U-Nov & I-Oct & I-Nov \\
 \midrule
-Nodes & 165 & 185 \\
-Node stamp span [\si{\second}] & 285.7 & 314.9 \\
-Optimised path [\si{\metre}] & 369.5 & 384.7 \\
-Neighbour links, rows / pairs & 322 / 161 & 356 / 178 \\
-Global closures, rows & 3 & 4 \\
-Closures spanning $>3$ nodes & 0 & 0 \\
-Gravity links & 165 & 185 \\
-Visual words & 55\,802 & 63\,276 \\
-Features & 145\,067 & 159\,009 \\
-Database size [\si{\mega\byte}] & 417 & 438 \\
-Fitted placement $(x, y, \theta)$ & $(5.30, 19.50, \SI{-179.9}{\degree})$ & $(5.15, 20.45, \SI{179.4}{\degree})$ \\
-Fit agreement, margin & 0.183, \SI{+10.1}{\percent} & 0.260, \SI{+66.1}{\percent} \\
+Built & 2026-10-26 & 2026-11-06 & 2026-10-26 & 2026-11-06 \\
+\repo{Rtabmap/DetectionRate} [\si{\hertz}] & 4.0 & 1.0 & 4.0 & 1.0 \\
+\repo{Grid/RangeMax} [\si{\metre}] & 8.0 & 10.0 & 8.0 & 10.0 \\
+\repo{Grid/MaxGroundHeight} [\si{\metre}] & 0.29 & 0.1 & 0.29 & 0.1 \\
+Nodes & 165 & 148 & 185 & 127 \\
+Node stamp span [\si{\second}] & 285.7 & 286.2 & 314.9 & 313.9 \\
+Optimised path [\si{\metre}] & 369.5 & 364.2 & 384.7 & 372.3 \\
+Neighbour links, rows & 322 & 294 & 356 & 248 \\
+Closure rows / spanning $>3$ & 3 / 0 & 0 / 0 & 4 / 0 & 0 / 0 \\
+Visual words & 55802 & 51539 & 63276 & 44342 \\
+Database size [\si{\mega\byte}] & 417 & 462 & 438 & 377 \\
+Placement $(x,y,\theta)$ & $(5.300, 19.500, \SI{-179.9}{\degree})$ & $(5.200, 19.800, \SI{-180.1}{\degree})$ & $(5.150, 20.450, \SI{179.4}{\degree})$ & $(4.950, 20.400, \SI{-179.9}{\degree})$ \\
+Fit agreement, margin & 0.183, \SI{+10.1}{\percent} & 0.161, \SI{-4.2}{\percent} (basin) & 0.260, \SI{+66.1}{\percent} & 0.252, \SI{+60.2}{\percent} \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}
 
 \begin{figure}[p]
   \centering
-  \includegraphics[width=0.78\textwidth]{figures/map_realistic_fit.png}
-  \caption[Placement overlay of \repo{map/map_realistic}, the weaker of the
-  two fits.]{Placement overlay of \repo{map/map_realistic}, the weaker of the
-  two fits (agreement 0.183, \SI{10.1}{\percent} margin over the rival
-  orientation). Red occupied cells over the world file's obstacle footprints
-  and wall. Shelf rows, the bay strip at $y\approx11$ and all four walls
-  coincide, so the fit is accepted on the overlay despite the thin margin; the
-  \repo{_01} fit agrees to within \SI{0.7}{\degree}.}
+  \includegraphics[width=0.7\textwidth]{figures/map_realistic_fit.png}
+  \caption[Placement overlay of \repo{map/map_realistic} (U-Oct).]{Placement
+  overlay of \repo{map/map_realistic} (U-Oct), agreement 0.183,
+  \SI{10.1}{\percent} margin over the rival orientation. Red occupied cells
+  over the world file's obstacle footprints and wall; shelf rows, the bay strip
+  at $y\approx11$ and all four walls coincide.}
   \label{fig:map-realistic-fit}
 \end{figure}
 
 \begin{figure}[p]
   \centering
+  \includegraphics[width=0.7\textwidth]{figures/dataset_allsensor_realistic_map_fit.png}
+  \caption[Placement overlay of \repo{map/dataset_allsensor_realistic_map}
+  (U-Nov), fitted in the \SI{-180}{\degree} basin.]{Placement overlay of
+  \repo{map/dataset_allsensor_realistic_map} (U-Nov). The unconstrained sweep
+  preferred the \SI{180}{\degree}-rotated rival at $(-5.6, -19.6)$, agreement
+  0.168 against 0.161, which puts shelf rows between shelves; the basin
+  placement shown sits \SI{0.15}{\metre} from the spawn of the IMU body, as its
+  October sibling does.}
+  \label{fig:map-realistic-nov-fit}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
   \includegraphics[width=\textwidth]{figures/map_realistic_validate.png}
-  \caption[Dense-map evaluation of \repo{map/map_realistic} against the
-  independent probe.]{Dense-map evaluation of \repo{map/map_realistic} against
-  \repo{dataset_allsensor_realistic_000}. Panels as in \cref{fig:map-vs-gt}.
-  The shelf rows are thickened toward the aisles; the false-obstacle poses sit
-  on the first metres below the spawn, where the top wall is doubled, and
-  where the probe hugs the left shelf column at $x\approx-12.5$.}
+  \caption[Dense-map evaluation of \repo{map/map_realistic} (U-Oct) against
+  the independent probe.]{Dense-map evaluation of \repo{map/map_realistic}
+  (U-Oct) against \repo{dataset_allsensor_realistic_000}. Panels as in
+  \cref{fig:map-vs-gt}. The shelf rows are thickened toward the aisles; the
+  false-obstacle poses sit on the first metres below the spawn and where the
+  probe hugs the left shelf column at $x\approx-12.5$.}
   \label{fig:map-realistic-validate}
 \end{figure}
 
 \begin{figure}[p]
   \centering
+  \includegraphics[width=\textwidth]{figures/dataset_allsensor_realistic_map_validate.png}
+  \caption[Dense-map evaluation of \repo{map/dataset_allsensor_realistic_map}
+  (U-Nov) against the independent probe.]{Dense-map evaluation of
+  \repo{map/dataset_allsensor_realistic_map} (U-Nov) against the same probe.
+  The same two blocked places as U-Oct, the spawn stretch now longer, and more
+  scatter in the outer bays and along the west wall, which this build's
+  \SI{10}{\metre} grid range reaches and the October build's did not.}
+  \label{fig:map-realistic-nov-validate}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
   \includegraphics[width=\textwidth]{figures/map_realistic_01_validate.png}
-  \caption[Dense-map evaluation of \repo{map/map_realistic_01} against the
-  independent probe.]{Dense-map evaluation of \repo{map/map_realistic_01}
-  against \repo{dataset_allsensor_realistic_001}. The cleaner of the two in
-  geometry. The clearance mode at exactly \SI{0.25}{\metre} is the probe
-  threading the one-aisle gap at $x\approx10$ between two mapped shelf rows.}
+  \caption[Dense-map evaluation of \repo{map/map_realistic_01} (I-Oct) against
+  the independent probe.]{Dense-map evaluation of \repo{map/map_realistic_01}
+  (I-Oct) against \repo{dataset_allsensor_realistic_001}. The clearance mode at
+  exactly \SI{0.25}{\metre} is the probe threading the one-aisle gap at
+  $x\approx10$ between two mapped shelf rows.}
   \label{fig:map-realistic-01-validate}
 \end{figure}
 
-\textbf{Analysis.} Both maps fail, by similar margins, on every criterion:
-precision 81.2 and 84.8 against \SI{90}{\percent}, observed recall 82.5 and
-81.4 against \SI{85}{\percent}, false obstacles 3.8 and 4.4 against
-\SI{1}{\percent}. Agreement across two layouts and two independent builds makes
-this a property of the build rather than of one run.
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=\textwidth]{figures/dataset_allsensor_realistic_01_map_validate.png}
+  \caption[Dense-map evaluation of
+  \repo{map/dataset_allsensor_realistic_01_map} (I-Nov) against the
+  independent probe.]{Dense-map evaluation of
+  \repo{map/dataset_allsensor_realistic_01_map} (I-Nov) against the same probe.
+  The blocked poses are no longer confined to the spawn: stretches of 68, 55
+  and 50 poses sit mid-route in the aisles of the probe's left loop and along
+  its bottom straight, on cells the map places on the floor of the aisle.}
+  \label{fig:map-realistic-01-nov-validate}
+\end{figure}
 
-The precision loss is mostly thickened structure, with a phantom share the
-tiny map did not have. Classifying the wrong cells
-(\repo{script/exp4_insights.py}): 13.4 and \SI{9.7}{\percent} of occupied cells
-are surfaces drawn too thick, within \SI{0.50}{\metre} of true structure, and
-5.2 and \SI{5.3}{\percent} are phantoms further out, against 3.0 and
-\SI{0.4}{\percent} on the tiny map. The thickening sits on the shelf rows the
-build route passed; the phantoms are the east and south walls, drawn about
-\SI{0.5}{\metre} off their true line in both maps and far from any route. The
+\textbf{Analysis.} All four maps fail, and the November build of each recording
+scores below its October sibling on every criterion: precision by 3.4 and 2.6
+points, observed recall by 7.6 and 4.3, false obstacles from 3.8 to 5.0 and
+from 4.4 to \SI{10.2}{\percent}. The October pair fail by similar margins on
+both layouts, which made their failure a property of the build rather than of
+one run; the November pair move it further in the same direction.
+
+Three parameters moved together between the builds, and each has its own
+signature in the data, so the reading is consistent-with, not attribution. The
+detection rate, 4 to \SI{1}{\hertz}, shows as fewer nodes (148 against 165, 127
+against 185) and fewer observations per cell, which the view-count effect of
+the tiny-map insight analysis turns into lower precision and recall. The grid
+range, 8 to \SI{10}{\metre}, shows as structure the October builds never
+reached: the west wall and the far outer bays now carry occupied cells, and the
+largest new phantom clusters sit on them. The ground-height threshold, 0.29 to
+\SI{0.10}{\metre}, shows where it would: on the I layout the November build
+blocks 518 probe poses against 213, and the new stretches are mid-route, in
+the aisles, on cells first observed at median node 27 rather than at the
+start. A one-parameter rebuild is the test that would separate the three, and
+is the next action.
+
+In the October builds the loss is mostly thickened structure, with a phantom
+share the tiny map did not have. Classifying the wrong cells
+(\repo{script/exp4_insights.py}): 13.4 and \SI{9.7}{\percent} of occupied
+cells are surfaces drawn too thick, within \SI{0.50}{\metre} of true
+structure, and 5.2 and \SI{5.3}{\percent} are phantoms further out, against
+3.0 and \SI{0.4}{\percent} on the tiny map; in the November builds the shares
+are 15.4 and \SI{11.5}{\percent} thickened and 7.3 and \SI{6.3}{\percent}
+phantom. The thickening sits on the shelf rows the build route passed; the
+phantoms are the east and south walls, drawn about \SI{0.5}{\metre} off their
+true line in all four maps and far from any route. In the October builds the
 false obstacles are not the thickened shelving: every blocked probe pose lies
 within \SI{0.6}{\metre} of a phantom cell, the largest blocked stretch of each
 map is the first metres from the spawn, and 96 and \SI{63}{\percent} of the
 phantom cells under those stretches were first observed by one of the first
-five graph nodes, during the inertial initialisation transient.
+five graph nodes, during the inertial initialisation transient. The November U
+build repeats that pattern (224 spawn poses, \SI{88}{\percent} of the blocking
+cells early); the November I build does not, which is the ground-height
+signature above.
 
-These maps are an odometry picture by design, and the result should be read as
-one. Loop closure was disabled on both sides of the pipeline after the
-morning's A/B showed the front end's own closures corrupting an otherwise
-\SI{0.1}{\metre} map (RTAB-Map record \S7c), so no node was ever corrected
-against a revisited place; the stored graph confirms it, with no closure
-spanning more than three nodes. The thickening is therefore uncorrected drift
-along a 370--385-metre build route re-observing the same shelf from slightly
-different estimated places, which is exactly what this configuration was built
-to expose. It is not evidence about RTAB-Map's loop closing, which was not
-exercised.
+All four are an odometry picture by design, and should be read as one. Loop
+closure was disabled on both sides of the pipeline after the A/B of 26 October
+showed the front end's own closures corrupting an otherwise \SI{0.1}{\metre}
+map (RTAB-Map record \S7c), so no node was ever corrected against a revisited
+place; the stored graphs confirm it, with no closure spanning more than three
+nodes and none at all in the November builds. The thickening and the displaced
+walls are therefore uncorrected drift along a 365--385-metre build route
+re-observing the same structure from slightly different estimated places,
+which is what this configuration was built to expose. It is not evidence
+about RTAB-Map's loop closing, which was not exercised.
 
-Whole-building recall of 55.7 and \SI{54.5}{\percent} is route coverage, as on
-the tiny map: the build routes loop the central block and the outer bays on the
-left and right were seen only in passing. Observed-region recall, the mapping
-figure, is 82.5 and \SI{81.4}{\percent}.
+Whole-building recall of 54.5 to \SI{57.1}{\percent} is route coverage, as on
+the tiny map: the build routes loop the central block and the outer bays were
+seen only in passing. Observed-region recall, the mapping figure, is 74.9 to
+\SI{82.5}{\percent}.
 
-Placement needed the overlay, and the spawn check did not apply. Both fits
-landed about \SI{180}{\degree} from the \SI{-90}{\degree} spawn prediction, one
-with a thin margin, because the map frame was seated during the inertial
-initialisation transient rather than at the body's spawn pose: node 1 of each
-database carries a yaw of \SI{57}{} and \SI{-89}{\degree} and a height still
-settling over the first nodes, where the tiny map's node 1 is the identity. The
-overlays leave no doubt about the placement, and the two fits agree to
-\SI{0.7}{\degree}.
+Placement needed the overlay on three of the four fits, and the spawn check
+did not apply to any. The fits land about \SI{180}{\degree} from the
+\SI{-90}{\degree} spawn prediction because the map frame was seated during the
+inertial initialisation transient rather than at the body's spawn pose: node 1
+of the October databases carries a yaw of \SI{57}{} and \SI{-89}{\degree} and a
+height still settling over the first nodes, where the tiny map's node 1 is the
+identity. On the November U build the unconstrained sweep chose the rotated
+rival outright; the overlays leave no doubt about any of the four placements,
+and the two builds of each layout agree to \SI{0.3}{\metre} and
+\SI{0.5}{\degree}.
 
 \textbf{Limitations, each stated once.} \emph{Not route-matched:} the tiny
 probe was one loop of a wide aisle, these probes thread shelf aisles
-(5th-percentile clearance 0.36--0.62 against \SI{0.45}{\metre}), so part of the
+(5th-percentile clearance 0.18--0.62 against \SI{0.45}{\metre}), so part of the
 false-obstacle gap is probe difficulty and the \SI{1}{\percent} threshold was
-set against an easier route. \emph{No attribution:} world, route, duration and
-path length vary together across the two, so no factor may be credited for a
-difference between them; the longer build, \repo{_01}, is the cleaner.
-\emph{$n$:} one database per layout supports no uncertainty estimate. \emph{Front end unrecorded:} the database stores the
-back end's parameters but not which front end supplied the odometry chain.
+set against an easier route. \emph{No attribution:} world and route vary
+together between layouts, and three parameters and the front-end session vary
+together between builds, so no factor may be credited for any difference in
+this slot. \emph{$n$:} one database per cell supports no uncertainty estimate.
+\emph{Front end unrecorded:} the databases store the back end's parameters but
+not which front end, in which session, supplied the odometry chain.
 
 \begin{queried}[Queried: front end of the realistic builds]
 RTAB-Map took its pose from TF, so the odometry came from whichever front end
-was running; the database does not record which. The precision loss cannot be
-placed on the front end against the back end until the build logs name it.
+was running; none of the four databases records which, and the November builds
+were made during the latency sessions of Experiment~3, whose load on the front
+end is not recorded either. The precision loss cannot be placed on the front
+end against the back end, nor the November drop on parameters against session,
+until the build manifest names both.
 \end{queried}
 
 \paragraph{Summary.} Where tracking holds, the mapping pipeline is
@@ -489,21 +580,27 @@ geometrically sound on the tiny map: occupied-cell precision \SI{96.6}{\percent}
 and observed-surface recall \SI{89.5}{\percent}, with whole-building recall of
 \SI{67.2}{\percent} explained by route coverage; the drivability half is a dated
 measurement whose independent reference is lost. On the realistic warehouse
-two maps built without loop closure are auditable end to end and fail the
-same criterion by similar margins: precision 81.2 and 84.8 and false obstacles
-3.8 and \SI{4.4}{\percent} against independent probes. Their loss is thickened
-shelving, displaced walls and spawn-area phantoms from uncorrected drift over
-370--385-metre routes, which the
-closure-free build was configured to expose. The earlier large-warehouse
+four maps built without loop closure, two per layout under the October and the
+current configuration, are auditable end to end and all fail the same
+criterion: precision 77.8 to \SI{84.8}{\percent} and false obstacles 3.8 to
+\SI{10.2}{\percent} against independent probes. Their loss is thickened
+shelving, displaced walls and phantoms at the spawn from uncorrected drift,
+which the closure-free build was configured to expose; the current
+configuration scores lower on every metric, for reasons the three parameters
+it changed at once do not let this slot separate. The earlier large-warehouse
 attempt that lost tracking remains unauditable.
 
-\paragraph{Future plan.} The two realistic maps are the odometry baseline
-that a corrected map is to be compared against with the unchanged evaluator:
-re-enable closure with a translation bound on accepted corrections, or merge
-the closure-free sub-maps through Atlas, and rescore. Name the front end in
-every build manifest. Record the tiny-warehouse independent route again and
-retain it. Identify and score the 21 September databases, or let the realistic
-maps stand as the large-warehouse result.
+\paragraph{Future plan.} Attribute the November drop by rebuilding one
+recording with a single parameter restored at a time, first the ground-height
+threshold (\repo{Grid/MaxGroundHeight}), then the detection rate, and rescoring
+with the unchanged evaluator. Name the front end, its
+session and the three parameters in every build manifest. Use the four maps as
+the odometry baseline against which a corrected map is compared: re-enable
+closure with a translation bound on accepted corrections, or merge the
+closure-free sub-maps through Atlas, and rescore. Discard the cells of the
+first few nodes, or start the map after the inertial transient has settled,
+which the data predict would remove the spawn stretch. Record the
+tiny-warehouse independent route again and retain it.
 
 % =====================================================================
 \FloatBarrier

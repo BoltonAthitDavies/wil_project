@@ -135,13 +135,21 @@ def final_table():
          r"after a rigid SE(2) fit with scale fixed; RPE at \SI{1}{\second} translational; path ratio = estimate / "
          r"truth; resets = \repo{local_mapping_bad_imu} map resets; dropped = camera frames the node's queue discarded "
          r"of about 6\,480 received. Lever arm tracker-marker to IMU unmeasured (zero applied); time offset pinned to "
-         r"\SI{-4.14}{\second}; all values provisional under the scorer's validity rules.}",
+         r"\SI{-4.14}{\second}; all values provisional under the scorer's validity rules. \\textbf{Bold} marks the "
+         r"lowest ATE of the five runs; with one run per configuration that records which run came lowest, not "
+         r"that the configuration is better.}",
          r"\label{tab:realv6-final}",
          r"\begin{tabular}{lrrrrrrr}", r"\toprule",
          r"Run & ATE [m] & median [m] & max [m] & RPE$_{1\,\mathrm{s}}$ [m] & path ratio & resets & dropped \\", r"\midrule"]
+    mall = {label: metrics(dclean) for label, (dclean, rdir) in RUNS.items()}
+    finite = [m["ate_rmse"] for m in mall.values() if m.get("ate_rmse") is not None and np.isfinite(m["ate_rmse"])]
+    best = min(finite) if finite else None
     for label, (dclean, rdir) in RUNS.items():
-        m = metrics(dclean); rpe1 = m.get("rpe", {}).get("1.0", {}).get("trans_rmse_clean", float("nan"))
-        L.append(f"{label} & {m['ate_rmse']:.2f} & {m['ate_median']:.2f} & {m['ate_max']:.2f} & {rpe1:.3f} & "
+        m = mall[label]; rpe1 = m.get("rpe", {}).get("1.0", {}).get("trans_rmse_clean", float("nan"))
+        ate = f"{m['ate_rmse']:.2f}"
+        if best is not None and abs(m["ate_rmse"] - best) < 1e-9:
+            ate = r"\textbf{" + ate + "}"
+        L.append(f"{label} & {ate} & {m['ate_median']:.2f} & {m['ate_max']:.2f} & {rpe1:.3f} & "
                  f"{m['path_ratio']:.2f} & {m.get('resets', '---')} & {m.get('frames_dropped', '---')} \\\\")
     L += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
     (OUT / "final_table.tex").write_text("\n".join(L) + "\n")
@@ -232,11 +240,12 @@ def orb_timeline():
          r"heading changes faster than \SI{10}{\degree\per\second} and on straights, with the time in each state. "
          r"Positive = error growing. One run per configuration, so no test is possible.}",
          r"\label{tab:realv6-turning}",
+         r"\resizebox{\textwidth}{!}{%",
          r"\begin{tabular}{lrrrr}", r"\toprule",
          r"Run & turning [mm/s] & straight [mm/s] & time turning [s] & time straight [s] \\", r"\midrule"]
     for label, c in rows:
         L.append(f"{label} & {fmt(1000*c[0],1)} & {fmt(1000*c[1],1)} & {fmt(c[2],0)} & {fmt(c[3],0)} \\\\" if c else f"{label} & --- & --- & --- & --- \\\\")
-    L += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
+    L += [r"\bottomrule", r"\end{tabular}}", r"\end{table}"]
     (OUT / "turning.tex").write_text("\n".join(L) + "\n")
     return rows
 

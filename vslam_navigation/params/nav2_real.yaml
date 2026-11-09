@@ -24,20 +24,32 @@
 #   * speed is capped at 0.6 m/s for the first trials (project target 1.5 m/s).
 #   * use_sim_time is REWRITTEN at launch (true on bag replay, false live).
 #
-# REAL CHASSIS (user measurements, 6 Nov 2026) and what follows from them:
-#   wheel_base L = 0.46 m, steering limit d = 20 deg (0.349 rad)
+# REAL CHASSIS (user measurements; wheel base CORRECTED 7 Nov 2026 from 0.46 to
+# 0.60 m) and what follows from them:
+#   wheel_base L = 0.60 m, steering limit d = 20 deg (0.349 rad)
 #   footprint about base_link (on the floor under the IMU): +0.13 m forward,
 #   -0.52 m back, +-0.21 m sideways -> circumscribed radius 0.56 m
-#       rear axle   k = tan(d)/L = 0.791 1/m        (R = 1.264 m)
-#       base_link   R = sqrt(1.264^2 + 0.46^2) = 1.345 m, taking base_link at the
-#                   front axle (0.13 m of body ahead of it); planned at 1.45 m
-#       RPP lookahead must satisfy 2/L_d <= 1/1.345 -> L_d >= 2.69 m: 2.70 here.
-#       max yaw rate = 0.791 * 1.5 m/s = 1.19 rad/s.
-#   Cross-check from dataset_realv7_001 (ORB trajectory vs /cmd_steering +-30):
-#   turn rate 0.19-0.26 rad/s at 0.29 m/s -> R ~1.4 m at the IMU, i.e. the
-#   +-30 commands saturate at a wheel angle of ~18-20 deg, consistent with d.
-#   This car turns in a 2.7 m circle: in a 10 x 7 m zone give goals that do not
-#   need a U-turn next to a wall, and expect Smac to reject some.
+#       rear axle   k = tan(d)/L = 0.607 1/m        (R = 1.649 m)
+#       base_link   R = sqrt(1.649^2 + 0.60^2) = 1.754 m, taking base_link at the
+#                   front axle (0.13 m of body ahead of it); planned at 1.85 m
+#       RPP lookahead must satisfy 2/L_d <= 1/1.754 -> L_d >= 3.51 m: 3.55 here.
+#       max yaw rate = 0.607 * 1.5 m/s = 0.91 rad/s.
+#   This car turns in a 3.5 m circle, not the 2.7 m assumed before the
+#   correction. In a 10 x 7 m zone that is most of the short dimension: give
+#   goals that do not need a U-turn anywhere near a wall, and expect Smac to
+#   reject more of them than it did.
+#
+#   UNRESOLVED, and it is the steering limit that is in doubt, not the wheel
+#   base. The cross-check from dataset_realv7_001 (ORB trajectory against
+#   /cmd_steering +-30) measured a turn rate of 0.19-0.26 rad/s at 0.29 m/s,
+#   i.e. R ~1.4 m at the IMU. With L = 0.46 that implied an 18 deg wheel angle,
+#   consistent with a 20 deg limit; with L = 0.60 the same measurement implies
+#   23 deg, which EXCEEDS the stated limit. Either the limit is nearer 23 deg,
+#   or the measured radius was optimistic (R = 1.6 m would give 20.6 deg).
+#   Everything below therefore assumes 20 deg, which is the CONSERVATIVE choice:
+#   it plans a wider circle than the car may actually need, and planning a
+#   wider circle than the car can turn is safe while the converse is not.
+#   Re-measure on a figure-of-eight at full lock before raising it.
 
 bt_navigator:
   ros__parameters:
@@ -86,11 +98,11 @@ controller_server:
       approach_velocity_scaling_dist: 1.00
       use_velocity_scaled_lookahead_dist: true
       lookahead_time: 2.00
-      lookahead_dist: 2.70
-      min_lookahead_dist: 2.70                 # >= 2 x 1.345 m (see header)
-      max_lookahead_dist: 3.50
+      lookahead_dist: 3.55
+      min_lookahead_dist: 3.55                 # >= 2 x 1.754 m (see header)
+      max_lookahead_dist: 4.50
       use_regulated_linear_velocity_scaling: true
-      regulated_linear_scaling_min_radius: 1.60
+      regulated_linear_scaling_min_radius: 2.00
       regulated_linear_scaling_min_speed: 0.25
       use_cost_regulated_linear_velocity_scaling: false
       use_rotate_to_heading: false
@@ -121,7 +133,7 @@ planner_server:
       max_planning_time: 3.0
       motion_model_for_search: "DUBIN"
       angle_quantization_bins: 72
-      minimum_turning_radius: 1.45          # base_link floor 1.345 m + margin
+      minimum_turning_radius: 1.85          # base_link floor 1.754 m + margin
       reverse_penalty: 2.0
       change_penalty: 0.0
       non_straight_penalty: 1.20
@@ -163,7 +175,7 @@ behavior_server:
     wait:
       plugin: "nav2_behaviors/Wait"
     simulate_ahead_time: 2.0
-    max_rotational_vel: 1.2
+    max_rotational_vel: 0.91
     min_rotational_vel: 0.3
     rotational_acc_lim: 1.0
 
@@ -173,13 +185,14 @@ velocity_smoother:
     smoothing_frequency: 20.0
     scale_velocities: true
     feedback: "OPEN_LOOP"
-    # yaw 1.2 = 0.791 1/m x 1.5 m/s. Accelerations chosen, not measured: 0.5 m/s^2
+    # yaw 0.91 = 0.607 1/m x 1.5 m/s (wheel base 0.60 m, 7 Nov correction).
+    # Accelerations chosen, not measured: 0.5 m/s^2
     # reaches 1.5 m/s in 3 s and keeps the front end's IMU excitation gentle;
     # -1.0 m/s^2 stops from 1.5 m/s in 1.5 s / 1.1 m, inside the 2.7 m lookahead
     # and the planner's inflation. Nothing here senses live obstacles, so braking
     # authority is the only margin against what the prior map does not show.
-    max_velocity: [1.50, 0.0, 1.20]
-    min_velocity: [-0.30, 0.0, -1.20]
+    max_velocity: [1.50, 0.0, 0.91]
+    min_velocity: [-0.30, 0.0, -0.91]
     max_accel: [0.50, 0.0, 1.00]
     max_decel: [-1.00, 0.0, -1.50]
     odom_topic: /orbslam3/odometry

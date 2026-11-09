@@ -142,7 +142,7 @@ def generate_launch_description():
         DeclareLaunchArgument('bridge_dry_run', default_value='true',
                               description='true (default) logs the robot commands instead of publishing them. '
                                           'Set false only on the robot, after wheel_base and the topic units are verified.'),
-        DeclareLaunchArgument('wheel_base', default_value='0.46'),
+        DeclareLaunchArgument('wheel_base', default_value='0.60'),
         DeclareLaunchArgument('max_speed', default_value='0.6'),
         OpaqueFunction(function=_setup),
     ])

@@ -122,9 +122,23 @@ finished prose: port them, do not rewrite their science.
   space on 2-3 November -- use the root above)
 - Ground truth: `/home/ambushee/wil_project/dataset/gt/` (tracker exports, not
   on the dataset drive)
-- Raw estimator results: `/home/ambushee/wil_project/output/output_*`
-- Offline YOLO evaluation: `/home/ambushee/wil_project/output/yolo_eval/`
+- Raw estimator results: `/home/ambushee/wil_project/output/output_*/<domain>/<dataset>/<run>/`
+  (run names since 6 Nov 2026: VINS `cpu`; ORB-SLAM3 `loopclosing_cpu`,
+  `loopclosing_gpu`, `noloopclosing_cpu`, `noloopclosing_gpu` -- the front end
+  and the closer switch are both in the name, and the closer STATE is still read
+  from `loop_closing.csv`, never from the name)
+- RTAB-Map databases: `/home/ambushee/wil_project/map/<name>/<name>.db`
+  (`map_tiny`, `map_realistic` [U, October config, formerly `map_realistic_v2`],
+  `map_realistic_01` [I, October], `dataset_allsensor_realistic_map` [U, 6 Nov
+  config], `dataset_allsensor_realistic_01_map` [I, 6 Nov config])
+- Worlds: **every** `.world` file now lives in
+  `/home/ambushee/wil_project/aws-robomaker-small-warehouse-world/worlds/small_warehouse/`
+  (moved 6 Nov 2026; the `small_warehouse_dynamic/` and `small_warehouse_static/`
+  subdirectories no longer exist -- scripts resolve `WORLDS` to this one directory)
 - Analysis products: `/home/ambushee/wil_project/output/compare/`
+- Retired outputs: `/home/ambushee/wil_project/trash/output/` (log of what went
+  there and why: `trash/output/RETIRED_20261106.txt`); never cite anything under
+  it as a result
 - Final report LaTeX: `/home/ambushee/wil_project/docs/report/final_report/`
 
 ### 3.2 Known dataset status
@@ -134,31 +148,39 @@ The following datasets are broken and must not be selected for experiments:
 - `dataset_real_001`
 - `dataset_real_002`
 
-The workspace copy `/home/ambushee/wil_project/dataset/` holds only what is in
-active use (8 October 2026):
+**The dataset set is fixed (user decision, 6 November 2026).** Every result in
+the report is drawn from these recordings and no others; results from any other
+recording were retired to `trash/output/` that day and are never mixed back in:
 
-- `dataset_map_realistic` -- simulation, 166 s, recorded 8 October 2026 in one of
-  the realistic worlds (Section 3.3). The bag does not say which variant; the run
-  manifest must. Carries `/clock`, both compressed cameras, IMU, ground-truth
-  odometry, joint states and `/world/default/pose/info`.
-- `dataset_realv2_000` -- real robot, Gensurv, 1 October 2026, 35 s, a straight
-  6 m line at constant speed (VIO scale is unobservable on it).
-- `dataset/gt/dataset_realv2_000` and `dataset/gt/dataset_realv2_001` -- the
-  optical tracker's planar ground truth (X, Y in cm, about 7 Hz, no heading, its
-  own time base). The robot clock is unsynchronised with it: the offset must be
-  estimated per bag (`script/eval_real_gt.py`). `/feedback/velocity` on these
-  bags is not metres per second; use its shape only.
-
-Inventory of the dataset root on 3 November 2026 (18 bags, 33 GB; health audit
-by `script/check_bags.py` the same day: **18 of 18 healthy**, message counts equal
-to the metadata for every bag):
-
-| group | present on the root | known absent or lost |
+| domain | in use | role |
 |---|---|---|
-| real robot | `dataset_realv6_000` (31 Oct, tracker truth needs one sample removed), `dataset_realv7_000/001/002` (3 Nov, the first recordings whose tracker truth passes the validity rules) | `dataset_real_000`, `realv2_*`, `realv3_*`, `realv4_*`, `realv5_000` are not on the root; `realv2_000` may still be in the workspace copy |
-| simulation, Experiment 1 | `dataset_allsensor_000/002/003`, `dataset_static_nofloortexture_000/002` | `allsensor_001/004`, `static_nofloortexture_001` (total losses per the integrity audit), `dynamic_nofloortexture_01_000` |
-| simulation, realistic | `dataset_allsensor_realistic_000..003` (U-static, I-static, U-dynamic, I-dynamic) | -- |
-| simulation, mapping | `dataset_allsensor_realistic_map`, `_map_000`, `_map_dynamic`, `_01_map`, `dataset_map_tiny` | -- |
+| simulation | `dataset_allsensor_realistic_000` (U, static twin), `_001` (I, static twin), `_002` (U, traffic), `_003` (I, traffic) | Experiments 1 and 3; `_000`/`_001` are also the independent probes of the Experiment 4 maps |
+| simulation | `dataset_allsensor_realistic_map` (U, formerly `_mapv2`), `dataset_allsensor_realistic_01_map` (I) | Experiment 4 builds; **the only source of Experiment 3's latency/resource measurement**, three repeats of each configuration (18 runs, 6-7 Nov 2026) |
+| simulation | `dataset_map_tiny` | the tiny map of Experiment 4 (its independent drivability route is lost) |
+| real robot | `dataset_realv6_000` (31 Oct; tracker truth needs the 184.9 s sample removed; export at 1.7 Hz fails the validity rules), `dataset_realv7_000/001/002` (3 Nov; truth passes the rules) | Experiments 1 (visual only) and 3; `realv8` is out |
+
+Retired and never selected: `dataset_allsensor_00x`, `dataset_static_*` and
+`dataset_dynamic_nofloortexture_*` (the extreme world, `relogged_20260916`),
+`dataset_real_00x`, `realv2`--`realv5`, `realv8`, `dataset_map_0x`, the October
+filtered runs, and the three-class `output/yolo_eval/dyn_*` runs (the
+four-class `*_4class` runs of 7 Nov are current). "Dynamic environment" in the report means
+the traffic of `_002`/`_003` noted as a *condition* of a recording (no two
+recordings share a route, so it is never a factor); the user's forward interest
+is map reconstruction after objects have been moved, not real-time filtering,
+so the filtered arms are blank in both domains until told otherwise.
+
+**Ground truth** for every simulation bag is canonical at
+`dataset/gt/<bag>/ground_truth.csv` (the tree copies under `output/output_*/`
+went to trash); `script/vio_metrics.py` looks there first. If a scorer prints
+ATE 0.000 for every run it found no truth and fell back to self-reference --
+that is a bug, not a result.
+
+**Misfiled runs.** Before scoring any run, check `run_metadata.csv`
+`dataset_path` against the output directory it sits in and the bag's frame
+count. `output_orb/simulation/dataset_allsensor_realistic_002/loopclosing_gpu`
+was launched on the `realistic_003` bag (3,535 pairs vs 2,409) and scored
+against the wrong truth for a day; it is under `trash/output/misfiled_20261106/`
+and the cell was re-run on the right bag on 6 Nov 23:50 (0.40 m, scored 7 Nov).
 
 Do not mark a dataset broken because it is absent from the workspace copy.
 Before preparing a run, report the resolved absolute path and inspect its topic
@@ -180,23 +202,24 @@ scored first without the repairs, to show the switches work.
 
 ### 3.3 World naming
 
-- `aws-robomaker-small-warehouse-world/worlds/small_warehouse` is the original
-  **tiny** map.
-- `worlds/small_warehouse_dynamic` and `worlds/small_warehouse_static` are the
-  rescaled **large** warehouse families, **with one exception**:
-  `worlds/small_warehouse_static/small_warehouse_static_tinymap.world` carries
-  tiny geometry despite living in the static family directory. It is the world the
-  RTAB-Map dense map (`map/map_tiny.db`) was built and evaluated against. The
-  directory name does not determine the scale; the file does.
+- Since 6 November 2026 every world file is in
+  `aws-robomaker-small-warehouse-world/worlds/small_warehouse/` (one directory;
+  the old `small_warehouse_dynamic/` and `small_warehouse_static/` families are
+  gone). `small_warehouse.world` is the original **tiny** map;
+  `small_warehouse_static_tinymap.world` carries tiny geometry and is the world
+  `map/map_tiny/map_tiny.db` was built and evaluated against; the
+  `small_warehouse_{static,dynamic}_0N_*.world` files are the rescaled **large**
+  (extreme) families, retired from the report. The file name, not a directory,
+  determines the scale.
 
 The **realistic** family (6 October 2026) is generated, never hand-edited:
-`worlds/small_warehouse_dynamic/small_warehouse_dynamic_realistic_nofloortexture.world`
+`worlds/small_warehouse/small_warehouse_dynamic_realistic_nofloortexture.world`
 is a U-shape flow (receiving and dispatch docks on the north wall) and
 `..._realistic_nofloortexture_01.world` an I-shape through flow (dispatch docks on
 the south wall), both from `script/make_realistic_world.py --layout {u,i}` with
 four pallet jacks on pick/carry/drop jobs (the `LogisticsScheduler` gz system) and four
 walking people as gz-sim actors (no collision, not baked, not in `pose/info`).
-`worlds/small_warehouse_static/small_warehouse_static_realistic_nofloortexture{,_01}.world`
+`worlds/small_warehouse/small_warehouse_static_realistic_nofloortexture{,_01}.world`
 are their static twins from `script/make_static_world.py` (all includes static,
 no traffic plugin). Baked nav2 maps: `maps/baked_dynamic_realistic{,_01}/`, frame
 `--origin -21.1 -21.1 --size 844 844`. The teleop routes recorded in the older
@@ -243,6 +266,36 @@ interaction:
 
 Never mix measurements from retired and current datasets in one aggregate.
 
+Standing rules from the 6 November 2026 decision:
+
+- **Experiment 1:** the EKF baseline runs on the inertial noise the VSLAM
+  configs declare (`script/make_vslam_noise_yaml.py --preset inflated` from
+  `config/wil_sim/stereo_imu.yaml`); the measured-noise EKF is a diagnostic row
+  (`analyse_proprio.py --ekf-diagnostic output_ekf_measured`), never the baseline.
+- **Experiment 3, accuracy:** one run per cell on `realistic_000..003`; factors
+  are estimator, front end (CPU/GPU), loop closer (active/disabled). On the I
+  layout a filtered-vs-unfiltered pair must use the closer **disabled**: both
+  loop-closing runs accept a false 14 m closure at 73 s on `realistic_001`.
+  Quote the planar onset table beside the 3-D ATE (vertical drift is charged to
+  a floor robot).
+- **Experiment 3, latency/resources:** only from repeated runs on
+  `dataset_allsensor_realistic_map` and `_01_map` (18 runs since 7 Nov 2026:
+  ORB-SLAM3 CPU and GPU front ends closure-free, and VINS-Fusion, 3 repeats
+  each; `mapping_resources.tex`). The per-run resource table of the accuracy
+  runs (`realistic_resources.tex`) is generated but NOT reported. The repeats
+  were run one configuration at a time, so the I-recording front-end
+  comparison is confounded with thermal state: say so wherever it is quoted,
+  and interleave the configurations when repeating.
+- **Experiment 2:** simulation scored with the FOUR-class checkpoint
+  (`weight/runs_1/detect/train/weights/best.pt`; `yolo_gt.CLASS_OF` maps
+  `PalletJackB_01` to `forklift`, so the moving pallet jacks are truth); the
+  walking people are actors without pose or mesh and outside the classes, so
+  they are unscorable on both sides and the write-up says so. Quote recall on
+  both bases (scored = exemptions applied; all = every projected box) and the
+  moving-object recall as the headline. Real robot: blank/planned (user, 7 Nov).
+- **Experiment 4:** the four realistic maps are two configurations x two
+  layouts, n = 1 each; parameter attributions are signatures, not ablations.
+
 ## 5. Required provenance and quality checks
 
 Each run must be traceable through a manifest or structured log containing:
@@ -282,7 +335,7 @@ Current primary artifacts are:
 |---|---|---|
 | `vio.csv` | Timestamped estimated trajectory | trajectory metrics and plots |
 | `yolo_mask.csv` | Masks actually used by the tracker | filtering coverage and timing analysis. `run_summary.csv` / `filter_summary.csv` carry `detection_match_rate` and `filter_status`; quote both beside any filter result, because a low match rate means the filter did not run rather than did not help |
-| `output/yolo_eval/*/yolo_eval.csv` | YOLO predictions matched against projected Gazebo ground truth | precision, recall, IoU, and moving/static analysis |
+| `output/yolo_eval/<bag>_4class/yolo_eval.csv` (the three-class `dyn_*` runs were retired 6 Nov 2026 to `trash/output/yolo_eval/`) | YOLO predictions matched against projected Gazebo ground truth | precision, recall, IoU, and moving/static analysis |
 | `output/yolo_eval/*/yolo_detections.csv` | Per-detection offline results | threshold, class, and error analysis |
 | `output/yolo_eval/*/overlay/` | Visual GT/prediction overlays | qualitative validation of projections and matching |
 | `map_tiny.db` or another `.db` | RTAB-Map graph/database | map, graph, and localization analysis |
@@ -698,22 +751,15 @@ hardware or calibration), and the exact next action -- and nothing else. Do not
 let an empty slot borrow the other domain's numbers, and do not compare the two
 domains of an experiment until both slots hold valid results.
 
-Status of the eight slots at the 25 September 2026 cutoff, which the report must
-state and the user updates as data arrives:
+Status of the eight slots at the 7 November 2026 cutoff, which the report
+states in table 4.1 and the user updates as data arrives:
 
 | Experiment | Simulation | Real robot |
 |---|---|---|
-| 1 Baseline / estimators | completed, 5 `allsensor` bags, 4 worlds | planned |
-| 2 YOLO detector | completed, 4 dynamic bags, 9,860 frames | planned |
-| 3 VIO + dynamic filtering | **untested** -- VINS filter never fired, ORB confounded by frame loss; runs exist, hypothesis has no valid test | planned |
-| 4 Dense map | **partial** -- tiny map scored (occupied-cell P 96.6 %, observed-surface R 89.5 %, whole-building R 67.2 %), large map failed through tracking loss with no artifact retained | planned |
-
-Evidence gathered after the cutoff and not yet in the report (as of 8 October
-2026): the `realv2` real bags were scored against the tracker ground truth on
-6 October (provisional, lever arm assumed zero): 000 both estimators scale-short
-(VINS ATE 1.43 m, ORB 0.76 m); 001 ORB ATE 0.37 m, RPE(1 s) 0.075 m, and the VINS
-001 run failed replay-side and must be re-run. This feeds slot 4.1.2 once the
-offset and lever-arm handling are settled.
+| 1 Baseline / estimators | completed, 4 realistic bags, EKF at VSLAM-config noise; VINS best on all four (0.22-0.66 m) | partial: wheel+gyro dead reckoning (`script/real_wheel_baseline.py`, speed scale k=0.325 fitted on realv7_000, gyro y axis, wheelbase 0.60 m unused: steering is a command echo) 0.22-0.46 m on the held recordings vs ORB 0.44-0.52 m |
+| 2 YOLO detector | completed, 4 realistic bags, 4-class checkpoint `weight/runs_1/detect/train/weights/best.pt` (forklift = pallet jack): P 0.747, R 0.502 scored / 0.288 all, moving R 0.288, class F1 0.994 (`summarise_yolo_eval.py`, `exp2_insights.py`, outputs `output/yolo_eval/*_4class/`) | planned (no annotated frames; user: blank for now) |
+| 3 VIO + dynamic filtering | **partial** -- 20 unfiltered accuracy runs (the loop closer decides ORB-SLAM3's error) + 18 mapping-bag resource repeats (VINS back end 44 ms and a quarter of the memory vs ORB local mapping 211-406 ms, for 2x the cores); no filtered run | partial -- ORB provisional 0.25-0.27 m (realv7_000) / 0.46-0.52 m (realv6); VINS no valid run; no filtered run |
+| 4 Dense map | **partial** -- tiny map passes; four realistic maps fail H6 (P 77.8-84.8 %, false obstacles 3.8-10.2 %); large map failed, no artefact | planned |
 
 "Untested" and "failed" are reported as findings, with cause where confirmed and
 untested explanations labelled as such. Weak, negative, or disappointing results
@@ -736,7 +782,20 @@ and `\reporttable{name}` resolve into `final_report/figures/` and
 same artefacts. The user reads the compiled PDF, and the insights are then
 extracted from it into the chapter. A later revision of an experiment updates
 the same file. A requested change to existing chapter 4 text goes into the raw
-write-up first, then into the chapter, so the two never disagree.
+write-up first, then into the chapter, so the two never disagree. **Since
+6 November 2026 the chapter's slots for Experiments 1-3 are produced from the
+notes by a mechanical transform** (sections become subsections,
+`\paragraph{Objective/Process/Dataset/Reporting rules/Results/Reason/Next
+action.}` become `\textbf{...}`, `\reporttable{x}` becomes
+`\input{tables/x}`, `../../../../output/` becomes `../../../output/`, the
+chapter-3 cross-reference labels `sec:results-proprio`, `sec:exp1-real`,
+`sec:yolo-performance`, `fig:yolo-ground-truth-overlay`, `sec:results-validity`,
+`sec:realistic-ab`, `sec:rpe`, `sec:trajectory-results`, `sec:exp3-real` are
+added as aliases, and the note's own `\label{sec:vio-filter-method}` is
+dropped because chapter 3 owns it). Regenerate rather than hand-edit; the
+Experiment 4 slot still inputs the fragment `m4_exp4_sim` for the tiny map,
+and the `m4_exp1_sim`, `m4_exp2_sim`, `m4_exp3_*` and `m4_discussion` fragments
+are no longer input (they report retired data).
 
 Each slot in the raw write-up keeps the fixed order (status; objective;
 process; dataset; results; analysis; summary; future plan), written to the

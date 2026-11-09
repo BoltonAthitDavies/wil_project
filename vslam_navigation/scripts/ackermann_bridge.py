@@ -18,11 +18,17 @@ Safety:
   * `dry_run` true logs what would be sent and publishes nothing.
 
 Chassis and command interface (6 Nov 2026):
-  * wheel_base 0.46 m, steering limit 20 deg, footprint: user measurements.
+  * wheel_base 0.60 m (user, CORRECTED 7 Nov 2026 from 0.46), steering limit
+    20 deg, footprint: user measurements. The limit is the doubtful one: the
+    realv7_001 turn-rate cross-check below implies 23 deg at L = 0.60, above
+    the stated limit. 20 deg is kept because clamping tighter than the car can
+    actually steer is the safe error.
   * /cmd_steering is in DEGREES and POSITIVE TURNS RIGHT: on dataset_realv7_001
     every one of ten +-30 deg commands produced a body turn rate of the opposite
     sign (about 0.2 rad/s at 0.29 m/s), hence steering_scale 57.3 (rad -> deg)
-    and steering_sign -1. Commands beyond +-20 saturate at the wheel limit.
+    and steering_sign -1. That turn rate is R ~1.4 m at the IMU, which at
+    L = 0.60 m is a 23 deg wheel angle -- so either the limit is nearer 23 deg
+    or the radius was optimistic. Unresolved; see nav2_real.yaml's header.
   * /cmd_velocity: 1.25 held for 112 s gave 0.29 m/s median (0.37 at p90) from
     the ORB trajectory, i.e. ~4.3 units per m/s -- but one operating point only,
     and /feedback/velocity on the realv2 bags read 3.0 x the tracker speed, so
@@ -43,7 +49,7 @@ from std_msgs.msg import Bool, Float64
 class Bridge(Node):
     def __init__(self):
         super().__init__('ackermann_bridge')
-        self.declare_parameter('wheel_base', 0.46)         # m, measured 6 Nov 2026
+        self.declare_parameter('wheel_base', 0.60)         # m, user 7 Nov 2026 (was 0.46)
         self.declare_parameter('steering_limit', 0.349)    # rad (20 deg), measured
         self.declare_parameter('velocity_scale', 4.3)      # /cmd_velocity units per m/s, PROVISIONAL (one point)
         self.declare_parameter('max_command_velocity', 2.5)  # cap on the published command units (~0.58 m/s at 4.3)

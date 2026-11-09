@@ -91,7 +91,9 @@ BAG_FRAMES = {"dataset_allsensor_realistic_000": 3805, "dataset_allsensor_realis
 # step of their own hue (search in script history, 21 Oct 2026); magenta is kept.
 # Secondary encoding remains: no-LC dashed, filtered arms dotted / open markers.
 COLORS = {"VINS-Fusion": "#cc8319", "ORB-SLAM3": "#e040fb", "ORB-SLAM3 (no LC)": "#a347b2",
-          "VINS-Fusion+YOLO": "#f57c00", "ORB-SLAM3+YOLO": "#8e24aa"}
+          "VINS-Fusion+YOLO": "#f57c00", "ORB-SLAM3+YOLO": "#8e24aa",
+          # GPU front end (6 Nov 2026 runs): same hues, lighter, so CPU/GPU pairs read as pairs
+          "ORB-SLAM3 GPU": "#f48fff", "ORB-SLAM3 GPU (no LC)": "#c98fd9", "ORB-SLAM3 GPU+YOLO": "#c060e0"}
 THEMES = {"light": dict(surface="#fcfcfb", ink="#0b0b0b", ink2="#52514e", grid="#dedcd4"),
           "dark": dict(surface="#1a1a19", ink="#ffffff", ink2="#c3c2b7", grid="#3a3a37")}
 
@@ -113,19 +115,28 @@ def parse_run(tree, name):
     est = {"output_vins": "VINS-Fusion", "output_orb": "ORB-SLAM3",
            "output_vins_yolo": "VINS-Fusion", "output_orb_yolo": "ORB-SLAM3"}[tree]
     filtered = tree.endswith("_yolo")
+    # Since the 6 November 2026 restructuring the unfiltered runs carry a
+    # front-end suffix (loopclosing_gpu, noloopclosing_cpu; VINS-Fusion's single
+    # run is "cpu"). The October names (loopclosing, nofilter) are kept for the
+    # retired runs under trash/. `frontend` is a factor of Experiment 3, so it is
+    # part of the label and never pooled over.
     if tree == "output_orb":
-        m = re.fullmatch(r"(no)?loopclosing", name)
+        m = re.fullmatch(r"(no)?loopclosing(?:_(cpu|gpu))?", name)
         if not m:
             return None
-        return dict(estimator=est, filtered=False, mode="off", lc_named=m.group(1) is None, atlas=False)
+        return dict(estimator=est, filtered=False, mode="off", lc_named=m.group(1) is None, atlas=False,
+                    frontend=m.group(2) or "cpu")
     if tree == "output_vins":
-        return dict(estimator=est, filtered=False, mode="off", lc_named=None, atlas=False) if name == "nofilter" else None
+        return (dict(estimator=est, filtered=False, mode="off", lc_named=None, atlas=False, frontend="cpu")
+                if name in ("nofilter", "cpu") else None)
     if tree == "output_vins_yolo":
-        return dict(estimator=est, filtered=True, mode=name, lc_named=None, atlas=False) if name in ("class", "motion") else None
-    m = re.fullmatch(r"(class|motion)_(no)?loopclosing_(no)?atlas", name)
+        return (dict(estimator=est, filtered=True, mode=name, lc_named=None, atlas=False, frontend="cpu")
+                if name in ("class", "motion") else None)
+    m = re.fullmatch(r"(class|motion)_(no)?loopclosing_(no)?atlas(?:_(cpu|gpu))?", name)
     if not m:
         return None
-    return dict(estimator=est, filtered=True, mode=m.group(1), lc_named=m.group(2) is None, atlas=m.group(3) is None)
+    return dict(estimator=est, filtered=True, mode=m.group(1), lc_named=m.group(2) is None, atlas=m.group(3) is None,
+                frontend=m.group(4) or "cpu")
 
 
 def discover():
@@ -170,7 +181,8 @@ def started(meta):
 
 def score(run):
     ds = run["dataset"]
-    label = run["estimator"] + (" (no LC)" if run["lc_named"] is False else "") + ("+YOLO" if run["filtered"] else "")
+    label = (run["estimator"] + (" GPU" if run.get("frontend") == "gpu" else "")
+             + (" (no LC)" if run["lc_named"] is False else "") + ("+YOLO" if run["filtered"] else ""))
     # The second entry never loads a run (output_vins/<ds>/vio.csv does not exist, the
     # runs are in named subdirectories) but puts output_vins on the ground-truth
     # candidate list, which is where extract_gt.py writes it. Without it an ORB or
@@ -254,6 +266,35 @@ def fmt(v, p=3):
     return "---" if v is None or (isinstance(v, float) and not np.isfinite(v)) else f"{v:.{p}f}"
 
 
+def best_of(rows, key, lower_is_better=True):
+    """The best finite value of `key` over `rows`, or None.
+
+    Used to set the rows a table prints in bold. Bold marks the best value in a
+    comparison the table actually makes, not a tested difference: these cells
+    hold one run each, so a bold number says "this run was lowest here", never
+    "this configuration is better".
+    """
+    vals = [r.get(key) for r in rows]
+    vals = [v for v in vals if v is not None and isinstance(v, (int, float)) and np.isfinite(v)]
+    if not vals:
+        return None
+    return min(vals) if lower_is_better else max(vals)
+
+
+def fmt_b(v, best, p=3):
+    """fmt(), emboldened when v is the group's best AT THE PRINTED PRECISION.
+
+    Comparing the rounded strings, not the floats: two runs whose RPE differs in
+    the fourth decimal both print 0.078, and bolding only one of them would claim
+    a distinction the table does not show. A tie at the printed precision gets
+    bold on every row that ties.
+    """
+    t = fmt(v, p)
+    if best is not None and v is not None and isinstance(v, (int, float)) and np.isfinite(v) and t == fmt(best, p):
+        return "\\textbf{%s}" % t
+    return t
+
+
 def write_csv(rows):
     keys = ["dataset", "layout", "scene", "tree", "run", "label", "estimator", "filtered", "mode", "lc_state", "atlas",
             "started", "binary", "replay_rate", "received", "processed", "dropped", "retention", "of_bag", "resets", "shutdown",
@@ -272,21 +313,28 @@ def write_baseline_table(rows):
         w = f.write
         w("% Generated by script/analyse_realistic_runs.py -- do not edit by hand.\n")
         w("\\begin{table}[htbp]\n\\centering\n")
-        w("\\caption{Unfiltered arms on the four realistic-warehouse recordings, 21 October 2026, replay rate 1.0. "
+        w("\\caption[Unfiltered arms on the four realistic-warehouse recordings.]{Unfiltered arms on the four realistic-warehouse recordings, 6 November 2026, replay rate 1.0. "
           "Aligned ATE is RMSE after a rigid $SE(3)$ fit with scale fixed; RPE is translational, at "
           "$\\Delta=\\SI{1}{\\second}$ over pairs that do not span a jump; ``Jumps'' counts steps above "
           "\\SI{10}{\\metre\\per\\second}; ``Kept'' is the fraction of the bag's stereo pairs the estimator processed (frames lost before the node's own queue count as lost). "
           "Loop-closer state is read from \\repo{loop_closing.csv}, not from the run name. Static and dynamic rows of "
-          "one layout share a world geometry and differ in traffic only.}\n")
+          "one layout share a world geometry and differ in traffic only. "
+          "\\textbf{Bold} marks the lowest ATE and the lowest jump-free RPE among the five arms of a recording; "
+          "with one run per arm it records which run came lowest, not that the arm is better.}\n")
         w("\\label{tab:realistic-baseline}\n\\small\n\\resizebox{\\textwidth}{!}{%\n")
         w("\\begin{tabular}{llll rrrrrr}\n\\toprule\n")
         w("Recording & Layout & Scene & Estimator & ATE [\\si{\\metre}] & Rot.\\ [\\si{\\degree}] & "
           "RPE$_{1\\,\\mathrm{s}}$ [\\si{\\metre}] & Jumps & Kept & Resets \\\\\n\\midrule\n")
+        unfiltered = [r for r in rows if not r["filtered"]]
+        best = {ds: (best_of([r for r in unfiltered if r["dataset"] == ds], "ate_rms"),
+                     best_of([r for r in unfiltered if r["dataset"] == ds], "rpe1_trans_clean"))
+                for ds in {r["dataset"] for r in unfiltered}}
         last = None
         for r in rows:
             if r["filtered"]:
                 continue
             lay, sc = SCENE[r["dataset"]]
+            b_ate, b_rpe = best[r["dataset"]]
             first = r["dataset"] != last
             if not first:
                 pass
@@ -296,7 +344,8 @@ def write_baseline_table(rows):
             w("%s & %s & %s & %s & %s & %s & %s & %s & %s & %s \\\\\n" % (
                 "\\repo{%s}" % r["dataset"].replace("dataset_allsensor_", "") if first else "",
                 lay if first else "", sc if first else "", r["label"],
-                fmt(r.get("ate_rms")), fmt(r.get("rot_rms"), 2), fmt(r.get("rpe1_trans_clean")),
+                fmt_b(r.get("ate_rms"), b_ate), fmt(r.get("rot_rms"), 2),
+                fmt_b(r.get("rpe1_trans_clean"), b_rpe),
                 r.get("jumps", "---"), fmt(r["of_bag"], 2), r["resets"]))
         w("\\bottomrule\n\\end{tabular}}\n\\end{table}\n")
 
@@ -379,7 +428,9 @@ def fig_trajectories(rows, aligned, theme):
 def fig_metrics(rows, theme):
     th = THEMES[theme]
     fig, axes = plt.subplots(1, 2, figsize=(11, 4.2), facecolor=th["surface"])
-    arms = [("VINS-Fusion", "o"), ("ORB-SLAM3", "s"), ("ORB-SLAM3 (no LC)", "D")]
+    # CPU arms filled, GPU arms open (same marker, same hue): the front end is the
+    # one factor added on 6 Nov 2026 and the pairs must read as pairs.
+    arms = [("VINS-Fusion", "o"), ("ORB-SLAM3", "s"), ("ORB-SLAM3 GPU", "s"), ("ORB-SLAM3 (no LC)", "D"), ("ORB-SLAM3 GPU (no LC)", "D")]
     x = np.arange(len(DATASETS))
     for ax, key, name in zip(axes, ("ate_rms", "rpe1_trans_clean"), ("aligned ATE RMSE [m]", "jump-free RPE at 1 s [m]")):
         style(ax, th)
@@ -388,12 +439,14 @@ def fig_metrics(rows, theme):
             for ds in DATASETS:
                 r = next((r for r in rows if r["dataset"] == ds and r["label"] == lab and not r["filtered"] and r.get("valid")), None)
                 ys.append(r.get(key, np.nan) if r else np.nan)
-            ax.plot(x + (k - 1) * 0.12, ys, mk, ms=8, color=COLORS[lab], mec=th["surface"], mew=1.2, label=lab, zorder=4)
+            gpu = "GPU" in lab
+            ax.plot(x + (k - 2) * 0.11, ys, mk, ms=8, mfc="none" if gpu else COLORS[lab], mec=COLORS[lab] if gpu else th["surface"],
+                    mew=1.8 if gpu else 1.2, label=lab, zorder=4)
         # admissible filtered arms as open markers next to their baseline
         for r in rows:
             if r["filtered"] and r["admissible"] and r.get("valid"):
                 i = DATASETS.index(r["dataset"]); k = [a[0] for a in arms].index(r["label"].replace("+YOLO", ""))
-                ax.plot(i + (k - 1) * 0.12 + 0.05, r.get(key, np.nan), "^", ms=9, mfc="none", mec=COLORS[r["label"]], mew=1.8,
+                ax.plot(i + (k - 2) * 0.11 + 0.05, r.get(key, np.nan), "^", ms=9, mfc="none", mec=COLORS[r["label"]], mew=1.8,
                         label="%s, %s mask (admissible)" % (r["estimator"], r["mode"]), zorder=5)
         ax.set_xticks(x); ax.set_xticklabels(["%s\n%s %s" % (d.replace("dataset_allsensor_", ""), *SCENE[d]) for d in DATASETS], fontsize=8)
         ax.set_ylabel(name); ax.set_ylim(bottom=0)
@@ -401,7 +454,7 @@ def fig_metrics(rows, theme):
     seen = {}
     for hh, ll in zip(h, l):
         seen.setdefault(ll, hh)
-    fig.legend(seen.values(), seen.keys(), loc="lower center", ncol=4, fontsize=8, frameon=False, labelcolor=th["ink"])
+    fig.legend(seen.values(), seen.keys(), loc="lower center", ncol=5, fontsize=8, frameon=False, labelcolor=th["ink"])
     fig.tight_layout(rect=(0, 0.1, 1, 1))
     fig.savefig(os.path.join(OUT, f"metrics_{theme}.png"), dpi=160, facecolor=th["surface"]); plt.close(fig)
 

@@ -143,6 +143,15 @@ def main():
                     help='coarse yaw step in degrees; refined to 0.1 around the winner')
     ap.add_argument('--spawn', default='1.8,9.0,-90',
                     help='X,Y,YAW_DEG the run started from, for the sanity check')
+    ap.add_argument('--yaw-near', type=float, default=None, metavar='DEG',
+                    help='choose the best candidate within --yaw-window of this '
+                         'yaw instead of the global winner. For a warehouse of '
+                         'parallel aisles the sweep is nearly 180-degree '
+                         'symmetric and the global winner can be the rotated '
+                         'rival; when the --overlay shows shelves between '
+                         'shelves, refit here. Both candidates are printed so '
+                         'the choice is on record.')
+    ap.add_argument('--yaw-window', type=float, default=15.0)
     ap.add_argument('--overlay', default='',
                     help='write a PNG of the fitted grid over the warehouse')
     a = ap.parse_args()
@@ -211,12 +220,24 @@ def main():
         cand = sweep(np.arange(-180.0, 180.0, a.step))
         if not cand:
             raise SystemExit('no usable yaw; is --pad large enough?')
-        alts = [c for c in cand
-                if abs((c[1] - cand[0][1] + 180) % 360 - 180) > 5.0]
-        margin = 100.0 * (cand[0][0] / alts[0][0] - 1.0) if alts else float('inf')
+        wrap = lambda d: (d + 180.0) % 360.0 - 180.0
+        if a.yaw_near is not None:
+            basin = [c for c in cand if abs(wrap(c[1] - a.yaw_near)) <= a.yaw_window]
+            if not basin:
+                raise SystemExit('no candidate within %.0f deg of --yaw-near %.1f'
+                                 % (a.yaw_window, a.yaw_near))
+            top = basin[0]
+            if top is not cand[0]:
+                print('  --yaw-near %.1f: global winner %.3f at %.1f deg REJECTED; '
+                      'basin winner %.3f at %.1f deg (%.1f%% lower)'
+                      % (a.yaw_near, cand[0][0], cand[0][1], top[0], top[1],
+                         100.0 * (1.0 - top[0] / cand[0][0])))
+        else:
+            top = cand[0]
+        alts = [c for c in cand if abs(wrap(c[1] - top[1])) > 5.0]
+        margin = 100.0 * (top[0] / alts[0][0] - 1.0) if alts else float('inf')
 
-        score, deg, tx, ty = sweep(np.arange(cand[0][1] - 1.0,
-                                             cand[0][1] + 1.0, 0.1))[0]
+        score, deg, tx, ty = sweep(np.arange(top[1] - 1.0, top[1] + 1.0, 0.1))[0]
 
         print('\n  --map-pose %.3f,%.3f,%.2f' % (tx, ty, deg))
         print('  agreement %.3f   margin over best rival >5deg away %+.1f%%%s'

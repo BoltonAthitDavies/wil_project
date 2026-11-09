@@ -112,8 +112,14 @@ def gt_candidates(dataset, systems=SYSTEMS):
     # that in practice never hold a copy -- harmless, and keeps this generic rather
     # than special-casing YOLO trees out.
     seen = dict.fromkeys(split(e)[1] for e in systems)
-    return [os.path.join(ROOT, "output", tree, dataset, "ground_truth.csv")
-            for tree in seen]
+    # Canonical location since 6 Nov 2026: dataset/gt/<bag>/ground_truth.csv. The
+    # estimator trees were restructured into per-run subdirectories that day and
+    # their flat ground_truth.csv copies went to trash/; without this entry a caller
+    # whose systems are the visual trees finds no truth, falls back to "first
+    # system as reference" and reports every run's deviation from itself as 0.000.
+    # The tree copies stay as fallbacks (proprio_estimator.py still writes one).
+    return ([os.path.join(ROOT, "dataset", "gt", os.path.basename(dataset), "ground_truth.csv")] +
+            [os.path.join(ROOT, "output", tree, dataset, "ground_truth.csv") for tree in seen])
 
 
 def discover(prefix="", contains=None, exclude=None, systems=SYSTEMS):

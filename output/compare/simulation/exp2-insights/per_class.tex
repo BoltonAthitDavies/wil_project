@@ -2,17 +2,18 @@
 \centering
 \scriptsize
 \setlength{\tabcolsep}{3pt}
-\caption[Misses and false positives by class.]{Misses and false positives by class, per recording, from the scorer's class-agnostic confusion counts. Recall is the share of truth boxes of the class associated with any prediction; FP share is the class's share of the recording's background-row predictions. The pallet jack is not a class of the loaded 3-class weights and is an ignore region, so it does not appear. Source: \path{output/yolo_eval/dyn_*/yolo_confusion.csv}.}
+\caption[Misses and false positives by class.]{Misses and false positives by class, per recording, from the scorer's class-agnostic confusion counts. Recall is the share of truth boxes of the class associated with any prediction; FP share is the class's share of the recording's background-row predictions. The pallet jack is not a class of the loaded 3-class weights and is an ignore region, so it does not appear. Source: \path{output/yolo_eval/dataset_allsensor_realistic_*_4class/yolo_confusion.csv}.}
 \label{tab:e2i-class}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{llrrrrrrrrrrrr}
 \toprule
- & & \multicolumn{3}{c}{\repo{dyn_00_000}} & \multicolumn{3}{c}{\repo{dyn_00_001}} & \multicolumn{3}{c}{\repo{dyn_01_000}} & \multicolumn{3}{c}{\repo{dyn_02_000}} \\
+ & & \multicolumn{3}{c}{\repo{realistic_000}} & \multicolumn{3}{c}{\repo{realistic_001}} & \multicolumn{3}{c}{\repo{realistic_002}} & \multicolumn{3}{c}{\repo{realistic_003}} \\
 Class & & truth & recall & FP share & truth & recall & FP share & truth & recall & FP share & truth & recall & FP share \\
 \midrule
-bin & & 268 & 0.84 & 0.01 & 2714 & 0.62 & 0.06 & 654 & 0.52 & 0.00 & 605 & 0.67 & 0.01 \\
-box & & 13092 & 0.59 & 0.90 & 11590 & 0.57 & 0.85 & 11284 & 0.57 & 0.87 & 12971 & 0.56 & 0.90 \\
-bucket & & 2527 & 0.79 & 0.10 & 2722 & 0.69 & 0.10 & 2268 & 0.62 & 0.12 & 1587 & 0.67 & 0.10 \\
+bin & & 4219 & 0.30 & 0.09 & 1072 & 0.18 & 0.00 & 3038 & 0.40 & 0.05 & 1624 & 0.00 & 0.04 \\
+box & & 15541 & 0.22 & 0.34 & 19658 & 0.32 & 0.70 & 11161 & 0.45 & 0.46 & 20068 & 0.35 & 0.51 \\
+bucket & & 11428 & 0.44 & 0.29 & 6529 & 0.21 & 0.07 & 6515 & 0.26 & 0.19 & 10816 & 0.35 & 0.16 \\
+forklift & & 7213 & 0.18 & 0.27 & 6001 & 0.17 & 0.22 & 7335 & 0.12 & 0.30 & 7990 & 0.15 & 0.29 \\
 \bottomrule
 \end{tabular}}
 \end{table}

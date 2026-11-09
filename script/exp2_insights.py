@@ -54,7 +54,9 @@ import matplotlib.pyplot as plt  # noqa: E402
 ROOT = Path(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SRC = ROOT / "output" / "yolo_eval"
 OUT = ROOT / "output" / "compare" / "simulation" / "exp2-insights"
-DATASETS = ["dyn_00_000", "dyn_00_001", "dyn_01_000", "dyn_02_000"]
+# 7 Nov 2026: the four realistic recordings, 4-class checkpoint (see summarise_yolo_eval.py).
+DATASETS = ["dataset_allsensor_realistic_%03d_4class" % i for i in range(4)]
+SHORT = {d: "realistic_%03d" % i for i, d in enumerate(DATASETS)}
 W, H = 1280.0, 720.0
 IOU_MATCH = 0.5
 NEAR_MISS_IOU = 0.2        # unmatched prediction with best IoU in [0.2, 0.5): the right object, wrong box
@@ -63,7 +65,7 @@ GAP_MAX_S = 2.0            # a gap between two matches of one object counts as m
 FRAME_DT = 1 / 30.0
 THRESHOLDS = [0.35, 0.45, 0.55, 0.65, 0.75, 0.85]
 SIZE_EDGES = [0, 24, 32, 48, 64, 96, 128, 192, 10000]   # sqrt(area) in px
-COL = {"dyn_00_000": "#2a78d6", "dyn_00_001": "#cc8319", "dyn_01_000": "#458554", "dyn_02_000": "#a347b2"}
+COL = dict(zip(DATASETS, ["#2a78d6", "#cc8319", "#458554", "#a347b2"]))
 
 
 def iou(a, b):
@@ -322,7 +324,7 @@ def tex_threshold(rows, path):
          r"lower bounds on recall by a small margin. Source: \path{threshold_sweep.csv}.}",
          r"\label{tab:e2i-threshold}",
          r"\resizebox{\textwidth}{!}{%", r"\begin{tabular}{l" + "rrr" * len(DATASETS) + "}", r"\toprule",
-         r"Threshold & " + " & ".join(f"\\multicolumn{{3}}{{c}}{{\\repo{{{d}}}}}" for d in DATASETS) + r" \\",
+         r"Threshold & " + " & ".join(f"\\multicolumn{{3}}{{c}}{{\\repo{{{SHORT[d]}}}}}" for d in DATASETS) + r" \\",
          r" & " + " & ".join("P & R & R$_{\\mathrm{mov}}$" for _ in DATASETS) + r" \\", r"\midrule"]
     for th in THRESHOLDS:
         cells = []
@@ -392,10 +394,10 @@ def tex_class(rows, path):
          r"the scorer's class-agnostic confusion counts. Recall is the share of truth boxes of the class associated "
          r"with any prediction; FP share is the class's share of the recording's background-row predictions. "
          r"The pallet jack is not a class of the loaded 3-class weights and is an ignore region, so it does not "
-         r"appear. Source: \path{output/yolo_eval/dyn_*/yolo_confusion.csv}.}",
+         r"appear. Source: \path{output/yolo_eval/dataset_allsensor_realistic_*_4class/yolo_confusion.csv}.}",
          r"\label{tab:e2i-class}",
          r"\resizebox{\textwidth}{!}{%", r"\begin{tabular}{ll" + "rrr" * len(DATASETS) + "}", r"\toprule",
-         r" & & " + " & ".join(f"\\multicolumn{{3}}{{c}}{{\\repo{{{d}}}}}" for d in DATASETS) + r" \\",
+         r" & & " + " & ".join(f"\\multicolumn{{3}}{{c}}{{\\repo{{{SHORT[d]}}}}}" for d in DATASETS) + r" \\",
          r"Class & & " + " & ".join("truth & recall & FP share" for _ in DATASETS) + r" \\", r"\midrule"]
     for cl in sorted({r["cls"] for r in rows}):
         cells = []
@@ -414,7 +416,7 @@ def fig_fp(anat, dets_by_ds, path):
     ax = axes[0]
     for ds in DATASETS:
         u = np.array([r["iou"] for r in dets_by_ds[ds] if not r["matched"]])
-        ax.hist(u, bins=np.linspace(0, 0.5, 26), histtype="step", lw=1.4, color=COL[ds], label=ds, density=True)
+        ax.hist(u, bins=np.linspace(0, 0.5, 26), histtype="step", lw=1.4, color=COL[ds], label=SHORT[ds], density=True)
     ax.axvline(NEAR_MISS_IOU, color="#888", ls=":", lw=0.9)
     ax.set_xlabel("best IoU of an unmatched prediction with an unmatched truth box of its class")
     ax.set_ylabel("density"); ax.legend(fontsize=8); ax.grid(True, alpha=0.3)
@@ -433,10 +435,10 @@ def fig_threshold(rows, path):
     fig, axes = plt.subplots(1, 2, figsize=(10, 4.2))
     for ds in DATASETS:
         rr = [r for r in rows if r["dataset"] == ds]
-        axes[0].plot([r["recall"] for r in rr], [r["precision"] for r in rr], "o-", color=COL[ds], label=ds, ms=4)
+        axes[0].plot([r["recall"] for r in rr], [r["precision"] for r in rr], "o-", color=COL[ds], label=SHORT[ds], ms=4)
         for r in rr:
             axes[0].annotate(f"{r['threshold']:.2f}", (r["recall"], r["precision"]), fontsize=6, xytext=(3, 3), textcoords="offset points")
-        axes[1].plot([r["threshold"] for r in rr], [r["moving_recall"] for r in rr], "o-", color=COL[ds], ms=4, label=f"{ds} moving")
+        axes[1].plot([r["threshold"] for r in rr], [r["moving_recall"] for r in rr], "o-", color=COL[ds], ms=4, label=f"{SHORT[ds]} moving")
         axes[1].plot([r["threshold"] for r in rr], [r["precision"] for r in rr], "s--", color=COL[ds], ms=3, alpha=0.6)
     axes[0].set_xlabel("recall"); axes[0].set_ylabel("precision"); axes[0].grid(True, alpha=0.3); axes[0].legend(fontsize=8)
     axes[0].set_title("Precision against recall as the threshold rises from 0.35", fontsize=10, loc="left")
@@ -451,14 +453,14 @@ def fig_size(frame_rows, obj_rows, path):
     centres = [(lo + min(hi, 256)) / 2 for lo, hi in zip(SIZE_EDGES[:-1], SIZE_EDGES[1:])]
     for ds in DATASETS:
         fr = [r for r in frame_rows if r["dataset"] == ds]
-        axes[0].plot(centres, [r["recall"] for r in fr], "o-", color=COL[ds], ms=4, label=ds)
+        axes[0].plot(centres, [r["recall"] for r in fr], "o-", color=COL[ds], ms=4, label=SHORT[ds])
     axes[0].set_xlabel("mean truth-box side of the frame [px]"); axes[0].set_ylabel("recall")
     axes[0].set_title("Frame level", fontsize=10, loc="left"); axes[0].grid(True, alpha=0.3); axes[0].legend(fontsize=8)
     for motion, ls in (("moving", "-"), ("static", "--")):
         for ds in DATASETS:
             rr = [r for r in obj_rows if r["dataset"] == ds and r["motion"] == motion]
             axes[1].plot(centres, [r["recall"] for r in rr], ls, marker="o", color=COL[ds], ms=3, alpha=0.8,
-                         label=f"{ds} {motion}")
+                         label=f"{SHORT[ds]} {motion}")
     axes[1].set_xlabel("object's median matched-box side [px]")
     axes[1].set_title("Object level (solid moving, dashed static)", fontsize=10, loc="left"); axes[1].grid(True, alpha=0.3)
     axes[1].legend(fontsize=6, ncol=2)
@@ -473,7 +475,7 @@ def fig_gaps(objs_by_ds, path):
         g = np.concatenate([o["gaps"] for o in objs_by_ds[ds]])
         g = g[(g > 0) & (g <= gap_frames)]
         vals, counts = np.unique(g, return_counts=True)
-        ax.plot(vals, np.cumsum(counts * vals) / (counts * vals).sum(), color=COL[ds], lw=1.4, label=ds)
+        ax.plot(vals, np.cumsum(counts * vals) / (counts * vals).sum(), color=COL[ds], lw=1.4, label=SHORT[ds])
     ax.set_xscale("log"); ax.set_xlabel("gap length between two matches of one object [frames]")
     ax.set_ylabel("cumulative share of missed frames"); ax.grid(True, alpha=0.3, which="both"); ax.legend(fontsize=8)
     ax.set_title("Are the misses flicker or long absences?", fontsize=11, loc="left")

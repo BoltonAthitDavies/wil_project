@@ -43,6 +43,7 @@ File.version: "1.0"
 # dataset_dynamic_nofloortexture_02_000 logged a genuine merge, so that sequence
 # is not a like-for-like comparison. Restore stock behaviour with 1.
 loopClosing: 0
+ORBextractor.useGPU: 0
 # System.SaveAtlasToFile: "warehouse_map_realistic_01_v1p5"
 # System.LoadAtlasFromFile: "warehouse_map_realistic"
 

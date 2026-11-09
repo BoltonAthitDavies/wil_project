@@ -43,9 +43,9 @@ from collections import defaultdict
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WORLD = os.path.join(ROOT, 'aws-robomaker-small-warehouse-world', 'worlds',
-                     'small_warehouse_dynamic', 'small_warehouse_dynamic.world')
+                     'small_warehouse', 'small_warehouse_dynamic.world')
 STATIC_WORLD = os.path.join(ROOT, 'aws-robomaker-small-warehouse-world', 'worlds',
-                            'small_warehouse_static', 'small_warehouse_static.world')
+                            'small_warehouse', 'small_warehouse_static.world')
 PRE = 'aws_robomaker_warehouse_'
 
 FLOOR_TOP = 0.034223           # ground pose z -0.090092 + slab top 0.124315

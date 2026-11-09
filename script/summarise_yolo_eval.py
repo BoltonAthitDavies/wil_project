@@ -12,11 +12,14 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "output" / "yolo_eval"
+# 7 Nov 2026: the four realistic recordings scored with the 4-class checkpoint
+# (weight/runs_1/detect/train/weights/best.pt, bin/box/bucket/forklift); the
+# scripted-world runs (dyn_*) were retired to trash/output/yolo_eval/ on 6 Nov.
 RUNS = {
-    "dynamic_00_000": OUT / "dyn_00_000" / "yolo_eval.csv",
-    "dynamic_00_001": OUT / "dyn_00_001" / "yolo_eval.csv",
-    "dynamic_01_000": OUT / "dyn_01_000" / "yolo_eval.csv",
-    "dynamic_02_000": OUT / "dyn_02_000" / "yolo_eval.csv",
+    "realistic_000": OUT / "dataset_allsensor_realistic_000_4class" / "yolo_eval.csv",
+    "realistic_001": OUT / "dataset_allsensor_realistic_001_4class" / "yolo_eval.csv",
+    "realistic_002": OUT / "dataset_allsensor_realistic_002_4class" / "yolo_eval.csv",
+    "realistic_003": OUT / "dataset_allsensor_realistic_003_4class" / "yolo_eval.csv",
 }
 
 
@@ -33,11 +36,14 @@ def aggregate(label: str, paths: list[Path]) -> dict[str, float | int | str]:
     sums = {key: sum(int(row[key]) for row in rows) for key in integer_columns}
     precision = sums["tp"] / (sums["tp"] + sums["fp"])
     recall = sums["tp"] / (sums["tp"] + sums["fn"])
-    moving_recall = sums["tp_moving"] / (sums["tp_moving"] + sums["fn_moving"])
+    mov = sums["tp_moving"] + sums["fn_moving"]
+    moving_recall = sums["tp_moving"] / mov if mov else float("nan")   # static recordings carry no moving object
+    recall_scored = sums["tp"] / max(sums["n_gt"] - sums["n_ignored"], 1)   # over the boxes the exemptions keep
     f1 = 2 * precision * recall / (precision + recall)
     mean = lambda key: sum(float(row[key]) for row in rows) / len(rows)
     return {
         "dataset": label,
+        "recall_scored": recall_scored,
         "frames": len(rows),
         **sums,
         "precision": precision,
@@ -114,7 +120,7 @@ print(f"precision={pooled['precision']:.6f} recall={pooled['recall']:.6f} "
 # Pool the separate class-agnostic IoU associations. Rows are actual classes;
 # columns are predictions. Background in the final column means a missed object,
 # while background in the final row means an unmatched detection.
-classes = ["bin", "box", "bucket", "background"]
+classes = ["bin", "box", "bucket", "forklift", "background"] if "background" in ["bin", "box", "bucket", "background"] else ["bin", "box", "bucket", "forklift"]
 matrix = np.zeros((len(classes), len(classes)), dtype=np.int64)
 for path in (p.parent / "yolo_confusion.csv" for p in RUNS.values()):
     with path.open(newline="") as stream:
@@ -171,12 +177,12 @@ class_matrix = matrix[:-1, :-1]
 class_support = class_matrix.sum(axis=1)
 class_predicted = class_matrix.sum(axis=0)
 class_tp = np.diag(class_matrix)
-class_precision = np.divide(class_tp, class_predicted, out=np.zeros(3),
+class_precision = np.divide(class_tp, class_predicted, out=np.zeros(len(object_classes)),
                             where=class_predicted != 0)
-class_recall = np.divide(class_tp, class_support, out=np.zeros(3),
+class_recall = np.divide(class_tp, class_support, out=np.zeros(len(object_classes)),
                          where=class_support != 0)
 class_f1 = np.divide(2 * class_precision * class_recall,
-                     class_precision + class_recall, out=np.zeros(3),
+                     class_precision + class_recall, out=np.zeros(len(object_classes)),
                      where=(class_precision + class_recall) != 0)
 class_accuracy = class_tp.sum() / class_matrix.sum()
 
@@ -204,14 +210,14 @@ for name, theme in themes.items():
     for ax, (values, title, colorbar_label) in zip(axes, displays):
         image = ax.imshow(values, cmap="Purples", vmin=0)
         ax.set_facecolor(theme["bg"])
-        ax.set_xticks(range(3), object_classes, rotation=15, ha="right")
-        ax.set_yticks(range(3), object_classes)
+        ax.set_xticks(range(len(object_classes)), object_classes, rotation=15, ha="right")
+        ax.set_yticks(range(len(object_classes)), object_classes)
         ax.set_xlabel("predicted object class", color=theme["ink"])
         ax.set_ylabel("actual object class", color=theme["ink"])
         ax.set_title(title, color=theme["ink"], loc="left")
         ax.tick_params(colors=theme["ink"], labelsize=9)
-        for i in range(3):
-            for j in range(3):
+        for i in range(len(object_classes)):
+            for j in range(len(object_classes)):
                 label = f"{class_matrix[i, j]:,}" if ax is axes[0] else f"{100 * class_row_norm[i, j]:.1f}%"
                 threshold = 0.55 * values.max() if values.max() else 0
                 ax.text(j, i, label, ha="center", va="center", fontsize=10,

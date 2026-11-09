@@ -1,0 +1,30 @@
+[INFO] [1793986133.760949453] [rosbag2_storage]: Opened database '/media/ambushee/New Volume/wil_rescue/dataset_allsensor_realistic_001/dataset_allsensor_realistic_001_0.db3' for READ_ONLY.
+bag      : /media/ambushee/New Volume/wil_rescue/dataset_allsensor_realistic_001
+frames   : 2937   pose tracks: 153
+model    : weight/runs_1/detect/train/weights/best.pt  device=cuda:0  classes=['bin', 'box', 'bucket', 'forklift']
+GT props : 55   ignore-region models: 53
+  0/2937
+  200/2937
+  400/2937
+  600/2937
+  800/2937
+  1000/2937
+  1200/2937
+  1400/2937
+  1600/2937
+  1800/2937
+  2000/2937
+  2200/2937
+  2400/2937
+  2600/2937
+  2800/2937
+
+frames scored     : 2937
+GT boxes          : 33260   (moving 0, static 33260, ignored/occluded 14286)
+predictions       : 14359   (ignored on unlabelled scenery: 1322)
+TP / FP / FN      : 8834 / 3907 / 24426
+precision         : 0.693
+recall (all)      : 0.266
+recall (MOVING)   : 0.000   <- what the SLAM filter actually needs
+wrote             : output/yolo_eval/dataset_allsensor_realistic_001_4class/yolo_eval.csv, yolo_detections.csv, yolo_confusion.csv, overlay/
+

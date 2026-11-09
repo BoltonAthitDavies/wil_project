@@ -44,10 +44,11 @@ THE INDEPENDENT-ROUTE RULE, WHICH IS THE POINT OF THE DESIGN
     measurement.
 
 WHAT IS NOT CONTROLLED, AND SO WHAT MAY NOT BE CONCLUDED
-    The two databases differ in world, route, duration and path length at the
-    same time. This is a characterisation of two maps, n = 1 per layout, not a
-    controlled comparison, and no factor may be credited for a difference
-    between them.
+    The two layouts differ in world and route at the same time, so no factor
+    may be credited for a difference between layouts. The two builds of each
+    bag differ in three back-end parameters at once (DetectionRate, Grid/RangeMax,
+    Grid/MaxGroundHeight) and in front-end session, so they are two
+    configurations, n = 1 each, not repeats; --inspect records the parameters.
 
 PLACEMENT IS MEASURED, NOT GUESSED
     world->map is a constant per database and must be fitted with
@@ -73,7 +74,7 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WORLDS = os.path.join(ROOT, 'aws-robomaker-small-warehouse-world/worlds/'
-                            'small_warehouse_static')
+                            'small_warehouse')
 OUT = os.path.join(ROOT, 'output/compare/simulation/exp4-realistic-maps')
 
 # The realistic worlds spawn here; fit_map_pose's default is the tiny map's.
@@ -84,26 +85,31 @@ PASS = dict(precision=0.90, recall_seen=0.85, false_obstacle=0.01)
 
 # (key, database, world, independent probe GT, build bag on the dataset root /media/ambushee/New Volume/wil_rescue)
 MAPS = [
-    # The database named map_realistic is the build formerly held as
-    # map_realistic_v2 (165 nodes, 417 MB, stamps 13.2-299 s); it was renamed
-    # on 26 October 2026 and the earlier 114-node map_realistic was deleted.
-    # Its artefacts are kept under exp4-realistic-maps/superseded/.
-    dict(key='map_realistic',
+    # Four databases, TWO BUILDS OF EACH OF TWO MAPPING BAGS, all closure-free
+    # (LoopThr 1.0, ProximityBySpace false). The bag now named
+    # dataset_allsensor_realistic_map on the rescued drive is the former
+    # mapv2 (identical message counts: gt 14411, cam0 8725, imu 57645); the
+    # original 103-316 s mapping bag and the 114-node map built from it were
+    # deleted on 26 October 2026. Node stamps prove the pairing: map_realistic
+    # spans 13.2-299 s and map_realistic_01 20-335 s, which the 125 s and 97 s
+    # probe recordings cannot have produced. The two builds of a bag are NOT
+    # repeats: three back-end parameters differ (DetectionRate 4 -> 1 Hz,
+    # Grid/RangeMax 8 -> 10 m, Grid/MaxGroundHeight 0.29 -> 0.10 m), so each is
+    # one configuration, n = 1, and nothing between them is attributable.
+    # Probe ground truth lives at dataset/gt/ since 6 Nov 2026 (the estimator
+    # trees were restructured into per-run subdirectories that day).
+    dict(key='map_realistic', build='2026-10-26', layout='U',
          db=os.path.join(ROOT, 'map/map_realistic/map_realistic.db'),
-         world=os.path.join(WORLDS,
-                            'small_warehouse_static_realistic_nofloortexture.world'),
-         probe=os.path.join(ROOT, 'output/output_vins/simulation/'
-                                  'dataset_allsensor_realistic_000/ground_truth.csv'),
-         probe_name='dataset_allsensor_realistic_000',
-         build_bag='/media/ambushee/New Volume/wil_rescue/dataset_allsensor_realistic_mapv2'),  # 2026-11-03: NOT on the rescued root (it holds _map, _01_map, _map_000, _map_dynamic); verify which bag built this DB before use
-    dict(key='map_realistic_01',
+         world=os.path.join(WORLDS, 'small_warehouse_static_realistic_nofloortexture.world'), probe=os.path.join(ROOT, 'dataset/gt/dataset_allsensor_realistic_000/ground_truth.csv'), probe_name='dataset_allsensor_realistic_000', build_bag='/media/ambushee/New Volume/wil_rescue/dataset_allsensor_realistic_map'),
+    dict(key='dataset_allsensor_realistic_map', build='2026-11-06', layout='U',
+         db=os.path.join(ROOT, 'map/dataset_allsensor_realistic_map/dataset_allsensor_realistic_map.db'),
+         world=os.path.join(WORLDS, 'small_warehouse_static_realistic_nofloortexture.world'), probe=os.path.join(ROOT, 'dataset/gt/dataset_allsensor_realistic_000/ground_truth.csv'), probe_name='dataset_allsensor_realistic_000', build_bag='/media/ambushee/New Volume/wil_rescue/dataset_allsensor_realistic_map'),
+    dict(key='map_realistic_01', build='2026-10-26', layout='I',
          db=os.path.join(ROOT, 'map/map_realistic_01/map_realistic_01.db'),
-         world=os.path.join(WORLDS,
-                            'small_warehouse_static_realistic_nofloortexture_01.world'),
-         probe=os.path.join(ROOT, 'output/output_vins/simulation/'
-                                  'dataset_allsensor_realistic_001/ground_truth.csv'),
-         probe_name='dataset_allsensor_realistic_001',
-         build_bag='/media/ambushee/New Volume/wil_rescue/dataset_allsensor_realistic_01_map'),
+         world=os.path.join(WORLDS, 'small_warehouse_static_realistic_nofloortexture_01.world'), probe=os.path.join(ROOT, 'dataset/gt/dataset_allsensor_realistic_001/ground_truth.csv'), probe_name='dataset_allsensor_realistic_001', build_bag='/media/ambushee/New Volume/wil_rescue/dataset_allsensor_realistic_01_map'),
+    dict(key='dataset_allsensor_realistic_01_map', build='2026-11-06', layout='I',
+         db=os.path.join(ROOT, 'map/dataset_allsensor_realistic_01_map/dataset_allsensor_realistic_01_map.db'),
+         world=os.path.join(WORLDS, 'small_warehouse_static_realistic_nofloortexture_01.world'), probe=os.path.join(ROOT, 'dataset/gt/dataset_allsensor_realistic_001/ground_truth.csv'), probe_name='dataset_allsensor_realistic_001', build_bag='/media/ambushee/New Volume/wil_rescue/dataset_allsensor_realistic_01_map'),
 ]
 
 # RTAB-Map Link::Type. Only 1-5 are closures; 0 is the odometry chain and 9 is
@@ -138,8 +144,15 @@ def inspect(m):
     P = np.asarray(P)
     path = float(np.linalg.norm(np.diff(P[:, :2], axis=0), axis=1).sum()) if len(P) > 1 else 0.0
     spans = sorted(abs(f - t) for f, t in closures)
+    (par,) = list(c.execute('SELECT parameters FROM Info LIMIT 1'))[0]
+    prm = dict(kv.split(':', 1) for kv in (par or '').split(';') if ':' in kv)
     return dict(
-        key=m['key'], nodes=len(nodes),
+        key=m['key'], build=m.get('build'), layout=m.get('layout'),
+        detection_rate_hz=prm.get('Rtabmap/DetectionRate'),
+        grid_range_max_m=prm.get('Grid/RangeMax'),
+        grid_max_ground_height_m=prm.get('Grid/MaxGroundHeight'),
+        loop_thr=prm.get('Rtabmap/LoopThr'),
+        nodes=len(nodes),
         sessions=len({n[2] for n in nodes}),
         stamp_first=nodes[0][1], stamp_last=nodes[-1][1],
         duration_s=nodes[-1][1] - nodes[0][1],
@@ -162,6 +175,8 @@ def do_inspect(args):
               % (r['nodes'], r['sessions'], r['duration_s'], r['path_m'], r['db_mb']))
         print('   stamps %.2f -> %.2f s   %d visual words'
               % (r['stamp_first'], r['stamp_last'], r['words']))
+        print('   build %s  DetectionRate %s Hz  Grid/RangeMax %s m  Grid/MaxGroundHeight %s m  LoopThr %s'
+              % (r['build'], r['detection_rate_hz'], r['grid_range_max_m'], r['grid_max_ground_height_m'], r['loop_thr']))
         print('   links %d: %s' % (r['links_total'], ', '.join(
             '%s %d' % (LINK_TYPE.get(k, k), v) for k, v in sorted(r['links_by_type'].items()))))
         print('   closures %d, of which spanning >3 nodes: %d   spans=%s'

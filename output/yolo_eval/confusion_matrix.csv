@@ -1,5 +1,6 @@
-actual\predicted,bin,box,bucket,background
-bin,2638,1,0,1602
-box,0,28051,25,20861
-bucket,1,110,6235,2758
-background,303,14895,1749,0
+actual\predicted,bin,box,bucket,forklift,background
+bin,2657,0,24,0,7272
+box,0,21561,5,27,44835
+bucket,0,16,11803,2,23467
+forklift,20,6,42,4345,24126
+background,574,7132,2280,3642,0

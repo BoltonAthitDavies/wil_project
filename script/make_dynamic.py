@@ -29,8 +29,8 @@ import re, os, sys, math, random, shutil
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WD = os.path.join(ROOT, 'aws-robomaker-small-warehouse-world', 'worlds')
-SRC = os.path.join(WD, 'small_warehouse_static', 'small_warehouse_static.world')
-DST = os.path.join(WD, 'small_warehouse_dynamic', 'small_warehouse_dynamic.world')
+SRC = os.path.join(WD, 'small_warehouse', 'small_warehouse_static.world')
+DST = os.path.join(WD, 'small_warehouse', 'small_warehouse_dynamic.world')
 PRE = 'aws_robomaker_warehouse_'
 SPEED = 1.011                                    # m/s, the stock value
 DIRS = [(1, 0), (0, -1), (-1, 0), (0, 1)]

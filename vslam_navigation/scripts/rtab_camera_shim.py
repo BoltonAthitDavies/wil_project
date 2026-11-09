@@ -407,6 +407,15 @@ class CameraShim(Node):
             f'static TF {self.body_frame} -> ' + ', '.join(c for _, c in frames))
 
     def on_pair(self, left_msg, right_msg):
+        # A SIGINT can invalidate the rclpy context while message_filters is still
+        # mid-callback. The publish below then raises RCLError ("publisher's context
+        # is invalid"), which is not a KeyboardInterrupt, so it escapes rclpy.spin()
+        # and every clean Ctrl-C is reported by launch as
+        #   process has died [... exit code 1 ...]
+        # with a twenty-line traceback. Measured on the first mapping_sim run,
+        # 6 Nov 2026. Bailing out here keeps shutdown quiet.
+        if not rclpy.ok():
+            return
         # Throttle on the message stamp, so the kept subset is identical whatever
         # --rate the bag is played at.
         t = left_msg.header.stamp.sec + left_msg.header.stamp.nanosec * 1e-9
@@ -471,6 +480,12 @@ def main():
         rclpy.spin(node)
     except (KeyboardInterrupt, ExternalShutdownException):
         pass
+    except Exception:
+        # The same shutdown race lost by a hair: the context went invalid between
+        # the rclpy.ok() guard in on_pair and the publish itself. Tolerate it only
+        # once shutdown has actually begun -- a genuine fault mid-run must stay loud.
+        if rclpy.ok():
+            raise
     finally:
         node.destroy_node()
         if rclpy.ok():

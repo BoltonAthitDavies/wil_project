@@ -129,8 +129,12 @@ def ground_assets_for_model(model):
 def gt_for(dataset):
     """Ground-truth CSV for a dataset, baseline trees first."""
     name = dataset.split('/')[-1]
-    cands = [os.path.join(ROOT, 'output', t, dataset, 'ground_truth.csv')
-             for t in ('output_wheel', 'output_imu', 'output_ekf')]
+    # Canonical location since 6 Nov 2026: dataset/gt/<bag>/ground_truth.csv, which
+    # is where the registry of the report says every recording's truth lives. The
+    # estimator-tree copies below are fallbacks for bags scored before that date.
+    cands = [os.path.join(ROOT, 'dataset', 'gt', name, 'ground_truth.csv')]
+    cands += [os.path.join(ROOT, 'output', t, dataset, 'ground_truth.csv')
+              for t in ('output_wheel', 'output_imu', 'output_ekf')]
     cands.append(os.path.join(ROOT, 'output', 'compare', 'relogged_20260916',
                               'ground_truth', name + '.csv'))
     # A bag that has not been through proprio_estimator.py or the relogged

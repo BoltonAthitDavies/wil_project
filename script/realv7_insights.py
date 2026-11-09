@@ -124,6 +124,7 @@ def main():
          r"(\repo{config/wil/stereo_imu.yaml}, IMU noise $\times 10$, gravity norm \num{9.2642}). Frames received "
          r"against the bag's count (\SI{30}{\hertz} over the recording), IMU use, resets, and where the estimate ended.}",
          r"\label{tab:realv7-vins}",
+         r"\resizebox{\textwidth}{!}{%",
          r"\begin{tabular}{lrrrrr}", r"\toprule",
          r"Recording & frames received & IMU received / used & resets & z range [m] & $|p|$ at end [m] \\", r"\midrule"]
     for ds in DSS:
@@ -133,7 +134,7 @@ def main():
         L.append(f"\\repo{{{ds[8:]}}} & {s.get('images_received', '?')} of about {int(round(span * 30))} & "
                  f"{s.get('imu_messages_received', '?')} / {s.get('imu_samples_used', '?')} & {s.get('resets', '?')} & "
                  f"{np.ptp(a[:, 3]):.0f} & {r_end:.0f} \\\\")
-    L += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
+    L += [r"\bottomrule", r"\end{tabular}}", r"\end{table}"]
     (OUT / "vins_table.tex").write_text("\n".join(L) + "\n")
 
     # ---- path grid: 3 recordings x 5 runs
@@ -207,10 +208,18 @@ def levelled():
          r"inside the route are tracking losses); ``tilt'' the plane tilt of the raw log, zero after the repair in "
          r"every run. ATE is planar after SE(2) alignment, RPE over \SI{1}{\second}. Status from the scorer's "
          r"rules (``partial'' = a reset or loss the run recovered from). Lever arm unmeasured (zero); VINS-Fusion "
-         r"diverged on all three (\cref{tab:realv7-vins}) and is omitted.}",
+         r"diverged on all three (\cref{tab:realv7-vins}) and is omitted. \textbf{Bold} marks the lowest ATE "
+         r"among the four configurations of a recording; with one run per configuration that records which run "
+         r"came lowest, not that the configuration is better.}",
          r"\label{tab:realv7-results}",
          r"\begin{tabular}{llrlrrrrrl}", r"\toprule",
          r"Recording & Run & IMU [\%] & resets [s] & tilt [\si{\degree}] & ATE [m] & median [m] & RPE$_{1\,\mathrm{s}}$ [m] & path ratio & status \\", r"\midrule"]
+    orb = [r for r in rows if r["sysk"] == "ORB"]
+    bestate = {}
+    for ds in {r["ds"] for r in orb}:
+        vals = [r["m"]["ate_rmse"] for r in orb if r["ds"] == ds
+                and r["m"].get("ate_rmse") is not None and np.isfinite(r["m"]["ate_rmse"])]
+        bestate[ds] = min(vals) if vals else None
     last = None
     for r in rows:
         if r["sysk"] != "ORB":
@@ -225,8 +234,12 @@ def levelled():
             rtxt = r"\textcolor{flagred}{" + rtxt + "}"
         frac = m.get("imu_init_fraction")
         status = (m.get("status") or "").split(" (")[0]
+        atetxt = num(m['ate_rmse'])
+        _b = bestate.get(r["ds"])
+        if _b is not None and m.get("ate_rmse") is not None and np.isfinite(m["ate_rmse"]) and abs(m["ate_rmse"] - _b) < 1e-9:
+            atetxt = r"\textbf{" + atetxt + "}"
         L.append(f"\\repo{{{r['ds'][8:]}}} & {r['label']} & {num(100 * frac, 0) if frac is not None else '---'} & {rtxt} & "
-                 f"{num(m.get('tilt_before_deg'), 0)} & {num(m['ate_rmse'])} & {num(m['ate_median'])} & "
+                 f"{num(m.get('tilt_before_deg'), 0)} & {atetxt} & {num(m['ate_median'])} & "
                  f"{num(m.get('rpe1_trans_rmse'))} & {num(m['path_ratio'])} & {status} \\\\")
     L += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
     (OUT / "results_table.tex").write_text("\n".join(L) + "\n")

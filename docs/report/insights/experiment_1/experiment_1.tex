@@ -7,7 +7,7 @@
 \title{Experiment 1: Non-Visual Baseline and Estimator Comparison\\
        \large Raw write-up for Chapter 4, Section 4.1}
 \author{Bolton Athit Davies}
-\date{Reporting cutoff: 22 October 2026}
+\date{Reporting cutoff: 6 November 2026}
 \begin{document}
 \maketitle
 
@@ -22,657 +22,406 @@ red where they arise.
 \section{Simulation}
 \label{sec:exp1-sim}
 
-\slotstatus{completed}{Five \repo{dataset_allsensor} recordings spanning four
-worlds and both floor conditions; three proprioceptive estimators, one
-transferred-noise EKF, VINS-Fusion, and ORB-SLAM3 in two loop-closure
-configurations: thirty-five runs, all passing their predefined checks.}
+\slotstatus{completed}{Four \repo{dataset_allsensor_realistic} recordings, two
+layouts each recorded without and with warehouse traffic; wheel odometry, IMU
+dead reckoning, the EKF at the visual systems' own inertial noise
+configuration, a measured-noise EKF as diagnostic, VINS-Fusion, and ORB-SLAM3
+with the GPU front end in two loop-closer states, twenty-eight runs, all over
+the full common interval. Re-scored on 7 November 2026 after the earlier
+\repo{allsensor} result was retired with its datasets and one misfiled
+ORB-SLAM3 run was set aside and re-run.}
 
-\paragraph{Objective.} Establish whether a non-visual estimator (wheel
-odometry, IMU dead reckoning, or an EKF fusing them) provides usable
+\paragraph{Objective.} Establish whether a non-visual estimator provides usable
 localisation on the same recordings the visual pipelines consumed, and whether
 each estimator's reported uncertainty describes its error.
 
-\paragraph{Process.} The sensor noise of each bag was measured against ground
-truth; the wheel, IMU and EKF trajectories were produced offline from the
-recorded encoders and IMU; VINS-Fusion and ORB-SLAM3 replayed the same bags
-live at $0.5\times$ real time with the dynamic filter disabled, ORB-SLAM3 once
-with its loop closer enabled and once disabled. All seven estimates per bag
-were scored against the same ground truth over the same interval. Four
-hypotheses were fixed before scoring: H1, wheel-odometry heading drift follows
-the fitted yaw-rate scale error; H2, IMU-only dead reckoning diverges by orders
-of magnitude more than wheel odometry; H3, the EKF improves on both single
-sensors; H4, all three dead-reckoning covariances are overconfident.
+\paragraph{Process.} \repo{script/proprio_estimator.py calibrate} measured
+each recording's wheel and inertial biases and wheel noise against ground truth
+from its stationary head and its driven length; \repo{run} produced the wheel,
+IMU and EKF trajectories offline; \repo{script/analyse_proprio.py} scored them
+with the live VINS-Fusion and ORB-SLAM3 runs over the common interval. The
+EKF reported here does \emph{not} use the measured inertial noise: by the
+design decision of 6 November 2026 its three inertial noise terms are the
+values both visual configurations declare (\repo{config/wil_sim/stereo_imu.yaml}:
+gyroscope density \num{0.002}, accelerometer density \num{0.02}, gyroscope bias
+walk \num{1e-4}), converted to per-sample $\sigma$ at \SI{200}{\hertz} by
+\repo{script/make_vslam_noise_yaml.py}, so that the proprioceptive and visual
+families run on the same hand-set inertial model; biases and both wheel
+$\sigma$ have no visual counterpart and stay measured. The measured-noise
+filter is run beside it as a diagnostic row and is not the baseline.
 
-\paragraph{Datasets.} \Cref{tab:e1-datasets} lists the five recordings. They
-are the only recordings that carry wheel encoders, and they are not repeats:
-only \repo{allsensor_000} and \repo{_001} share a world, so no quantity is
-pooled across bags.
+\paragraph{Datasets.} \Cref{tab:exp1-datasets}: the two static twins and the
+two traffic recordings of the realistic worlds, both layouts. Traffic is noted
+as a condition of a recording, not treated as a factor, since no two
+recordings share a route.
 
 \begin{table}[htbp]
 \centering
-\caption{The five \repo{allsensor} recordings. ``Yaw-rate scale'' is the
-fitted wheel-model yaw-rate scale against ground truth, the quantity H1 is
-about.}
-\label{tab:e1-datasets}
+\caption[Recordings of Experiment 1.]{Recordings of Experiment~1 (names without the
+\repo{dataset_allsensor_} prefix), from the bags. Route is the ground-truth
+path length; samples are ground-truth odometry messages.}
+\label{tab:exp1-datasets}
 \small
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{llllrrr}
+\begin{tabular}{lllrrr}
 \toprule
-Dataset & World arrangement & Floor & Objects & Route [\si{\metre}] & Span [\si{\second}] & Yaw-rate scale \\
+Recording & Layout & Traffic & Route [\si{\metre}] & Span [\si{\second}] & Samples \\
 \midrule
-\repo{allsensor_000} & \texttt{static\_01} & plain & 117 & 117.0 & 87.1 & $+1.10\,\%$ \\
-\repo{allsensor_001} & \texttt{static\_01} & plain & 117 & 113.1 & 81.8 & $-4.73\,\%$ \\
-\repo{allsensor_002} & \texttt{static\_objonwallonly} & plain & 49 & 115.2 & 86.7 & $+0.34\,\%$ \\
-\repo{allsensor_003} & \texttt{static\_objonwallonly} & bayline & 49 & 140.6 & 102.4 & $-6.25\,\%$ \\
-\repo{allsensor_004} & \texttt{static\_01} & bayline & 117 & 142.3 & 100.5 & $-7.50\,\%$ \\
+\repo{realistic_000} & U & none (static twin) & 171.3 & 125.5 & 6\,278 \\
+\repo{realistic_001} & I & none (static twin) & 133.0 & 96.9 & 4\,847 \\
+\repo{realistic_002} & U & pallet jacks and people & 102.7 & 79.5 & 3\,975 \\
+\repo{realistic_003} & I & pallet jacks and people & 158.0 & 117.0 & 5\,852 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Reporting rules.} Aligned ATE is RMSE after a rigid $SE(3)$ fit
+with scale fixed, the convention of every slot; anchored error is the direct
+difference from ground truth with no alignment and is defined only for the
+estimators that start from the ground-truth pose; aligned rotation is the
+geodesic angle after the same fit, defined for every estimator; ANEES is the
+average normalised estimation error squared over decorrelated \SI{1}{\hertz}
+samples, 3.0 for a consistent planar filter. Ground truth is the bag's
+\repo{/ground_truth/odometry} moved from the model origin to the IMU point
+every estimator reports (lever arm \SI{0.338}{\metre} forward,
+\SI{0.192}{\metre} up). The visual runs are pinned by name: VINS-Fusion
+\repo{cpu}; ORB-SLAM3 \repo{loopclosing_gpu} and \repo{noloopclosing_gpu},
+both with the GPU feature extractor, at replay rate 1.0. The loop-closer
+state is read from each run's \repo{loop_closing.csv} (patch-7 signature:
+sub-millisecond rows mean a disabled closer), not from the run name. On
+\repo{realistic_002} the directory named \repo{loopclosing_gpu} first held a
+run whose manifest names the \repo{realistic_003} bag (3\,535 stereo pairs
+received against the 2\,409 that recording holds); it was scored against the
+wrong truth for a day, is set aside under
+\repo{trash/output/misfiled_20261106/}, and the run reported here was made on
+the right bag on the evening of 6 November (2\,382 pairs received). Sources: \path{output/compare/simulation/exp1-realistic/}
+(\repo{proprio_metrics.csv}, \repo{proprio_rpe_metrics.csv}, the noise models
+under \repo{noise/}), run directories under \path{output/output_{wheel,imu,ekf,ekf_measured}/simulation/}. One run per cell, $n=1$.
+
+\paragraph{Results.} At the visual systems' inertial noise the EKF holds
+\SIrange{0.68}{2.80}{\metre} aligned ATE and is behind VINS-Fusion on all four
+recordings; the measured-noise diagnostic holds \SIrange{0.21}{0.58}{\metre}.
+\Cref{tab:exp1-accuracy} gives every estimator on every recording,
+\cref{tab:exp1-rpe} the relative pose error at \SI{1}{\second}, and
+\cref{fig:exp1-grid} the trajectories.
+
+\begin{table}[htbp]
+\centering
+\caption[Estimator comparison on the four realistic recordings.]{Estimator
+comparison on the four realistic recordings. The closer state of each
+ORB-SLAM3 run is read from its artefact. ANEES is reported for the
+proprioceptive estimators, which carry a covariance; a consistent filter
+gives 3.0, and every value here is above it. \textbf{Bold} marks the lowest aligned ATE of a recording; the measured-noise filter is a diagnostic row, not the baseline, so it is shown bold where it is lowest but is not the slot's result.}
+\label{tab:exp1-accuracy}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lllrrrrrr}
+\toprule
+Recording & Estimator & Closer & Anch.\ RMS & Anch.\ final & Aligned ATE & Aligned rot. & Yaw RMS & ANEES \\
+ & & & [\si{\metre}] & [\si{\metre}] & [\si{\metre}] & [\si{\degree}] & [\si{\degree}] & \\
+\midrule
+\repo{realistic_000} & Wheel odometry & -- & 5.89 & 5.66 & 2.56 & 9.14 & 18.05 & 1810 \\
+ & IMU dead reckoning & -- & 36.19 & 76.01 & 23.02 & 177.21 & 0.84 & 454 \\
+ & EKF, VSLAM-config noise & -- & 2.49 & 3.42 & 1.34 & 5.83 & 10.62 & 19 \\
+ & EKF, measured noise (diag.) & -- & 0.33 & 0.35 & \textbf{0.23} & 0.47 & 0.43 & 111 \\
+ & VINS-Fusion & -- & -- & -- & 0.29 & 1.85 & -- & -- \\
+ & ORB-SLAM3 GPU, LC run & active & -- & -- & 0.29 & 12.80 & -- & -- \\
+ & ORB-SLAM3 GPU, no-LC run & disabled & -- & -- & 0.52 & 12.84 & -- & -- \\
+\midrule
+\repo{realistic_001} & Wheel odometry & -- & 1.40 & 2.90 & 1.03 & 6.04 & 7.27 & 176 \\
+ & IMU dead reckoning & -- & 15.40 & 39.82 & 13.05 & 0.25 & 0.55 & 160 \\
+ & EKF, VSLAM-config noise & -- & 0.94 & 0.83 & 0.68 & 3.81 & 4.51 & 8 \\
+ & EKF, measured noise (diag.) & -- & 0.26 & 0.26 & \textbf{0.21} & 0.33 & 0.36 & 31 \\
+ & VINS-Fusion & -- & -- & -- & 0.22 & 1.18 & -- & -- \\
+ & ORB-SLAM3 GPU, LC run & active & -- & -- & 4.78 & 18.98 & -- & -- \\
+ & ORB-SLAM3 GPU, no-LC run & disabled & -- & -- & 0.40 & 15.13 & -- & -- \\
+\midrule
+\repo{realistic_002} & Wheel odometry & -- & 6.54 & 6.08 & 4.81 & 17.03 & 25.00 & 1778 \\
+ & IMU dead reckoning & -- & 25.88 & 39.17 & 19.01 & 118.74 & 1.91 & 695 \\
+ & EKF, VSLAM-config noise & -- & 2.06 & 3.29 & 1.58 & 9.92 & 13.65 & 37 \\
+ & EKF, measured noise (diag.) & -- & 0.59 & 0.30 & 0.37 & 0.70 & 1.03 & 191 \\
+ & VINS-Fusion & -- & -- & -- & 0.66 & 3.57 & -- & -- \\
+ & ORB-SLAM3 GPU, LC run & active & -- & -- & 0.40 & 16.04 & -- & -- \\
+ & ORB-SLAM3 GPU, no-LC run & disabled & -- & -- & \textbf{0.17} & 16.08 & -- & -- \\
+\midrule
+\repo{realistic_003} & Wheel odometry & -- & 6.71 & 7.19 & 4.30 & 19.24 & 35.82 & 3399 \\
+ & IMU dead reckoning & -- & 13.72 & 35.47 & 11.60 & 180.00 & 1.68 & 140 \\
+ & EKF, VSLAM-config noise & -- & 4.44 & 6.23 & 2.80 & 15.92 & 28.01 & 158 \\
+ & EKF, measured noise (diag.) & -- & 0.79 & 1.49 & 0.58 & 3.90 & 5.72 & 106 \\
+ & VINS-Fusion & -- & -- & -- & \textbf{0.27} & 1.51 & -- & -- \\
+ & ORB-SLAM3 GPU, LC run & active & -- & -- & 0.50 & 13.16 & -- & -- \\
+ & ORB-SLAM3 GPU, no-LC run & disabled & -- & -- & 1.91 & 13.53 & -- & -- \\
 \bottomrule
 \end{tabular}}
 \end{table}
 
-\paragraph{Reporting rules.}
-\label{sec:rpe}
-Every value in this slot is written by \path{script/analyse_proprio.py}
-into the directory \path{output/compare/simulation/exp-estimator-baseline/}
-(the files \path{proprio_metrics.csv} and \path{proprio_rpe_metrics.csv},
-and the figures of the same name). The visual runs are
-\path{logging_20260916_01} (VINS-Fusion; ORB-SLAM3 with the loop closer
-enabled) and \path{logging_20260916_02} (ORB-SLAM3 with it disabled); the
-proprioceptive runs are offline. Aligned ATE is RMSE after a rigid $SE(3)$ fit with
-scale fixed, and is the only column comparable across the two families, because
-the visual estimators build their own world frame while the baselines start
-from the ground-truth pose. Anchored columns are the raw difference from ground
-truth and exist only for the baselines. RPE is unaligned at
-$\Delta=\SI{1}{\second}$; ``clean'' excludes pairs spanning a step above
-\SI{10}{\metre\per\second}. One run per estimator per bag; ORB-SLAM3 is
-non-deterministic and its spread is unmeasured, so between-configuration
-differences on one bag are not attributed to the switch. ORB-SLAM3 received
-\SIrange{3.8}{11.9}{\percent} fewer stereo pairs than VINS-Fusion on every bag
-(best-effort subscriber under load, unproven), so no throughput or latency
-comparison is admissible here; accuracy is unaffected, since the estimator with
-no frame loss shows the same margin.
-The two families are scored against two reference points, because they report
-two different points on the robot. The ground truth
-(\path{/ground_truth/odometry}) reports the model origin; the baselines
-estimate that same point. ORB-SLAM3 and VINS-Fusion report the IMU, which
-\path{models/ackermann_robot/model.sdf} places \SI{0.338}{\metre} ahead of
-and \SI{0.192}{\metre} above the origin. Since 22 October 2026 the visual
-estimates are scored against the ground truth moved to the IMU point
-(\path{vio_metrics.gt_at_imu}); before that correction the offset rotated
-with the heading and added \SIrange{0.05}{0.26}{\metre} to every visual
-ATE and up to \SI{0.09}{\metre} to every visual RPE at \SI{1}{\second}
-in this table. The baselines are unchanged.
-
-\paragraph{Results.}
-The EKF is the most accurate estimator on one of the five bags
-(\repo{allsensor_002}); a visual estimator is the most accurate on the other
-four, VINS-Fusion on two and ORB-SLAM3 without loop closure on two. The
-filter's merit is consistency, \SIrange{0.19}{0.49}{\metre} aligned ATE on
-every bag, where each visual configuration taken on its own has at least one
-bag above it; given the visual systems' own IMU noise constants instead, the
-filter loses to VINS-Fusion on all five.
-\Cref{tab:e1-accuracy} holds every estimator on every bag, and
-\cref{fig:e1-grid} draws them.
-
 \begin{table}[htbp]
 \centering
-\caption{Estimator comparison on the five \repo{allsensor} bags. Bold marks the
-best aligned ATE of each bag \emph{as each system was configured}. Visual
-estimators are scored at the IMU point, baselines at the model origin (see
-Reporting rules). The
-\emph{EKF @ VSLAM noise} rows are the same filter with only its four IMU noise
-terms replaced by the values of \repo{config/wil_sim/stereo_imu.yaml}, the
-file every visual run read. Drift is final position error over distance
-driven.}
-\label{tab:e1-accuracy}
-% Visual-estimator ATE values regenerated 22 Oct 2026 from
-% output/compare/simulation/exp-estimator-baseline/proprio_metrics.csv
-% (lever-arm-corrected scoring); baseline rows unchanged from the same file.
-\small
-\setlength{\tabcolsep}{5pt}
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{lllrrrrr}
+\caption[Relative pose error at $\Delta t=\SI{1}{\second}$ on the four
+realistic recordings.]{Relative pose error at $\Delta t=\SI{1}{\second}$, RMSE
+over all pairs and over pairs that span no detected jump (a step above
+\SI{10}{\metre\per\second} between consecutive poses); the jump count is per
+run. \textbf{Bold} marks the lowest jump-free translational RPE of a recording.}
+\label{tab:exp1-rpe}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{llrrrrr}
 \toprule
-Dataset & World & Estimator & Aligned ATE & Anchored RMS & Anchored final &
-  Drift & Final yaw \\
- & & & [\si{\metre}] & [\si{\metre}] & [\si{\metre}] & [\si{\percent}] &
-  [\si{\degree}] \\
+Recording & Estimator & Jumps & \multicolumn{2}{c}{Translation [\si{\metre}]} & \multicolumn{2}{c}{Rotation [\si{\degree}]} \\
+ & & & all pairs & clean & all pairs & clean \\
 \midrule
-\repo{allsensor_000} & \texttt{static\_01} & IMU dead reckoning & 21.697 & 39.353 &
-  47.597 & 40.66 & $+2.19$ \\
- & plain & Wheel odometry & 2.801 & 4.732 & 4.767 & 4.07 & $-13.76$ \\
- & & VINS-Fusion & 0.557 & -- & -- & -- & -- \\
- & & ORB-SLAM3 & 0.526 & -- & -- & -- & -- \\
- & & \textbf{ORB-SLAM3 (no LC)} & \textbf{0.167} & -- & -- & -- & -- \\
- & & EKF wheel+IMU & 0.190 & 0.281 & 0.122 & \textbf{0.10} &
-  $+0.19$ \\
- & & EKF @ VSLAM noise & 1.313 & 1.980 & 1.443 & 1.23 & $-11.27$ \\
+\repo{realistic_000} & Wheel odometry & 0 & 0.028 & 0.028 & 1.720 & 1.720 \\
+ & IMU dead reckoning & 0 & 1.941 & 1.941 & 0.023 & 0.023 \\
+ & EKF & 44 & 0.240 & 0.218 & 0.979 & 0.893 \\
+ & EKF & 0 & 0.039 & 0.039 & 0.098 & 0.098 \\
+ & VINS-Fusion & 0 & 0.021 & 0.021 & 0.443 & 0.443 \\
+ & ORB-SLAM3 GPU, LC run & 3 & 0.246 & 0.017 & 5.902 & 0.094 \\
+ & ORB-SLAM3 GPU, no-LC run & 3 & 0.254 & \textbf{0.013} & 5.909 & 0.090 \\
 \midrule
-\repo{allsensor_001} & \texttt{static\_01} & IMU dead reckoning & 12.617 & 14.728 &
-  23.741 & 20.99 & $+1.33$ \\
- & plain & Wheel odometry & 0.979 & 1.826 & 2.426 & 2.15 & $-12.95$ \\
- & & \textbf{VINS-Fusion} & \textbf{0.127} & -- & -- & -- & -- \\
- & & ORB-SLAM3 & 0.256 & -- & -- & -- & -- \\
- & & ORB-SLAM3 (no LC) & 0.468 & -- & -- & -- & -- \\
- & & EKF wheel+IMU & 0.308 & 0.351 & 0.303 & \textbf{0.27} &
-  $+0.11$ \\
- & & EKF @ VSLAM noise & 0.681 & 0.939 & 1.027 & 0.91 & $-9.49$ \\
+\repo{realistic_001} & Wheel odometry & 0 & 0.033 & 0.033 & 1.733 & 1.733 \\
+ & IMU dead reckoning & 0 & 0.980 & 0.980 & 0.023 & 0.023 \\
+ & EKF & 42 & 0.254 & 0.202 & 0.964 & 0.811 \\
+ & EKF & 0 & 0.045 & 0.045 & 0.090 & 0.090 \\
+ & VINS-Fusion & 0 & 0.018 & \textbf{0.018} & 0.366 & 0.366 \\
+ & ORB-SLAM3 GPU, LC run & 7 & 1.191 & 0.034 & 7.031 & 0.120 \\
+ & ORB-SLAM3 GPU, no-LC run & 2 & 0.302 & 0.020 & 6.845 & 0.155 \\
 \midrule
-\repo{allsensor_002} & \texttt{objonwallonly} & IMU dead reckoning & 13.237 &
-  16.359 & 17.728 & 15.39 & $+1.36$ \\
- & plain & Wheel odometry & 1.485 & 2.888 & 4.332 & 3.76 & $-30.11$ \\
- & & VINS-Fusion & 0.472 & -- & -- & -- & -- \\
- & & ORB-SLAM3 & 0.556 & -- & -- & -- & -- \\
- & & ORB-SLAM3 (no LC) & 1.849 & -- & -- & -- & -- \\
- & & \textbf{EKF wheel+IMU} & \textbf{0.256} & 0.345 & 0.346 & \textbf{0.30} &
-  $-0.68$ \\
- & & EKF @ VSLAM noise & 0.868 & 1.320 & 1.802 & 1.56 & $-20.71$ \\
+\repo{realistic_002} & Wheel odometry & 0 & 0.027 & 0.027 & 1.997 & 1.997 \\
+ & IMU dead reckoning & 0 & 1.505 & 1.505 & 0.033 & 0.033 \\
+ & EKF & 67 & 0.243 & 0.158 & 0.985 & 0.780 \\
+ & EKF & 0 & 0.035 & 0.035 & 0.075 & 0.075 \\
+ & VINS-Fusion & 0 & 0.038 & 0.038 & 0.790 & 0.790 \\
+ & ORB-SLAM3 GPU, LC run & 4 & 0.463 & \textbf{0.017} & 10.403 & 0.084 \\
+ & ORB-SLAM3 GPU, no-LC run & 1 & 0.147 & 0.028 & 7.422 & 0.070 \\
 \midrule
-\repo{allsensor_003} & \texttt{bayline\_} & IMU dead reckoning & 45.562 & 62.903 &
-  74.745 & 53.16 & $-5.84$ \\
- & \texttt{objonwallonly} & Wheel odometry & 3.192 & 3.979 & 9.231 & 6.57 &
-  $-37.17$ \\
- & bayline & VINS-Fusion & 0.737 & -- & -- & -- & -- \\
- & & ORB-SLAM3 & \flag{6.381} & -- & -- & -- & -- \\
- & & \textbf{ORB-SLAM3 (no LC)} & \textbf{0.313} & -- & -- & -- & -- \\
- & & EKF wheel+IMU & 0.423 & 0.668 & 1.240 & \textbf{0.88} &
-  $-7.20$ \\
- & & EKF @ VSLAM noise & 1.230 & 1.574 & 3.037 & 2.16 & $-24.76$ \\
-\midrule
-\repo{allsensor_004} & \texttt{static\_01\_} & IMU dead reckoning & 26.709 & 41.476 &
-  48.099 & 33.81 & $-1.35$ \\
- & \texttt{bayline} & Wheel odometry & 3.241 & 5.124 & 5.791 & 4.07 & $-17.68$ \\
- & bayline & \textbf{VINS-Fusion} & \textbf{0.275} & -- & -- & -- & -- \\
- & & ORB-SLAM3 & 1.200 & -- & -- & -- & -- \\
- & & ORB-SLAM3 (no LC) & 0.845 & -- & -- & -- & -- \\
- & & EKF wheel+IMU & 0.494 & 0.776 & 0.831 & 0.58 & $-5.30$ \\
- & & EKF @ VSLAM noise & 1.583 & 2.650 & 1.836 & 1.29 & $-15.16$ \\
+\repo{realistic_003} & Wheel odometry & 0 & 0.023 & 0.023 & 1.447 & 1.447 \\
+ & IMU dead reckoning & 0 & 0.936 & 0.936 & 0.023 & 0.023 \\
+ & EKF & 22 & 0.202 & 0.185 & 1.026 & 0.969 \\
+ & EKF & 0 & 0.036 & 0.036 & 0.154 & 0.154 \\
+ & VINS-Fusion & 0 & 0.014 & \textbf{0.014} & 0.327 & 0.327 \\
+ & ORB-SLAM3 GPU, LC run & 3 & 0.165 & 0.028 & 6.068 & 0.174 \\
+ & ORB-SLAM3 GPU, no-LC run & 3 & 0.151 & 0.036 & 6.088 & 0.333 \\
 \bottomrule
-\end{tabular}}
+\end{tabular}
 \end{table}
 
 \begin{figure}[p]
   \centering
-  \includegraphics[width=0.96\textwidth]{figures/proprio_trajectories_grid.png}
-  \caption{Every estimator on every \repo{allsensor} recording, world frame,
-  on the warehouse plan. The baselines are drawn as estimated from the
-  ground-truth start pose; the visual estimators after the rigid $SE(3)$
-  alignment used for their metrics. The ground-truth line is the model-origin
-  path, so the visual estimates, which follow the IMU, sit up to
-  \SI{0.34}{\metre} from it by construction. The wheel-odometry bow and the IMU's
-  departure from the building recur on all five; the one visual outlier is
-  ORB-SLAM3 with loop closure on \repo{allsensor_003}.}
-  \label{fig:e1-grid}
+  \includegraphics[width=0.96\textwidth]{figures/proprio_trajectories_grid_realistic.png}
+  \caption[Estimator comparison on every realistic recording, world frame.]{
+  Estimator comparison on every realistic recording, world frame: the
+  dead-reckoning estimators as estimated from the ground-truth start pose,
+  the visual estimators after the rigid $SE(3)$ alignment used for their
+  metrics, one legend for all four panels. The IMU leaves the building on
+  every recording; the EKF at the visual systems' noise (light green) wanders
+  in heading where the measured-noise filter (dark green) stays on the route;
+  ORB-SLAM3's divergent runs are the excursions on \repo{001} (loop closer
+  active) and \repo{003} (closer disabled).}
+  \label{fig:exp1-grid}
 \end{figure}
 
-The ordering reverses on the local metric. \Cref{tab:e1-rpe} gives the
-jump-free relative pose error at \SI{1}{\second}: the visual estimators sit
-below the EKF on every bag, VINS-Fusion at \SIrange{0.02}{0.11}{\metre} and
-ORB-SLAM3 at \SIrange{0.01}{0.18}{\metre} once its initialisation step is
-excluded, against \SIrange{0.08}{0.14}{\metre} for the EKF and three to
-five times that for the transferred-noise EKF. Over one second the visual
-systems move as the truth moves; what separates them from the filter on
-aligned ATE is accumulated drift, not local motion.
+\paragraph{Analysis.} With both families on the same hand-set inertial model
+the ordering is settled: VINS-Fusion is the most accurate estimator on every
+recording (\SIrange{0.22}{0.66}{\metre}) and the EKF, at
+\SIrange{0.68}{2.80}{\metre}, is behind it on all four and behind the better
+ORB-SLAM3 run on three. The measured-noise diagnostic puts the same filter at
+\SIrange{0.21}{0.58}{\metre}, ahead of VINS-Fusion on three of four, so the
+whole of the EKF's deficit is the noise model and none of it the
+architecture --- the September control, reproduced on new recordings and
+larger.
 
-\begin{table}[htbp]
-\centering
-\caption{Relative pose error at $\Delta=\SI{1}{\second}$, no alignment, pairs
-spanning a step above \SI{10}{\metre\per\second} excluded (``clean''). Jumps
-are the number of such steps. ORB-SLAM3's one to six jumps are its gravity
-re-alignment at inertial initialisation, which carries about \SI{90}{\degree}
-of rotation and no translation; with them included its rotational RPE reads
-\SIrange{8.8}{10.5}{\degree}.}
-\label{tab:e1-rpe}
-% Numbers are the "clean" columns of
-% output/compare/simulation/exp-estimator-baseline/proprio_rpe_table.tex
-% (regenerated 22 Oct 2026, lever-arm-corrected); baseline rows unchanged.
-\small
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{l rr rr rr rr rr}
-\toprule
- & \multicolumn{2}{c}{\repo{000}} & \multicolumn{2}{c}{\repo{001}} & \multicolumn{2}{c}{\repo{002}} & \multicolumn{2}{c}{\repo{003}} & \multicolumn{2}{c}{\repo{004}} \\
-\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}\cmidrule(lr){10-11}
-Estimator & [\si{\metre}] & [\si{\degree}] & [\si{\metre}] & [\si{\degree}] & [\si{\metre}] & [\si{\degree}] & [\si{\metre}] & [\si{\degree}] & [\si{\metre}] & [\si{\degree}] \\
-\midrule
-Wheel odometry     & 0.049 & 2.777 & 0.075 & 3.290 & 0.066 & 2.650 & 0.099 & 5.612 & 0.074 & 2.607 \\
-IMU dead reckoning & 3.558 & 0.039 & 2.113 & 0.046 & 2.412 & 0.042 & 5.939 & 0.071 & 4.708 & 0.037 \\
-EKF wheel+IMU      & 0.088 & 0.291 & 0.092 & 0.245 & 0.076 & 0.141 & 0.105 & 0.260 & 0.140 & 0.488 \\
-EKF @ VSLAM noise  & 0.360 & 1.508 & 0.337 & 1.791 & 0.216 & 1.371 & 0.247 & 1.149 & 0.276 & 1.234 \\
-VINS-Fusion        & 0.034 & 1.053 & 0.019 & 0.291 & 0.094 & 0.683 & 0.112 & 1.085 & 0.022 & 0.814 \\
-ORB-SLAM3          & 0.027 & 0.320 & 0.018 & 0.062 & 0.069 & 0.209 & 0.177 & 0.424 & 0.035 & 0.333 \\
-ORB-SLAM3 (no LC)  & 0.013 & 0.098 & 0.015 & 0.054 & 0.085 & 0.232 & 0.046 & 0.099 & 0.024 & 0.276 \\
-\bottomrule
-\end{tabular}
-\end{table}
+The mechanism is the one isolated in September. The configuration's
+gyroscope density is five to seven times the measured value, which inflates
+the heading process noise forty-fold; with the heading unobserved except
+through the wheel yaw-rate residual, that residual steers the heading instead
+of the bias, and yaw RMS rises from \SIrange{0.4}{5.7}{\degree} to
+\SIrange{4.5}{28.0}{\degree}. On routes of 100 to \SI{170}{\metre} with
+repeated turns that heading error is what the aligned ATE measures.
 
-Every dead-reckoning covariance is overconfident by roughly two orders of
-magnitude (H4 supported). \Cref{tab:e1-covariance} reports the average
-normalised estimation error squared, which a consistent filter makes 3.0, and
-the fraction of each run inside the claimed $k\sigma$ bounds;
-\cref{fig:e1-covariance} shows the EKF's NEES near 3 during the opening
-straight and departing at the first turn.
+ORB-SLAM3's divergences are not a loop-closure effect. With the GPU front end
+six of eight runs hold \SIrange{0.17}{0.52}{\metre} and two diverge, to
+\SI{4.78}{\metre} with the closer active on \repo{realistic_001} and to
+\SI{1.91}{\metre} with it disabled on \repo{realistic_003}, while the other
+closer state on each of those recordings holds \SI{0.40}{} and
+\SI{0.50}{\metre}. Each divergent run carries three or seven jumps
+(\cref{tab:exp1-rpe}) and its clean relative error is as low as the stable
+runs', so the error is a few discrete events, not steady-state tracking.
+Which front-end condition produces them is not isolated here; the CPU runs of
+the same recordings belong to Experiment~3, where the same pattern recurs.
 
-\begin{table}[htbp]
-\centering
-\caption{Covariance consistency of the non-visual estimators. A consistent
-filter gives $\mathrm{ANEES}=3.0$ and coverages of 0.683, 0.954 and 0.997.
-Neither visual estimator writes a pose covariance, so neither can be tested.
-The $\chi^2$ test runs on a \SI{1}{\hertz} subsample (81 to 102 samples per
-bag); the coverage columns make no independence assumption and are the sturdier
-statement.}
-\label{tab:e1-covariance}
-\small
-\begin{tabular}{llrrrr}
-\toprule
-Dataset & Estimator & ANEES & $1\sigma$ & $2\sigma$ & $3\sigma$ \\
-\midrule
-\repo{allsensor_000} & Wheel odometry & 569.4 & 0.309 & 0.390 & 0.408 \\
- & IMU dead reckoning & 311.0 & 0.005 & 0.022 & 0.043 \\
- & EKF wheel+IMU & 64.7 & 0.426 & 0.767 & 0.879 \\
-\midrule
-\repo{allsensor_001} & Wheel odometry & 263.9 & 0.015 & 0.131 & 0.187 \\
- & IMU dead reckoning & 339.9 & 0.001 & 0.009 & 0.021 \\
- & EKF wheel+IMU & 123.2 & 0.194 & 0.439 & 0.537 \\
-\midrule
-\repo{allsensor_002} & Wheel odometry & 729.4 & 0.140 & 0.143 & 0.145 \\
- & IMU dead reckoning & 244.7 & 0.017 & 0.045 & 0.147 \\
- & EKF wheel+IMU & 114.5 & 0.193 & 0.350 & 0.501 \\
-\midrule
-\repo{allsensor_003} & Wheel odometry & 406.7 & 0.260 & 0.343 & 0.459 \\
- & IMU dead reckoning & 1504.3 & 0.010 & 0.018 & 0.035 \\
- & EKF wheel+IMU & 79.1 & 0.034 & 0.291 & 0.476 \\
-\midrule
-\repo{allsensor_004} & Wheel odometry & 785.0 & 0.154 & 0.157 & 0.162 \\
- & IMU dead reckoning & 289.5 & 0.004 & 0.017 & 0.044 \\
- & EKF wheel+IMU & 78.6 & 0.254 & 0.330 & 0.570 \\
-\midrule
-\multicolumn{2}{l}{\emph{consistent reference}} & 3.0 & 0.683 & 0.954 & 0.997 \\
-\bottomrule
-\end{tabular}
-\end{table}
+Traffic appears as a condition, not a tested factor. VINS-Fusion is
+\SI{0.66}{\metre} on the U traffic recording against \SI{0.29}{\metre} on its
+static twin and \SI{0.27}{\metre} against \SI{0.22}{\metre} on the I layout;
+the proprioceptive estimators are unaffected by construction. The U recordings
+do not share a route, so the difference cannot be credited to traffic alone.
 
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\textwidth]{/home/ambushee/wil_project/output/compare/simulation/exp-estimator-baseline/proprio_covariance_dataset_allsensor_001_light.png}
-  \caption{Error against claimed uncertainty on \repo{dataset_allsensor_001}.
-  Top left: position error over time. Top right and bottom right: absolute
-  error against the estimator's own $3\sigma$ bound in $x$ and in heading;
-  a solid line above the dashed line of the same colour is overconfidence.
-  Bottom left: NEES against the consistent value of 3. The step near
-  \SI{9.5}{\second} in every panel is the first turn.}
-  \label{fig:e1-covariance}
-\end{figure}
+The complementary failure of the two proprioceptive sensors holds. The IMU
+keeps heading to \SIrange{0.5}{1.9}{\degree} RMS and loses position by
+\SIrange{12}{23}{\metre}; the wheels keep position to \SIrange{1.0}{4.8}{\metre}
+and lose \SIrange{7}{36}{\degree} of heading. Every proprioceptive covariance
+is overconfident: ANEES \SIrange{8}{3399}{} against 3.0, the EKF at the
+configuration noise least so because its inflated process noise is closer to
+the error it actually makes.
 
-\paragraph{Analysis.}
-H2 and H3 hold on every bag: IMU-only dead reckoning is 7.7 to 14.3 times
-worse than wheel odometry, and the EKF improves on both single sensors by an
-order of magnitude everywhere (\cref{tab:e1-accuracy}).
+\textbf{Limitations, each stated once.} \emph{$n$:} one run per cell, no
+uncertainty; ORB-SLAM3's two divergences out of eight are the only
+run-to-run figure in the slot. \emph{Equal handicap, not equal effort:} the
+shared inertial model was fitted to neither family. \emph{Idealised wheels:}
+simulated encoders with slip under \SI{1}{\percent}, the proprioceptive
+estimators' best case. \emph{Route and traffic confounded:} no two recordings
+share a route. \emph{Run bookkeeping:} one directory held a run on another
+recording for a day; the manifest caught it, and the launch should refuse an
+output directory whose name disagrees with its dataset.
 
-The EKF's lead over the visual estimators is a tuning effect, not an
-architectural one, and that is the governing result of this slot. The EKF's
-four IMU noise terms are measured from each bag; both visual systems read one
-hand-set file. Re-running the filter on that file's values raises its mean
-aligned ATE over the five bags from \SI{0.334}{} to \SI{1.135}{\metre};
-VINS-Fusion (mean \SI{0.434}{\metre}) then wins on five of five and
-ORB-SLAM3 without loop closure (mean \SI{0.728}{\metre}) on four of five.
-\Cref{tab:e1-ablation} isolates the cause to the gyroscope noise density,
-which the file sets 5.5 to 6.7 times looser than measured: it inflates the
-heading process variance about forty-fold, so the wheel yaw-rate residual
-steers heading instead of staying confined to the bias estimate. The
-accelerometer term is inert and the bias random walk contributes little.
-
-\begin{table}[htbp]
-\centering
-\caption{Which IMU noise term costs the EKF its accuracy. Each row moves one
-term from its measured value to the one \repo{config/wil_sim/stereo_imu.yaml}
-declares, averaged over the five bags. The last row reproduces the gyroscope
-term's effect on the measurement noise $R$ only, leaving the process noise $Q$
-measured: it is harmless, so the damage is entirely through $Q$.}
-\label{tab:e1-ablation}
-\small
-\begin{tabular}{lrrr}
-\toprule
-EKF, one term moved & Anchored RMS & Aligned ATE & Anchored yaw RMS \\
- & [\si{\metre}] & [\si{\metre}] & [\si{\degree}] \\
-\midrule
-measured throughout & 0.484 & 0.334 & 1.60 \\
-gyroscope density, $\times 6.5$ & 1.654 & 1.105 & 8.67 \\
-accelerometer density & 0.479 & 0.329 & 1.60 \\
-gyroscope bias random walk, $\times 10$ & 0.654 & 0.452 & 2.97 \\
-all four (\emph{EKF @ VSLAM noise}) & 1.693 & 1.135 & 8.88 \\
-\midrule
-gyroscope density through $R$ only & 0.475 & 0.327 & 1.50 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{queried}[Post-hoc control]
-The noise-transfer hypothesis was written down after the exploratory runs had
-been scored, not before. It is also an equal-handicap comparison, not an
-equal-effort one: it shows the EKF's advantage is smaller than the tuning
-difference between the families and reverses under it, not that the visual
-systems would win a symmetric comparison. The mirror run, giving VINS-Fusion
-and ORB-SLAM3 the measured values, has not been run to a reportable standard.
+\begin{queried}[Resolved: \repo{realistic_002/loopclosing_gpu}]
+Earlier on 6 November this run was reported as closure-free from its
+\repo{loop_closing.csv} and queried. Its manifest shows the real cause: it was
+launched on the \repo{realistic_003} bag with \repo{realistic_002}'s output
+path, so it was scored against the wrong truth (\SI{4.94}{\metre},
+\SI{48.9}{\degree}, 139\,\% of the recording's frames processed). It is set
+aside, not deleted; the configuration was re-run on the right bag the same
+evening and every table here carries that run.
 \end{queried}
 
-The EKF's accuracy is not an in-sample artefact, but its lead is a bag-by-bag
-matter. Exchanging noise models between bags (\cref{tab:e1-xval}) makes the
-borrowed model \emph{better} on four of five bags; scored that way the filter
-leads the best visual configuration on one bag (\repo{allsensor_002}, by a
-factor of 2.1) and trails it on the other four (ratios 0.5 to 0.8, best visual
-ATE over cross-validated EKF ATE). That control cannot address the asymmetry
-above, since both models are still measured from one simulated IMU; the
-ablation does.
+\paragraph{Summary.} On the realistic recordings IMU-only dead reckoning
+drifts by \SIrange{12}{23}{\metre} and wheel odometry by
+\SIrange{1.0}{4.8}{\metre} of aligned ATE; the EKF, run on the visual
+systems' own inertial noise as the design requires, holds
+\SIrange{0.68}{2.80}{\metre} and loses to VINS-Fusion on every recording,
+while the same filter on a measured noise model would hold
+\SIrange{0.21}{0.58}{\metre}. VINS-Fusion holds \SIrange{0.22}{0.66}{\metre};
+ORB-SLAM3 with the GPU front end holds \SIrange{0.17}{0.52}{\metre} on six
+runs of eight and diverges on two, one in each closer state. Against the
+project's target of \SI{0.05}{\metre} ATE no estimator qualifies; against
+the \SI{1.5}{\metre} RPE bound at \SI{1}{\second}, all but the IMU do.
 
-\begin{table}[htbp]
-\centering
-\caption{EKF aligned ATE with an in-sample and an out-of-sample noise model.
-Mean change about $-10\,\%$: no systematic in-sample advantage.}
-\label{tab:e1-xval}
-\small
-\begin{tabular}{llrr}
-\toprule
-Dataset & Noise model from & Aligned ATE [\si{\metre}] & Change \\
-\midrule
-\repo{allsensor_000} & same bag & 0.190 & -- \\
- & \repo{allsensor_001} & 0.206 & $+8.8\,\%$ \\
-\midrule
-\repo{allsensor_001} & same bag & 0.308 & -- \\
- & \repo{allsensor_000} & 0.263 & $-14.5\,\%$ \\
-\midrule
-\repo{allsensor_002} & same bag & 0.256 & -- \\
- & \repo{allsensor_000} & 0.220 & $-13.9\,\%$ \\
-\midrule
-\repo{allsensor_003} & same bag & 0.423 & -- \\
- & \repo{allsensor_000} & 0.392 & $-7.1\,\%$ \\
-\midrule
-\repo{allsensor_004} & same bag & 0.494 & -- \\
- & \repo{allsensor_000} & 0.377 & $-23.8\,\%$ \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-The two proprioceptive sensors fail in complementary ways, which is why the
-fusion works. The IMU holds final heading to \SIrange{1.3}{5.8}{\degree} while
-losing position by tens of metres; the wheels hold position to a few percent
-of distance while losing \SIrange{13}{37}{\degree} of heading. The EKF beats
-both in both quantities because the wheel yaw rate observes the gyroscope bias
-rather than heading, so the filter never inherits the wheels' heading drift.
-
-H1 is falsified: wheel heading drift does not follow the yaw-rate scale error.
-\Cref{tab:e1-h1} shows the bag with the best scale ($+0.34\,\%$) drifting
-\SI{-30.11}{\degree} and the bag with the worst ($-7.50\,\%$) only
-\SI{-17.68}{\degree}, with every heading error sharing a sign the scale errors
-do not. The mechanism is a persistent yaw-rate \emph{offset}, \SI{-0.0028}{}
-to \SI{-0.0062}{\radian\per\second}, whose time integral reproduces the
-measured heading error to within \SI{1.4}{\degree} on all five bags. Its
-origin is open: a steering-angle zero offset, an unmodelled slip angle and a
-kingpin-geometry error are all consistent with the split-by-turn-direction
-residuals and none is tested. Averaging the two kingpin angles in the bicycle
-model is ruled out (it moves the residual by under \SI{4}{\percent}).
-
-\begin{table}[htbp]
-\centering
-\caption{Wheel-odometry heading drift against the fitted yaw-rate scale.
-``Rotation'' is the total unsigned ground-truth rotation of the run. The last
-column is the mean yaw-rate residual of the run multiplied by its duration.}
-\label{tab:e1-h1}
-\small
-\begin{tabular}{lrrrrr}
-\toprule
-Dataset & Yaw-rate scale & Final yaw error & Rotation & Error/rotation & Offset prediction \\
- & [\si{\percent}] & [\si{\degree}] & [\si{\degree}] & [\si{\percent}] & [\si{\degree}] \\
-\midrule
-\repo{allsensor_000} & $+1.10$ & $-13.76$ & 536 & $-2.566$ & $-13.81$ \\
-\repo{allsensor_001} & $-4.73$ & $-12.95$ & 852 & $-1.519$ & $-13.37$ \\
-\repo{allsensor_002} & $+0.34$ & $-30.11$ & 865 & $-3.481$ & $-31.03$ \\
-\repo{allsensor_003} & $-6.25$ & $-37.17$ & 1123 & $-3.309$ & $-38.51$ \\
-\repo{allsensor_004} & $-7.50$ & $-17.68$ & 895 & $-1.976$ & $-18.03$ \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-The same offset sets a floor on the EKF, because the filter observes its
-gyroscope bias through the wheel yaw rate. \Cref{tab:e1-coupling} shows the
-two tracking each other: where the wheel yaw-rate scale is within
-\SI{1.1}{\percent} of unity the EKF holds heading to \SI{0.42}{\degree} or
-better, and on the two bayline bags, where it is 6 to \SI{7.5}{\percent} low,
-the EKF's heading error rises roughly tenfold. No gyroscope quality can lift
-that floor.
-
-\begin{table}[htbp]
-\centering
-\caption{The EKF's heading error follows the quality of the wheel yaw rate it
-uses to observe its gyroscope bias.}
-\label{tab:e1-coupling}
-\small
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{llrrrr}
-\toprule
-Dataset & Floor & Wheel yaw scale & Wheel yaw $\sigma$ [\si{\radian\per\second}] & EKF yaw RMS [\si{\degree}] & EKF ATE [\si{\metre}] \\
-\midrule
-\repo{allsensor_000} & plain & 1.0110 & 0.0659 & 0.35 & 0.190 \\
-\repo{allsensor_002} & plain & 1.0034 & 0.0705 & 0.30 & 0.256 \\
-\repo{allsensor_001} & plain & 0.9527 & 0.0804 & 0.42 & 0.308 \\
-\repo{allsensor_003} & bayline & 0.9375 & 0.1192 & 3.54 & 0.423 \\
-\repo{allsensor_004} & bayline & 0.9250 & 0.0613 & 3.41 & 0.494 \\
-\bottomrule
-\end{tabular}}
-\end{table}
-
-Scene content did not move the visual estimators in any resolvable way.
-Clearing the central floor (\repo{allsensor_002}) leaves both visual errors
-within \SI{0.09}{\metre} of the full layout (\repo{_000}), and the painted
-bay lines give VINS-Fusion \SI{0.737}{} and \SI{0.275}{\metre} against
-\SIrange{0.127}{0.557}{\metre} on plain floors: one bayline bag is the worst
-of the five and the other sits inside the plain-floor range. \flag{The bayline manipulation is weak:
-fourteen painted outlines on the same untextured base, so a genuinely textured
-floor remains untested.} What the bayline bags did change is the
-proprioceptive side: both carry the largest wheel yaw-rate scale errors of the
-five.
-
-ORB-SLAM3's rotational error is a property of the estimator, not of tuning:
-its aligned rotational RMS stays at \SIrange{13.6}{16.5}{\degree} in every
-condition, against \SI{6.21}{\degree} for the handicapped EKF. \flag{Its
-\SI{6.381}{\metre} ATE with loop closure on \repo{allsensor_003}, against
-\SI{0.313}{\metre} without, is a real measurement of two runs but not
-attributable to the switch}: one run per configuration, unmeasured spread, and
-the loop closer accepted one candidate of 64 on that bag.
-
-\begin{queried}[Provenance]
-Loop-closure state is not in \repo{run_metadata.csv}; the enabled/disabled
-distinction between \repo{logging_20260916_01} and \repo{_02} was recovered
-afterwards from \repo{loop_closing.csv}, and the same suffix means a repeat
-index in the Experiment 3 campaign. The logger should record the switch
-explicitly before any further ORB-SLAM3 campaign. Initialisation and reset
-counts were extracted for \repo{allsensor_000} and \repo{_001} only.
-\end{queried}
-
-\paragraph{Summary.} IMU-only dead reckoning drifts by
-\SIrange{12.6}{45.6}{\metre} and wheel odometry by \SIrange{1.0}{3.2}{\metre}
-of aligned ATE; the EKF stays below \SI{0.5}{\metre} on every recording and
-the visual estimators between \SI{0.13}{} and \SI{0.47}{\metre} in their best
-configuration. Against the project's \SI{0.05}{\metre} target no estimator
-qualifies. The defensible claim is narrow: on aligned ATE the
-per-recording-calibrated proprioceptive filter is the most accurate estimator
-on one bag of five and a visual estimator on the other four, with the filter
-never the worst and never far behind; on the local metric the visual systems
-lead on every bag; and the calibration does at least as much work as the
-architecture, since the filter on the visual systems' noise constants loses to
-VINS-Fusion everywhere. The comparison is confined to static scenes at $0.5\times$
-replay, $n=5$ across four worlds with no condition repeated more than twice,
-so no scene-content effect and no real-time conclusion is claimed.
-
-\paragraph{Future plan.} Tune the visual systems' IMU noise model to this
-platform, the cheapest remaining improvement; feed the VIO pose into the EKF as
-a third measurement so the filter takes distance from the wheels, heading from
-the gyroscope and drift correction from vision; record the \repo{allsensor}
-topics in a dynamic world, since every encoder-bearing recording is static; and
-add a pose covariance to VINS-Fusion's output so the consistency test can reach
-the pipelines the thesis is about.
+\paragraph{Future plan.} Fit the visual systems' inertial noise to this
+platform rather than copying a file, since the slot shows the noise model is
+worth more than the estimator; feed the VIO pose into the EKF as a third
+measurement; and bridge the real robot's wheel speed in metric units so that
+this slot's real-robot half can be formed.
 
 % =====================================================================
 \FloatBarrier
 \section{Real robot}
 \label{sec:exp1-real}
 
-\slotstatus{partial}{One real recording, \repo{dataset_realv3_000}, scored
-against an independent planar optical tracker on 20 October 2026. Visual
-estimators only: the real platform publishes no wheel odometry in metric units
-and no joint states, so the non-visual baselines of \cref{sec:exp1-sim}
-cannot be formed. Every value is provisional: the marker-to-camera lever arm is
-unmeasured, and the runs predate the 21 October stereo recalibration.}
+\slotstatus{partial}{Four real recordings with an independent planar
+reference (\repo{dataset_realv6_000}, \repo{dataset_realv7_000} to
+\repo{_002}). A non-visual baseline now exists: wheel+gyro dead reckoning
+with the feedback speed scaled by a factor fitted once against the tracker on
+\repo{realv7_000} and held on the other three. On every held recording it is
+at least as accurate as the best ORB-SLAM3 run of Experiment~3
+(\SIrange{0.22}{0.46}{\metre} against \SIrange{0.44}{0.52}{\metre} planar
+ATE). The EKF of the simulation slot cannot be formed, because the rig
+publishes no steering measurement; every value is provisional until the
+marker-to-IMU lever arm is measured.}
 
-\paragraph{Objective.} Do the two visual pipelines track the robot's true path
-on the Gensurv floor, measured against a reference independent of both.
+\paragraph{Objective.} The real-robot half of the question of
+\cref{sec:exp1-sim}: does a non-visual estimator provide usable localisation
+on the recordings the visual pipelines consumed, and do the visual pipelines
+earn their place over it.
 
-\paragraph{Process.} The bag was replayed at rate 1.0 through ORB-SLAM3 twice
-(loop closer enabled and disabled) and through VINS-Fusion once. The clock
-offset between tracker and robot was estimated by cross-correlating the
-tracker's speed with the wheel-speed feedback; each estimate was aligned to the
-tracker by a rigid planar fit with scale fixed and scored at the tracker's own
-samples.
+\paragraph{Process.} The bags carry \repo{/feedback/velocity} and
+\repo{/feedback/steering} (\SI{50}{\hertz}, \texttt{std\_msgs/Float64}) and
+the WitMotion yaw sensor on \repo{/hwt101ct_yaw_publisher} (\SI{200}{\hertz}).
+The velocity is in a firmware unit, not metres per second; the steering is a
+command echo that takes two values (0 and $-30$) on every recording and so
+carries no yaw rate; the yaw sensor's orientation field is identity and its
+rate on the $y$ axis is the live gyro (the sensor is mounted with $y$
+vertical: that axis integrates to \SI{6.29}{rad} over \repo{realv7_000}, whose
+tracker heading sweeps \SI{6.3}{rad}; $x$ and $z$ integrate to under
+\SI{0.05}{rad}).
 
-\paragraph{Datasets.} \repo{dataset_realv3_000}, recorded at Gensurv on
-19 October 2026 after the stereo camera was remounted (\cref{tab:e1-realdata}).
-The tracker exports a \SI{10.3}{\metre} path on a loop about \SI{2}{\metre}
-across, with no gap above \SI{0.30}{\second} and no step above
-\SI{0.07}{\metre}.
+\repo{script/real_wheel_baseline.py} integrates heading from
+that gyro with its rest bias removed (\SIrange{3}{7}{\second} at rest at the
+head of each bag) and position from the scaled speed. The scale $k$, the gyro
+axis and its sign are fitted on \repo{realv7_000} alone by minimising the
+planar ATE after rigid $SE(2)$ alignment with scale fixed (a wrong sign
+mirrors the path, which a proper rotation cannot align), then held: the fit
+recording's own score is a calibration, the three held scores are the result.
+The fitted $k=0.325$ agrees with the plain path-length ratio of each
+\repo{realv7} bag (0.323 to 0.329). The time offset between tracker and bag is
+the wheel-speed cross-correlation of \repo{script/eval_real_gt.py}
+($r=0.93$ to $0.99$ on \repo{realv7}, $0.61$ on the sparse \repo{realv6}
+export), scoring is that script's planar procedure at the tracker's own
+samples, and the one off-path \repo{realv6} sample is removed by the rule the
+realv6 analysis fixed.
 
-\begin{table}[htbp]
-\centering
-\caption{The real recording and its reference. The wheel-speed feedback is in
-unverified units and is used for its shape only.}
-\label{tab:e1-realdata}
-\small
-\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.34\textwidth}>{\raggedright\arraybackslash}X}
-\toprule
-Quantity & Value \\
-\midrule
-Bag duration & \SI{43.0}{\second} \\
-Stereo pairs (compressed) & 1\,290 at \SI{30}{\hertz} \\
-Inertial messages (\repo{/hwt101ct_yaw_publisher}) & 8\,579 at \SI{200}{\hertz} \\
-Wheel-speed and steering feedback & \SI{50}{\hertz}, units unverified; no joint states \\
-Tracker samples & 372 over \SI{51.7}{\second}, median \SI{0.132}{\second}, planar, no heading \\
-Tracker path & \SI{10.3}{\metre} \\
-Fitted clock offset & tracker starts \SI{4.34}{\second} before the bag; peak $r=0.99$, next peak $0.84$; $\pm\SI{0.2}{\second}$ moves ATE $<\SI{0.002}{\metre}$ \\
-Lever arm applied & up \SI{-0.092}{\metre} (earlier rig); horizontal assumed zero, \flag{unmeasured} \\
-Stereo pairs processed & ORB-SLAM3 437 of 1\,184 and 474 of 1\,122 (\SI{63}{} and \SI{58}{\percent} dropped); VINS-Fusion 561 of 1\,290 \\
-\bottomrule
-\end{tabularx}
-\end{table}
+The rig's wheelbase, \SI{0.60}{\metre}, is recorded
+and unused: with no steering measurement there is nothing to put through a
+bicycle model, so the yaw-rate observation that gives the simulation EKF its
+bias state does not exist, and that filter would reduce to this integration.
 
-\paragraph{Reporting rules.}
-\label{sec:method-trajectory}
-Values come from \path{output/compare/real/} as written by
-\path{script/eval_real_gt.py}: the tables \path{real_gt_table.tex} and
-\path{real_gt_rpe_table.tex}, and the figures named
-\path{real_gt_*realv3_000*.png}.
-Planar ATE is RMSE after a rigid $SE(2)$ fit with scale fixed, at the
-tracker's samples; RPE is translational only, since the tracker has no
-heading; ``path'' is the estimate's planar path length over the matched
-interval divided by the tracker's. A run is failed if its vertical range
-exceeds \SI{1}{\metre} on the flat floor (rule added 20 October 2026) or its
-path ratio leaves $[0.5, 2.0]$; failed runs are excluded from the tables and
-reported in the text.
-\begin{queried}[Superseded configuration]
-All three runs used the pre-remount stereo extrinsics (old baseline, and a
-\SI{2}{\milli\metre} typo in the ORB-SLAM3 inertial file) with the image
-topics swapped as a workaround. The lever arm between the tracker marker and
-the IMU is also unmeasured; the simulation slot shows what an uncompensated
-arm of a few decimetres does to an ATE of this size, so it is no longer a
-secondary concern. The rig was recalibrated on 21 October 2026
-(\repo{camera_parameters/211026camera1_rot_trans.dat}, baseline
-\SI{0.0897}{\metre}) and the swap retired. Every number in this slot must be
-re-run on the new extrinsics before it is quoted as evidence about the
-estimators.
+\paragraph{Datasets.} The four tracker-truthed real recordings of
+Experiment~3's real-robot section: routes of \SIrange{22}{37}{\metre} over
+\SIrange{97}{219}{\second}. Sources:
+\path{output/compare/real/exp1-wheel/} (\repo{wheel_metrics.csv},
+\repo{manifest.json}), estimates under \path{output/output_wheel/real/}.
+
+\paragraph{Results.} \Cref{tab:exp1-real-wheel} and \cref{fig:exp1-real-wheel}.
+On the fit recording the baseline reads \SI{0.06}{\metre} ATE with a path ratio
+of 0.99, which is the calibration. Held, it reads \SI{0.26}{} and
+\SI{0.22}{\metre} on \repo{realv7_001} and \repo{_002} with path ratios of
+0.99 and 1.01, and \SI{0.46}{\metre} on \repo{realv6_000} against its sparse
+export, with no jump and a relative error at \SI{1}{\second} of
+\SIrange{0.01}{0.02}{\metre}.
+
+\input{../../../../output/compare/real/exp1-wheel/wheel_table.tex}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{../../../../output/compare/real/exp1-wheel/wheel_paths_light.png}
+  \caption[Wheel+gyro dead reckoning against the tracker.]{Wheel+gyro dead
+  reckoning (blue) against the tracker (black) after
+  rigid planar alignment, one panel per recording; the first is the recording
+  the speed scale was fitted on.}
+  \label{fig:exp1-real-wheel}
+\end{figure}
+
+\paragraph{Analysis.} The comparison this slot exists for now has a number on
+both sides, and it does not favour vision. On the same recordings the best
+ORB-SLAM3 configuration reads \SI{0.44}{\metre} on \repo{realv7_001},
+\SI{0.47}{\metre} on \repo{realv7_002} and \SI{0.46}{\metre} on
+\repo{realv6_000} (Experiment~3, real-robot section, after the scorer's frame
+repair); the scaled dead reckoning reads \SI{0.26}{}, \SI{0.22}{} and
+\SI{0.46}{\metre}, with path ratios within \SI{4}{\percent} of one where the
+visual runs read \SIrange{5}{15}{\percent} long.
+
+Three things bound that reading. The scale is a fitted constant, not a measured one, so the baseline
+has had one parameter tuned against the truth it is scored on, on a different
+recording; a second calibration route, the wheel circumference and the gear
+ratio, would remove that. The routes are \SIrange{22}{37}{\metre} with the
+robot at \SI{0.2}{\metre\per\second}: a gyro drifting at the measured rest
+bias of \SIrange{0.003}{0.006}{\radian\per\second} accumulates
+\SIrange{0.3}{1.3}{\radian} over a run if the bias is not removed and under
+\SI{0.1}{\radian} after the rest-window removal, and on a longer route that
+term grows while the visual error need not. And the lever arm is zero for
+both sides. Against the project's targets no run approaches \SI{0.05}{\metre}
+except the calibration itself; every run is inside the \SI{1.5}{\metre} RPE
+bound.
+
+\begin{queried}[Open: the realv6 scale]
+On \repo{realv6_000} the path-length ratio gives $k=0.43$ where the three
+\repo{realv7} bags give $0.32$ to $0.33$, yet the held $k=0.325$ scores a path
+ratio of 1.04 on the matched samples. The export is at \SI{1.7}{\hertz} and
+fails the validity rules, and the recording predates \repo{realv7} by three
+days; whether the firmware unit changed or the sparse export misstates the
+path length is not decided, and the \repo{realv6} row is a diagnostic.
 \end{queried}
 
-\paragraph{Results.}
-ORB-SLAM3 holds planar error near \SI{1}{\metre} but reads less than half the
-true path length, path ratio 0.40 and 0.45; VINS-Fusion failed.
-\Cref{tab:real-gt-ate,tab:real-gt-rpe} hold the two partial ORB-SLAM3 runs and
-\cref{fig:e1-real} draws them against the tracker.
+\paragraph{Summary.} With one scale fitted on one recording, wheel+gyro dead
+reckoning localises the real robot to \SIrange{0.22}{0.26}{\metre} on the
+two held \repo{realv7} recordings and \SI{0.46}{\metre} on \repo{realv6},
+at least as well as the best visual run on each. On routes of this length
+vision has not earned its place over the proprioceptive sensors; the
+simulation slot said the same of the measured-noise filter.
 
-\reporttable{real_gt_table}
-\reporttable{real_gt_rpe_table}
-
-\begin{figure}[htbp]
-  \centering
-  \begin{minipage}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{figures/real_gt_trajectory_realv3_000_orb.png}
-  \end{minipage}\hfill
-  \begin{minipage}[t]{0.49\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{figures/real_gt_error_realv3_000.png}
-  \end{minipage}
-  \caption{Real-robot estimates against the optical tracker on
-  \repo{dataset_realv3_000}. Left: the two ORB-SLAM3 runs after rigid planar
-  alignment with scale fixed; the tracker (black) traces a loop about
-  \SI{2}{\metre} across and both estimates a smaller loop inside it. Right:
-  planar error and speed on the robot-clock timeline; the tracker's speed is
-  drawn shifted by the fitted offset, and VINS-Fusion's speed rises without
-  bound from \SI{10}{\second} while the robot moves at
-  \SI{0.2}{\metre\per\second}. No site plan exists for the real floor, so no
-  map underlay is drawn.}
-  \label{fig:e1-real}
-\end{figure}
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.8\textwidth]{figures/real_gt_trajectory_realv3_000.png}
-  \caption{The same alignment with the failed VINS-Fusion run included: its
-  \SI{60}{\metre} path reduces the \SI{2}{\metre} loop to a dot, which is why
-  it is omitted from \cref{fig:e1-real}.}
-  \label{fig:e1-real-all}
-\end{figure}
-
-\paragraph{Analysis.}
-VINS-Fusion's failure is inertial, not visual. It initialised at
-\SI{0.33}{\second}, never reset and shut down gracefully, yet its planar speed
-grew linearly to \SI{3.3}{\metre\per\second}, its path reached
-\SI{60}{\metre} against the tracker's \SI{10.3}{\metre}, and it climbed
-\SI{21.8}{\metre} on a flat floor: unbounded acceleration in a scene that is
-not moving is the accelerometer integrated under a wrong gravity or extrinsic
-assumption. Two untested candidates are on record for the remounted rig: the
-camera--IMU rotation of the swapped configuration reused un-inverted (about
-\SI{2}{\degree} off), and the unverified sign of the IMU's yaw axis. The run
-passed every pre-registered validity rule because its planar error stayed
-under the \SI{50}{\metre} divergence threshold; the vertical-range rule now
-fails it.
-
-Both ORB-SLAM3 runs are partial for the same reason: scale. Each reset twice in
-its first seconds and then tracked continuously with no jump, but the
-estimates traverse \SI{4.6}{} and \SI{4.1}{\metre} of a \SI{10.3}{\metre}
-loop. Three causes are candidates and none is isolated: the unmeasured lever
-arm (a marker \SIrange{0.7}{1}{\metre} from the camera on a \SI{1}{\metre}
-radius loop traces a path this much longer, but the diagnostic least-squares
-fits for the two runs, $(+0.57,-0.60)$ and $(+0.31,+0.93)$\,m, disagree, so
-no single geometry explains both and none is applied); the stereo baseline
-carried over from the pre-remount rig, which sets the metric scale; and the
-frame loss, under half the stereo pairs processed at rate 1.0. Loop closure
-earns no credit: neither run closed a loop, and the \SI{0.22}{\metre} between
-them is run-to-run variation at this drop rate.
-
-Against the project's targets, neither ORB-SLAM3 run approaches
-\SI{0.05}{\metre} ATE; both are inside the \SI{1.5}{\metre} RPE bound at
-\SI{1}{\second}, provisionally.
-
-\paragraph{Summary.} The first real recording with an independent reference
-has been scored. ORB-SLAM3 tracks the shape of the loop at about \SI{1}{\metre}
-planar error with no jumps after its start-up resets but at less than half the
-true scale; VINS-Fusion diverges inertially. Until the lever arm is measured
-and the runs are repeated on the 21 October extrinsics, neither number is
-evidence about the estimators, and the slot stays partial.
-
-\paragraph{Future plan.} Re-run all three configurations with the launch
-defaults on the recalibrated extrinsics; measure the lever arm from
-\repo{cam0} to the tracked marker (forward, left, up) and re-score with the
-unchanged script; verify the IMU's axis signs against gravity and a known
-rotation; replay at rate 0.5 so that at least \SI{80}{\percent} of stereo
-pairs are processed; bridge the wheel and steering feedback in metric units so
-the baselines of \cref{sec:exp1-sim} can be formed on the same recording; and
-record routes with turns and speed changes long enough for scale to be
-observable.
+\paragraph{Next action.} Replace the fitted scale with a measured one (wheel
+circumference and gear ratio, or a tape-measured straight run); record the
+steering angle as a measurement so that the bicycle model and the EKF's bias
+state can be formed with the \SI{0.60}{\metre} wheelbase; measure the
+marker-to-IMU lever arm; and record a route long enough for gyro drift to
+show.
 
 \end{document}

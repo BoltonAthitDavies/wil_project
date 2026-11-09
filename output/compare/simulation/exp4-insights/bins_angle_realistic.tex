@@ -3,14 +3,15 @@
 \small
 \caption[Recall of the observed surfaces by incidence angle.]{Recall of the observed surfaces by the incidence angle of the nearest graph node's line of sight on the surface: \SI{0}{\degree} is a surface faced head-on, \SI{90}{\degree} one seen edge-on along its own plane (the faces of neighbouring shelves across a narrow gap, looked into from the aisle). Normals come from the world footprints; the viewing node is the nearest optimised graph node.}
 \label{tab:insight4-angle-realistic}
-\begin{tabular}{lrrrr}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrrrrr}
 \toprule
-Incidence angle & \multicolumn{2}{c}{\repo{map_realistic}} & \multicolumn{2}{c}{\repo{map_realistic_01}} \\
-{[\si{\degree}]} & surface cells & recall [\si{\percent}] & surface cells & recall [\si{\percent}] \\
+Incidence angle & \multicolumn{2}{c}{\repo{U-Oct}} & \multicolumn{2}{c}{\repo{I-Oct}} & \multicolumn{2}{c}{\repo{U-Nov}} & \multicolumn{2}{c}{\repo{I-Nov}} \\
+{[\si{\degree}]} & surface cells & recall [\si{\percent}] & surface cells & recall [\si{\percent}] & surface cells & recall [\si{\percent}] & surface cells & recall [\si{\percent}] \\
 \midrule
-0--30 & 6042 & 85.4 & 5445 & 82.6 \\
-30--60 & 2413 & 84.1 & 2535 & 82.1 \\
-60--90 & 2454 & 74.7 & 2477 & 78.4 \\
+0--30 & 6042 & 85.4 & 5445 & 82.6 & 6668 & 79.1 & 5480 & 78.9 \\
+30--60 & 2413 & 84.1 & 2535 & 82.1 & 2592 & 74.6 & 2993 & 77.2 \\
+60--90 & 2454 & 74.7 & 2477 & 78.4 & 2921 & 65.3 & 2728 & 74.2 \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}

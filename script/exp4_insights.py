@@ -58,29 +58,51 @@ from matplotlib.lines import Line2D             # noqa: E402
 
 ROOT = Path(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 OUT = ROOT / "output" / "compare" / "simulation" / "exp4-insights"
-WORLD_TINY = ROOT / "aws-robomaker-small-warehouse-world/worlds/small_warehouse_static/small_warehouse_static_tinymap.world"
-GT_TINY = ROOT / "output/output_vins/simulation/dataset_map_tiny/ground_truth.csv"
+WORLD_TINY = ROOT / "aws-robomaker-small-warehouse-world/worlds/small_warehouse/small_warehouse_static_tinymap.world"
+GT_TINY = ROOT / "dataset/gt/dataset_map_tiny/ground_truth.csv"   # canonical since 6 Nov 2026; was output_vins/simulation/dataset_map_tiny/
 TOL = 0.25            # metres, as validate_map.py
 NEAR = 0.50           # beyond TOL but within NEAR: boundary thickening; beyond: phantom
 LEVER = 0.338         # IMU ahead of base_footprint; the map frame is the IMU body frame
 MAPS = {              # map pose from fit_map_pose.py (22 October 2026 re-fit)
-    "map_tiny": dict(db=ROOT / "map/map_tiny.db", pose=(1.85, 8.60, -89.9), closures=None),
+    "map_tiny": dict(db=ROOT / "map/map_tiny/map_tiny.db", pose=(1.85, 8.60, -89.9), closures=None),  # moved into map_tiny/ on 6 Nov 2026
     "map_02":   dict(db=ROOT / "map/map_02.db",   pose=(1.85, 8.50, -179.8), closures=None),
     # Realistic-warehouse maps (26 October 2026), fitted by eval_realistic_maps.py
     # step 1 with the realistic spawn; see exp4-realistic-maps/*.mappose.
     "map_realistic":    dict(db=ROOT / "map/map_realistic/map_realistic.db",       pose=(5.30, 19.50, -179.9), closures=None),
     "map_realistic_01": dict(db=ROOT / "map/map_realistic_01/map_realistic_01.db", pose=(5.15, 20.45, 179.4),  closures=None),
+    # 6 Nov 2026 rebuilds of the same two mapping bags under the current pipeline configuration
+    # (DetectionRate 1 Hz, Grid/RangeMax 10 m, Grid/MaxGroundHeight 0.10 m; October: 4 Hz, 8 m, 0.29 m).
+    # Placements from exp4-realistic-maps/*.mappose; the U one fitted with --yaw-near -180.
+    "dataset_allsensor_realistic_map":    dict(db=ROOT / "map/dataset_allsensor_realistic_map/dataset_allsensor_realistic_map.db",       pose=(5.20, 19.80, -180.1), closures=None),
+    "dataset_allsensor_realistic_01_map": dict(db=ROOT / "map/dataset_allsensor_realistic_01_map/dataset_allsensor_realistic_01_map.db", pose=(4.95, 20.40, -179.9), closures=None),
 }
 # --realistic: each map against its own world, probed by the static twin of its
 # layout (the recording that did NOT build it), as the raw write-up scores them.
-WORLDS_STATIC = ROOT / "aws-robomaker-small-warehouse-world/worlds/small_warehouse_static"
+WORLDS_STATIC = ROOT / "aws-robomaker-small-warehouse-world/worlds/small_warehouse"
 REALISTIC = [
     dict(name="map_realistic",    world=WORLDS_STATIC / "small_warehouse_static_realistic_nofloortexture.world",
-         gt=ROOT / "output/output_vins/simulation/dataset_allsensor_realistic_000/ground_truth.csv", probe="realistic_000", layout="U"),
+         gt=ROOT / "dataset/gt/dataset_allsensor_realistic_000/ground_truth.csv", probe="realistic_000", layout="U"),
     dict(name="map_realistic_01", world=WORLDS_STATIC / "small_warehouse_static_realistic_nofloortexture_01.world",
-         gt=ROOT / "output/output_vins/simulation/dataset_allsensor_realistic_001/ground_truth.csv", probe="realistic_001", layout="I"),
+         gt=ROOT / "dataset/gt/dataset_allsensor_realistic_001/ground_truth.csv", probe="realistic_001", layout="I"),
+    dict(name="dataset_allsensor_realistic_map", world=WORLDS_STATIC / "small_warehouse_static_realistic_nofloortexture.world",
+         gt=ROOT / "dataset/gt/dataset_allsensor_realistic_000/ground_truth.csv", probe="realistic_000", layout="U"),
+    dict(name="dataset_allsensor_realistic_01_map", world=WORLDS_STATIC / "small_warehouse_static_realistic_nofloortexture_01.world",
+         gt=ROOT / "dataset/gt/dataset_allsensor_realistic_001/ground_truth.csv", probe="realistic_001", layout="I"),
 ]
+# Databases of the tiny-map insight. map_01/map_02/map_02_vins/map_03 were deleted
+# with the 6 Nov 2026 dataset decision (only map_tiny of the old maps remains), so the
+# tiny path scores whatever of (map_tiny, map_02) exists and summarises only the
+# databases on disk; the 22 Oct outputs that carried map_02 and map_03 are kept in git
+# and under trash/output/exp4-insights-tiny-with-map_02_20261106/.
+TINY_SCORED = ["map_tiny", "map_02"]
 ALL_DBS = ["map_tiny", "map_01", "map_02", "map_02_vins", "map_03"]
+# Display names for table first columns and headers. Empty on the tiny path, so its
+# output is unchanged; main_realistic() fills it because the rebuilds' database names
+# are 36 characters and overflow every table.
+SHORT = {}
+def nm(name):
+    return SHORT.get(name, name)
+
 DIST_BINS = [0, 1, 2, 3, 4, 6, 8, 99]
 VIEW_BINS = [1, 2, 3, 5, 8, 99]
 
@@ -99,7 +121,7 @@ def decode_mat(blob):
 
 
 def db_summary(name):
-    db = ROOT / "map" / f"{name}.db"
+    db = ROOT / "map" / name / f"{name}.db"   # map/<name>/<name>.db since 6 Nov 2026
     con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
     nodes = con.execute("select id, stamp, pose from Node order by id").fetchall()
     P = np.array([struct.unpack("<12f", b) for _, _, b in nodes]).reshape(-1, 3, 4)
@@ -314,7 +336,7 @@ def tex_cell_classes(scores, path, label="tab:insight4-classes", route="the reco
          r" & cells & [\si{\percent}] & [\si{\percent}] & [\si{\percent}] & & [cells] & med.\ [m] \\", r"\midrule"]
     for s in scores:
         n = s["n_occ"]; ph = s["phantom"]
-        L.append(f"\\repo{{{s['name']}.db}} & {n} & {f(100*s['correct'].sum()/n)} & {f(100*s['thick'].sum()/n)} & "
+        L.append(f"\\repo{{{nm(s['name'])}}} & {n} & {f(100*s['correct'].sum()/n)} & {f(100*s['thick'].sum()/n)} & "
                  f"{f(100*ph.sum()/n)} & {len(s['comps'])} & {s['comps'][0]['cells'] if s['comps'] else 0} & "
                  f"{f(float(np.median(s['scene'].d_route[ph])) if ph.any() else float('nan'), 2)} \\\\")
     L += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
@@ -366,7 +388,7 @@ def tex_bins(scores, scene, path, key, bins, label, unit, caption, tag, integer=
     # `short` maps a database name to the header text; the caption names the maps in full.
     short = short or {}
     L = [r"\begin{table}[htbp]", r"\centering", r"\scriptsize", r"\setlength{\tabcolsep}{2pt}", r"\caption[" + caption.split(". ")[0] + ".]{" + caption + "}",
-         r"\label{tab:insight4-" + tag + "}", r"\begin{tabular}{l" + "rr" * (2 * len(scores)) + "}", r"\toprule",
+         r"\label{tab:insight4-" + tag + "}", (r"\resizebox{\textwidth}{!}{%" if len(scores) > 2 else ""), r"\begin{tabular}{l" + "rr" * (2 * len(scores)) + "}", r"\toprule",
          label + " & " + " & ".join(f"\\multicolumn{{2}}{{c}}{{\\repo{{{short.get(s['name'], s['name'])}}} precision}} & \\multicolumn{{2}}{{c}}{{\\repo{{{short.get(s['name'], s['name'])}}} recall}}" for s in scores) + r" \\",
          "{" + unit + "} & " + " & ".join(r"cells & [\si{\percent}]" for _ in range(2 * len(scores))) + r" \\", r"\midrule"]
     allb = []
@@ -385,7 +407,7 @@ def tex_bins(scores, scene, path, key, bins, label, unit, caption, tag, integer=
         for pb, rb in allb:
             cells += [str(pb[i][2]), f(100 * pb[i][3]), str(rb[i][2]), f(100 * rb[i][3])]
         L.append(lab + " & " + " & ".join(cells) + r" \\")
-    L += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
+    L += [r"\bottomrule", r"\end{tabular}" + ("}" if len(scores) > 2 else ""), r"\end{table}"]
     path.write_text("\n".join(L) + "\n")
     return allb
 
@@ -400,8 +422,8 @@ def tex_bins_angle(scores, path, label="tab:insight4-angle"):
          r"head-on, \SI{90}{\degree} one seen edge-on along its own plane (the faces of neighbouring shelves across a "
          r"narrow gap, looked into from the aisle). Normals come from the world footprints; the viewing node is the "
          r"nearest optimised graph node.}",
-         r"\label{" + label + "}", r"\begin{tabular}{l" + "rr" * len(scores) + "}", r"\toprule",
-         r"Incidence angle & " + " & ".join(f"\\multicolumn{{2}}{{c}}{{\\repo{{{s['name']}}}}}" for s in scores) + r" \\",
+         r"\label{" + label + "}", (r"\resizebox{\textwidth}{!}{%" if len(scores) > 2 else ""), r"\begin{tabular}{l" + "rr" * len(scores) + "}", r"\toprule",
+         r"Incidence angle & " + " & ".join(f"\\multicolumn{{2}}{{c}}{{\\repo{{{nm(s['name'])}}}}}" for s in scores) + r" \\",
          r"{[\si{\degree}]} & " + " & ".join(r"surface cells & recall [\si{\percent}]" for _ in scores) + r" \\", r"\midrule"]
     out = {}
     for a, b in zip(ANGLE_BINS[:-1], ANGLE_BINS[1:]):
@@ -412,7 +434,7 @@ def tex_bins_angle(scores, path, label="tab:insight4-angle"):
             out.setdefault(s["name"], []).append((a, b, int(m.sum()), rec))
             cells += [str(int(m.sum())), f(100 * rec)]
         L.append(f"{a}--{min(b, 90)} & " + " & ".join(cells) + r" \\")
-    L += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
+    L += [r"\bottomrule", r"\end{tabular}" + ("}" if len(scores) > 2 else ""), r"\end{table}"]
     path.write_text("\n".join(L) + "\n")
     return out
 
@@ -426,9 +448,9 @@ def tex_blocked(scores, path, label="tab:insight4-blocked", route=r"the recorded
          r"Map & poses & count & $x$ [m] & $y$ [m] & min.\ clearance [m] \\", r"\midrule"]
     for s in scores:
         if not s["segs"]:
-            L.append(f"\\repo{{{s['name']}.db}} & --- & 0 & --- & --- & --- \\\\")
+            L.append(f"\\repo{{{nm(s['name'])}}} & --- & 0 & --- & --- & --- \\\\")
         for g in sorted(s["segs"], key=lambda g: -g["n"])[:8]:
-            L.append(f"\\repo{{{s['name']}.db}} & {g['i0']}--{g['i1']} & {g['n']} & {f(g['x'],1)} & {f(g['y'],1)} & {f(g['clear_min'],2)} \\\\")
+            L.append(f"\\repo{{{nm(s['name'])}}} & {g['i0']}--{g['i1']} & {g['n']} & {f(g['x'],1)} & {f(g['y'],1)} & {f(g['clear_min'],2)} \\\\")
     L += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
     path.write_text("\n".join(L) + "\n")
 
@@ -448,7 +470,7 @@ def tex_drivability(scores, path, label="tab:insight4-driv", caption=None, route
          r" & & [\si{\percent} of poses] & [\si{\percent}] & [m] & [m] \\", r"\midrule"]
     for s in scores:
         d = s["driv"]
-        L.append(f"\\repo{{{s['name']}.db}} & {route_of(s['name'])} & "
+        L.append(f"\\repo{{{nm(s['name'])}}} & {route_of(s['name'])} & "
                  f"{f(100*d['blocked'])} & {f(100*d['unmapped'])} & {f(d['clear_med'],2)} & {f(d['clear_p05'],2)} \\\\")
     L += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
     path.write_text("\n".join(L) + "\n")
@@ -529,7 +551,8 @@ def fig_cells(s, scene, gt, path, title):
 
 def fig_bins(bins_d, bins_v, names, path):
     fig, axes = plt.subplots(1, 2, figsize=(10, 4))
-    cols = {"map_tiny": "#2a78d6", "map_02": "#cc8319", "map_realistic": "#458554", "map_realistic_01": "#a347b2"}
+    cols = {"map_tiny": "#2a78d6", "map_02": "#cc8319", "map_realistic": "#458554", "map_realistic_01": "#a347b2",
+            "dataset_allsensor_realistic_map": "#8fd19e", "dataset_allsensor_realistic_01_map": "#d49be0"}
     for ax, (bins, allb, xl) in zip(axes, ((DIST_BINS, bins_d, "distance from the recorded route [m]"),
                                             (VIEW_BINS, bins_v, "graph nodes that observed the cell"))):
         x = np.arange(len(bins) - 1)
@@ -577,13 +600,16 @@ def main():
         res = 0.05
         scene = Scene(WORLD_TINY, res, gt[:, :2])
         scores = []
-        for name in ("map_tiny", "map_02"):
+        tiny_names = [n for n in TINY_SCORED if Path(MAPS[n]["db"]).exists()]
+        all_dbs = [n for n in ALL_DBS if Path(ROOT / "map" / n / (n + ".db")).exists() or Path(ROOT / "map" / (n + ".db")).exists()]
+        print("tiny path: scoring", tiny_names, "| summarising", all_dbs)
+        for name in tiny_names:
             s = score_map(name, scene, gt, tmp); s["scene"] = scene; scores.append(s)
             print(f"{name}: occ {s['n_occ']} precision {100*s['precision']:.1f} recall(seen) {100*s['recall_seen']:.1f} "
                   f"recall(all) {100*s['recall_all']:.1f} | correct {s['correct'].sum()} thick {s['thick'].sum()} "
                   f"phantom {s['phantom'].sum()} in {len(s['comps'])} clusters | missed {s['missed'].sum()} | "
                   f"driv blocked {100*s['driv']['blocked']:.1f}% unmapped {100*s['driv']['unmapped']:.1f}% clear med {s['driv']['clear_med']:.2f}")
-        summ = [db_summary(n) for n in ALL_DBS]
+        summ = [db_summary(n) for n in all_dbs]
         fits = {"map_tiny": "0.387, +61\\,\\%", "map_02": "0.385, +54\\,\\%",
                 "map_03": "0.19, +7\\,\\% (large worlds; weak)", "map_01": "---", "map_02_vins": "---"}
         ident = {"map_tiny": "the scored tiny map (registered); built on the \\repo{dataset_map_tiny} route",
@@ -608,13 +634,16 @@ def main():
         clos = tex_closures(summ[0], scores[0], scene, OUT / "closures.tex")
         fig_cells(scores[0], scene, gt, OUT / "fig_cells_map_tiny_light.png",
                   "map_tiny.db against the tiny world: what the wrong cells are and where")
-        fig_cells(scores[1], scene, gt, OUT / "fig_cells_map_02_light.png",
-                  "map_02.db (unregistered) against the tiny world, placed by its own fit")
-        fig_bins(bins_d, bins_v, ["map_tiny", "map_02"], OUT / "fig_bins_light.png")
+        if len(scores) > 1:
+            fig_cells(scores[1], scene, gt, OUT / "fig_cells_map_02_light.png",
+                      "map_02.db (unregistered) against the tiny world, placed by its own fit")
+        fig_bins(bins_d, bins_v, tiny_names, OUT / "fig_bins_light.png")
         fig_graph(summ[0], scores[0], OUT / "fig_graph_light.png")
         # node-vs-ground-truth identity test (which bag built the map)
         ident_test = {}
-        for s, sm in zip(scores, summ[:1] + [summ[2]]):
+        summ_by = {sm["name"]: sm for sm in summ} if summ and "name" in summ[0] else dict(zip(all_dbs, summ))
+        for s in scores:
+            sm = summ_by[s["name"]]
             g = np.loadtxt(GT_TINY, delimiter=",")
             gt_t = g[:, 0] / 1e9; yaw = gt[:, 2]
             gix, giy = gt[:, 0] + LEVER * np.cos(yaw), gt[:, 1] + LEVER * np.sin(yaw)
@@ -631,8 +660,8 @@ def main():
                          for s in scores},
                    objects=obj_rows, closures=dict(prec_pre=clos["prec_pre"], prec_post=clos["prec_post"], n_pre=clos["n_pre"], n_post=clos["n_post"],
                                                    planar_med=float(np.median(clos["d"])), planar_max=float(clos["d"].max()), vert_max=float(np.abs(clos["dz"]).max())),
-                   bins_distance={n: [(p[0], p[1], p[2], p[3], r[2], r[3]) for p, r in zip(*b)] for n, b in zip(["map_tiny", "map_02"], bins_d)},
-                   bins_views={n: [(p[0], p[1], p[2], p[3], r[2], r[3]) for p, r in zip(*b)] for n, b in zip(["map_tiny", "map_02"], bins_v)},
+                   bins_distance={n: [(p[0], p[1], p[2], p[3], r[2], r[3]) for p, r in zip(*b)] for n, b in zip(tiny_names, bins_d)},
+                   bins_views={n: [(p[0], p[1], p[2], p[3], r[2], r[3]) for p, r in zip(*b)] for n, b in zip(tiny_names, bins_v)},
                    identity_test=ident_test, bins_angle=bins_a,
                    blocked={s["name"]: s["segs"] for s in scores},
                    databases=[{k: v for k, v in sm.items() if k not in ("odom", "stamps_all", "ids")} for sm in summ])
@@ -644,7 +673,7 @@ def main():
         print("angle bins:", {k: [(a, b, n, round(100*r, 1)) for a, b, n, r in v] for k, v in bins_a.items()})
         for s in scores:
             print(s["name"], "blocked segments:", [(g["i0"], g["i1"], g["n"], round(g["x"], 1), round(g["y"], 1), round(g["clear_min"], 2)) for g in sorted(s["segs"], key=lambda g: -g["n"])[:6]])
-        for nm in ("map_tiny", "map_02"):
+        for nm in tiny_names:
             print(nm, "bins distance:", [(a, b, n, round(100*p, 1), m, round(100*r, 1)) for a, b, n, p, m, r in out["bins_distance"][nm]])
             print(nm, "bins views:", [(a, b, n, round(100*p, 1), m, round(100*r, 1)) for a, b, n, p, m, r in out["bins_views"][nm]])
     finally:
@@ -654,6 +683,8 @@ def main():
 def main_realistic():
     """Insight 6: do the realistic-warehouse maps fail by the tiny map's mechanism?
     Writes *_realistic.* beside the tiny outputs; never rewrites them."""
+    SHORT.update({"map_realistic": "U-Oct", "map_realistic_01": "I-Oct",
+                  "dataset_allsensor_realistic_map": "U-Nov", "dataset_allsensor_realistic_01_map": "I-Nov"})
     OUT.mkdir(parents=True, exist_ok=True)
     tmp = tempfile.mkdtemp(prefix="exp4ins.")
     try:
@@ -674,12 +705,12 @@ def main_realistic():
                           "Precision and recall of the observed surfaces by the number of graph nodes whose stored local "
                           "grid covers the cell, for the two realistic-warehouse maps (U is \\repo{map_realistic}, I is \\repo{map_realistic_01}). The tiny-map contrast was 91 to 99 "
                           "percent precision and 78 to 97 percent recall from one node to three or more.", "views-realistic", integer=True,
-                          short={"map_realistic": "U", "map_realistic_01": "I"})
+                          short={"map_realistic": "U-Oct", "map_realistic_01": "I-Oct", "dataset_allsensor_realistic_map": "U-Nov", "dataset_allsensor_realistic_01_map": "I-Nov"})
         bins_d = tex_bins(scores, scores[0]["scene"], OUT / "bins_distance_realistic.tex", "d_route", DIST_BINS, "Distance from route", "[m]",
                           "Precision and recall of the observed surfaces by distance from the independent probe route "
                           "(\\repo{realistic_000} for U, \\repo{map_realistic}; \\repo{realistic_001} for I, \\repo{map_realistic_01}). The probe is not the route "
                           "that built either map, so this is only a proxy for range from the mapping camera.", "dist-realistic",
-                          short={"map_realistic": "U", "map_realistic_01": "I"})
+                          short={"map_realistic": "U-Oct", "map_realistic_01": "I-Oct", "dataset_allsensor_realistic_map": "U-Nov", "dataset_allsensor_realistic_01_map": "I-Nov"})
         bins_a = tex_bins_angle(scores, OUT / "bins_angle_realistic.tex", label="tab:insight4-angle-realistic")
         tex_drivability(scores, OUT / "drivability_realistic.tex", label="tab:insight4-driv-realistic",
                         caption=(r"\caption[Drivability of the realistic-warehouse maps under the true footprint along their "

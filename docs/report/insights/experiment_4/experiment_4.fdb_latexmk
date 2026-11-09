@@ -1,10 +1,13 @@
 # Fdb version 3
-["pdflatex"] 1793001515 "experiment_4.tex" "experiment_4.pdf" "experiment_4" 1793001517
+["pdflatex"] 1794031145 "experiment_4.tex" "experiment_4.pdf" "experiment_4" 1794031147
   "../../final_report//../../../output/compare/rtab_map_vs_gt.png" 1788949391 288938 1902f85006f3c1df722f0a3cb42a9a1f ""
   "../../final_report//../../../output/compare/rtab_map_vs_gt_selfcheck.png" 1789651293 291043 6ff7c6c1b2f2a4923af37325b5d17d00 ""
-  "../../final_report//figures/map_realistic_01_validate.png" 1792998786 304080 70e21a38302a386f126215282cea01b8 ""
-  "../../final_report//figures/map_realistic_fit.png" 1793000511 178896 751d27364370fbff209a499a8450da61 ""
-  "../../final_report//figures/map_realistic_validate.png" 1793000511 349299 64e219150ea2153c1d41e132a668a062 ""
+  "../../final_report//figures/dataset_allsensor_realistic_01_map_validate.png" 1793976977 317580 168c90becc5329197fa3495ab16a317e ""
+  "../../final_report//figures/dataset_allsensor_realistic_map_fit.png" 1793976977 169159 cd3fc39e2c4e00b2567bb948a176b0af ""
+  "../../final_report//figures/dataset_allsensor_realistic_map_validate.png" 1793976977 343711 32a05f403f7f40f15fe566b1c1a08a34 ""
+  "../../final_report//figures/map_realistic_01_validate.png" 1793976977 304080 70e21a38302a386f126215282cea01b8 ""
+  "../../final_report//figures/map_realistic_fit.png" 1793976977 178896 751d27364370fbff209a499a8450da61 ""
+  "../../final_report//figures/map_realistic_validate.png" 1793976977 349299 64e219150ea2153c1d41e132a668a062 ""
   "../common/preamble.tex" 1792648427 3264 62aa31a458034ef5e59b2e5156cf5b32 ""
   "/etc/texmf/web2c/texmf.cnf" 1789525515 475 c0e671620eb5563b2130f56340a5fde8 ""
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
@@ -147,9 +150,9 @@
   "/usr/share/texmf/web2c/texmf.cnf" 1644012257 39432 7155514e09a3d69036fac785183a21c2 ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1789525526 165012 f177baa1c39a3ebd62c3096a43521a0d ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1789525528 1435854 f4f5f67aa9d1ba2a312ed1460dac1994 ""
-  "experiment_4.aux" 1793001516 7907 0b44a147f9488d68cdd5ec5983fc9186 "pdflatex"
-  "experiment_4.out" 1793001516 193 15d077211a6091f6ec564d80ff2672a6 "pdflatex"
-  "experiment_4.tex" 1793001513 27546 a2e8a97915ba1e5ad424750703651fb2 ""
+  "experiment_4.aux" 1794031147 9158 1627c6bc8e1a9732e0c302c6e5d350f5 "pdflatex"
+  "experiment_4.out" 1794031147 193 15d077211a6091f6ec564d80ff2672a6 "pdflatex"
+  "experiment_4.tex" 1794031119 33805 ff74819d07ede57670a9256a52b25a80 ""
   (generated)
   "experiment_4.aux"
   "experiment_4.log"

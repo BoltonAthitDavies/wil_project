@@ -4,18 +4,19 @@
 \setlength{\tabcolsep}{2pt}
 \caption[Precision and recall of the observed surfaces by distance from the recorded route (\repo{dataset_map_tiny}, the route that built \repo{map_tiny.db}; for \repo{map_02.db} the same route is only a proxy for its own, unknown route).]{Precision and recall of the observed surfaces by distance from the recorded route (\repo{dataset_map_tiny}, the route that built \repo{map_tiny.db}; for \repo{map_02.db} the same route is only a proxy for its own, unknown route). Stereo depth error grows with range, so a range effect would show as falling precision and recall with distance.}
 \label{tab:insight4-dist}
-\begin{tabular}{lrrrrrrrr}
+
+\begin{tabular}{lrrrr}
 \toprule
-Distance from route & \multicolumn{2}{c}{\repo{map_tiny} precision} & \multicolumn{2}{c}{\repo{map_tiny} recall} & \multicolumn{2}{c}{\repo{map_02} precision} & \multicolumn{2}{c}{\repo{map_02} recall} \\
-{[m]} & cells & [\si{\percent}] & cells & [\si{\percent}] & cells & [\si{\percent}] & cells & [\si{\percent}] \\
+Distance from route & \multicolumn{2}{c}{\repo{map_tiny} precision} & \multicolumn{2}{c}{\repo{map_tiny} recall} \\
+{[m]} & cells & [\si{\percent}] & cells & [\si{\percent}] \\
 \midrule
-0--1 & 819 & 97.3 & 436 & 89.0 & 723 & 90.0 & 398 & 85.7 \\
-1--2 & 3211 & 96.4 & 932 & 88.7 & 2824 & 97.1 & 872 & 85.7 \\
-2--3 & 3389 & 97.4 & 836 & 86.0 & 3023 & 91.9 & 778 & 77.6 \\
-3--4 & 3183 & 97.6 & 862 & 94.3 & 2869 & 96.2 & 816 & 86.9 \\
-4--6 & 1015 & 91.1 & 364 & 88.7 & 730 & 91.0 & 281 & 77.9 \\
-6--8 & 15 & 100.0 & 4 & 100.0 & 21 & 76.2 & 11 & 100.0 \\
-$\geq 8$ & 0 & --- & 0 & --- & 0 & --- & 0 & --- \\
+0--1 & 819 & 97.3 & 436 & 89.0 \\
+1--2 & 3211 & 96.4 & 932 & 88.7 \\
+2--3 & 3389 & 97.4 & 836 & 86.0 \\
+3--4 & 3183 & 97.6 & 862 & 94.3 \\
+4--6 & 1015 & 91.1 & 364 & 88.7 \\
+6--8 & 15 & 100.0 & 4 & 100.0 \\
+$\geq 8$ & 0 & --- & 0 & --- \\
 \bottomrule
 \end{tabular}
 \end{table}

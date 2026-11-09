@@ -1,0 +1,7 @@
+23255 occupied cells vs 23004 world edge samples
+
+  --map-pose 4.950,20.400,-179.90
+  agreement 0.252   margin over best rival >5deg away +60.2%
+  spawn of the IMU body frame (5.250, 19.657, -90.0): fit is 0.801 m, -89.90 deg away
+  naive guess, the base_footprint spawn (5.250, 19.995): 0.504 m away
+  wrote /home/ambushee/wil_project/output/compare/simulation/exp4-realistic-maps/fit_dataset_allsensor_realistic_01_map.png

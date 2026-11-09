@@ -1,0 +1,18 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption[Matched boxes against near misses.]{Matched predictions (IoU $\ge 0.5$) against near misses (best IoU in $[0.2, 0.5)$ with an unmatched truth box of the class): median IoU, box side, width-to-height ratio and score. The last columns give how many of the scorer's false negatives have a near miss standing next to them: the share of frames with at least one false negative that also hold at least one near-miss prediction, and the near-miss count against the false-negative count. Source: \path{box_shape.csv}.}
+\label{tab:e2i-shape}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrrrrrr}
+\toprule
+Recording & \multicolumn{2}{c}{IoU median} & \multicolumn{2}{c}{side [px]} & \multicolumn{2}{c}{w/h} & \multicolumn{2}{c}{score} & FN frames with \\
+ & matched & near & matched & near & matched & near & matched & near & a near miss; near/FN \\
+\midrule
+\repo{dataset_allsensor_realistic_000_4class} & 0.67 & 0.36 & 99 & 64 & 0.99 & 0.65 & 0.83 & 0.71 & 66\,\%; 3983/27461 \\
+\repo{dataset_allsensor_realistic_001_4class} & 0.65 & 0.38 & 107 & 54 & 1.18 & 0.75 & 0.81 & 0.71 & 74\,\%; 4314/24426 \\
+\repo{dataset_allsensor_realistic_002_4class} & 0.70 & 0.36 & 79 & 63 & 0.89 & 0.60 & 0.82 & 0.67 & 67\,\%; 2854/19228 \\
+\repo{dataset_allsensor_realistic_003_4class} & 0.65 & 0.41 & 97 & 59 & 1.03 & 0.67 & 0.81 & 0.70 & 73\,\%; 5082/28646 \\
+\bottomrule
+\end{tabular}}
+\end{table}

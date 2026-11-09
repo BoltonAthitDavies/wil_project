@@ -41,7 +41,7 @@ import reshuffle_bays as R
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WORLD = os.path.join(ROOT, 'aws-robomaker-small-warehouse-world', 'worlds',
-                     'small_warehouse_static', 'small_warehouse_static.world')
+                     'small_warehouse', 'small_warehouse_static.world')
 PRE = R.PRE
 
 # Collision z_max, needed only for the stack base. Everything else -- footprint,

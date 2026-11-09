@@ -11,7 +11,7 @@
 \title{Experiment 4: Where the Map Is Wrong\\
        \large Insight analysis for Chapter 4, Section 4.4}
 \author{Bolton Athit Davies}
-\date{Reporting cutoff: 26 October 2026}
+\date{Reporting cutoff: 26 October 2026; tiny-map tables regenerated 6 November 2026}
 
 \begin{document}
 \maketitle
@@ -23,11 +23,18 @@
 remaining \SI{3.4}{\percent} and \SI{10.5}{\percent} are, and whether the map's
 quality follows anything a reader would propose: range from the route, how often
 a surface was observed, the angle it was seen at, the loop-closure correction,
-the kind of object. It also opens the four unregistered databases that sit
-beside the scored one. Every number is written by \path{script/exp4_insights.py}
-into \path{output/compare/simulation/exp4-insights/}; the tables below are
-input from there unchanged. One warehouse and two maps support descriptive
-patterns, not statistics, and the document says so where it matters. Added 26
+the kind of object. It also opened, on 22 October, the four unregistered
+databases that then sat beside the scored one; those four were deleted on
+6 November 2026 with the dataset decision that keeps only \repo{map_tiny}
+of the older maps, so the tables below now carry the scored map alone and the
+second-map and provenance findings of 22 October are kept in prose as retired
+results, marked as such. Every number is written by
+\path{script/exp4_insights.py} into
+\path{output/compare/simulation/exp4-insights/}; the tables are input from
+there unchanged (regenerated 6 November on \repo{map_tiny} alone, every
+\repo{map_tiny} value identical to 22 October). One warehouse and one map
+support descriptive patterns, not statistics, and the document says so where
+it matters. Added 26
 October 2026: the same classification applied to the two realistic-warehouse
 maps of the raw write-up (Insight~6), written by the script's \repo{--realistic}
 entry into files named \repo{*_realistic.*} beside the tiny ones, which it does
@@ -42,8 +49,8 @@ not rewrite.
       of observing nodes, the viewing angle, or the object?
 \item Did the loop closures change the map's accuracy?
 \item On an independent route, where does the map block the robot, and why?
-\item What are the four unregistered databases, and which recording built the
-      scored map?
+\item What were the four unregistered databases, and which recording built
+      the scored map?
 \item Do the two realistic-warehouse maps, four times the area and built
       without loop closure, fail by the same mechanism, and what blocks the
       independent probe on them?
@@ -66,11 +73,13 @@ incidence angle of a surface is the angle between its outward normal and the
 line of sight from the nearest graph node: \SI{0}{\degree} faced head-on,
 \SI{90}{\degree} seen edge-on along its own plane.
 
-\paragraph{Second map.} \repo{map/map_02.db}, one of the unregistered
-databases, fits the tiny world as well as the scored map does (Q5) and was
-built on a different route. It is scored by the same method and used as the
-independent drivability probe that the lost \repo{dataset_static_tiny_repeat}
-reference was meant to provide.
+\paragraph{Second map (retired).} On 22 October \repo{map/map_02.db}, one
+of the unregistered databases, fitted the tiny world as well as the scored map
+(Q5), had been built on a different route, and was scored by the same method
+as the independent drivability probe that the lost
+\repo{dataset_static_tiny_repeat} reference was meant to provide. The
+database was deleted on 6 November 2026; its 22 October scores are quoted
+below as retired results and appear in no table.
 
 \FloatBarrier
 \section{Insight 1: the wrong cells are thick surfaces, not phantom obstacles}
@@ -175,25 +184,21 @@ was not drawn on.
 \section{Insight 4: on an independent route the second map blocks the robot at
          its phantom cells}
 
-Under the true footprint along the recorded route, \repo{map_02.db} blocks
-\SI{7.6}{\percent} of the poses and leaves \SI{5.5}{\percent} unmapped, and
-every blocked stretch coincides with one of its phantom clusters.
-\Cref{tab:insight4-driv,tab:insight4-blocked} and \cref{fig:cells-02} carry
-the evidence.
+\status{retired}: the database that gave this measurement was deleted on
+6 November 2026 and the result cannot be regenerated. For the record, on
+22 October \repo{map_02.db} under the true footprint along the recorded
+route blocked \SI{7.6}{\percent} of the poses and left \SI{5.5}{\percent}
+unmapped, in three stretches (poses 125--164, 922--986 and 1485--1539, with
+a short 2356--2421 stretch at \SI{0.10}{\metre} clearance), every one on a
+phantom cluster of that map. \Cref{tab:insight4-driv,tab:insight4-blocked}
+now carry the scored map alone, for which the build route is clear by
+construction; the 22 October tables and the second map's cell figure are
+kept under \repo{trash/output/exp4-insights-tiny-with-map_02_20261106/}.
 
 \ins{drivability.tex}
 \ins{blocked_segments.tex}
 
-\begin{figure}[p]
-  \centering
-  \includegraphics[width=\textwidth]{\insdir/fig_cells_map_02_light.png}
-  \caption{\repo{map_02.db}, unregistered, against the tiny world, placed by
-  its own fit; same conventions as \cref{fig:cells-tiny}. The recorded route
-  drawn is that of \repo{dataset_map_tiny}, which this map did not see.}
-  \label{fig:cells-02}
-\end{figure}
-
-This is the measurement the raw write-up could not make. The build route is
+This was the measurement the raw write-up could not make. The build route is
 drivable on the map it built by construction, since the camera cleared the
 cells the robot passed through; an independent route meets the cells the
 build route only looked at. On the second map the three blocked stretches sit
@@ -203,12 +208,12 @@ start of the east straight; the route centre comes within \SI{0.0}{\metre} to
 \SI{290}{\square\metre} floor are negligible for geometry and decisive for
 drivability when they fall in an aisle.
 
-\begin{queried}[Placement of the second map]
-\repo{map_02.db} is placed by its own grid fit (agreement 0.385, margin
-\SI{54}{\percent} over the best rival yaw), not by a known spawn. A placement
-error of a few centimetres moves the thickened wall cells but not the phantom
-clusters, so the blocked stretches stand; the per-cell precision of this map
-carries that uncertainty.
+\begin{queried}[Placement of the second map, retired]
+\repo{map_02.db} was placed by its own grid fit (agreement 0.385, margin
+\SI{54}{\percent} over the best rival yaw), not by a known spawn, so its
+per-cell precision carried that uncertainty. With the database deleted the
+placement cannot be re-examined; the retired numbers above are quoted with
+that caveat and no further.
 \end{queried}
 
 \FloatBarrier
@@ -218,76 +223,110 @@ carries that uncertainty.
 The nodes of \repo{map_tiny.db} coincide with the ground truth of
 \repo{dataset_map_tiny} at the same stamps to a median \SI{0.05}{\metre}, so
 the map was built from that recording and the write-up's self-check is a
-true self-check; and \repo{map_03.db} is a \SI{76}{\metre} run whose poses
-climb to \SI{9.8}{\metre} above the floor, the large-warehouse attempt that
-the chapter reports as having left no artefact. \Cref{tab:insight4-dbs}
-describes all five databases.
+true self-check (the identity test is regenerated: median \SI{0.05}{\metre},
+maximum \SI{0.10}{\metre}); and \repo{map_03.db} was a \SI{76}{\metre}
+run whose poses climbed to \SI{9.8}{\metre} above the floor, the
+large-warehouse attempt that the chapter reports as having left no artefact.
+\Cref{tab:insight4-dbs} now describes the scored database alone; the four
+others were described on 22 October and deleted on 6 November 2026, so what
+follows about them is retired.
 
 \ins{databases.tex}
 
-\repo{map_02.db} fits the tiny world as well as the scored map does and its
-nodes do not follow the recorded route (median \SI{4.1}{\metre} from the
-ground truth at the same stamps): it is a second map of the same world on a
-different route, made on 21 September, and the only candidate for the lost
-\repo{dataset_static_tiny_repeat} session. \repo{map_03.db} cannot be placed
-in any large world (agreement 0.19, margin \SI{7}{\percent}); its 18 nodes run
-\SI{37}{\metre} along one aisle and leave the floor, which is tracking failure,
-not mapping failure. \repo{map_01.db} and \repo{map_02_vins.db} are two-node
-starts.
+\repo{map_02.db} (38 nodes, \SI{55.3}{\mega\byte}) fitted the tiny world as
+well as the scored map and its nodes did not follow the recorded route
+(median \SI{4.1}{\metre} from the ground truth at the same stamps): a second
+map of the same world on a different route, made on 21 September, and the
+only candidate for the lost \repo{dataset_static_tiny_repeat} session.
+\repo{map_03.db} (18 nodes, \SI{29.2}{\mega\byte}) could not be placed in
+any large world (agreement 0.19, margin \SI{7}{\percent}); its nodes ran
+\SI{37}{\metre} along one aisle and left the floor, which is tracking
+failure, not mapping failure. \repo{map_01.db} and \repo{map_02_vins.db}
+were two-node starts. All four are deleted.
 
 \begin{queried}[Provenance]
-The identifications of \repo{map_02.db} and \repo{map_03.db} rest on their
-contents alone; no record names them. The raw write-up's statement that the
-scored map's node stamps match no recorded dataset is contradicted by the
-stamp-and-pose match above and should be withdrawn.
+The identifications of \repo{map_02.db} and \repo{map_03.db} rested on their
+contents alone; no record names them, and since 6 November the databases
+cannot be re-examined, so the large-warehouse attempt is again without an
+artefact. The raw write-up's statement that the scored map's node stamps
+match no recorded dataset is contradicted by the stamp-and-pose match above
+and is withdrawn.
 \end{queried}
 
 \FloatBarrier
-\section{Insight 6: on the realistic maps the shelves are thickened, the walls
-         are displaced, and the cells that block the probe were laid during
-         initialisation}
+\section{Insight 6: on the realistic maps the shelves are thickened and the
+         walls displaced; the October builds are blocked at cells laid during
+         initialisation, the November I build at cells laid in the aisles}
 
-Of the occupied cells of the two realistic maps, 13.4 and \SI{9.7}{\percent}
-are surfaces drawn too thick and 5.2 and \SI{5.3}{\percent} are phantoms,
-thirteen times the tiny map's phantom share; every probe pose that the maps
-block lies within \SI{0.6}{\metre} of a phantom cell, and 96 and
-\SI{63}{\percent} of those blocking cells were first observed by one of the
-first five graph nodes. \Cref{tab:insight4-classes-realistic} gives the split,
-\cref{fig:cells-realistic,fig:cells-realistic-01} the places, and
-\cref{tab:insight4-driv-realistic,tab:insight4-blocked-realistic} the blocked
-stretches.
+Of the occupied cells of the four realistic maps, 9.7 to \SI{15.4}{\percent}
+are surfaces drawn too thick and 5.2 to \SI{7.3}{\percent} are phantoms,
+thirteen to eighteen times the tiny map's phantom share; every probe pose the
+maps block lies within \SI{0.6}{\metre} of a phantom cell, and in three of the
+four maps 63 to \SI{96}{\percent} of those blocking cells were first observed
+by one of the first five graph nodes --- in the fourth, the November I build,
+\SI{18}{\percent} were, and the blocked stretches are mid-route.
+\Cref{tab:insight4-classes-realistic} gives the split,
+\cref{fig:cells-realistic,fig:cells-realistic-01,fig:cells-realistic-nov,fig:cells-realistic-01-nov}
+the places, and \cref{tab:insight4-driv-realistic,tab:insight4-blocked-realistic}
+the blocked stretches. The four maps are two builds of each of two mapping
+recordings; the builds differ in three back-end parameters at once
+(\repo{Rtabmap/DetectionRate} 4 against \SI{1}{\hertz}, \repo{Grid/RangeMax} 8
+against \SI{10}{\metre}, \repo{Grid/MaxGroundHeight} 0.29 against
+\SI{0.10}{\metre}; October against November), so a difference between builds is
+read for its signature, not attributed.
 
 \ins{cell_classes_realistic.tex}
 
 \begin{figure}[p]
   \centering
   \includegraphics[width=\textwidth]{\insdir/fig_cells_map_realistic_light.png}
-  \caption{\repo{map_realistic.db} against the U-layout realistic world, placed
-  by its fit; conventions as \cref{fig:cells-tiny}. The route drawn is the
-  independent probe \repo{realistic_000}, which did not build the map; the
-  graph nodes are the build route. Phantom clusters are labelled with their
-  cell count.}
+  \caption{\repo{map_realistic.db} (U, October) against the U-layout realistic
+  world, placed by its fit; conventions as \cref{fig:cells-tiny}. The route
+  drawn is the independent probe \repo{realistic_000}, which did not build the
+  map; the graph nodes are the build route. Phantom clusters are labelled with
+  their cell count.}
   \label{fig:cells-realistic}
 \end{figure}
 
 \begin{figure}[p]
   \centering
+  \includegraphics[width=\textwidth]{\insdir/fig_cells_dataset_allsensor_realistic_map_light.png}
+  \caption{\repo{dataset_allsensor_realistic_map.db} (U, November) against the
+  same world and probe. The \SI{10}{\metre} grid range reaches the west wall
+  and the outer bays, which carry new phantom clusters; the spawn stretch is
+  longer than in October.}
+  \label{fig:cells-realistic-nov}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
   \includegraphics[width=\textwidth]{\insdir/fig_cells_map_realistic_01_light.png}
-  \caption{\repo{map_realistic_01.db} against the I-layout realistic world,
-  placed by its fit; the route drawn is the probe \repo{realistic_001}.}
+  \caption{\repo{map_realistic_01.db} (I, October) against the I-layout
+  realistic world; the route drawn is the probe \repo{realistic_001}.}
   \label{fig:cells-realistic-01}
 \end{figure}
 
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=\textwidth]{\insdir/fig_cells_dataset_allsensor_realistic_01_map_light.png}
+  \caption{\repo{dataset_allsensor_realistic_01_map.db} (I, November) against
+  the same world and probe. The blocked stretches sit in the aisles of the
+  probe's left loop and along its bottom straight, on phantom cells first
+  observed mid-run.}
+  \label{fig:cells-realistic-01-nov}
+\end{figure}
+
 The thickening is the tiny map's mechanism at the shelves, and the phantoms are
-a different one at the walls. In both figures the shelf rows the build route
+a different one at the walls, in all four maps. The shelf rows the build route
 passed are green with an orange rim, surfaces spread over two or three cells as
-on the tiny map; the phantoms form a continuous red band the full length of the
-east wall about \SI{0.6}{\metre} inside its true line, and a second band along
-the south wall outside it, in both maps alike. The largest clusters, 108 and 70
-cells on the U map and 157 and 117 on the I map, all sit on that east band, 6
-to \SI{11}{\metre} from the probe route and first observed at median node 32
-and 36. The walls are the structure furthest from any build node; what moved
-them is not identified here.
+on the tiny map; the phantoms form a red band the full length of the east wall
+about \SI{0.6}{\metre} inside its true line, and a second along the south wall
+outside it. The largest clusters of the October maps, 108 and 70 cells on U and
+157 and 117 on I, all sit on that east band, 6 to \SI{11}{\metre} from the
+probe route and first observed at median node 32 and 36; the November maps add
+clusters on the south and west walls, which their longer grid range reaches.
+The walls are the structure furthest from any build node; what moved them is
+not identified here.
 
 \ins{bins_views_realistic.tex}
 \ins{bins_angle_realistic.tex}
@@ -298,76 +337,97 @@ them is not identified here.
   \includegraphics[width=\textwidth]{\insdir/fig_bins_realistic_light.png}
   \caption{Precision of the occupied cells and recall of the observed surfaces
   against distance from the independent probe route (left, a proxy only: the
-  probe did not build either map) and against the number of graph nodes that
-  observed the cell (right), for the two realistic-warehouse maps.}
+  probe did not build any map) and against the number of graph nodes that
+  observed the cell (right), for the four realistic-warehouse maps.}
   \label{fig:bins-realistic}
 \end{figure}
 
-The view-count mechanism of Insight~2 holds and is larger. Cells observed by
-one node are 66 and \SI{83}{\percent} correct, cells observed by five or more
-99 and \SI{100}{\percent}, against 91 and \SI{99}{\percent} on the tiny map;
-recall of the observed surfaces rises from 72 and \SI{76}{\percent} at one node
-to 91 and \SI{88}{\percent} at eight or more. The incidence effect also holds,
-85 and \SI{83}{\percent} head-on against 75 and \SI{78}{\percent} grazing, but
-the head-on figure is ten points below the tiny map's \SI{95}{\percent}, so
-viewing geometry explains the spread between surfaces and not the level they
-all sit at.
+The view-count mechanism of Insight~2 holds in the October builds and is
+larger: cells observed by one node are 66 and \SI{83}{\percent} correct, cells
+observed by five or more 99 and \SI{100}{\percent}, against 91 and
+\SI{99}{\percent} on the tiny map. In the November builds the curve is flatter
+below five observations (69 to \SI{87}{\percent}) and the \SI{1}{\hertz}
+detection rate gives every cell fewer observations, which is the direction the
+mechanism predicts for that parameter. The incidence effect holds in all four,
+79 to \SI{85}{\percent} head-on against 65 to \SI{78}{\percent} grazing, but
+the head-on figure is ten to sixteen points below the tiny map's
+\SI{95}{\percent}, so viewing geometry explains the spread between surfaces
+and not the level they all sit at.
 
 \ins{drivability_realistic.tex}
 \ins{blocked_realistic.tex}
 
-The probes are blocked by the phantoms, not by the thickened shelving, and the
-blocking phantoms are the oldest cells in each map. Of 134 and 213 blocked
-poses, 134 and 212 lie within \SI{0.6}{\metre} of a phantom cell and none
-within that distance of a thickened cell alone. The largest stretch on each map
-is the first metres of the probe at the spawn, 77 and 150 poses; the 77 and 41
-phantom cells under the blocked stretches have a median first-observing node
-of 1, and 96 and \SI{63}{\percent} of them were first seen by node 5 or
-earlier, against 6 and \SI{3}{\percent} of all phantom cells. The raw write-up
-records that node~1 of each database is not at identity and that its height
-settles over the first nodes, the inertial initialisation transient; the cells
-laid during that transient are the ones under the robot's starting position,
-which is where every probe begins. The remaining stretches, at the left shelf
-column on both maps and in the one-aisle gap at $x\approx10$ on the I map, sit
-on small phantom clusters laid mid-run.
+The probes are blocked by the phantoms, not by the thickened shelving, and in
+the October builds the blocking phantoms are the oldest cells in each map. Of
+134 and 213 blocked poses, 134 and 212 lie within \SI{0.6}{\metre} of a
+phantom cell and none within that distance of a thickened cell alone; the
+largest stretch on each map is the first metres of the probe at the spawn, 77
+and 150 poses; and the 77 and 41 phantom cells under the blocked stretches have
+a median first-observing node of 1, with 96 and \SI{63}{\percent} first seen by
+node 5 or earlier against 6 and \SI{3}{\percent} of all phantom cells. The raw
+write-up records that node~1 of each database is not at identity and that its
+height settles over the first nodes, the inertial initialisation transient; the
+cells laid during it are the ones under the robot's starting position, where
+every probe begins.
 
-\begin{queried}[Two rasters, one disagreement]
-The chapter's \repo{validate_map.py} reports \SI{3.8}{\percent} blocked poses
-on \repo{map_realistic}; this document's raster, whose origin is the wall ring
-rather than the union of map, route and wall, reports \SI{2.1}{\percent}. The
-difference is the spawn stretch alone: the chapter counts probe poses 0--183,
-this raster 108--184, and the route centre there has \SI{0.00}{\metre}
-clearance, so the count flips on a sub-cell offset. The other two stretches,
-\repo{map_realistic_01} in full (4.4 against \SI{4.4}{\percent}), and every
-clearance and unmapped figure agree to \SI{0.01}{\metre}. The chapter's figure
-stands as the registered one; the spawn-stretch count carries about
-\SI{1.7}{\percent} of raster sensitivity.
+The November I build is blocked by a different population. Its 518 blocked
+poses (\SI{10.7}{\percent}) include 27 within \SI{0.6}{\metre} of thickened
+cells only, the first such on any map, and the 79 phantom cells under its
+stretches have a median first-observing node of 27 with only \SI{18}{\percent}
+early; the stretches of 68, 55 and 50 poses sit in the aisles of the probe's
+left loop and on its bottom straight. A ground-height threshold lowered from
+0.29 to \SI{0.10}{\metre} admits the lowest sensed cells in the aisles as
+obstacles, which is this signature; the detection rate and grid range changed
+in the same build and are not excluded. The November U build keeps the
+October pattern (224 spawn poses, \SI{88}{\percent} of its blocking cells
+early), so the aisle population is specific to the I layout's narrower aisles,
+untested.
+
+\begin{queried}[Two rasters, three agreements and one disagreement]
+The chapter's \repo{validate_map.py} reports 3.8, 5.0, 4.4 and
+\SI{10.2}{\percent} blocked poses; this document's raster, whose origin is the
+wall ring rather than the union of map, route and wall, reports 2.1, 5.0, 4.4
+and \SI{10.7}{\percent}. The one disagreement is the October U spawn stretch,
+where the chapter counts probe poses 0--183 and this raster 108--184 at
+\SI{0.00}{\metre} clearance, so the count flips on a sub-cell offset. The
+chapter's figures stand as the registered ones.
 \end{queried}
 
 \begin{queried}[Wall displacement, untested]
-The east band is inside the wall and the south band outside it in both maps,
-which a uniform scale error would not produce; drift accumulated along the
-closure-free build route is the candidate, but no test separates it from a
+The east band is inside the wall and the south band outside it in all four
+maps, which a uniform scale error would not produce; drift accumulated along
+the closure-free build route is the candidate, but no test separates it from a
 range-dependent stereo bias at the 3 to \SI{5}{\metre} the walls were seen
-from. The build-route ground truth on the removable drive would decide it.
+from. The build-route ground truth on the rescued drive would decide it.
+\end{queried}
+
+\begin{queried}[Parameter attribution, untested]
+Each of the three parameters that changed between the builds has a signature
+consistent with the November drop, and none is isolated: a rebuild changing
+one parameter at a time is the test, and the front-end session of the November
+builds, made during the latency runs of Experiment~3, is not recorded.
 \end{queried}
 
 \FloatBarrier
 \section{What these data cannot answer}
 
 \begin{itemize}
-\item \textbf{Whether the patterns generalise.} Two maps of one small world;
-      the contrasts are descriptive. The view-count and incidence effects are
-      consistent between the two maps and with how stereo mapping works, which
-      is the reason to trust them, not a test.
-\item \textbf{The old large-warehouse attempt.} \repo{map_03.db} exists but
-      cannot be scored: no placement fits, and the pose graph left the floor.
-      The two realistic-warehouse maps of Insight~6 now stand as the large
+\item \textbf{Whether the patterns generalise.} One map of one small world;
+      the contrasts are descriptive. The view-count and incidence effects
+      agreed with the second map on 22 October and with how stereo mapping
+      works, which is the reason to trust them, not a test.
+\item \textbf{The old large-warehouse attempt.} \repo{map_03.db} existed
+      until 6 November and could not be scored: no placement fitted, and the
+      pose graph left the floor; it is deleted.
+      The four realistic-warehouse maps of Insight~6 now stand as the large
       result; whether their patterns hold under loop closure is untested,
-      because they were built without it.
-\item \textbf{Whether the second map's phantoms are typical.} Their cause is
-      not identified; they appear where the second map's own route started
-      and turned, which suggests transient depth at initialisation, untested.
+      because they were built without it, and which of three parameters
+      produced the November drop is untested, because they changed together.
+\item \textbf{Whether the second map's phantoms were typical.} Their cause
+      was not identified; they appeared where that map's own route started
+      and turned, which suggested transient depth at initialisation, the
+      mechanism Insight~6 later found on the realistic maps; the database is
+      deleted.
 \item \textbf{Distance beyond \SI{6}{\metre}.} The map reaches no further, so
       the absence of a range effect is bounded to that range.
 \end{itemize}
@@ -383,28 +443,31 @@ from. The build-route ground truth on the removable drive would decide it.
  & Answer & Evidence & Confidence \\
 \midrule
 Q1 wrong cells & Thick surfaces, not phantoms: 348 thickened against 43 phantom cells in 22 small clusters & \cref{tab:insight4-classes}, \cref{fig:cells-tiny} & high \\
-Q2 missed surfaces & Seen edge-on and once: recall 95\,\% head-on to 76\,\% grazing, 97\,\% at three nodes to 78\,\% at one; no range effect within 6\,m & \cref{tab:insight4-angle,tab:insight4-views,tab:insight4-dist} & medium, two maps \\
+Q2 missed surfaces & Seen edge-on and once: recall 95\,\% head-on to 76\,\% grazing, 97\,\% at three nodes to 78\,\% at one; no range effect within 6\,m & \cref{tab:insight4-angle,tab:insight4-views,tab:insight4-dist} & medium, one map \\
 Q3 loop closures & Corrected 0.26\,m planar and 0.52\,m vertical; map accuracy unchanged across the revisit & \cref{tab:insight4-closures} & medium \\
-Q4 independent route & Second map blocks 7.6\,\% of poses, all at its phantom clusters & \cref{tab:insight4-driv,tab:insight4-blocked} & medium, placement by fit \\
-Q5 provenance & Scored map built from \repo{dataset_map_tiny}; \repo{map_02} a second tiny map; \repo{map_03} the large attempt, unscorable & \cref{tab:insight4-dbs} & high / medium \\
-Q6 realistic maps & Shelves thickened as on the tiny map; walls displaced about 0.5\,m as phantom bands; probes blocked only at phantoms, 96\,\% / 63\,\% of them laid by node 5 & \cref{tab:insight4-classes-realistic,tab:insight4-blocked-realistic} & medium, one map per layout \\
+Q4 independent route & Retired: on 22 Oct the second map blocked 7.6\,\% of poses, all at its phantom clusters; its database is deleted & prose of Insight~4 & retired \\
+Q5 provenance & Scored map built from \repo{dataset_map_tiny} (regenerated); \repo{map_02} was a second tiny map and \repo{map_03} the large attempt, both deleted 6 Nov & \cref{tab:insight4-dbs}, prose & high / retired \\
+Q6 realistic maps & Shelves thickened as on the tiny map; walls displaced about 0.5\,m as phantom bands in all four; October builds blocked only at spawn-transient phantoms (96\,\% / 63\,\% laid by node 5), the November I build mid-route in the aisles (18\,\%); three parameters changed together & \cref{tab:insight4-classes-realistic,tab:insight4-blocked-realistic} & medium, one map per cell \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 \paragraph{Consequences for Chapter 4.} Report the map's error as surface
 thickness plus a handful of phantom cells, and the recall gap as a
-viewing-geometry effect of the route, not a sensor-range effect. Quote the
-independent-route drivability from \repo{map_02.db} on the recorded route,
-with its provenance stated, in place of the lost reference. Correct the
-statement that the scored map matches no recorded dataset. Report
-\repo{map_03.db} as the retained artefact of the large-warehouse attempt and
-its failure as tracking loss, with the database available for a future placement
-attempt. For the realistic maps, attribute the false obstacles to phantom cells
+viewing-geometry effect of the route, not a sensor-range effect. The
+independent-route drivability of 22 October can no longer be quoted: its
+database is deleted, and the chapter reports the tiny map's drivability
+reference as lost. Correct the statement that the scored map matches no
+recorded dataset. Report that a database identified from its contents as the
+large-warehouse attempt existed until 6 November and was deleted unplaced and
+unscored, so the attempt is again without an artefact and its failure stands
+as tracking loss on the progress record. For the realistic maps, attribute the false obstacles to phantom cells
 laid during initialisation and at the walls, not to thickened shelving, and
 state that discarding the cells of the first few nodes, or starting the map
 after the inertial transient has settled, is the one correction the data
-predict would remove the spawn stretch, 57 and \SI{70}{\percent} of the blocked
-poses.
+predict would remove the spawn stretch, 57 to \SI{71}{\percent} of the blocked
+poses on three of the four maps. Report the November builds as the current
+configuration scored lower on every metric, with the drop unattributed until
+one parameter is changed at a time.
 
 \end{document}

@@ -64,9 +64,10 @@ zeroed at the start. To separate heading from velocity error, the true
 velocity is integrated through the heading error alone; the ratio of that
 prediction to the actual error says how much of the error the heading
 explains. Growth rates while turning (ground-truth yaw rate above
-\SI{10}{\degree\per\second}) and on straights are compared as in the companion
-analysis of the visual arms (\path{insights/experiment_1_visual_insight/}).
-NEES is computed from the logged covariance at \SI{1}{\hertz}; the filter
+\SI{10}{\degree\per\second}) and on straights are the median growth of the
+error within the segments of each kind, the convention the translation and
+rotation error patterns of \path{output/compare/simulation/exp1-error-pattern/}
+also use. NEES is computed from the logged covariance at \SI{1}{\hertz}; the filter
 ``leaves its band'' at the first time it stays above the \SI{97.5}{\percent}
 value of a 3-DOF $\chi^2$ for \SI{5}{\second}.
 
@@ -79,9 +80,10 @@ tree names are the reverse of what they suggest and are easy to swap.
 \paragraph{Visual estimators.} VINS-Fusion and ORB-SLAM3 report the IMU,
 \SI{0.338}{\metre} ahead of the model origin, so they are scored against the
 ground truth moved to that point. The initialisation transient is cut and the
-start-anchored error, tracking regime and turning contrast of the companion
-analysis are reused. Whole-run ATE is reported both in three dimensions, as
-the chapter does, and in the plane.
+start-anchored error is taken over the tracking regime --- before the first
+impossible-speed jump and below \SI{3}{\metre} of error --- with the same
+turning contrast as the baselines. Whole-run ATE is reported both in three
+dimensions, as the chapter does, and in the plane.
 
 \FloatBarrier
 \section{Insight 1: wheel odometry's error is heading error made in the
@@ -326,8 +328,9 @@ the largest moves the estimate \SI{17.7}{\metre} in one step;
 outside tracking-OK state. The estimator did not lose the robot --- it
 confidently put it somewhere else. The same recording with the closer off
 tracks to \SI{0.06}{\metre} in the plane. This is the false closure between
-the I layout's repeated aisles that the companion analysis reaches
-independently from the loop-closure logs, and it is the single reason
+the I layout's repeated aisles that the chapter's loop-closer analysis reaches
+independently from each run's \repo{loop_closing.csv}, and it is the single
+reason
 ORB-SLAM3's accuracy table has an outlier on that recording.
 
 Turning and feature count explain nothing here. The visual arms' drift rates

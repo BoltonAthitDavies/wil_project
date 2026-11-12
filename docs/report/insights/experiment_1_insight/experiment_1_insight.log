@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  12 NOV 2026 17:24
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  12 NOV 2026 17:44
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -779,44 +779,42 @@ LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <5> not available
 )
 (../../../../output/compare/simulation/exp1-insights/turning.tex)
 <../../../../output/compare/simulation/exp1-insights/fig_decomposition_light.pn
-g, id=55, 1084.05pt x 578.16pt>
+g, id=54, 1084.05pt x 578.16pt>
 File: ../../../../output/compare/simulation/exp1-insights/fig_decomposition_lig
 ht.png Graphic file (type png)
 <use ../../../../output/compare/simulation/exp1-insights/fig_decomposition_ligh
 t.png>
 Package pdftex.def Info: ../../../../output/compare/simulation/exp1-insights/fi
-g_decomposition_light.png  used on input line 100.
+g_decomposition_light.png  used on input line 102.
 (pdftex.def)             Requested size: 455.24411pt x 242.79907pt.
- [2] [3]
-[4 <../../../../output/compare/simulation/exp1-insights/fig_decomposition_light
-.png>] (../../../../output/compare/simulation/exp1-insights/imu_law.tex)
+ [2] [3 <../../../../output/compare/simulation/exp1-insights/fig_decomposition_
+light.png>]
+(../../../../output/compare/simulation/exp1-insights/imu_law.tex)
 <../../../../output/compare/simulation/exp1-insights/fig_imu_law_light.png, id=
-81, 722.7pt x 289.08pt>
+76, 722.7pt x 289.08pt>
 File: ../../../../output/compare/simulation/exp1-insights/fig_imu_law_light.png
  Graphic file (type png)
 <use ../../../../output/compare/simulation/exp1-insights/fig_imu_law_light.png>
 
 Package pdftex.def Info: ../../../../output/compare/simulation/exp1-insights/fi
-g_imu_law_light.png  used on input line 150.
+g_imu_law_light.png  used on input line 152.
 (pdftex.def)             Requested size: 455.24411pt x 182.0993pt.
-
-[5
-
- <../../../../output/compare/simulation/exp1-insights/fig_imu_law_light.png>] (
-../../../../output/compare/simulation/exp1-insights/nees_timing.tex)
-<../../../../output/compare/simulation/exp1-insights/fig_nees_light.png, id=97,
+ [4 <../../../../output/compare/simulation/exp1-insights/fig_imu_law_light.png>
+]
+(../../../../output/compare/simulation/exp1-insights/nees_timing.tex)
+<../../../../output/compare/simulation/exp1-insights/fig_nees_light.png, id=91,
  1084.05pt x 260.172pt>
 File: ../../../../output/compare/simulation/exp1-insights/fig_nees_light.png Gr
 aphic file (type png)
 <use ../../../../output/compare/simulation/exp1-insights/fig_nees_light.png>
 Package pdftex.def Info: ../../../../output/compare/simulation/exp1-insights/fi
-g_nees_light.png  used on input line 199.
+g_nees_light.png  used on input line 201.
 (pdftex.def)             Requested size: 455.24411pt x 109.25957pt.
-
+ [5 <../../../../output/compare/simulation/exp1-insights/fig_nees_light.png>]
 ! Missing $ inserted.
 <inserted text> 
                 $
-l.227 ...heel odometry's uniform \num{\approx 1.0}
+l.229 ...heel odometry's uniform \num{\approx 1.0}
                                                   , so part of
 I've inserted a begin-math/end-math symbol since I think
 you left one out. Proceed, with fingers crossed.
@@ -824,7 +822,7 @@ you left one out. Proceed, with fingers crossed.
 ! Missing $ inserted.
 <inserted text> 
                 $
-l.227 ...heel odometry's uniform \num{\approx 1.0}
+l.229 ...heel odometry's uniform \num{\approx 1.0}
                                                   , so part of
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -832,31 +830,30 @@ With luck, this will get me unwedged. But if you
 really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
-[6 <../../../../output/compare/simulation/exp1-insights/fig_nees_light.png>]
 (../../../../output/compare/simulation/exp1-insights/visual.tex)
 <../../../../output/compare/simulation/exp1-insights/fig_orb_failure_light.png,
- id=112, 722.7pt x 303.534pt>
+ id=107, 722.7pt x 303.534pt>
 File: ../../../../output/compare/simulation/exp1-insights/fig_orb_failure_light
 .png Graphic file (type png)
 <use ../../../../output/compare/simulation/exp1-insights/fig_orb_failure_light.
 png>
 Package pdftex.def Info: ../../../../output/compare/simulation/exp1-insights/fi
-g_orb_failure_light.png  used on input line 286.
+g_orb_failure_light.png  used on input line 288.
 (pdftex.def)             Requested size: 455.24411pt x 191.20427pt.
- [7] [8 <../../../../output/compare/simulation/exp1-insights/fig_orb_failure_li
+ [6] [7 <../../../../output/compare/simulation/exp1-insights/fig_orb_failure_li
 ght.png>]
-[9] [10] (./experiment_1_insight.aux)
+[8] [9] (./experiment_1_insight.aux)
 Package rerunfilecheck Info: File `experiment_1_insight.out' has not changed.
 (rerunfilecheck)             Checksum: B591A0E4C0ACE1BC756C266C9D9504D1;3103.
  ) 
 Here is how much of TeX's memory you used:
- 20635 strings out of 480171
- 393095 string characters out of 5894489
+ 20628 strings out of 480171
+ 393043 string characters out of 5894489
  707752 words of memory out of 5000000
  37856 multiletter control sequences out of 15000+600000
- 561922 words of font info for 386 fonts, out of 8000000 for 9000
+ 561665 words of font info for 382 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
- 76i,15n,82p,1017b,923s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 76i,15n,82p,1017b,960s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
 e/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texm
 f-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/
@@ -866,10 +863,10 @@ bol/usyr.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/symbol/usyr.pfb></u
 sr/share/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texliv
 e/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fo
 nts/type1/urw/times/utmri8a.pfb>
-Output written on experiment_1_insight.pdf (10 pages, 721404 bytes).
+Output written on experiment_1_insight.pdf (9 pages, 722711 bytes).
 PDF statistics:
- 200 PDF objects out of 1000 (max. 8388607)
- 160 compressed objects within 2 object streams
- 49 named destinations out of 1000 (max. 500000)
+ 195 PDF objects out of 1000 (max. 8388607)
+ 156 compressed objects within 2 object streams
+ 48 named destinations out of 1000 (max. 500000)
  102997 words of extra memory for PDF output out of 106986 (max. 10000000)
 

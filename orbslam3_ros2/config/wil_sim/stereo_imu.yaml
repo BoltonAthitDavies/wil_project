@@ -42,8 +42,10 @@ File.version: "1.0"
 # CAUTION: 0 disables place recognition, loop closure AND map merging together.
 # dataset_dynamic_nofloortexture_02_000 logged a genuine merge, so that sequence
 # is not a like-for-like comparison. Restore stock behaviour with 1.
+LocalMapping.initWithBacklog: 1    # 0 = upstream: initialise only with an empty keyframe queue
+LocalMapping.resetOnLowMotion: 0   # 1 = upstream: reset the map on <2 cm keyframe spacing within 10 s
 loopClosing: 0
-ORBextractor.useGPU: 0
+ORBextractor.useGPU: 1
 # System.SaveAtlasToFile: "warehouse_map_realistic_01_v1p5"
 # System.LoadAtlasFromFile: "warehouse_map_realistic"
 

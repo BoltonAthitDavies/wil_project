@@ -55,6 +55,14 @@ bt_navigator:
 controller_server:
   ros__parameters:
     use_sim_time: true
+    # Nav2's own stock params do not list odom_topic under controller_server, so
+    # it silently keeps its default of /odom -- and nothing publishes /odom in
+    # this chain, because ground_truth_localization is exactly what the SLAM
+    # stack replaces. The controller's velocity feedback therefore never arrived.
+    # Found 11 Nov 2026 by enumerating the running stack: controller_server was
+    # subscribing /odom with no publisher. It IS settable here; verified by
+    # re-running the stack and seeing the subscription move.
+    odom_topic: /orbslam3/odometry
     controller_frequency: 20.0
     min_x_velocity_threshold: 0.001
     min_y_velocity_threshold: 0.50

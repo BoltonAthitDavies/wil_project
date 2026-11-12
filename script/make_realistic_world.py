@@ -1089,7 +1089,6 @@ def plot(path, report=False):
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
     from matplotlib.patches import Rectangle
-    import csv, glob
     colours = {'receiving staging': '#4C72B0', 'dispatch staging': '#DD8452',
                'pick faces': '#55A868', 'storage (medium)': '#8172B3', 'picking': '#64B5CD',
                'packing': '#CCB974', 'block storage': '#937860', 'MHE charging': '#DA8BC3',
@@ -1127,10 +1126,6 @@ def plot(path, report=False):
         for i, (secs, yaw) in h[5].items():
             ax.plot(route[i][0], route[i][1], 'o', color=col, ms=3.5)
         ax.plot(route[0][0], route[0][1], 'o', mfc='white', mec=col, ms=6)
-    for f in sorted(glob.glob(os.path.join(GT_DIR, 'dataset_dynamic_*.csv')))[:1]:
-        pts = [(float(r[1]), float(r[2])) for r in csv.reader(open(f))]
-        ax.plot([p[0] for p in pts], [p[1] for p in pts], color='k', lw=0.8, alpha=0.5,
-                label='recorded teleop route (dyn_00_000)')
     ax.plot(5.25, 20, 'k^', ms=8, label='robot spawn')
     for txt, (x, y) in LAYOUTS[LAYOUT]['labels'].items():
         ax.text(x, y, txt, ha='center', va='center', fontsize=fs + 1,

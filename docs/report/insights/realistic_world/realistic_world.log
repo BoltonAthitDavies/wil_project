@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  22 OCT 2026 14:46
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  12 NOV 2026 15:48
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -775,27 +775,27 @@ eld fixed: the [][] shell, the plain
 [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
-<../../final_report//figures/plan_realistic_u.png, id=46, 723.6636pt x 745.3446
+<../../final_report//figures/plan_realistic_u.png, id=46, 723.6636pt x 744.8628
 pt>
 File: ../../final_report//figures/plan_realistic_u.png Graphic file (type png)
 <use ../../final_report//figures/plan_realistic_u.png>
 Package pdftex.def Info: ../../final_report//figures/plan_realistic_u.png  used
  on input line 76.
-(pdftex.def)             Requested size: 418.82375pt x 431.36758pt.
-<../../final_report//figures/plan_realistic_i.png, id=48, 714.5094pt x 791.1156
+(pdftex.def)             Requested size: 418.82375pt x 431.08875pt.
+<../../final_report//figures/plan_realistic_i.png, id=48, 714.5094pt x 790.6338
 pt>
 File: ../../final_report//figures/plan_realistic_i.png Graphic file (type png)
 <use ../../final_report//figures/plan_realistic_i.png>
 Package pdftex.def Info: ../../final_report//figures/plan_realistic_i.png  used
- on input line 91.
-(pdftex.def)             Requested size: 400.61703pt x 443.56493pt.
+ on input line 89.
+(pdftex.def)             Requested size: 400.61703pt x 443.29478pt.
 <../../final_report//figures/warehouse_realistic_u.png, id=49, 847.165pt x 847.
 165pt>
 File: ../../final_report//figures/warehouse_realistic_u.png Graphic file (type 
 png)
 <use ../../final_report//figures/warehouse_realistic_u.png>
 Package pdftex.def Info: ../../final_report//figures/warehouse_realistic_u.png 
- used on input line 138.
+ used on input line 135.
 (pdftex.def)             Requested size: 218.51521pt x 218.51259pt.
 <../../final_report//figures/warehouse_realistic_i.png, id=50, 847.165pt x 847.
 165pt>
@@ -803,7 +803,7 @@ File: ../../final_report//figures/warehouse_realistic_i.png Graphic file (type
 png)
 <use ../../final_report//figures/warehouse_realistic_i.png>
 Package pdftex.def Info: ../../final_report//figures/warehouse_realistic_i.png 
- used on input line 143.
+ used on input line 140.
 (pdftex.def)             Requested size: 218.51521pt x 218.51259pt.
  [2] [3 <../../final_report//figures/plan_realistic_u.png>] [4 <../../final_rep
 ort//figures/plan_realistic_i.png>] [5 <../../final_report//figures/warehouse_r
@@ -815,7 +815,7 @@ File: ../../final_report//figures/scene_allsensor_realistic_000.png Graphic fil
 e (type png)
 <use ../../final_report//figures/scene_allsensor_realistic_000.png>
 Package pdftex.def Info: ../../final_report//figures/scene_allsensor_realistic_
-000.png  used on input line 245.
+000.png  used on input line 242.
 (pdftex.def)             Requested size: 218.51521pt x 216.95355pt.
 <../../final_report//figures/scene_allsensor_realistic_001.png, id=82, 845.1575
 pt x 839.135pt>
@@ -823,7 +823,7 @@ File: ../../final_report//figures/scene_allsensor_realistic_001.png Graphic fil
 e (type png)
 <use ../../final_report//figures/scene_allsensor_realistic_001.png>
 Package pdftex.def Info: ../../final_report//figures/scene_allsensor_realistic_
-001.png  used on input line 249.
+001.png  used on input line 246.
 (pdftex.def)             Requested size: 218.51521pt x 216.95355pt.
 <../../final_report//figures/scene_allsensor_realistic_002.png, id=83, 845.1575
 pt x 839.135pt>
@@ -831,7 +831,7 @@ File: ../../final_report//figures/scene_allsensor_realistic_002.png Graphic fil
 e (type png)
 <use ../../final_report//figures/scene_allsensor_realistic_002.png>
 Package pdftex.def Info: ../../final_report//figures/scene_allsensor_realistic_
-002.png  used on input line 253.
+002.png  used on input line 250.
 (pdftex.def)             Requested size: 218.51521pt x 216.95355pt.
 <../../final_report//figures/scene_allsensor_realistic_003.png, id=84, 845.1575
 pt x 839.135pt>
@@ -839,14 +839,14 @@ File: ../../final_report//figures/scene_allsensor_realistic_003.png Graphic fil
 e (type png)
 <use ../../final_report//figures/scene_allsensor_realistic_003.png>
 Package pdftex.def Info: ../../final_report//figures/scene_allsensor_realistic_
-003.png  used on input line 257.
+003.png  used on input line 254.
 (pdftex.def)             Requested size: 218.51521pt x 216.95355pt.
  [6]
 [7 <../../final_report//figures/scene_allsensor_realistic_000.png (PNG copy)> <
 ../../final_report//figures/scene_allsensor_realistic_001.png (PNG copy)> <../.
 ./final_report//figures/scene_allsensor_realistic_002.png (PNG copy)> <../../fi
 nal_report//figures/scene_allsensor_realistic_003.png (PNG copy)>]
-Underfull \hbox (badness 10000) in paragraph at lines 331--338
+Underfull \hbox (badness 10000) in paragraph at lines 328--335
 \T1/pcr/m/n/10.95 vins / simulation / dataset _ allsensor _ realistic _ 00* / g
 round _ truth . csv$\T1/ptm/m/n/10.95 (+20) ; the
  []
@@ -856,11 +856,11 @@ Package rerunfilecheck Info: File `realistic_world.out' has not changed.
 (rerunfilecheck)             Checksum: DEFE984B21B07B0EE9578134F577408E;1127.
  ) 
 Here is how much of TeX's memory you used:
- 20470 strings out of 480171
- 391245 string characters out of 5894489
+ 20473 strings out of 480171
+ 391280 string characters out of 5894489
  695737 words of memory out of 5000000
- 37835 multiletter control sequences out of 15000+600000
- 540660 words of font info for 299 fonts, out of 8000000 for 9000
+ 37836 multiletter control sequences out of 15000+600000
+ 540724 words of font info for 300 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
  76i,12n,82p,1012b,836s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
@@ -870,7 +870,7 @@ fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/
 type1/urw/courier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/tim
 es/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb><
 /usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on realistic_world.pdf (8 pages, 489250 bytes).
+Output written on realistic_world.pdf (8 pages, 457977 bytes).
 PDF statistics:
  143 PDF objects out of 1000 (max. 8388607)
  107 compressed objects within 2 object streams

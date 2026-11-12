@@ -137,6 +137,22 @@ def in_table(text, pos):
     return depth > 0
 
 
+def caption_around(text, pos):
+    """(open_brace, close_brace) of the \\caption whose body contains pos, or None.
+
+    A \\flag inside a table's caption is NOT a table row. Treating it as one made
+    row_around() scan from the previous "\\\\" to the next one, which in a caption
+    runs past \\end{table} and swallowed the following float's \\caption, emitting a
+    bare \\caption into the concerns document ("\\caption outside float").
+    """
+    for m in re.finditer(r'\\caption(\[[^\]]*\])?\{', text):
+        o = m.end() - 1
+        c = match_brace(text, o)
+        if o < pos < c:
+            return o, c
+    return None
+
+
 def row_around(text, start, end):
     """The table row containing a span, as readable text."""
     lo = text.rfind('\\\\', 0, start)
@@ -221,6 +237,17 @@ def harvest(path):
             continue  # already inside a queried block
         end = match_brace(text, m.end() - 1)
         sec, sub = context_of(m.start(), heads)
+        cap = caption_around(text, m.start())
+        if cap is not None:
+            # quote the sentence inside the caption, never the caption command
+            o, c = cap
+            body = text[o + 1:c - 1]
+            b, span, a = sentence_around(body, m.start() - (o + 1), end - (o + 1))
+            if not (balanced(b) and balanced(a)):
+                b, a = '', ''
+            items.append(dict(kind='inline', label=None, sec=sec, sub=sub,
+                              before=clean(b), span=clean(span), after=clean(a), pos=m.start()))
+            continue
         if in_table(text, m.start()):
             items.append(dict(kind='row', label=None, sec=sec, sub=sub,
                               before='', span=clean(row_around(text, m.start(), end)),
@@ -230,7 +257,7 @@ def harvest(path):
         if not (balanced(before) and balanced(after)):
             before, after = '', ''   # keep the flag, drop unsafe context
         items.append(dict(kind='inline', label=None, sec=sec, sub=sub,
-                          before=clean(before), span=span,
+                          before=clean(before), span=clean(span),
                           after=clean(after), pos=m.start()))
 
     items.sort(key=lambda d: d['pos'])

@@ -57,6 +57,20 @@ def metrics(d, system):
     return entries[0] if entries else {}
 
 
+def pct_of_path(m):
+    """Aligned ATE as a percentage of the ground-truth path length.
+
+    These routes are 21-23 m against the simulation's 103-172 m, so the
+    absolute metre figure cannot be set beside the simulated one; this column
+    is what makes the two comparable in sec:sim-vs-real.  It is a plain ratio,
+    not a KITTI-style sub-sequence drift rate.
+    """
+    ate, path = m.get("ate_rmse"), m.get("gt_path_m")
+    if ate is None or not path or not np.isfinite(ate):
+        return "---"
+    return "%.2f" % (100.0 * float(ate) / float(path))
+
+
 def manifest(d):
     return json.load(open(d / "manifest.json"))
 
@@ -203,6 +217,9 @@ def levelled():
          r"with the bags on the dataset drive (wheel-speed time offsets) and the two frame repairs of "
          r"\repo{script/eval_real_gt.py}: the poses written before each IMU initialisation rotated into the frame "
          r"used after it (\texttt{--join-imu-init}), and each map's fitted plane levelled (\texttt{--level-plane}). "
+         r"These are the runs made under \emph{stock} initialisation on 3 November 2026; the re-runs with fork "
+         r"patch 15 of the patched real-robot results table need neither repair, and this table is the comparison they are "
+         r"set against. "
          r"``IMU'' is the share of tracked frames with the IMU initialised; ``resets'' the active-map resets after "
          r"the first pose, in seconds (a reset restarts the position at the origin and is not stitched; those "
          r"inside the route are tracking losses); ``tilt'' the plane tilt of the raw log, zero after the repair in "
@@ -210,10 +227,14 @@ def levelled():
          r"rules (``partial'' = a reset or loss the run recovered from). Lever arm unmeasured (zero); VINS-Fusion "
          r"diverged on all three (\cref{tab:realv7-vins}) and is omitted. \textbf{Bold} marks the lowest ATE "
          r"among the four configurations of a recording; with one run per configuration that records which run "
-         r"came lowest, not that the configuration is better.}",
+         r"came lowest, not that the configuration is better. ``ATE/path'' is the aligned ATE as a percentage of "
+         r"the ground-truth path length, the same ratio as in the simulation accuracy table, so that these "
+         r"\SIrange{21}{23}{\metre} routes can be set beside the simulation's "
+         r"\SIrange{103}{172}{\metre} ones; it is a ratio, not a sub-sequence drift rate.}",
          r"\label{tab:realv7-results}",
-         r"\begin{tabular}{llrlrrrrrl}", r"\toprule",
-         r"Recording & Run & IMU [\%] & resets [s] & tilt [\si{\degree}] & ATE [m] & median [m] & RPE$_{1\,\mathrm{s}}$ [m] & path ratio & status \\", r"\midrule"]
+         r"\resizebox{\textwidth}{!}{%",
+         r"\begin{tabular}{llrlrrrrrrl}", r"\toprule",
+         r"Recording & Run & IMU [\%] & resets [s] & tilt [\si{\degree}] & ATE [m] & ATE/path [\si{\percent}] & median [m] & RPE$_{1\,\mathrm{s}}$ [m] & path ratio & status \\", r"\midrule"]
     orb = [r for r in rows if r["sysk"] == "ORB"]
     bestate = {}
     for ds in {r["ds"] for r in orb}:
@@ -239,9 +260,9 @@ def levelled():
         if _b is not None and m.get("ate_rmse") is not None and np.isfinite(m["ate_rmse"]) and abs(m["ate_rmse"] - _b) < 1e-9:
             atetxt = r"\textbf{" + atetxt + "}"
         L.append(f"\\repo{{{r['ds'][8:]}}} & {r['label']} & {num(100 * frac, 0) if frac is not None else '---'} & {rtxt} & "
-                 f"{num(m.get('tilt_before_deg'), 0)} & {atetxt} & {num(m['ate_median'])} & "
+                 f"{num(m.get('tilt_before_deg'), 0)} & {atetxt} & {pct_of_path(m)} & {num(m['ate_median'])} & "
                  f"{num(m.get('rpe1_trans_rmse'))} & {num(m['path_ratio'])} & {status} \\\\")
-    L += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
+    L += [r"\bottomrule", r"\end{tabular}}", r"\end{table}"]
     (OUT / "results_table.tex").write_text("\n".join(L) + "\n")
 
     # ---- path grid after the repair: 3 recordings x 4 ORB runs

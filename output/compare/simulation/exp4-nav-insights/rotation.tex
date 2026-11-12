@@ -1,0 +1,18 @@
+\begin{table}[htbp]
+\centering\small
+\caption{Heading error against ground truth, degrees. The first sample after the first fix is excluded: it carries the correction still settling and held both runs' apparent 160-degree maxima. ``In exc.'' is the median while the position error is over \SI{1}{\metre}, ``out'' while it is not, and $r$ their correlation.}
+\label{tab:insight4nav-rotation}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+Run & Med. & p95 & Max & Bias & Straight & Turning & In exc. & $r$ \\
+\midrule
+U static straight & 0.37 & 0.92 & 1.56 & +0.26 & 0.37 & 0.48 & -- & 0.04 \\
+U static square & 0.76 & 2.65 & 22.93 & -1.29 & 0.81 & 0.65 & 1.99 & 0.40 \\
+U static figure-8 & 0.48 & 11.59 & 14.93 & +2.23 & 0.40 & 0.98 & 11.02 & 0.97 \\
+I static straight & 0.86 & 2.99 & 3.37 & -0.93 & 1.12 & 0.69 & -- & 0.01 \\
+I static square & 1.12 & 3.05 & 3.57 & -1.04 & 1.47 & 0.78 & -- & -0.27 \\
+I static figure-8 & 0.71 & 3.53 & 163.29 & +4.17 & 0.51 & 1.51 & -- & 0.61 \\
+U dynamic straight & 4.85 & 5.26 & 5.78 & +3.35 & 4.85 & 5.23 & 4.87 & 0.63 \\
+\bottomrule
+\end{tabular}
+\end{table}

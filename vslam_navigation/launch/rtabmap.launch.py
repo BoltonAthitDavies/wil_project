@@ -56,7 +56,7 @@ RVIZ_CFG = os.path.join(get_package_share_directory(_PKG), 'rviz', 'rtab_map.rvi
 CONFIG_DIR = os.path.join(WORKSPACE, 'vins_fusion_ros2', 'config', 'wil_sim')
 
 
-def _mode_params(mode, read_only):
+def _mode_params(mode, read_only, start_pose='origin'):
     """The ~6 parameters that separate the three modes.
 
     Everything else in the node is shared, and the shared block is where the
@@ -92,16 +92,31 @@ def _mode_params(mode, read_only):
         'Mem/InitWMWithAllNodes': 'true',
         # Publish the grid stored in the database rather than re-assembling it.
         'use_saved_map': True,
-        # Do NOT assume we restart at the map origin. Without ground truth the
-        # origin is wherever the mapping run's front-end initialised, which is not
-        # where this run starts. false = restart from the last saved localization
-        # pose, and appearance-based relocalization corrects from there.
-        'RGBD/StartAtOrigin': 'false',
-        # Anti-teleport. A warehouse is rows of near-identical shelf bays, which is
-        # the worst case for perceptual aliasing; this cache is what verifies a
-        # candidate against recent odometry instead of accepting any similar-looking
-        # place (Parameters.h:403).
-        'RGBD/MaxOdomCacheSize': '10',
+        # WHERE THE RUN IS ASSUMED TO START. Default 'origin' (user constraint,
+        # 11 Nov 2026: the robot is returned to its spawn point before every
+        # relocalisation run), which is the right seed here for two measured
+        # reasons.
+        #
+        # First, the seed IS the spawn point on these priors. RTAB-Map logs what
+        # it does here -- "last localization pose is ignored
+        # (RGBD/StartAtOrigin=true), assuming we start at the first node of the
+        # map" -- so the seed is node 1, not the map frame's identity. Both
+        # mapping recordings begin at the same spawn pose and node 1 is added
+        # 0.8-1.2 s in, by which time the robot has moved 0.000 m on the U layout
+        # and 0.051 m on the I layout. The seed is therefore the spawn pose to
+        # within 5 cm. (The map frame's identity is a further 0.26 m away, being
+        # where the front end initialised; it is not what this parameter uses.)
+        #
+        # Second, 'false' is actively bad here, which was not obvious. We set
+        # Mem/LocalizationReadOnly below, and RTAB-Map documents that the last
+        # localisation pose is then never written back, so the run restarts from
+        # the pose stored in the database -- wherever the 300 s MAPPING run
+        # finished, metres away and in the wrong aisle. The appearance-based
+        # relocaliser has to recover from there before any pose is usable.
+        #
+        # Set start_pose:=last to restore the old behaviour, or give six numbers
+        # "x y z roll pitch yaw" to seed an explicit pose in the map frame.
+        'RGBD/StartAtOrigin': 'true' if start_pose == 'origin' else 'false',
         # Turns on the LocalizationStatus diagnostic, which only runs when
         # Mem/IncrementalMemory is false. Gives a one-line pass/fail on
         # /diagnostics instead of eyeballing covariances.
@@ -179,6 +194,66 @@ def _loop_closure_params(enabled):
     }
 
 
+def _geometric_check_params(enabled, correspondence_ratio, max_rotation):
+    """Verify an accepted loop closure against the 3-D structure, not just the 2-D
+    features that proposed it.
+
+    Reg/Strategy is 0 (Vis) by RTAB-Map default and this launch never set it, so
+    every closure in the twelve sweep runs of 11-12 Nov 2026 was accepted on
+    feature correspondences alone -- twenty PnP inliers at 2 px reprojection
+    error -- and the depth stored against all 148 prior nodes was never consulted.
+
+    WHY THIS IS A DIFFERENT TEST from everything else in the sweep. RGBD/
+    OptimizeMaxError and RGBD/MaxOdomCacheSize both judge the GRAPH RESIDUAL, and
+    the odometry links in that graph are relative: rotating and translating the
+    whole cached chain rigidly leaves their residual near zero, so a wrong
+    placement of the entire window is invisible to them. That is why cache size
+    was inert (and harmful at 20/30) and why the threshold only halved the warp
+    rate. Structural agreement is an ABSOLUTE constraint and has no such null
+    space -- it asks whether the racks in view line up with the racks the map
+    puts there.
+
+    WHY IT SHOULD WORK HERE. The rotational error of four false fixes, each
+    measured against the correct correction that replaced it:
+        sweep_B2   73.6 deg -> 0.3 deg      73 deg error
+        sweep_B3 -138.6 deg -> 4.0 deg     143 deg
+        sweep_A3   22.8 deg -> -0.4 deg     23 deg
+        sweep_A2  -24.2 deg -> -0.5 deg     24 deg
+    An aisle grid is symmetric at 0 and 180 deg and under aisle-pitch
+    translations. None of those four is a symmetry, so the structure cannot
+    agree: ICP either fails the correspondence ratio or needs a correction past
+    Icp/MaxRotation, and the closure is rejected either way.
+
+    WHAT IT CANNOT DO. A true 180 deg flip, or a translation by exactly one aisle
+    pitch, IS a symmetry, and over one local cloud the geometry genuinely agrees.
+    Expect the 23/24/73 deg class to go and a residue near 180 deg to survive
+    (B2's 143 and H1's 177 are in that grey zone). Bounding WHERE a match may
+    come from (proximity-only) or HOW FAST the pose may change (an innovation
+    gate) is what finishes those; the three compose rather than compete.
+
+    COST. There are no laser scans in the prior -- 148 nodes with image, depth
+    and calibration -- so this runs ICP on the depth cloud per candidate closure,
+    on a laptop that throttles at 90 C. Expect CPU up and the acceptance rate
+    down.
+    """
+    if not enabled:
+        return {}
+    return {
+        'Reg/Strategy': '2',                 # Vis to propose, ICP to verify
+        'Icp/CorrespondenceRatio': correspondence_ratio,
+        'Icp/MaxRotation': max_rotation,
+        # RAISED from RTAB-Map's 0.2 m, deliberately. 0.2 is tight enough to
+        # reject an honest closure that needs a modest refinement, which would
+        # starve acceptance the way odom_cache_size 20/30 did.
+        'Icp/MaxTranslation': '0.5',
+        # Stereo depth is noisy at warehouse range, so plane normals estimated
+        # from it are unreliable and 0.05 m correspondences find nothing.
+        'Icp/PointToPlane': 'false',
+        'Icp/MaxCorrespondenceDistance': '0.3',
+        'Icp/VoxelSize': '0.1',
+    }
+
+
 def launch_setup(context, *args, **kwargs):
     mode = LaunchConfiguration('mode').perform(context).lower()
     if mode not in ('construct', 'extend', 'localize'):
@@ -187,6 +262,28 @@ def launch_setup(context, *args, **kwargs):
     camera_model = LaunchConfiguration('camera_model').perform(context).lower()
     if camera_model not in ('pinhole', 'fisheye'):
         raise RuntimeError(f"camera_model must be pinhole|fisheye, got {camera_model!r}")
+
+    # start_pose: 'origin' (the spawn point, the default), 'last' (the pose left
+    # in the database), or six numbers "x y z roll pitch yaw" in the MAP frame.
+    # RTAB-Map applies both mechanisms in localization mode only, so asking for a
+    # seed while building or extending a map is refused rather than ignored.
+    start_pose = LaunchConfiguration('start_pose').perform(context).strip().lower()
+    initial_pose = ''
+    if start_pose not in ('origin', 'last'):
+        parts = start_pose.replace(',', ' ').split()
+        if len(parts) != 6:
+            raise RuntimeError(
+                f"start_pose must be 'origin', 'last', or six numbers "
+                f'"x y z roll pitch yaw"; got {start_pose!r}')
+        try:
+            [float(v) for v in parts]
+        except ValueError:
+            raise RuntimeError(f'start_pose is not six numbers: {start_pose!r}')
+        initial_pose = ' '.join(parts)
+    if mode != 'localize' and start_pose != 'origin':
+        raise RuntimeError(
+            f"start_pose:={start_pose!r} applies to mode:=localize only "
+            f'(RTAB-Map ignores it while building or extending a map), got mode {mode!r}')
     odom_frame = LaunchConfiguration('odom_frame').perform(context)
     body_frame = LaunchConfiguration('body_frame').perform(context)
     # frontend:=orb|vins picks the frame pair the front end broadcasts, so the
@@ -222,13 +319,49 @@ def launch_setup(context, *args, **kwargs):
         'base_link' if publish_base_tf else body_frame)
     ground_height = LaunchConfiguration('ground_height').perform(context)
     optimize_max_error = LaunchConfiguration('optimize_max_error').perform(context)
+    min_inliers = LaunchConfiguration('min_inliers').perform(context)
+    min_inliers_distribution = LaunchConfiguration('min_inliers_distribution').perform(context)
+    odom_cache_size = LaunchConfiguration('odom_cache_size').perform(context)
+    geometric_check = LaunchConfiguration('geometric_check').perform(context).lower() \
+        in ('true', '1', 'yes')
+    icp_correspondence_ratio = LaunchConfiguration('icp_correspondence_ratio').perform(context)
+    icp_max_rotation = LaunchConfiguration('icp_max_rotation').perform(context)
+    estimation_type = LaunchConfiguration('estimation_type').perform(context)
+    vis_inlier_distance = LaunchConfiguration('vis_inlier_distance').perform(context)
+    gen_scan = LaunchConfiguration('gen_scan').perform(context).lower() \
+        in ('true', '1', 'yes')
+    localize_delay_s = float(LaunchConfiguration('localize_delay_s').perform(context))
     loop_closure = LaunchConfiguration('loop_closure').perform(context).lower() in (
         'true', '1', 'yes')
-    if mode == 'localize' and not loop_closure:
+
+    # relocalize:=false is DEAD RECKONING ON A PRIOR MAP: hold the pose at the
+    # seed composed with the front end's odometry, serve the prior's grid, and
+    # never correct. Asked for 11 Nov 2026 ("just using the initial pose and
+    # vslam pose"). It is the same mechanism as loop_closure:=false -- the
+    # appearance detector's threshold is put out of reach and proximity
+    # detection is off -- so it is expressed as its own argument to keep the
+    # intent legible, and it relaxes the refusal below.
+    relocalize = LaunchConfiguration('relocalize').perform(context).lower() in (
+        'true', '1', 'yes')
+    if not relocalize:
+        if mode != 'localize':
+            raise RuntimeError(
+                f'relocalize:=false applies to mode:=localize only, got mode {mode!r}')
+        if start_pose == 'last':
+            # Dead reckoning has no way back from a wrong start, and the stored
+            # pose is where the MAPPING run ended, not where this one begins.
+            raise RuntimeError(
+                "relocalize:=false needs a known start: use start_pose:=origin (the "
+                "point the map was collected from) or an explicit \"x y z r p y\". "
+                "start_pose:=last would silently begin at the mapping run's end.")
+        loop_closure = False
+    if mode == 'localize' and not loop_closure and relocalize:
         # Relocalisation IS the appearance-based detector: Rtabmap/LoopThr 1.0
-        # would make it impossible to ever localise against the prior map.
+        # would make it impossible to ever localise against the prior map. Pass
+        # relocalize:=false if that is what you actually want.
         raise RuntimeError('mode:=localize needs loop_closure:=true '
-                           '(relocalisation uses the loop-closure detector)')
+                           '(relocalisation uses the loop-closure detector), '
+                           'or relocalize:=false to dead reckon from the seed')
     read_only = LaunchConfiguration('read_only').perform(context).lower() in (
         'true', '1', 'yes')
     database = os.path.expanduser(LaunchConfiguration('database_path').perform(context))
@@ -280,6 +413,73 @@ def launch_setup(context, *args, **kwargs):
             f"mode:={mode} needs an existing database to read, but {database} does not "
             f"exist. Give the .db file itself (database_path:=.../name.db) or use "
             f"mode:=construct to start a new map.")
+    # A prior with no VOCABULARY cannot be relocalised against, and the symptom
+    # is silent: the node starts, publishes /localization_pose, and every pose
+    # carries RTAB-Map's no-information covariance (trace 3e4). Checked here
+    # because it is cheap and the alternative is discovering it from a run.
+    #
+    # The Feature table stores each keypoint's word_id, but the Word table stores
+    # the word DESCRIPTORS, and only the latter can be matched against. Measured
+    # 11 Nov 2026: dataset_realv7_map's features reference 35,683 distinct word
+    # ids while its Word table holds 122 rows, so the run that used it localised
+    # nothing. Both priors built that night are like this; everything built
+    # 10 Nov 06:45 or earlier is intact, including closure-free ones, so this is
+    # not a consequence of loop_closure:=false.
+    if mode == 'localize' and relocalize:   # nothing is matched when relocalize is off
+        try:
+            import sqlite3
+            _c = sqlite3.connect(f'file:{database}?mode=ro', uri=True)
+            _w = _c.execute('select count(*) from Word').fetchone()[0]
+            _d = _c.execute('select count(distinct word_id) from Feature '
+                            'where word_id>0').fetchone()[0]
+            _c.close()
+        except Exception:
+            _w = _d = None          # unreadable: let RTAB-Map report it instead
+        if _w is not None and _d and _w < 0.2 * _d:
+            raise RuntimeError(
+                f'{database} has no usable visual vocabulary: {_w} Word rows against '
+                f'{_d} distinct word ids referenced by its features.\n'
+                f'  Relocalisation matches against the Word table, so this prior cannot '
+                f'be localised against;\n'
+                f'  every pose would carry covariance trace 3e4 and no fix would ever be '
+                f'accepted.\n'
+                f'  Rebuild the prior, or use one whose vocabulary is intact.')
+
+    # geometric_check verifies a closure by ICP, and RTAB-Map's ICP registers the
+    # LASER SCAN of each node -- not its depth image. Nothing in this stack ever
+    # produced a scan: gen_scan is a node parameter defaulting to false, so all
+    # 148 nodes of dataset_allsensor_realistic_map carry image, depth and
+    # calibration but zero scan rows. Reg/Strategy 2 against that prior leaves
+    # ICP with nothing to register, so EVERY closure fails verification and the
+    # run localises nothing at all -- measured 12 Nov 2026, two runs, both with
+    # no informative pose in the whole run, the same signature as
+    # min_inliers_distribution 0.03. I checked that the depth was present and
+    # concluded ICP was feasible; the depth is not what ICP reads.
+    if mode == 'localize' and relocalize and geometric_check:
+        try:
+            import sqlite3
+            _c = sqlite3.connect(f'file:{database}?mode=ro', uri=True)
+            _s = _c.execute('select count(*) from Data where scan is not null '
+                            'and length(scan)>0').fetchone()[0]
+            _n = _c.execute('select count(*) from Node').fetchone()[0]
+            _c.close()
+        except Exception:
+            _s = _n = None
+        if _s is not None and _n and _s < 0.5 * _n:
+            raise RuntimeError(
+                f'geometric_check:=true needs laser scans in the prior, and '
+                f'{os.path.basename(database)} has {_s} of {_n} nodes with one.\n'
+                f'  RTAB-Map ICP registers Data.scan, not Data.depth, so every closure '
+                f'would fail verification\n'
+                f'  and the run would localise nothing. Generate the scans from the depth '
+                f'already stored:\n\n'
+                f'    rtabmap-reprocess -scan_from_depth \\\n'
+                f'        "{database}" "{database[:-3]}_scan.db"\n\n'
+                f'  then localise against that copy, and pass gen_scan:=true so the live '
+                f'frames carry a scan too.\n'
+                f'  Both sides need one. Alternatively use estimation_type:=0, which '
+                f'checks the SPARSE\n'
+                f'  feature geometry and needs no scan at all.')
     os.makedirs(os.path.dirname(database), exist_ok=True)
     print(f'[rtab_sim] mode     = {mode}'
           + ('  (read-only)' if (read_only and mode == 'localize') else ''))
@@ -291,6 +491,14 @@ def launch_setup(context, *args, **kwargs):
     if not loop_closure:
         print('[rtab_sim] loop closure OFF: pure odometry chain (LoopThr 1.0, '
               'ProximityBySpace false; visual words still extracted)')
+    if mode == 'localize' and not relocalize:
+        print('[rtab_sim] RELOCALISATION OFF: the pose is the start_pose seed plus '
+              'front-end odometry.')
+        print('[rtab_sim]   No correction will ever be published, so drift is '
+              'unbounded and grows with')
+        print('[rtab_sim]   distance travelled. corr_step_m should read 0.000 for '
+              'every sample; if it')
+        print('[rtab_sim]   does not, something else is publishing map -> odom.')
     print(f'[rtab_sim] base     = {base_frame}   ground_height = {ground_height}')
     print(f'[rtab_sim] body     = {body_frame}')
     print(f'[rtab_sim] cameras  = {camera_model}  config_dir = {config_dir}'
@@ -476,7 +684,53 @@ def launch_setup(context, *args, **kwargs):
             # with zero closures. Upstream's own multisession demo raises this to
             # 10 for the same reason.
             'RGBD/OptimizeMaxError': optimize_max_error,
-        }] + [_mode_params(mode, read_only), _loop_closure_params(loop_closure)],
+
+            # ---- what the localiser is allowed to ACCEPT ---------------------
+            # A warehouse is rows of near-identical shelf bays, the worst case
+            # for perceptual aliasing. Measured 11-12 Nov 2026 over four runs: a
+            # wrong match is accepted with a LOWER covariance than the honest
+            # ones (0.0048 against 0.106), so covariance cannot screen it, and
+            # RGBD/OptimizeMaxError cannot either -- it judges consistency with
+            # the graph, and a lookalike bay is perfectly consistent, just wrong.
+            # Tightening it from 10.0 to 3.0 did not stop the warps and pushed
+            # the startup transient from 27 s to 68 s, because the same test also
+            # rejects the first CORRECT fix for longer.
+            #
+            # These two test something OptimizeMaxError does not: how good the
+            # geometric match itself is, and whether its inliers are spread
+            # across the image or bunched on one piece of repeating structure.
+            # Both are at RTAB-Map's own defaults here, so nothing changes until
+            # they are passed; see their launch arguments for the values worth
+            # trying.
+            'Vis/MinInliers': min_inliers,
+            'Vis/MinInliersDistribution': min_inliers_distribution,
+            # Anti-teleport, localization mode only: verifies a candidate against
+            # recent odometry instead of accepting any similar-looking place
+            # (Parameters.h:403). Was hard-coded; an argument now so it can be
+            # swept with the two above.
+            'RGBD/MaxOdomCacheSize': odom_cache_size,
+
+            # 3D->3D instead of RTAB-Map's 3D->2D default. PnP only needs the
+            # matched map points to REPROJECT consistently, which a wrongly
+            # placed match can still satisfy; 3D->3D requires the two sets of
+            # feature positions to be congruent in metres, with
+            # Vis/InlierDistance as the tolerance. That is a geometric veto on
+            # the sparse map itself, and unlike Reg/Strategy 2 it needs no laser
+            # scan -- the feature depths are already in the prior.
+            'Vis/EstimationType': estimation_type,
+            'Vis/InlierDistance': vis_inlier_distance,
+
+            # Turn the depth image into a laser scan for the LIVE frames, so ICP
+            # has something to register when geometric_check is on. The prior
+            # side needs rtabmap-reprocess -scan_from_depth; the guard above
+            # refuses the run otherwise.
+            'gen_scan': gen_scan,
+            'gen_scan_max_depth': 8.0,
+        }] + [_geometric_check_params(geometric_check, icp_correspondence_ratio,
+                                      icp_max_rotation),
+              _mode_params(mode, read_only, start_pose),
+              _loop_closure_params(loop_closure),
+              {'initial_pose': initial_pose} if initial_pose else {}],
         remappings=[
             ('left/image_rect', '/stereo/left/image_rect'),
             ('right/image_rect', '/stereo/right/image_rect'),
@@ -489,6 +743,32 @@ def launch_setup(context, *args, **kwargs):
             # gravity-aligns its output, so RTAB-Map has no use for it here.
             ('imu', '/rtabmap/imu_unused'),
         ])
+
+    # Hold RTAB-Map back for the front end's first seconds.
+    #
+    # Measured on sweep_J1/J2/J3, 12 Nov 2026. The ORB-SLAM3 orientation is
+    # unstable for the first ~1 s it publishes: 15-33 yaw steps over 15 deg,
+    # some of 90 deg, between consecutive frames, all inside sim 15.1-16.1 s,
+    # after which |dyaw| settles to under 0.1 deg. RTAB-Map's first fix lands
+    # within about a second of that window and LATCHES a map->odom correction
+    # 73-76 deg wrong, which it then holds for ~16 s until a good localisation
+    # replaces it wholesale. J1 and J2 produced 73.8 and 73.7 deg -- the same
+    # defect to a tenth of a degree, so this is deterministic, not aliasing.
+    #
+    # wait_for_imu_init does not stop it: that gate tests Frame::HasVelocity(),
+    # which is already true through the unstable window. init_ignore_s does not
+    # either -- it lives in the pose gate and only withholds the pose from Nav2,
+    # while RTAB-Map has already latched and RViz already shows it wrong.
+    #
+    # Delaying the node is the blunt version of the right fix and needs no
+    # rebuild. The proper one is an orientation-stability condition in
+    # slam_wrapper.cpp beside the HasVelocity() test: hold frames back until the
+    # last k have turned less than a few degrees each.
+    if localize_delay_s > 0.0:
+        from launch.actions import TimerAction
+        rtabmap = TimerAction(period=localize_delay_s, actions=[rtabmap])
+        print(f'[rtab_sim] localise = held back {localize_delay_s:g} s so the first fix '
+              f'cannot latch on an unstable front-end orientation')
 
     nodes = [shim, rtabmap]
 
@@ -657,6 +937,79 @@ def generate_launch_description():
                         'from. pinhole: cam{0,1}_pinhole.yaml + stereo_imu.yaml '
                         '(sim). fisheye: cam{0,1}_fisheye.yaml + stereo_imu.yaml '
                         '(real rig: vins_fusion_ros2/config/wil).'),
+        DeclareLaunchArgument(
+            'min_inliers', default_value='20',
+            description='Vis/MinInliers: feature correspondences a match must survive '
+                        'to be accepted. RTAB-Map default 20; try 35 when lookalike '
+                        'shelf bays are being accepted.'),
+        DeclareLaunchArgument(
+            'min_inliers_distribution', default_value='0.0',
+            description='Vis/MinInliersDistribution: how spread the inliers must be '
+                        'across the image (second PCA eigenvalue, 0 to 0.5). 0 disables '
+                        'it, which is the RTAB-Map default. Try 0.05-0.1: it is the one '
+                        'test aimed at a match bunched on one piece of repeating '
+                        'structure, which is what an aisle warp is.'),
+        DeclareLaunchArgument(
+            'odom_cache_size', default_value='10',
+            description='RGBD/MaxOdomCacheSize: odometry poses kept to verify a '
+                        'localisation against recent motion. Localize mode only. '
+                        'Larger gives the anti-teleport check more context.'),
+        DeclareLaunchArgument(
+            'geometric_check', default_value='false',
+            description='Reg/Strategy 2: verify every accepted loop closure by ICP '
+                        'against the 3-D structure, not only the 2-D features that '
+                        'proposed it. RTAB-Map default is Vis-only, which consults no '
+                        'geometry at all. This is the one test that is outside the null '
+                        'space defeating OptimizeMaxError and MaxOdomCacheSize; it costs '
+                        'ICP on the depth cloud per candidate.'),
+        DeclareLaunchArgument(
+            'icp_correspondence_ratio', default_value='0.3',
+            description='Icp/CorrespondenceRatio, the actual veto. RTAB-Map default 0.1; '
+                        'raised because a 73 deg misplacement should not find a third of '
+                        'its points. geometric_check:=true only.'),
+        DeclareLaunchArgument(
+            'icp_max_rotation', default_value='0.35',
+            description='Icp/MaxRotation (rad), cap on how far ICP may rotate a closure '
+                        'to make it fit. RTAB-Map default 0.78 (45 deg) is wide enough to '
+                        'absorb a 23-24 deg error; 0.35 is 20 deg. geometric_check:=true '
+                        'only.'),
+        DeclareLaunchArgument(
+            'localize_delay_s', default_value='0.0',
+            description="seconds to hold RTAB-Map back after the front end starts, so "
+                        "its first fix cannot latch on the unstable orientation of the "
+                        "first ~1 s. 0 disables. Unlike init_ignore_s, which only "
+                        "withholds the pose from Nav2, this stops the wrong correction "
+                        "being formed at all."),
+        DeclareLaunchArgument(
+            'estimation_type', default_value='1',
+            description='Vis/EstimationType: 1 = 3D->2D PnP (RTAB-Map default), '
+                        '0 = 3D->3D, which requires the matched feature positions to '
+                        'agree in metres rather than merely reproject consistently. 0 is '
+                        'the sparse-geometry veto and needs no laser scan.'),
+        DeclareLaunchArgument(
+            'vis_inlier_distance', default_value='0.1',
+            description='Vis/InlierDistance (m), the tolerance of the 3D->3D check. '
+                        'estimation_type:=0 only.'),
+        DeclareLaunchArgument(
+            'gen_scan', default_value='false',
+            description='Generate a laser scan from the depth image for the live frames. '
+                        'Needed by geometric_check:=true, whose ICP registers scans and '
+                        'not depth. The prior needs its own, via '
+                        'rtabmap-reprocess -scan_from_depth.'),
+        DeclareLaunchArgument(
+            'relocalize', default_value='true',
+            description='localize mode only. false = dead reckon on the prior: the pose '
+                        'is the start_pose seed composed with the front end odometry, the '
+                        "prior's grid is still served, and no correction is ever applied. "
+                        'Drift is then unbounded and the pose gate cannot detect it.'),
+        DeclareLaunchArgument(
+            'start_pose', default_value='origin',
+            description="localize mode only. 'origin' assumes the robot restarts "
+                        "at the map's first node, which on these priors is the "
+                        "spawn pose to within 5 cm; 'last' restarts from the pose "
+                        'left in the database, which with read_only is where the '
+                        'MAPPING run ended; or six numbers "x y z roll pitch yaw" '
+                        'to seed an explicit pose in the map frame.'),
         DeclareLaunchArgument(
             'camera_model', default_value='pinhole',
             description='pinhole = sim bags, raw frames are already rectified. '

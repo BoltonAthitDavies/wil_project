@@ -47,11 +47,14 @@ On the real robot the slot now holds the comparison it exists for
 scaled by one constant fitted against the tracker on \repo{realv7_000} and
 held, localises the robot to \SI{0.26}{} and \SI{0.22}{\metre} on the other
 two \repo{realv7} recordings and \SI{0.46}{\metre} on \repo{realv6}, where
-the best ORB-SLAM3 run reads \SI{0.44}{}, \SI{0.47}{} and \SI{0.46}{\metre}.
-On routes of \SIrange{22}{37}{\metre} vision has not earned its place over
-the proprioceptive sensors in either domain. The baseline carries one tuned
-constant and no yaw-rate observation, so no EKF could be formed, and both
-sides are scored with the marker lever arm unmeasured.
+the best ORB-SLAM3 run reads \SI{0.44}{}, \SI{0.17}{} and \SI{0.46}{\metre}.
+On routes of \SIrange{22}{37}{\metre} the two families are in the same
+accuracy class: the baseline leads on one held recording, ties on another, and
+is beaten on the third by the runs that followed the initialisation patch of
+\cref{sec:exp1-real}. Neither result is the one a \SI{20}{\metre} route can
+settle. The baseline carries one tuned constant and no yaw-rate observation,
+so no EKF could be formed, and both sides are scored with the marker lever arm
+unmeasured.
 
 \subsection{Experiment 2: how good is the detector?}
 
@@ -68,12 +71,9 @@ pallet jacks' frames and none of the walking people, which are simulator
 actors outside its classes and outside the score. The real recordings have no
 annotated frames, so the real-robot slot stays planned.
 
-\subsection{Experiment 3: does filtering help?}
 
-The question the project is named for has no answer yet: no filtered run
-exists in the current dataset set, in either domain. What the twenty
-unfiltered simulation runs establish is the precondition and one of its
-answers (\cref{sec:results-validity}). With physically simulated traffic
+The visual half of the same experiment is scored on the same four recordings
+(\cref{sec:results-validity}). With physically simulated traffic
 neither pipeline loses tracking. VINS-Fusion holds \SIrange{0.22}{0.66}{\metre}
 with no jump and is worst on the U layout with traffic, where its error rises
 on the aisles the pallet jacks work; ORB-SLAM3 holds \SIrange{0.14}{0.52}{\metre}
@@ -96,17 +96,18 @@ half (\cref{tab:mapping-resources}). Neither pipeline is cheaper outright,
 and the choice between them is a memory-against-cores trade.
 
 On the real robot ORB-SLAM3 tracks every recording: a provisional
-\SIrange{0.46}{0.52}{\metre} planar ATE on \repo{realv6_000} with the GPU
-front end and \SIrange{0.25}{0.27}{\metre} on \repo{realv7_000} in all four
-configurations after the scorer's frame repair, with the marker lever arm
-unmeasured (\cref{sec:exp3-real}). The cause of the IMU staying uninitialised
-for most of nine \repo{realv7} runs is identified in the upstream code and
-patched in the fork, and the patch is untested on a recording. VINS-Fusion has
+\SIrange{0.404}{0.480}{\metre} planar ATE on \repo{realv6_000} and
+\SIrange{0.172}{0.268}{\metre} across the three \repo{realv7} recordings, all
+sixteen runs scored with no repair applied and with the marker lever arm
+unmeasured (\cref{sec:exp1-real}). The cause of the IMU staying uninitialised
+for most of nine of the original \repo{realv7} runs is identified in the
+upstream code, patched in the fork and now exercised on every run; it removes
+the need for the scorer's frame repair rather than improving accuracy. VINS-Fusion has
 no valid real run: its two defects, IMU delivery and the gravity norm, are
 diagnosed and in part corrected. Loop closing changed nothing on the real
 robot that the front end did not change more.
 
-\subsection{Experiment 4: is the map usable?}
+\subsection{Experiment 3: is the map usable?}
 
 Where tracking is sound, the mapping pipeline is: the tiny-warehouse map is
 \SI{96.6}{\percent} precise in what it marks occupied, recovers
@@ -127,6 +128,31 @@ the longer range laying wall phantoms, and the higher ground-height cut laying
 aisle obstacles on the I layout. On the large warehouse the attempt failed
 through tracking loss in repeated structure and its artefacts were not retained
 (\cref{sec:map-large}).
+
+
+\subsection{Experiment 4: can the robot navigate on it?}
+
+Half answered. Seven live runs on 12 November 2026 in three of the four
+realistic worlds track ground truth to a median of \SI{0.50}{\metre} over
+hand-driven routes of \SIrange{21}{153}{\metre}, with a minimum clearance of
+\SI{0.58}{\metre} and no collision; one run of the seven lost the pose and did
+not recover (\cref{sec:exp4-sim}). The error is a constant offset rather than
+scatter, it is largest on single-aisle drives and averages away over routes
+that cross the building, and its magnitude matches the wall displacement
+Experiment~3 measured cell by cell. The slot's accuracy is therefore
+\emph{map-limited, not estimator-limited}, which says that the improvement to
+chase is a better map. The same initialisation transient that lays
+Experiment~3's blocking phantoms also latches the back end's first fix
+\SIrange{73}{76}{\degree} wrong until it is held back for \SI{5}{\second}:
+one transient, two symptoms, one prescription.
+
+What remains planned is the half the experiment is named for. No goal was
+commanded in any run, so nothing yet speaks to planning, to recovery, or to the
+question the map scores raise but cannot settle --- whether a
+\SIrange{3.8}{10.2}{\percent} false-obstacle rate blocks a route or merely
+lengthens it. Every cell is a single run, and the acceptance sweep showed
+run-to-run spread as wide as most differences between settings, so no
+comparison within \cref{tab:exp4-tracking} is evidence.
 
 \section{Limitations and Threats to Validity}
 \label{sec:limitations}
@@ -161,13 +187,12 @@ dense mapping, have no real-robot evidence at all.
 \section{Recommendations and Next Steps}
 \label{sec:recommendations}
 
-\textbf{Give Experiment~3 its test.} Run both pipelines filtered and
-unfiltered on \repo{realistic_002} and \repo{_003} with the detector live,
-paired under the admissibility gates of \cref{sec:vio-filter-method}, with the
-loop closer disabled on the I layout so that the false closure does not
-dominate both arms; then the same on one \repo{realv7} recording. Make the
-repeated runs on the two mapping recordings for the latency and resource
-table.
+\textbf{Give Experiment~4 its first run.} Fix a goal set in each realistic
+world, write the scorer that reads the Nav2 action results and the
+ground-truth pose into the measures of \cref{sec:nav-eval-method}, and run each
+world against each of its two map configurations. That is the one experiment
+whose system exists, is launchable and has never been scored, and it is the
+test the project's own title implies.
 
 \textbf{Bound the loop closer.} Add a maximum correction against the inertial
 drift bound, or a covisibility-consistency window, and test it on

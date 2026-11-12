@@ -52,6 +52,37 @@ SHARE = get_package_share_directory('vslam_navigation')
 WAREHOUSE = get_package_share_directory('aws_robomaker_small_warehouse_world')
 
 
+def _world_spawn_pose(world_path):
+    """The ackermann robot's spawn pose as the world file sets it, or None.
+
+    Worth reading at launch because start_pose:=origin asserts that the robot
+    begins where the prior's first node is, and nothing downstream checks it. On
+    11 Nov 2026 the U static world had been edited to spawn at 13.0, 14.0 while
+    the prior recorded from that world begins at 5.25, 20.0 -- 9.8 m apart, which
+    seeds relocalisation in the wrong aisle. The pose gate does catch it (the
+    correction when the relocaliser recovers far exceeds max_step, so Nav2 never
+    starts) but the symptom, a stack that silently never activates, looks nothing
+    like a wrong spawn pose. Printing both makes it a two-second check.
+
+    Only the ACTIVE pose counts: the edited world kept the original as an XML
+    comment immediately above, so a naive search finds the wrong one.
+    """
+    try:
+        text = open(world_path).read()
+    except OSError:
+        return None
+    i = text.find('<name>ackermann_robot_001</name>')
+    if i < 0:
+        return None
+    for line in text[i:].splitlines()[1:6]:
+        line = line.strip()
+        if line.startswith('<!--'):
+            continue                      # the commented-out original
+        if line.startswith('<pose>'):
+            return line[len('<pose>'):line.index('</pose>')].strip()
+    return None
+
+
 def _setup(context, *args, **kwargs):
     cfg = lambda k: LaunchConfiguration(k).perform(context)  # noqa: E731
     truthy = lambda k: cfg(k).lower() in ('true', '1', 'yes')  # noqa: E731
@@ -70,6 +101,21 @@ def _setup(context, *args, **kwargs):
     print(f'[navigate_sim] gazebo   = {"starting" if truthy("start_sim") else "assumed already running"}'
           f' (headless {cfg("headless")})')
 
+    # The spawn pose the robot will actually have, beside the seeding assumption.
+    world = cfg('world') or os.path.join(
+        WAREHOUSE, 'worlds', 'small_warehouse', 'small_warehouse.world')
+    spawn = _world_spawn_pose(world)
+    print(f'[navigate_sim] world    = {os.path.basename(world)}')
+    print(f'[navigate_sim] spawn    = {spawn if spawn else "NOT FOUND in the world file"}'
+          f'   (x y z r p y, as the world sets it)')
+    if cfg('start_pose').strip().lower() == 'origin':
+        print('[navigate_sim] start_pose:=origin -- relocalisation is seeded at the '
+              "prior's FIRST NODE.")
+        print('[navigate_sim]   That is only correct if the spawn above is where '
+              'this prior was recorded from.')
+        print('[navigate_sim]   If it is not, pass the spawn pose in MAP coordinates '
+              'as start_pose:="x y z r p y".')
+
     acts = []
     if truthy('start_sim'):
         # First, and as an include rather than a copy: its _override_speed_limits
@@ -86,9 +132,24 @@ def _setup(context, *args, **kwargs):
                 'bridge_cmd_vel': 'true',
                 'cmd_vel_bridge_topic': '/cmd_vel',
                 'bridge_ground_truth': 'true',   # scoring only; publishes no transform
-                'bridge_wheel_odom': 'false',
-                'bridge_joint_states': 'false',  # localize_sim runs joint_state_publisher
-                'bridge_model_poses': 'false',
+                # Both are additive to what localize_sim already runs, because
+                # neither lands on the topic it might collide with: the bridges
+                # publish /model/<robot>/odometry and /model/<robot>/joint_state,
+                # while localize_sim's joint_state_publisher publishes
+                # /joint_states and the VSLAM odometry is its own topic. Nothing
+                # here publishes a transform, so the one-publisher-per-edge
+                # contract is untouched.
+                'bridge_wheel_odom': cfg('bridge_wheel_odom'),
+                'bridge_joint_states': cfg('bridge_joint_states'),
+                # Opt-in, and it is the warehouse launch's own bridge rather than
+                # one started beside it: gz model poses as a TFMessage whose
+                # child_frame_id is the model name, on /world/default/pose/info.
+                # It uses pose/info and NOT dynamic_pose/info deliberately -- the
+                # dynamic props are <static>true</static> driven by
+                # KinematicTrajectory, so they never appear in dynamic_pose/info
+                # and a subscriber to that draws every prop frozen at its spawn
+                # pose. Costs ~1.0 MB/s, which is why it is off unless asked for.
+                'bridge_model_poses': cfg('bridge_model_poses'),
                 'robot_name': cfg('robot_name'),
                 'verbosity': cfg('verbosity'),
                 # Only override the world when one is named, so the default stays
@@ -110,6 +171,21 @@ def _setup(context, *args, **kwargs):
             'detection_rate': cfg('detection_rate'),
             'shim_rate': cfg('shim_rate'),
             'publish_joint_states': 'true',
+            'start_pose': cfg('start_pose'),
+            'relocalize': cfg('relocalize'),
+            'min_inliers': cfg('min_inliers'),
+            'min_inliers_distribution': cfg('min_inliers_distribution'),
+            'odom_cache_size': cfg('odom_cache_size'),
+            'geometric_check': cfg('geometric_check'),
+            'icp_correspondence_ratio': cfg('icp_correspondence_ratio'),
+            'icp_max_rotation': cfg('icp_max_rotation'),
+            'estimation_type': cfg('estimation_type'),
+            'vis_inlier_distance': cfg('vis_inlier_distance'),
+            'gen_scan': cfg('gen_scan'),
+            'localize_delay_s': cfg('localize_delay_s'),
+            'wait_for_imu_init': cfg('wait_for_imu_init'),
+            'orb_output_path': cfg('orb_output_path'),
+            'overwrite': cfg('overwrite'),
             'extent_margin': cfg('extent_margin'),
             'rviz': 'false',                      # one RViz, with the navigation config
         }.items())
@@ -171,16 +247,82 @@ def generate_launch_description():
         DeclareLaunchArgument('optimize_max_error', default_value='10.0'),
         DeclareLaunchArgument('detection_rate', default_value='1.0'),
         DeclareLaunchArgument('shim_rate', default_value='4.0'),
+        DeclareLaunchArgument(
+            'bridge_wheel_odom', default_value='false',
+            description='publish the simulated wheel/steering odometry on '
+                        '/model/<robot_name>/odometry. An independent dead-reckoning '
+                        'signal to compare the VSLAM estimate against, and the sim '
+                        'counterpart of the real wheel+gyro baseline. Publishes no '
+                        'transform, so it never competes with the VSLAM chain.'),
+        DeclareLaunchArgument(
+            'bridge_joint_states', default_value='false',
+            description='publish the TRUE wheel and steering joint angles on '
+                        '/model/<robot_name>/joint_state, from the JointStatePublisher '
+                        'in model.sdf. Not quantised encoder counts -- script/'
+                        'encoder_sim.py adds the resolution. Distinct from '
+                        '/joint_states, which localize_sim publishes for the robot '
+                        'description, so both can run.'),
+        DeclareLaunchArgument(
+            'bridge_model_poses', default_value='false',
+            description='publish every gz model pose on /world/default/pose/info as a '
+                        'TFMessage (child_frame_id = model name). Needed to record '
+                        'where the moving props and actors actually were, which is '
+                        'ground truth for a dynamic world; pointless in a static one, '
+                        'where the layout is in the .world file. NOT published on /tf.'),
         DeclareLaunchArgument('init_ignore_s', default_value='8.0',
                               description='seconds of localisation output the gate ignores while the '
                                           'front end initialises.'),
         DeclareLaunchArgument('max_step', default_value='1.0',
                               description='map->odom correction step above which the gate drops [m].'),
+        DeclareLaunchArgument('overwrite', default_value='false',
+                              description='true replaces an existing run CSV of the same name.'),
+        DeclareLaunchArgument('wait_for_imu_init', default_value='true',
+                              description='hold the front end back until its inertial state is '
+                                          'valid; prevents a wrong correction being latched at '
+                                          'startup.'),
+        DeclareLaunchArgument('orb_output_path', default_value='',
+                              description="directory for the front end's vio.csv."),
+        DeclareLaunchArgument('min_inliers', default_value='20',
+                              description='Vis/MinInliers; try 35 against aisle aliasing.'),
+        DeclareLaunchArgument('min_inliers_distribution', default_value='0.0',
+                              description='Vis/MinInliersDistribution; 0 disables. Try 0.05-0.1: '
+                                          'rejects a match bunched on repeating structure.'),
+        DeclareLaunchArgument('odom_cache_size', default_value='10',
+                              description='RGBD/MaxOdomCacheSize; anti-teleport context.'),
+        DeclareLaunchArgument('relocalize', default_value='true',
+                              description='false = dead reckon on the prior from the '
+                                          'start_pose seed; no correction is applied and '
+                                          'drift is unbounded.'),
+        DeclareLaunchArgument('start_pose', default_value='origin',
+                              description='passed to the localisation layer; the robot is '
+                                          'assumed to start at the spawn point unless this '
+                                          "is set to 'last' or to an explicit pose."),
         DeclareLaunchArgument('extent_margin', default_value='2.0'),
         DeclareLaunchArgument('stack_delay', default_value='12.0',
                               description='seconds after Gazebo before the localisation stack starts.'),
         DeclareLaunchArgument('nav2_delay', default_value='8.0',
                               description='further seconds before Nav2 starts.'),
         DeclareLaunchArgument('rviz', default_value='true'),
+        DeclareLaunchArgument('geometric_check', default_value='false',
+                              description='Reg/Strategy 2: verify an accepted loop closure by ICP against the 3-D '
+                        'structure, not only the 2-D features that proposed it. The '
+                        'one acceptance test outside the null space that defeats '
+                        'OptimizeMaxError and MaxOdomCacheSize.'),
+        DeclareLaunchArgument('icp_correspondence_ratio', default_value='0.3',
+                              description='Icp/CorrespondenceRatio, the veto itself. geometric_check:=true only.'),
+        DeclareLaunchArgument('icp_max_rotation', default_value='0.35',
+                              description='Icp/MaxRotation in rad (0.35 = 20 deg). geometric_check:=true only.'),
+        DeclareLaunchArgument('estimation_type', default_value='1',
+                              description='Vis/EstimationType: 0 = 3D->3D sparse-geometry veto, '
+                      '1 = PnP (RTAB-Map default).'),
+        DeclareLaunchArgument('vis_inlier_distance', default_value='0.1',
+                              description='Vis/InlierDistance (m); estimation_type:=0 only.'),
+        DeclareLaunchArgument('gen_scan', default_value='false',
+                              description='generate a laser scan from depth for the live frames; '
+                      'geometric_check needs it.'),
+        DeclareLaunchArgument('localize_delay_s', default_value='0.0',
+                              description='hold RTAB-Map back this long so its first '
+                                          'fix cannot latch on an unstable front-end '
+                                          'orientation.'),
         OpaqueFunction(function=_setup),
     ])

@@ -227,7 +227,7 @@ private:
   std::thread worker_;
   bool running_{false};
 
-  bool imu_ready_{false};
+  bool imu_ready_{false};   // has EVER been ready; does not gate the test (see .cpp)
   bool have_align_{false};
   Eigen::Isometry3f T_align_{Eigen::Isometry3f::Identity()};
 

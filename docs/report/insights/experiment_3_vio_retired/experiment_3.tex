@@ -105,6 +105,32 @@ end (\cref{tab:realistic-baseline}, \cref{fig:realistic-traj,fig:realistic-metri
 Neither front end loses tracking on any recording, with or without traffic:
 zero tracking-loss events and zero resets in twenty runs.
 
+Two columns of \cref{tab:realistic-baseline} qualify those RMSE figures. The
+first is the worst single error each run reaches after its initialisation
+transient, which the RMSE averages away: over the fifteen runs that held it is
+\SIrange{0.26}{1.25}{\metre}, between \num{0.8} and \num{2.6} times the run's
+own RMSE, so no run that tracked was ever more than about
+\SI{1.25}{\metre} from the truth; over the five that diverged it is
+\SIrange{2.25}{13.42}{\metre}. The two orderings are not the same one. On
+\repo{realistic_000} VINS-Fusion has the lower RMSE
+(\SI{0.290}{} against \SI{0.338}{\metre}) and ORB-SLAM3 the smaller worst
+case (\SI{0.260}{} against \SI{0.576}{\metre}), so which estimator is
+``better'' on that recording depends on whether the question is average
+accuracy or the largest excursion --- and for a vehicle in a \SI{3.0}{\metre}
+aisle it is the second. The exclusion matters: every ORB-SLAM3 run peaks near
+\SI{2.5}{\second} at three to four metres on the gravity re-alignment that
+ends its inertial initialisation, and a raw maximum would report that
+initialisation as though it were driving.
+
+The second column is the same ATE as a percentage of the ground-truth path
+length. It exists so that these \SIrange{103}{172}{\metre} routes can be set
+beside the real robot's much shorter ones,
+and it separates the two outcomes more sharply than
+the metre figure does: \SIrange{0.09}{0.64}{\percent} for the fifteen runs
+that held against \SIrange{1.11}{4.51}{\percent} for the five that diverged.
+It is a ratio of two quantities already in the table, not a KITTI-style
+sub-sequence drift rate, and it is not comparable to one.
+
 \reporttable{realistic_baseline_table}
 
 \begin{figure}[p]
@@ -301,16 +327,109 @@ laptop that throttles at \SI{90}{\celsius}; the front-end record notes that
 timing comparisons need a cool-start, interleaved order. The six VINS-Fusion
 runs are a separate session of 7 November and are not a control for that
 state. The U-recording figures are the ones to quote until the I recording is
-repeated interleaved. \end{queried} The per-run resources of the twenty
-accuracy runs above are generated beside this table
-(\repo{realistic_resources.tex}) and are not reported, except the frame
-retention already in \cref{tab:realistic-baseline}.
-
+repeated interleaved. \end{queried} 
 \reporttable{mapping_resources}
 
-\paragraph{Limitations, each stated once.} \emph{$n$:} one run per cell; the
-only run-to-run figure is the agreement of the two front ends on where and
-how the closer fails. \emph{Route and traffic confounded:} no two recordings
+\paragraph{What each accuracy run cost.} The twenty accuracy runs were
+measured for cost as well, on the same machine and in the same sessions, and
+\cref{tab:realistic-resources} reports them one row per run. They are not a
+substitute for \cref{tab:mapping-resources}: they are single runs on four
+short recordings rather than three repeats on two long ones, and the
+divergences of \cref{tab:realistic-baseline} are inside them. What they add is
+that accuracy and cost can be read on the same runs, which
+\cref{fig:realistic-cost-accuracy} draws.
+
+The separation between the two pipelines is the one the mapping recordings
+show, at the same sizes. VINS-Fusion holds its state in \SIrange{477}{492}{\mebi\byte}
+against ORB-SLAM3's \SIrange{1029}{1350}{\mebi\byte} and optimises in
+\SIrange{45}{60}{\milli\second} against \SIrange{189}{286}{\milli\second},
+for \SIrange{707}{801}{\percent} of one core against
+\SIrange{285}{448}{\percent}. Within ORB-SLAM3 the GPU front end tracks in
+\SIrange{29.6}{36.7}{\milli\second} against the CPU front end's
+\SIrange{49.2}{54.9}{\milli\second} and draws about a core less, at
+\SI{150}{\mebi\byte} more memory. These runs were not interleaved either, so
+they carry the same thermal caveat as \cref{tab:mapping-resources} and are
+quoted as a second observation of the same separation, not as an independent
+one.
+
+The figure's own result is a negative one: no panel shows cost buying
+accuracy. Every run that diverged is ORB-SLAM3, and within each front end the
+diverged runs cost what the runs that held cost --- with the GPU front end
+\SIrange{31.6}{36.7}{\milli\second} against \SIrange{29.6}{36.2}{\milli\second},
+overlapping entirely, and with the CPU front end
+\SIrange{52.6}{54.9}{\milli\second} against \SIrange{49.2}{51.6}{\milli\second},
+a gap of one to five milliseconds across three runs and two recordings, which
+one run per cell cannot separate from the recording. A run about to be thrown
+several metres by a false loop closure is not working harder beforehand, so no
+resource measure on this machine is a usable early warning for the failure
+mode this experiment actually found.
+
+\reporttable{realistic_resources}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{figures/realistic_cost_accuracy.png}
+  \caption[Accuracy against cost on the twenty unfiltered realistic runs.]{Accuracy
+  against cost, one point per unfiltered run on the four realistic-warehouse
+  recordings, from \cref{tab:realistic-baseline,tab:realistic-resources}.
+  Aligned ATE is on a logarithmic axis in all three panels; the shaded band is
+  the region above \SI{1}{\metre}, which holds the five diverged runs. Orange
+  is VINS-Fusion, magenta ORB-SLAM3 with the CPU front end and light magenta
+  with the GPU front end; an open marker is a run with the loop closer
+  disabled and a square a recording carrying traffic. Cost is the run's median
+  front-end latency, its process time as a percentage of one core, and its
+  peak resident set.}
+  \label{fig:realistic-cost-accuracy}
+\end{figure}
+
+
+
+\paragraph{How repeatable is any of this?} The eighteen runs above are the only
+repeated runs in the simulation campaign, and scoring them for accuracy as well
+as for time measures something no other result in this chapter can:
+how much an estimate moves when nothing changes.
+\Cref{tab:mapping-repeats} gives the spread over the three repeats of each
+configuration. The two estimators answer differently. VINS-Fusion repeats to
+\SI{0.094}{\metre} on the U recording and \SI{0.035}{} on the I, five and
+seven per cent of its own mean. ORB-SLAM3 does not: its three repeats span
+\SI{0.089}{\metre} on the U recording and \SI{0.277}{} on the I with the CPU
+front end, and \SI{0.016}{} and \SI{0.236}{\metre} with the GPU front end ---
+on the I recording that is half to four fifths of the configuration's own mean,
+from the same binary, the same configuration file and the same bag, with the
+loop closer disabled in all six.
+
+The frame counts in the same table are consistent with why. VINS-Fusion
+processed every frame of both recordings in all six runs, so it saw identical
+input each time; ORB-SLAM3 kept \SIrange{90}{97}{\percent} with the CPU front
+end and \SIrange{70}{98}{\percent} with the GPU one, and which frames a run
+loses depends on how the laptop was scheduling at that moment. That is a
+consistent explanation and not a demonstrated one: a keyframe-based system with
+a bundle adjustment on its own thread need not be deterministic even on
+identical input. Separating the two would need a run at a replay rate slow
+enough to drop nothing, which this chapter does not have. The worst spread also
+belongs to the I recording, whose repeats carry the thermal confound noted
+above, so part of \SI{0.277}{\metre} may be the laptop rather than the
+estimator.
+
+Read against \cref{tab:realistic-baseline} this sets a floor under what that
+table can be asked. A difference of less than about a quarter of a metre
+between two ORB-SLAM3 arms is inside the spread measured here and should not be
+read as an effect; this is the quantity the bold marking of that table was
+hedged against, now measured. Two of the chapter's findings survive it and one
+is strengthened. The five divergences are \SIrange{1.39}{6.02}{\metre}, five to
+twenty times the floor, and the false closure that causes the largest of them
+is reproduced by both front ends on the same frame. The claim that the front
+end changes throughput and not accuracy is supported rather than weakened:
+the CPU and GPU arms differ by less than this floor on every recording, which
+is what having no effect looks like. What should not be carried further is any
+ordering of two ORB-SLAM3 arms that rests on a gap smaller than it.
+
+\reporttable{mapping_repeats}
+
+\paragraph{Limitations, each stated once.} \emph{$n$:} one run per cell on the
+four accuracy recordings; the three repeats of each mapping-recording
+configuration (\cref{tab:mapping-repeats}) are the only within-configuration
+spread the campaign measures, and they are on different routes. \emph{Route and traffic confounded:} no two recordings
 share a route. \emph{Three-dimensional ATE:} the metric charges vertical
 drift to a floor robot; the planar onset table is the complement, not a
 replacement. \emph{Deployment rate on one laptop:} frame retention and every latency
@@ -368,9 +487,19 @@ times on IMU-stream gaps and has no valid run. No filtered run exists, the
 \repo{realv7} exports pass them and all twelve ORB-SLAM3 runs on them score
 after a frame repair in the scorer (\SIrange{0.25}{0.27}{\metre} on
 \repo{000}), but the IMU stayed uninitialised for most of nine runs (an upstream
-map reset at the initialisation, then a starved re-initialisation), VINS-Fusion
-has no valid run, and the marker-to-IMU lever arm is unmeasured, so the filter
-hypothesis remains untested on the real robot and no headline is claimed.}
+map reset at the initialisation, then a starved re-initialisation). On
+11 November all twelve were re-made with the fork's patch-15 switches active:
+the upstream reset does not occur in any of them, every estimate is level, and
+scored with no repair at all they give \SIrange{0.251}{0.268}{\metre} on
+\repo{000}, \SIrange{0.442}{1.278}{} on \repo{_001} and
+\SIrange{0.172}{0.198}{} on \repo{_002}, seven of the twelve
+\status{completed} where none was before. Patch 15 is therefore exercised, and
+what it establishes is that the scorer's repair is no longer needed, not that
+the estimator is more accurate: against the repaired stock figures it matches
+on \repo{000}, is mixed on \repo{_001} and wins on \repo{_002}.
+VINS-Fusion has no valid run, the marker-to-IMU lever arm is unmeasured, and no
+filtered run exists, so the filter hypothesis remains untested on the real
+robot and no headline is claimed.}
 
 \paragraph{Objective.} Establish whether the two unfiltered pipelines track the
 real robot against an independent reference, as the precondition for a
@@ -509,50 +638,106 @@ estimate is stereo-only in a map whose vertical is the camera's $y$ axis, and
 the late re-initialisation rotates the map under the already-written poses (the
 \SIrange{1.9}{6.8}{\metre} steps).
 
-The scorer repairs both without the truth: the pre-initialisation poses are
-rotated by the rotation measured at the initialisation frame, and each map's
-fitted plane is levelled. With the bags on the dataset drive the time offsets
-come from the wheel speed on all three recordings (\cref{tab:realv7-results},
-\cref{fig:realv7-paths-repaired}). \repo{000} scores
-\SIrange{0.25}{0.27}{\metre} in all four configurations over \SI{89}{\second}
-(RPE at \SI{1}{\second} \SI{0.05}{\metre}), with the IMU initialised for at
-most a quarter of the frames. \repo{001} scores \SIrange{0.44}{0.82}{\metre}
-over \SI{126}{\second}, one run failing the scorer's one-metre vertical-range
-rule by two centimetres. \repo{002} scores \SI{0.47}{\metre} for the CPU front
-end with loop closing; two runs lose tracking inside the route and one drifts
-(vertical range \SI{4.3}{\metre}, failed). The init-time resets leave every
-other run \emph{partial} under the scorer's rules.
+A scorer-side repair was written while the cause was being found: it rotates
+the pre-initialisation poses by the rotation measured at the initialisation
+frame and levels each map's fitted plane, both without using the truth.
+It is kept for the record and is not used
+for any result below, because the defect it worked around is now fixed in the
+estimator; the one figure it produced that is still worth quoting is that on
+\repo{000} it recovered \SIrange{0.252}{0.275}{\metre} from runs whose
+estimates were lying on their side.
 
 The fork's patch 15 adds two switches that attempt the initialisation with a
-queued backlog and skip the low-motion reset for stereo; they are on in the
-real-rig configuration and not yet exercised on a recording. VINS-Fusion
+queued backlog and skip the low-motion reset for stereo. On 11 November 2026
+all twelve runs were re-made with both active, and
+\cref{tab:realv7-patch15} reports them scored \emph{raw}: neither of the two
+repairs above was applied, which is the point of the table.
+
+The upstream behaviour is gone from every run. The IMU initialised at
+\SIrange{2.8}{4.7}{\second} and was retained; thirteen of the sixteen request
+no map reset at all and the other three request one for a timestamp jump, not
+for insufficient motion. The plane of the estimate now lies
+\SIrange{0.2}{2.8}{\degree} from horizontal in every run against the
+\SIrange{5}{90}{\degree} of \cref{tab:realv7-tilt}, and the vertical range
+falls from as much as \SI{9.6}{} to at most \SI{1.00}{\metre}. Under the
+scorer's own rules seven \repo{realv7} runs are now \status{completed} where
+none was before and the other five are \status{partial}; the four
+\repo{realv6} runs remain rejected, not for anything the estimator did but
+because that recording's tracker export fails the validity rules.
+
+The accuracy claim is narrower than the defect claim, and the three recordings
+disagree. Set against the same configuration under upstream initialisation
+\emph{after both repairs} --- each estimator at the best obtainable from it ---
+patch 15 matches it on \repo{realv7_000} (\SIrange{0.251}{0.268}{} against
+\SIrange{0.252}{0.275}{\metre}), is mixed on \repo{_001}, where two runs
+improve and two worsen and one of those reaches \SI{1.278}{} against
+\SI{0.817}{\metre}, and beats it on \repo{_002}
+(\SIrange{0.172}{0.198}{} against \SIrange{0.472}{2.115}{\metre}, every one
+of the four better than anything the repair obtained there) and on
+\repo{realv6_000}, where all four improve
+(\SIrange{0.404}{0.480}{} against \SIrange{0.457}{1.028}{\metre}) and the two
+CPU runs improve most. The
+defensible statement is therefore not that patch 15 is more accurate. It is
+that patch 15 removes the need for the repair: it reaches on the raw estimate
+what the stock estimator reaches only after its frame bookkeeping has been
+corrected offline, and on the one recording the repair handled worst it
+reaches considerably more. The
+\SIrange{0.172}{0.198}{\metre} runs of \repo{_002} are the most accurate
+real-robot ORB-SLAM3 figures in this report.
+
+\begin{queried}[Open: what the improvement is owed to]
+Two things differ between the two sets of runs, not one. Patch 15 is the
+first; the second is that \repo{IMU.NoiseGyro} and \repo{IMU.NoiseAcc} were
+inflated tenfold on 3 November, and no artefact records which values that
+afternoon's runs used, because \repo{run_metadata.csv} stores the
+configuration's path and not its contents. The loss of the tilt is
+patch 15's: the upstream rule tests keyframe spacing below \SI{2}{\centi\metre}
+within \SI{10}{\second} and cannot be influenced by an inertial noise density.
+Any part of the accuracy difference is not separable on the present evidence.
+One control run, the same bag at today's noise with both switches returned to
+upstream, would separate them and has not been made.
+\end{queried}
+
+\begin{queried}[Provenance: the 3 November estimates are gone]
+The re-runs overwrote \path{output/output_orb/real/dataset_realv7_00*/} in
+place, so the pre-patch-15 estimates of all three recordings no longer exist
+and neither \cref{tab:realv7-tilt} nor \cref{fig:realv7-tilt} can be
+regenerated; the frozen copies beside the generator are the only record of the
+behaviour this section reports as corrected. A run directory should be
+written under a name that carries its configuration, so that a re-run cannot
+overwrite the evidence for the behaviour it replaces.
+\end{queried} VINS-Fusion
 diverges on all three with the IMU stream intact (zero resets) and
 \SIrange{40}{45}{\percent} of the frames received (\cref{tab:realv7-vins}); its
 gravity norm has since been set to the measured \SI{9.886}{\metre\per\second\squared}.
 
-\input{../../../../output/compare/real/realv7-insights/tilt_table.tex}
+\input{../../../../output/compare/real/realv7-insights/tilt_table_prepatch15.tex}
 
 \begin{figure}[p]
   \centering
-  \includegraphics[width=\textwidth]{../../../../output/compare/real/realv7-insights/fig_tilt_light.png}
+  \includegraphics[width=\textwidth]{../../../../output/compare/real/realv7-insights/fig_tilt_light_prepatch15.png}
   \caption[The twelve realv7 estimates as written in the live log.]{The twelve
   \repo{realv7} ORB-SLAM3 estimates as written in the live
   log, seen from the side ($x$ against $z$, centred); a floor robot's path should
-  be a flat line. The repaired estimates are in \cref{fig:realv7-paths-repaired}.}
+  be a flat line. This is the defect that fork patch 15 removes; the estimates
+  it produces instead are \cref{fig:realv7-paths-patch15}.}
   \label{fig:realv7-tilt}
 \end{figure}
 
-\input{../../../../output/compare/real/realv7-insights/results_table.tex}
+\input{../../../../output/compare/real/realv7-insights/patch15_table.tex}
 
 \begin{figure}[p]
   \centering
-  \includegraphics[width=\textwidth]{../../../../output/compare/real/realv7-insights/fig_paths_lvl_light.png}
-  \caption[The twelve realv7 runs after the frame repair.]{The twelve
-  \repo{realv7} ORB-SLAM3 runs after the scorer's frame
-  repair, against the tracker truth after rigid SE(2) alignment; each panel's
-  title gives the planar ATE and the share of tracked frames with the IMU
-  initialised.}
-  \label{fig:realv7-paths-repaired}
+  \includegraphics[width=\textwidth]{../../../../output/compare/real/realv7-insights/fig_paths_patch15_light.png}
+  \caption[Every real-robot run with patch 15, scored raw.]{Every real-robot
+  ORB-SLAM3 run on the four recordings that carry an independent planar
+  reference, with fork patch 15 active, against the tracker truth after rigid
+  SE(2) alignment. No repair of
+  any kind is applied: these are the estimates as the node wrote them, where
+  those of \cref{fig:realv7-tilt} had to be levelled and rotated before they
+  could be drawn at all. Each panel gives the planar ATE, the tilt of the
+  fitted plane and the scorer's status.}
+  \label{fig:realv7-paths-patch15}
 \end{figure}
 
 \input{../../../../output/compare/real/realv7-insights/vins_table.tex}
@@ -566,22 +751,29 @@ before any value from this recording is quoted outside a diagnostic.
 \end{queried}
 
 \paragraph{Summary.} The real robot has an unfiltered ORB-SLAM3 reference at a
-provisional \SIrange{0.46}{0.52}{\metre} on \repo{realv6} (GPU front end) and
-\SIrange{0.25}{0.27}{\metre} on \repo{realv7_000} with valid truth after the
-scorer's frame repair, a measured cost of the CPU front end at real time, the
-cause of the IMU staying uninitialised for most of nine \repo{realv7} runs (an
-upstream map reset at the initialisation and a starved re-initialisation)
-patched in the fork but not yet exercised, and two diagnosed VINS-Fusion
-defects, one of them (the gravity norm) now corrected in the configuration. The
-experiment's own question, whether filtering helps, is still untested on real
-imagery.
+provisional \SIrange{0.46}{0.52}{\metre} on \repo{realv6} (GPU front end) and,
+on the three \repo{realv7} recordings with valid truth,
+\SIrange{0.251}{0.268}{}, \SIrange{0.442}{1.278}{} and
+\SIrange{0.172}{0.198}{\metre} with no repair applied at all. The cause of the
+IMU staying uninitialised for most of nine of the original twelve runs --- an
+upstream map reset at the initialisation and a starved re-initialisation --- is
+diagnosed, patched in the fork and now exercised: with the two switches active
+the reset does not occur in any of the twelve, every estimate is level, and the
+scorer's frame repair is no longer needed. What the patch is not shown to do is
+improve accuracy, which it matches on one recording, splits on a second and
+improves on the third. Also here: a measured cost of the CPU front end at real
+time, and two diagnosed VINS-Fusion defects, one of them (the gravity norm) now
+corrected in the configuration. The experiment's own question, whether
+filtering helps, is still untested on real imagery.
 
-\paragraph{Next action.} Run one \repo{realv7} recording with the fork's two
-initialisation switches on and confirm from the per-frame log that the IMU
-stays initialised from the first seconds; re-run VINS-Fusion with the corrected
-gravity norm; repeat each ORB-SLAM3 configuration under a new run name; measure
-the marker-to-IMU lever arm; then run both pipelines filtered
-and unfiltered on the same recording, with the detector live, and score them
-with the admissibility gates of the simulation slots.
+\textbf{Next action.} Run one \repo{realv7} recording with both initialisation
+switches returned to upstream at the current inertial noise, which is the
+control that separates patch 15 from the tenfold noise change made the same
+week; re-run VINS-Fusion with the corrected gravity norm; measure the
+marker-to-IMU lever arm, which every real figure in this chapter is provisional
+on; then run both pipelines filtered and unfiltered on the same recording, with
+the detector live, and score them with the admissibility gates of the
+simulation slots. Write each run under a directory name that carries its
+configuration, so that no re-run overwrites the evidence it replaces.
 
 \end{document}

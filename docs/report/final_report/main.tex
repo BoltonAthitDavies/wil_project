@@ -208,6 +208,12 @@
 %     \textbf{Status: #1.}\ #2}}\par\medskip}
 \newcommand{\status}[1]{\textbf{#1}}
 
+% Source line beneath a reproduced figure or table, in the manual's form:
+%   \figsource{Campos et al., 2021}  ->  (Source : Campos et al., 2021)
+% The manual requires a reproduced item to carry BOTH a citation number and
+% this line; the citation stays in the caption, the attribution goes here.
+\newcommand{\figsource}[1]{\par\vspace{-0.4em}{\centering\small (Source : #1)\par}}
+
 % ---------------------------------------------------------------- \repo
 % Repository paths, identifiers and commit hashes in typewriter, breakable at
 % path separators first and only reluctantly elsewhere.

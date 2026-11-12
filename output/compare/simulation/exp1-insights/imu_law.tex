@@ -1,0 +1,16 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption[IMU dead reckoning: growth law of the error and the share the heading error explains.]{IMU dead reckoning: exponent $k$ of a power-law fit $|e| \propto t^{k}$ to the anchored position error after the first \SI{5}{\second} (with its $R^2$), the final heading error, and the share of the final position error that integrating the true velocity through the heading error alone reproduces. A share near one means the position error is heading error integrated along the path; a share well below one means the velocity (accelerometer) integration itself is wrong.}
+\label{tab:e1i-imu}
+\begin{tabular}{lrrrrr}
+\toprule
+Recording & $k$ & $R^2$ & final error [m] & final heading [\si{\degree}] & heading-only share \\
+\midrule
+\repo{allsensor_realistic_000} & 1.53 & 0.80 & 76.0 & 1.8 & 0.01 \\
+\repo{allsensor_realistic_001} & 2.22 & 0.82 & 39.8 & -0.8 & 0.01 \\
+\repo{allsensor_realistic_002} & 1.71 & 0.92 & 39.2 & 3.3 & 0.01 \\
+\repo{allsensor_realistic_003} & 0.91 & 0.85 & 35.5 & -3.2 & 0.01 \\
+\bottomrule
+\end{tabular}
+\end{table}

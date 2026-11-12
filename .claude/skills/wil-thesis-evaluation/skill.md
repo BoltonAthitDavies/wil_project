@@ -28,10 +28,18 @@ domains, simulation and the real robot**, giving eight result slots in total:
 
 | # | Experiment | Architecture block | Question it answers |
 |---|---|---|---|
-| 1 | Non-Visual Baseline and Estimator Comparison | #4 robot odometry / SLAM output | Do the visual pipelines genuinely outperform wheels, IMU, and a wheel+IMU EKF? |
-| 2 | Offline YOLO Detector Performance | #2 object detection | How reliably does the detector find and name warehouse objects, independent of SLAM, and how much of the frame could masking remove? |
-| 3 | Visual-Inertial Odometry With Dynamic Environment Filtering Evaluation | #1 SLAM front end | Does masking dynamic-object features improve localization, at what compute cost, and does tracking survive it? |
-| 4 | Dense Map Reconstruction and Map-Quality Evaluation | #3 SLAM back end / map | Does the reconstructed map reflect the physical environment and is it usable by a route planner? |
+| 1 | Estimator Comparison Against a Non-Visual Baseline | #1 SLAM front end / #4 robot odometry | How well does each estimator localise, does a wheel+IMU baseline match the visual pipelines on the same recordings, which of a pipeline's own switches decides its error, and at what compute cost? |
+| 2 | Offline YOLO Detector Performance | #2 object detection | How reliably does the detector find and name warehouse objects, independent of SLAM? |
+| 3 | Dense Map Reconstruction and Map-Quality Evaluation | #3 SLAM back end / map | Does the reconstructed map reflect the physical environment, including what a dynamic environment leaves in it, and is it usable by a route planner? |
+| 4 | Autonomous Navigation on the Reconstructed Map | whole pipeline driving a planner | Can the robot relocalise against a prior it did not build, plan through it, and reach a goal set without colliding with structure the map got wrong? |
+
+**Restructured 11 November 2026.** Experiments 1 and 3 were merged into the new
+Experiment 1; the dense-map experiment moved from 4 to 3; navigation became the
+new Experiment 4. The dynamic-environment question is now asked of the map, not
+of the estimator: the semantic-masking arm exists in both pipelines, was never
+run, and **is not reported**. Do not reinstate it, do not cite a "filtered run",
+and do not treat `detection_match_rate` or `filter_status` as a reportable
+quantity.
 
 Do not add a fifth experiment, merge two, or rename these. New evidence goes into
 one of the eight slots. The project's stated targets are ATE $\le$ 0.05 m and
@@ -154,9 +162,9 @@ recording were retired to `trash/output/` that day and are never mixed back in:
 
 | domain | in use | role |
 |---|---|---|
-| simulation | `dataset_allsensor_realistic_000` (U, static twin), `_001` (I, static twin), `_002` (U, traffic), `_003` (I, traffic) | Experiments 1 and 3; `_000`/`_001` are also the independent probes of the Experiment 4 maps |
-| simulation | `dataset_allsensor_realistic_map` (U, formerly `_mapv2`), `dataset_allsensor_realistic_01_map` (I) | Experiment 4 builds; **the only source of Experiment 3's latency/resource measurement**, three repeats of each configuration (18 runs, 6-7 Nov 2026) |
-| simulation | `dataset_map_tiny` | the tiny map of Experiment 4 (its independent drivability route is lost) |
+| simulation | `dataset_allsensor_realistic_000` (U, static twin), `_001` (I, static twin), `_002` (U, traffic), `_003` (I, traffic) | Experiments 1 and 3; `_000`/`_001` are also the independent probes of the Experiment 3 maps |
+| simulation | `dataset_allsensor_realistic_map` (U, formerly `_mapv2`), `dataset_allsensor_realistic_01_map` (I) | Experiment 3 builds; **the only source of Experiment 3's latency/resource measurement**, three repeats of each configuration (18 runs, 6-7 Nov 2026) |
+| simulation | `dataset_map_tiny` | the tiny map of Experiment 3 (its independent drivability route is lost) |
 | real robot | `dataset_realv6_000` (31 Oct; tracker truth needs the 184.9 s sample removed; export at 1.7 Hz fails the validity rules), `dataset_realv7_000/001/002` (3 Nov; truth passes the rules) | Experiments 1 (visual only) and 3; `realv8` is out |
 
 Retired and never selected: `dataset_allsensor_00x`, `dataset_static_*` and
@@ -167,7 +175,7 @@ four-class `*_4class` runs of 7 Nov are current). "Dynamic environment" in the r
 the traffic of `_002`/`_003` noted as a *condition* of a recording (no two
 recordings share a route, so it is never a factor); the user's forward interest
 is map reconstruction after objects have been moved, not real-time filtering,
-so the filtered arms are blank in both domains until told otherwise.
+so the masking arm is not reported in either domain (§1).
 
 **Ground truth** for every simulation bag is canonical at
 `dataset/gt/<bag>/ground_truth.csv` (the tree copies under `output/output_*/`
@@ -272,13 +280,13 @@ Standing rules from the 6 November 2026 decision:
   configs declare (`script/make_vslam_noise_yaml.py --preset inflated` from
   `config/wil_sim/stereo_imu.yaml`); the measured-noise EKF is a diagnostic row
   (`analyse_proprio.py --ekf-diagnostic output_ekf_measured`), never the baseline.
-- **Experiment 3, accuracy:** one run per cell on `realistic_000..003`; factors
-  are estimator, front end (CPU/GPU), loop closer (active/disabled). On the I
-  layout a filtered-vs-unfiltered pair must use the closer **disabled**: both
-  loop-closing runs accept a false 14 m closure at 73 s on `realistic_001`.
+- **Experiment 1, visual accuracy:** one run per cell on `realistic_000..003`; factors
+  are estimator, front end (CPU/GPU), loop closer (active/disabled). Both
+  loop-closing runs accept a false 14 m closure at 73 s on `realistic_001`, so
+  any comparison on the I layout must use the closer **disabled**.
   Quote the planar onset table beside the 3-D ATE (vertical drift is charged to
   a floor robot).
-- **Experiment 3, latency/resources:** only from repeated runs on
+- **Experiment 1, latency/resources:** only from repeated runs on
   `dataset_allsensor_realistic_map` and `_01_map` (18 runs since 7 Nov 2026:
   ORB-SLAM3 CPU and GPU front ends closure-free, and VINS-Fusion, 3 repeats
   each; `mapping_resources.tex`). The per-run resource table of the accuracy
@@ -293,7 +301,7 @@ Standing rules from the 6 November 2026 decision:
   they are unscorable on both sides and the write-up says so. Quote recall on
   both bases (scored = exemptions applied; all = every projected box) and the
   moving-object recall as the headline. Real robot: blank/planned (user, 7 Nov).
-- **Experiment 4:** the four realistic maps are two configurations x two
+- **Experiment 3:** the four realistic maps are two configurations x two
   layouts, n = 1 each; parameter attributions are signatures, not ablations.
 
 ## 5. Required provenance and quality checks
@@ -334,7 +342,7 @@ Current primary artifacts are:
 | Artifact | Meaning | Typical consumer |
 |---|---|---|
 | `vio.csv` | Timestamped estimated trajectory | trajectory metrics and plots |
-| `yolo_mask.csv` | Masks actually used by the tracker | filtering coverage and timing analysis. `run_summary.csv` / `filter_summary.csv` carry `detection_match_rate` and `filter_status`; quote both beside any filter result, because a low match rate means the filter did not run rather than did not help |
+| `yolo_mask.csv` | Masks actually used by the tracker | **not reported** since 11 Nov 2026 (§1). Kept so an old run directory can be interpreted: a low `detection_match_rate` in `run_summary.csv` / `filter_summary.csv` means the filter did not run, not that it did not help |
 | `output/yolo_eval/<bag>_4class/yolo_eval.csv` (the three-class `dyn_*` runs were retired 6 Nov 2026 to `trash/output/yolo_eval/`) | YOLO predictions matched against projected Gazebo ground truth | precision, recall, IoU, and moving/static analysis |
 | `output/yolo_eval/*/yolo_detections.csv` | Per-detection offline results | threshold, class, and error analysis |
 | `output/yolo_eval/*/overlay/` | Visual GT/prediction overlays | qualitative validation of projections and matching |
@@ -473,7 +481,8 @@ ros2 launch orbslam3_ros2 wil_sim_stereo_imu.launch.py \
 
 # Dynamic-filter treatment. filter:=true also starts dynamic_detector_node.py,
 # which runs YOLO live alongside the tracker -- that concurrency is part of the
-# system under test (Experiment 3 is a deployment evaluation at replay rate 1.0).
+# system under test. NOTE: the masking arm is NOT reported since 11 Nov 2026;
+# this block is kept only so that an old run directory can be interpreted.
 # Mask availability therefore varies with machine load: measured 1-100% across
 # repeats, declining within a session as the laptop heats. Report
 # detection_match_rate and filter_status from run_summary.csv beside every
@@ -513,7 +522,7 @@ ros2 run vins_fusion_ros2 vins_fusion_ros2_node --ros-args \
 # Simulation dynamic-filter treatment. Use the LAUNCH FILE, not `ros2 run`: it
 # starts the detector node and the estimator together, in order, both reading
 # the compressed camera topics directly. Starting the detector by hand is what
-# produced four Experiment 3 runs with matched=0 on 2026-09-16 and more on
+# produced four masked runs with matched=0 on 2026-09-16 and more on
 # 2026-10-15/16. Use the SAME launch file for the baseline arm (filter:=false),
 # so the two arms differ only by the variable under test.
 ros2 launch vins_fusion_ros2 wil_sim_vins_filter.launch.py \
@@ -726,16 +735,16 @@ Exactly four sections, in the fixed order, and inside each **two domain
 subsections** -- eight result slots:
 
 ```text
-4.1 Experiment 1: Non-Visual Baseline and Estimator Comparison
+4.1 Experiment 1: Estimator Comparison Against a Non-Visual Baseline
     4.1.1 Simulation
     4.1.2 Real robot
 4.2 Experiment 2: Offline YOLO Detector Performance
     4.2.1 Simulation
     4.2.2 Real robot
-4.3 Experiment 3: Visual-Inertial Odometry With Dynamic Environment Filtering
+4.3 Experiment 3: Dense Map Reconstruction and Map-Quality Evaluation
     4.3.1 Simulation
     4.3.2 Real robot
-4.4 Experiment 4: Dense Map Reconstruction and Map-Quality Evaluation
+4.4 Experiment 4: Autonomous Navigation on the Reconstructed Map
     4.4.1 Simulation
     4.4.2 Real robot
 4.5 Cross-experiment discussion, simulation-to-real comparison, threats to
@@ -751,15 +760,15 @@ hardware or calibration), and the exact next action -- and nothing else. Do not
 let an empty slot borrow the other domain's numbers, and do not compare the two
 domains of an experiment until both slots hold valid results.
 
-Status of the eight slots at the 7 November 2026 cutoff, which the report
+Status of the eight slots at the 12 November 2026 cutoff, which the report
 states in table 4.1 and the user updates as data arrives:
 
 | Experiment | Simulation | Real robot |
 |---|---|---|
-| 1 Baseline / estimators | completed, 4 realistic bags, EKF at VSLAM-config noise; VINS best on all four (0.22-0.66 m) | partial: wheel+gyro dead reckoning (`script/real_wheel_baseline.py`, speed scale k=0.325 fitted on realv7_000, gyro y axis, wheelbase 0.60 m unused: steering is a command echo) 0.22-0.46 m on the held recordings vs ORB 0.44-0.52 m |
-| 2 YOLO detector | completed, 4 realistic bags, 4-class checkpoint `weight/runs_1/detect/train/weights/best.pt` (forklift = pallet jack): P 0.747, R 0.502 scored / 0.288 all, moving R 0.288, class F1 0.994 (`summarise_yolo_eval.py`, `exp2_insights.py`, outputs `output/yolo_eval/*_4class/`) | planned (no annotated frames; user: blank for now) |
-| 3 VIO + dynamic filtering | **partial** -- 20 unfiltered accuracy runs (the loop closer decides ORB-SLAM3's error) + 18 mapping-bag resource repeats (VINS back end 44 ms and a quarter of the memory vs ORB local mapping 211-406 ms, for 2x the cores); no filtered run | partial -- ORB provisional 0.25-0.27 m (realv7_000) / 0.46-0.52 m (realv6); VINS no valid run; no filtered run |
-| 4 Dense map | **partial** -- tiny map passes; four realistic maps fail H6 (P 77.8-84.8 %, false obstacles 3.8-10.2 %); large map failed, no artefact | planned |
+| 1 Estimator comparison | **completed** -- 4 realistic bags; the non-visual family (EKF at VSLAM-config noise) and 20 visual runs, one per cell; the loop closer decides ORB-SLAM3's error; latency/resources from 18 mapping-bag repeats (VINS back end 44 ms and a quarter of the memory against ORB local mapping 211-406 ms, for 2x the cores) | **partial** -- wheel+gyro dead reckoning (`script/real_wheel_baseline.py`, k=0.325 fitted on realv7_000, gyro y axis) and 16 ORB-SLAM3 runs on 4 tracker-truthed recordings, all with patch 15 and scored raw. The two families are in the SAME ACCURACY CLASS: the baseline leads on realv7_001, ties on realv6_000 and loses realv7_002 (0.219 against ORB 0.172). VINS-Fusion has no valid run; no EKF (steering is a command echo) |
+| 2 YOLO detector | **completed** -- 4 realistic bags, 4-class checkpoint `weight/runs_1/detect/train/weights/best.pt` (forklift = pallet jack): P 0.747, R 0.502 scored / 0.288 all, moving R 0.288, class F1 0.994 | **planned** (no annotated frames) |
+| 3 Dense map | **partial** -- tiny map passes; four realistic maps fail (P 77.8-84.8 %, false obstacles 3.8-10.2 %), and their graphs are accurate to 0.10-0.40 m rms, so the failure is grid construction and not the poses; large map failed, no artefact; **no map built with traffic present** | **planned** (no database from real imagery, no site geometry to score against) |
+| 4 Navigation | **partial** -- 7 live runs (12 Nov) in 3 of the 4 worlds, hand-driven 21-153 m, median tracking 0.50 m, min clearance 0.58 m, one run lost the pose; error is a constant OFFSET matching Experiment 3's wall displacement, so the slot is MAP-limited not estimator-limited; the init transient latches the first fix 73-76 deg wrong until held 5 s. **No goal was commanded**, so goal-reaching, planning and recovery remain `planned`. Single run per cell and the acceptance sweep shows run-to-run spread as wide as between-setting differences, so no comparison inside the table is evidence | **planned** (blocked behind Experiment 3's real-robot slot: no map to navigate on) |
 
 "Untested" and "failed" are reported as findings, with cause where confirmed and
 untested explanations labelled as such. Weak, negative, or disappointing results
@@ -791,11 +800,13 @@ action.}` become `\textbf{...}`, `\reporttable{x}` becomes
 chapter-3 cross-reference labels `sec:results-proprio`, `sec:exp1-real`,
 `sec:yolo-performance`, `fig:yolo-ground-truth-overlay`, `sec:results-validity`,
 `sec:realistic-ab`, `sec:rpe`, `sec:trajectory-results`, `sec:exp3-real` are
-added as aliases, and the note's own `\label{sec:vio-filter-method}` is
-dropped because chapter 3 owns it). Regenerate rather than hand-edit; the
-Experiment 4 slot still inputs the fragment `m4_exp4_sim` for the tiny map,
-and the `m4_exp1_sim`, `m4_exp2_sim`, `m4_exp3_*` and `m4_discussion` fragments
-are no longer input (they report retired data).
+added as aliases). Since 11 November 2026 only slots 1 and 2 are generated
+from the notes; Experiment 3 (maps) and Experiment 4 (navigation) are
+chapter-authoritative and edited in the chapter itself. Regenerate rather than
+hand-edit the generated slots; the Experiment 3 slot still inputs the fragment
+`m4_exp4_sim` for the tiny map, and the `m4_exp1_sim`, `m4_exp2_sim`,
+`m4_exp3_*` and `m4_discussion` fragments are no longer input (they report
+retired data).
 
 Each slot in the raw write-up keeps the fixed order (status; objective;
 process; dataset; results; analysis; summary; future plan), written to the

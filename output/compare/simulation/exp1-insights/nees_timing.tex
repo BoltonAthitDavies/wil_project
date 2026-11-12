@@ -1,0 +1,18 @@
+\begin{table}[htbp]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\caption[When the EKF's NEES leaves its band, against the first turn.]{When the EKF's 3-DOF NEES first stays above the \SI{97.5}{\percent} band (\num{9.35}) for \SI{5}{\second}, as time since the start and as distance travelled, against the time of the first ground-truth heading change (yaw rate above \SI{10}{\degree\per\second}); for the EKF with its measured per-recording noise model and for the same filter on the VSLAM noise file. NEES sampled at \SI{1}{\hertz} from the logged covariance. ``never'': the band is not left for \SI{5}{\second} in the run.}
+\label{tab:e1i-nees}
+\begin{tabular}{lrrrrrrr}
+\toprule
+Recording & first turn & \multicolumn{3}{c}{EKF, measured noise} & \multicolumn{3}{c}{EKF @ VSLAM noise} \\
+ & [s] & leaves at [s] & at [m] & median NEES & leaves at [s] & at [m] & median NEES \\
+\midrule
+\repo{allsensor_realistic_000} & 10.5 & 10.0 & 11.9 & 57.5 & 10.0 & 11.9 & 15.0 \\
+\repo{allsensor_realistic_001} & 24.7 & 25.0 & 33.8 & 34.2 & 27.0 & 36.0 & 3.6 \\
+\repo{allsensor_realistic_002} & 12.7 & 9.0 & 11.4 & 116.6 & 27.0 & 37.4 & 34.0 \\
+\repo{allsensor_realistic_003} & 20.6 & 20.0 & 28.2 & 73.7 & 21.0 & 28.7 & 139.2 \\
+\bottomrule
+\end{tabular}
+\end{table}

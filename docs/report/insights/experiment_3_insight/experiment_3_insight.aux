@@ -17,99 +17,89 @@
 \providecommand\HyField@AuxAddToFields[1]{}
 \providecommand\HyField@AuxAddToCoFields[2]{}
 \@writefile{toc}{\contentsline {section}{\numberline {1}Questions and method}{1}{section.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Within-run contrasts.}{1}{section*.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Lever arm (Q5).}{2}{section*.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {2}Insight 1: the error that appears at turns is the scoring lever arm}{2}{section.4.2}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {I.1}{\ignorespaces Lever-arm sweep: ATE and turning drift against the assumed IMU offset.}}{2}{table.caption.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Raster.}{1}{section*.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Per-node observation.}{1}{section*.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Second map (retired).}{2}{section*.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Insight 1: the wrong cells are thick surfaces, not phantom obstacles}{2}{section.4.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {I.1}{\ignorespaces Occupied map cells by distance to the true structure.}}{2}{table.caption.4}\protected@file@percent }
 \providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
-\newlabel{tab:insight-lever}{{I.1}{2}{Lever-arm sweep: ATE and turning drift against the assumed IMU offset}{table.caption.3}{}}
-\newlabel{tab:insight-lever@cref}{{[table][1][4]I.1}{[1][2][]2}}
-\@writefile{lof}{\contentsline {figure}{\numberline {I.1}{\ignorespaces Whole-run planar ATE of every tracked unfiltered run against the lever arm assumed between the model origin and the IMU. Solid lines are static recordings, dashed the realistic dynamic recordings. The dotted line is the value in the robot model.\relax }}{2}{figure.caption.5}\protected@file@percent }
-\newlabel{fig:lever}{{I.1}{2}{Whole-run planar ATE of every tracked unfiltered run against the lever arm assumed between the model origin and the IMU. Solid lines are static recordings, dashed the realistic dynamic recordings. The dotted line is the value in the robot model.\relax }{figure.caption.5}{}}
-\newlabel{fig:lever@cref}{{[figure][1][4]I.1}{[1][2][]2}}
-\@writefile{lot}{\contentsline {table}{\numberline {I.2}{\ignorespaces Lever arm that minimises each run's ATE.}}{3}{table.caption.4}\protected@file@percent }
-\newlabel{tab:insight-lever-argmin}{{I.2}{3}{Lever arm that minimises each run's ATE}{table.caption.4}{}}
-\newlabel{tab:insight-lever-argmin@cref}{{[table][2][4]I.2}{[1][2][]3}}
-\@writefile{toc}{\contentsline {section}{\numberline {3}Insight 2: after the correction, turning does not raise the error}{4}{section.4.3}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {I.3}{\ignorespaces Within-run drift contrasts, extreme world.}}{4}{table.caption.6}\protected@file@percent }
-\newlabel{tab:insight-contrast-extreme}{{I.3}{4}{Within-run drift contrasts, extreme world}{table.caption.6}{}}
-\newlabel{tab:insight-contrast-extreme@cref}{{[table][3][4]I.3}{[1][4][]4}}
-\@writefile{lot}{\contentsline {table}{\numberline {I.4}{\ignorespaces Within-run drift contrasts, realistic world.}}{5}{table.caption.7}\protected@file@percent }
-\newlabel{tab:insight-contrast-realistic}{{I.4}{5}{Within-run drift contrasts, realistic world}{table.caption.7}{}}
-\newlabel{tab:insight-contrast-realistic@cref}{{[table][4][4]I.4}{[1][4][]5}}
-\@writefile{lof}{\contentsline {figure}{\numberline {I.2}{\ignorespaces Drift rate while turning against drift rate on straights, one marker per run, ground truth at the IMU point. Negative rates are drawn at the axis floor. A run above the diagonal drifts faster while turning.\relax }}{5}{figure.caption.8}\protected@file@percent }
-\newlabel{fig:turn}{{I.2}{5}{Drift rate while turning against drift rate on straights, one marker per run, ground truth at the IMU point. Negative rates are drawn at the axis floor. A run above the diagonal drifts faster while turning.\relax }{figure.caption.8}{}}
-\newlabel{fig:turn@cref}{{[figure][2][4]I.2}{[1][4][]5}}
-\@writefile{toc}{\contentsline {section}{\numberline {4}Insight 3: in the extreme world the failure is immediate and is not modulated by how much moving object is in view}{6}{section.4.4}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {I.5}{\ignorespaces What the robot was doing at the onset, extreme world.}}{6}{table.caption.9}\protected@file@percent }
-\newlabel{tab:insight-onset-extreme}{{I.5}{6}{What the robot was doing at the onset, extreme world}{table.caption.9}{}}
-\newlabel{tab:insight-onset-extreme@cref}{{[table][5][4]I.5}{[1][6][]6}}
-\@writefile{lot}{\contentsline {table}{\numberline {I.6}{\ignorespaces Extreme world: tracking events against the true moving-object area in view.}}{6}{table.caption.10}\protected@file@percent }
-\newlabel{tab:insight-mechanism-extreme}{{I.6}{6}{Extreme world: tracking events against the true moving-object area in view}{table.caption.10}{}}
-\newlabel{tab:insight-mechanism-extreme@cref}{{[table][6][4]I.6}{[1][6][]6}}
-\@writefile{lof}{\contentsline {figure}{\numberline {I.3}{\ignorespaces What precedes the onset, at the chapter's onset definition: median over runs (shaded, interquartile range) of the matched-feature count relative to the run's own pre-onset level, the true moving-object area in view (extreme world) or the number of traffic agents in view (realistic world), the image area the filter masked, and the ground-truth yaw rate, against time from onset.\relax }}{7}{figure.caption.11}\protected@file@percent }
-\newlabel{fig:epoch}{{I.3}{7}{What precedes the onset, at the chapter's onset definition: median over runs (shaded, interquartile range) of the matched-feature count relative to the run's own pre-onset level, the true moving-object area in view (extreme world) or the number of traffic agents in view (realistic world), the image area the filter masked, and the ground-truth yaw rate, against time from onset.\relax }{figure.caption.11}{}}
-\newlabel{fig:epoch@cref}{{[figure][3][4]I.3}{[1][6][]7}}
-\@writefile{toc}{\contentsline {section}{\numberline {5}Insight 4: in the realistic world the traffic in view does not measurably change the drift, and the class mask costs features when traffic is in view}{8}{section.4.5}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {I.7}{\ignorespaces Realistic world: tracking against traffic in the camera's view.}}{8}{table.caption.12}\protected@file@percent }
-\newlabel{tab:insight-traffic-realistic}{{I.7}{8}{Realistic world: tracking against traffic in the camera's view}{table.caption.12}{}}
-\newlabel{tab:insight-traffic-realistic@cref}{{[table][7][4]I.7}{[1][8][]8}}
-\@writefile{lof}{\contentsline {figure}{\numberline {I.4}{\ignorespaces Realistic dynamic recordings, unfiltered runs: anchored planar error (ground truth at the IMU point) with the moments a carrier or carried load is in the camera's view (violet) and the moments the robot turns (grey). The green band is the alignment window.\relax }}{9}{figure.caption.13}\protected@file@percent }
-\newlabel{fig:traffic}{{I.4}{9}{Realistic dynamic recordings, unfiltered runs: anchored planar error (ground truth at the IMU point) with the moments a carrier or carried load is in the camera's view (violet) and the moments the robot turns (grey). The green band is the alignment window.\relax }{figure.caption.13}{}}
-\newlabel{fig:traffic@cref}{{[figure][4][4]I.4}{[1][8][]9}}
-\@writefile{toc}{\contentsline {section}{\numberline {6}Insight 5: real robot (\texttt  {dataset_realv6_000}): ORB-SLAM3 tracks the figure-of-eight to \SI {0.5}{\metre } with the GPU front end, loses a factor of two with the CPU front end, and VINS-Fusion has not yet had a valid run}{10}{section.4.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{The recording.}{10}{section*.14}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{The runs.}{10}{section*.15}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Reporting rules.}{10}{section*.16}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {I.8}{\ignorespaces Realv6: raw versus cleaned tracker export.}}{11}{table.caption.17}\protected@file@percent }
-\newlabel{tab:realv6-cleaning}{{I.8}{11}{Realv6: raw versus cleaned tracker export}{table.caption.17}{}}
-\newlabel{tab:realv6-cleaning@cref}{{[table][8][4]I.8}{[1][10][]11}}
-\@writefile{lof}{\contentsline {figure}{\numberline {I.5}{\ignorespaces The tracker export of \texttt  {dataset_realv6_000}: one sample at \SI {184.9}{\second } lies \SI {5.2}{\metre } off the path and back (left), which puts an \SI {8.7}{\metre \per \second } spike into the speed profile the time alignment correlates against (right).\relax }}{11}{figure.caption.18}\protected@file@percent }
-\newlabel{fig:realv6-gt}{{I.5}{11}{The tracker export of \repo {dataset_realv6_000}: one sample at \SI {184.9}{\second } lies \SI {5.2}{\metre } off the path and back (left), which puts an \SI {8.7}{\metre \per \second } spike into the speed profile the time alignment correlates against (right).\relax }{figure.caption.18}{}}
-\newlabel{fig:realv6-gt@cref}{{[figure][5][4]I.5}{[1][10][]11}}
-\@writefile{lot}{\contentsline {table}{\numberline {I.9}{\ignorespaces Realv6: every surviving run against the cleaned tracker truth.}}{11}{table.caption.20}\protected@file@percent }
-\newlabel{tab:realv6-final}{{I.9}{11}{Realv6: every surviving run against the cleaned tracker truth}{table.caption.20}{}}
-\newlabel{tab:realv6-final@cref}{{[table][9][4]I.9}{[1][11][]11}}
-\@writefile{lof}{\contentsline {figure}{\numberline {I.6}{\ignorespaces Every surviving run against the cleaned tracker truth after rigid SE(2) alignment, one panel per run: ORB-SLAM3 with GPU or CPU extractor and loop closing on or off, and VINS-Fusion, whose \SI {18}{\second } before its resets took over are all it tracked.\relax }}{12}{figure.caption.19}\protected@file@percent }
-\newlabel{fig:realv6-paths}{{I.6}{12}{Every surviving run against the cleaned tracker truth after rigid SE(2) alignment, one panel per run: ORB-SLAM3 with GPU or CPU extractor and loop closing on or off, and VINS-Fusion, whose \SI {18}{\second } before its resets took over are all it tracked.\relax }{figure.caption.19}{}}
-\newlabel{fig:realv6-paths@cref}{{[figure][6][4]I.6}{[1][11][]12}}
-\@writefile{lot}{\contentsline {table}{\numberline {I.10}{\ignorespaces Realv6: ORB-SLAM3 drift while turning versus on straights.}}{12}{table.caption.22}\protected@file@percent }
-\newlabel{tab:realv6-turning}{{I.10}{12}{Realv6: ORB-SLAM3 drift while turning versus on straights}{table.caption.22}{}}
-\newlabel{tab:realv6-turning@cref}{{[table][10][4]I.10}{[1][11][]12}}
-\@writefile{lof}{\contentsline {figure}{\numberline {I.7}{\ignorespaces ORB-SLAM3 planar error against the cleaned tracker truth over the run, one panel per configuration. Grey bands: the aligned estimate's heading changes faster than \SI {10}{\degree \per \second }. Dotted red: the frames at which tracking left the OK state (the \texttt  {local_mapping_bad_imu} initialisation resets, all inside the first \SI {13}{\second }).\relax }}{13}{figure.caption.21}\protected@file@percent }
-\newlabel{fig:realv6-orb}{{I.7}{13}{ORB-SLAM3 planar error against the cleaned tracker truth over the run, one panel per configuration. Grey bands: the aligned estimate's heading changes faster than \SI {10}{\degree \per \second }. Dotted red: the frames at which tracking left the OK state (the \repo {local_mapping_bad_imu} initialisation resets, all inside the first \SI {13}{\second }).\relax }{figure.caption.21}{}}
-\newlabel{fig:realv6-orb@cref}{{[figure][7][4]I.7}{[1][11][]13}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}How the setting was reached}{14}{subsection.4.6.1}\protected@file@percent }
-\newlabel{sec:realv6-stability}{{6.1}{14}{How the setting was reached}{subsection.4.6.1}{}}
-\newlabel{sec:realv6-stability@cref}{{[subsection][1][4,6]6.1}{[1][14][]14}}
-\@writefile{lot}{\contentsline {table}{\numberline {I.11}{\ignorespaces Realv6: the VINS-Fusion run.}}{14}{table.caption.23}\protected@file@percent }
-\newlabel{tab:realv6-vins}{{I.11}{14}{Realv6: the VINS-Fusion run}{table.caption.23}{}}
-\newlabel{tab:realv6-vins@cref}{{[table][11][4]I.11}{[1][14][]14}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}realv7: three recordings with a valid tracker truth, and an IMU initialisation that the map reset threw away}{14}{subsection.4.6.2}\protected@file@percent }
-\newlabel{sec:realv7-tilt}{{6.2}{14}{realv7: three recordings with a valid tracker truth, and an IMU initialisation that the map reset threw away}{subsection.4.6.2}{}}
-\newlabel{sec:realv7-tilt@cref}{{[subsection][2][4,6]6.2}{[1][14][]14}}
-\@writefile{lof}{\contentsline {figure}{\numberline {I.8}{\ignorespaces VINS-Fusion on \texttt  {dataset_realv6_000}: distance of the estimate from its origin with every \texttt  {imu_gap} reset marked (top), and the IMU messages the node received against the samples the estimator used (bottom).\relax }}{15}{figure.caption.24}\protected@file@percent }
-\newlabel{fig:realv6-vins}{{I.8}{15}{VINS-Fusion on \repo {dataset_realv6_000}: distance of the estimate from its origin with every \repo {imu_gap} reset marked (top), and the IMU messages the node received against the samples the estimator used (bottom).\relax }{figure.caption.24}{}}
-\newlabel{fig:realv6-vins@cref}{{[figure][8][4]I.8}{[1][14][]15}}
-\@writefile{lot}{\contentsline {table}{\numberline {I.12}{\ignorespaces Realv7: the plane of every ORB-SLAM3 estimate as written in the live log.}}{15}{table.caption.25}\protected@file@percent }
-\newlabel{tab:realv7-tilt}{{I.12}{15}{Realv7: the plane of every ORB-SLAM3 estimate as written in the live log}{table.caption.25}{}}
-\newlabel{tab:realv7-tilt@cref}{{[table][12][4]I.12}{[1][15][]15}}
-\@writefile{lof}{\contentsline {figure}{\numberline {I.9}{\ignorespaces The twelve \texttt  {realv7} ORB-SLAM3 estimates as written in the live log, seen from the side (estimate $x$ against $z$, centred). A floor robot's path should be a flat line; on \texttt  {realv7_000} every run is the route drawn in a vertical plane. The repaired estimates are in \cref  {fig:realv7-paths-repaired}.\relax }}{17}{figure.caption.26}\protected@file@percent }
-\newlabel{fig:realv7-tilt}{{I.9}{17}{The twelve \repo {realv7} ORB-SLAM3 estimates as written in the live log, seen from the side (estimate $x$ against $z$, centred). A floor robot's path should be a flat line; on \repo {realv7_000} every run is the route drawn in a vertical plane. The repaired estimates are in \cref {fig:realv7-paths-repaired}.\relax }{figure.caption.26}{}}
-\newlabel{fig:realv7-tilt@cref}{{[figure][9][4]I.9}{[1][15][]17}}
-\@writefile{lot}{\contentsline {table}{\numberline {I.13}{\ignorespaces Realv7: every run after the frame repair, with its initialisation history.}}{17}{table.caption.27}\protected@file@percent }
-\newlabel{tab:realv7-results}{{I.13}{17}{Realv7: every run after the frame repair, with its initialisation history}{table.caption.27}{}}
-\newlabel{tab:realv7-results@cref}{{[table][13][4]I.13}{[1][16][]17}}
-\@writefile{lot}{\contentsline {table}{\numberline {I.14}{\ignorespaces Realv7: the VINS-Fusion runs.}}{17}{table.caption.29}\protected@file@percent }
-\newlabel{tab:realv7-vins}{{I.14}{17}{Realv7: the VINS-Fusion runs}{table.caption.29}{}}
-\newlabel{tab:realv7-vins@cref}{{[table][14][4]I.14}{[1][16][]17}}
-\@writefile{lof}{\contentsline {figure}{\numberline {I.10}{\ignorespaces The twelve \texttt  {realv7} ORB-SLAM3 runs after the scorer's frame repair, against the tracker truth after rigid SE(2) alignment; each panel's title gives the planar ATE and the share of tracked frames with the IMU initialised.\relax }}{18}{figure.caption.28}\protected@file@percent }
-\newlabel{fig:realv7-paths-repaired}{{I.10}{18}{The twelve \repo {realv7} ORB-SLAM3 runs after the scorer's frame repair, against the tracker truth after rigid SE(2) alignment; each panel's title gives the planar ATE and the share of tracked frames with the IMU initialised.\relax }{figure.caption.28}{}}
-\newlabel{fig:realv7-paths-repaired@cref}{{[figure][10][4]I.10}{[1][16][]18}}
-\@writefile{toc}{\contentsline {section}{\numberline {7}What these data cannot answer}{19}{section.4.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {8}Summary}{19}{section.4.8}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Consequences for Chapter 4.}{19}{section*.31}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {I.15}{\ignorespaces Questions, answers and the strength of the evidence.\relax }}{20}{table.caption.30}\protected@file@percent }
-\newlabel{tab:insight-summary}{{I.15}{20}{Questions, answers and the strength of the evidence.\relax }{table.caption.30}{}}
-\newlabel{tab:insight-summary@cref}{{[table][15][4]I.15}{[1][19][]20}}
-\gdef \@abspage@last{20}
+\newlabel{tab:insight4-classes}{{I.1}{2}{Occupied map cells by distance to the true structure}{table.caption.4}{}}
+\newlabel{tab:insight4-classes@cref}{{[table][1][4]I.1}{[1][2][]2}}
+\@writefile{lof}{\contentsline {figure}{\numberline {I.1}{\ignorespaces \texttt  {map_tiny.db} against the tiny world: correct occupied cells (green), surfaces drawn too thick (orange), phantom cells (red, the largest clusters labelled with their cell count), true surfaces the map observed but did not reproduce (blue), the recorded route and the optimised graph nodes.\relax }}{3}{figure.caption.5}\protected@file@percent }
+\newlabel{fig:cells-tiny}{{I.1}{3}{\repo {map_tiny.db} against the tiny world: correct occupied cells (green), surfaces drawn too thick (orange), phantom cells (red, the largest clusters labelled with their cell count), true surfaces the map observed but did not reproduce (blue), the recorded route and the optimised graph nodes.\relax }{figure.caption.5}{}}
+\newlabel{fig:cells-tiny@cref}{{[figure][1][4]I.1}{[1][2][]3}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Insight 2: surfaces are missed when they are seen edge-on and only once, not when they are far}{4}{section.4.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {I.2}{\ignorespaces Recall of the observed surfaces by incidence angle.}}{4}{table.caption.6}\protected@file@percent }
+\newlabel{tab:insight4-angle}{{I.2}{4}{Recall of the observed surfaces by incidence angle}{table.caption.6}{}}
+\newlabel{tab:insight4-angle@cref}{{[table][2][4]I.2}{[1][4][]4}}
+\@writefile{lot}{\contentsline {table}{\numberline {I.3}{\ignorespaces Precision and recall of the observed surfaces by the number of graph nodes whose stored local grid covers the cell.}}{4}{table.caption.7}\protected@file@percent }
+\newlabel{tab:insight4-views}{{I.3}{4}{Precision and recall of the observed surfaces by the number of graph nodes whose stored local grid covers the cell}{table.caption.7}{}}
+\newlabel{tab:insight4-views@cref}{{[table][3][4]I.3}{[1][4][]4}}
+\@writefile{lot}{\contentsline {table}{\numberline {I.4}{\ignorespaces Precision and recall of the observed surfaces by distance from the recorded route (\texttt  {dataset_map_tiny}, the route that built \texttt  {map_tiny.db}; for \texttt  {map_02.db} the same route is only a proxy for its own, unknown route).}}{4}{table.caption.8}\protected@file@percent }
+\newlabel{tab:insight4-dist}{{I.4}{4}{Precision and recall of the observed surfaces by distance from the recorded route (\repo {dataset_map_tiny}, the route that built \repo {map_tiny.db}; for \repo {map_02.db} the same route is only a proxy for its own, unknown route)}{table.caption.8}{}}
+\newlabel{tab:insight4-dist@cref}{{[table][4][4]I.4}{[1][4][]4}}
+\@writefile{lof}{\contentsline {figure}{\numberline {I.2}{\ignorespaces Precision of the occupied cells and recall of the observed surfaces against distance from the recorded route (left) and against the number of graph nodes that observed the cell (right), for both tiny-warehouse maps.\relax }}{5}{figure.caption.9}\protected@file@percent }
+\newlabel{fig:bins}{{I.2}{5}{Precision of the occupied cells and recall of the observed surfaces against distance from the recorded route (left) and against the number of graph nodes that observed the cell (right), for both tiny-warehouse maps.\relax }{figure.caption.9}{}}
+\newlabel{fig:bins@cref}{{[figure][2][4]I.2}{[1][4][]5}}
+\@writefile{lot}{\contentsline {table}{\numberline {I.5}{\ignorespaces Recall of the observed surfaces, per world object.}}{5}{table.caption.10}\protected@file@percent }
+\newlabel{tab:insight4-objects}{{I.5}{5}{Recall of the observed surfaces, per world object}{table.caption.10}{}}
+\newlabel{tab:insight4-objects@cref}{{[table][5][4]I.5}{[1][4][]5}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Insight 3: the loop closures corrected the graph, and the map did not need it}{6}{section.4.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {I.6}{\ignorespaces Loop closures and the correction they applied, \texttt  {map_tiny.db}.}}{6}{table.caption.11}\protected@file@percent }
+\newlabel{tab:insight4-closures}{{I.6}{6}{Loop closures and the correction they applied, \repo {map_tiny.db}}{table.caption.11}{}}
+\newlabel{tab:insight4-closures@cref}{{[table][6][4]I.6}{[1][6][]6}}
+\@writefile{lof}{\contentsline {figure}{\numberline {I.3}{\ignorespaces \texttt  {map_tiny.db}: odometry poses and optimised poses of the 29 nodes in the optimised graph, with the loop-closure links (left), and the planar and vertical correction each node received (right).\relax }}{6}{figure.caption.12}\protected@file@percent }
+\newlabel{fig:graph}{{I.3}{6}{\repo {map_tiny.db}: odometry poses and optimised poses of the 29 nodes in the optimised graph, with the loop-closure links (left), and the planar and vertical correction each node received (right).\relax }{figure.caption.12}{}}
+\newlabel{fig:graph@cref}{{[figure][3][4]I.3}{[1][6][]6}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Insight 4: on an independent route the second map blocks the robot at its phantom cells}{6}{section.4.5}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {I.7}{\ignorespaces Drivability of both maps under the true footprint along the recorded tiny route.}}{7}{table.caption.13}\protected@file@percent }
+\newlabel{tab:insight4-driv}{{I.7}{7}{Drivability of both maps under the true footprint along the recorded tiny route}{table.caption.13}{}}
+\newlabel{tab:insight4-driv@cref}{{[table][7][4]I.7}{[1][7][]7}}
+\@writefile{lot}{\contentsline {table}{\numberline {I.8}{\ignorespaces Where the probe route collides with the maps.}}{7}{table.caption.14}\protected@file@percent }
+\newlabel{tab:insight4-blocked}{{I.8}{7}{Where the probe route collides with the maps}{table.caption.14}{}}
+\newlabel{tab:insight4-blocked@cref}{{[table][8][4]I.8}{[1][7][]7}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Insight 5: the scored map was built from the recorded tiny bag, and the large-warehouse attempt left a database}{7}{section.4.6}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {I.9}{\ignorespaces The five RTAB-Map databases under \texttt  {map/}.}}{8}{table.caption.15}\protected@file@percent }
+\newlabel{tab:insight4-dbs}{{I.9}{8}{The five RTAB-Map databases under \repo {map/}}{table.caption.15}{}}
+\newlabel{tab:insight4-dbs@cref}{{[table][9][4]I.9}{[1][7][]8}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Insight 6: on the realistic maps the shelves are thickened and the walls displaced; the October builds are blocked at cells laid during initialisation, the November I build at cells laid in the aisles}{8}{section.4.7}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {I.10}{\ignorespaces Occupied map cells by distance to the true structure.}}{8}{table.caption.16}\protected@file@percent }
+\newlabel{tab:insight4-classes-realistic}{{I.10}{8}{Occupied map cells by distance to the true structure}{table.caption.16}{}}
+\newlabel{tab:insight4-classes-realistic@cref}{{[table][10][4]I.10}{[1][8][]8}}
+\@writefile{lof}{\contentsline {figure}{\numberline {I.4}{\ignorespaces \texttt  {map_realistic.db} (U, October) against the U-layout realistic world, placed by its fit; conventions as \cref  {fig:cells-tiny}. The route drawn is the independent probe \texttt  {realistic_000}, which did not build the map; the graph nodes are the build route. Phantom clusters are labelled with their cell count.\relax }}{9}{figure.caption.17}\protected@file@percent }
+\newlabel{fig:cells-realistic}{{I.4}{9}{\repo {map_realistic.db} (U, October) against the U-layout realistic world, placed by its fit; conventions as \cref {fig:cells-tiny}. The route drawn is the independent probe \repo {realistic_000}, which did not build the map; the graph nodes are the build route. Phantom clusters are labelled with their cell count.\relax }{figure.caption.17}{}}
+\newlabel{fig:cells-realistic@cref}{{[figure][4][4]I.4}{[1][8][]9}}
+\@writefile{lof}{\contentsline {figure}{\numberline {I.5}{\ignorespaces \texttt  {dataset_allsensor_realistic_map.db} (U, November) against the same world and probe. The \SI {10}{\metre } grid range reaches the west wall and the outer bays, which carry new phantom clusters; the spawn stretch is longer than in October.\relax }}{9}{figure.caption.18}\protected@file@percent }
+\newlabel{fig:cells-realistic-nov}{{I.5}{9}{\repo {dataset_allsensor_realistic_map.db} (U, November) against the same world and probe. The \SI {10}{\metre } grid range reaches the west wall and the outer bays, which carry new phantom clusters; the spawn stretch is longer than in October.\relax }{figure.caption.18}{}}
+\newlabel{fig:cells-realistic-nov@cref}{{[figure][5][4]I.5}{[1][8][]9}}
+\@writefile{lof}{\contentsline {figure}{\numberline {I.6}{\ignorespaces \texttt  {map_realistic_01.db} (I, October) against the I-layout realistic world; the route drawn is the probe \texttt  {realistic_001}.\relax }}{10}{figure.caption.19}\protected@file@percent }
+\newlabel{fig:cells-realistic-01}{{I.6}{10}{\repo {map_realistic_01.db} (I, October) against the I-layout realistic world; the route drawn is the probe \repo {realistic_001}.\relax }{figure.caption.19}{}}
+\newlabel{fig:cells-realistic-01@cref}{{[figure][6][4]I.6}{[1][8][]10}}
+\@writefile{lof}{\contentsline {figure}{\numberline {I.7}{\ignorespaces \texttt  {dataset_allsensor_realistic_01_map.db} (I, November) against the same world and probe. The blocked stretches sit in the aisles of the probe's left loop and along its bottom straight, on phantom cells first observed mid-run.\relax }}{10}{figure.caption.20}\protected@file@percent }
+\newlabel{fig:cells-realistic-01-nov}{{I.7}{10}{\repo {dataset_allsensor_realistic_01_map.db} (I, November) against the same world and probe. The blocked stretches sit in the aisles of the probe's left loop and along its bottom straight, on phantom cells first observed mid-run.\relax }{figure.caption.20}{}}
+\newlabel{fig:cells-realistic-01-nov@cref}{{[figure][7][4]I.7}{[1][8][]10}}
+\@writefile{lot}{\contentsline {table}{\numberline {I.11}{\ignorespaces Precision and recall of the observed surfaces by the number of graph nodes whose stored local grid covers the cell, for the two realistic-warehouse maps (U is \texttt  {map_realistic}, I is \texttt  {map_realistic_01}).}}{11}{table.caption.21}\protected@file@percent }
+\newlabel{tab:insight4-views-realistic}{{I.11}{11}{Precision and recall of the observed surfaces by the number of graph nodes whose stored local grid covers the cell, for the two realistic-warehouse maps (U is \repo {map_realistic}, I is \repo {map_realistic_01})}{table.caption.21}{}}
+\newlabel{tab:insight4-views-realistic@cref}{{[table][11][4]I.11}{[1][8][]11}}
+\@writefile{lot}{\contentsline {table}{\numberline {I.12}{\ignorespaces Recall of the observed surfaces by incidence angle.}}{11}{table.caption.22}\protected@file@percent }
+\newlabel{tab:insight4-angle-realistic}{{I.12}{11}{Recall of the observed surfaces by incidence angle}{table.caption.22}{}}
+\newlabel{tab:insight4-angle-realistic@cref}{{[table][12][4]I.12}{[1][8][]11}}
+\@writefile{lot}{\contentsline {table}{\numberline {I.13}{\ignorespaces Precision and recall of the observed surfaces by distance from the independent probe route (\texttt  {realistic_000} for U, \texttt  {map_realistic}; \texttt  {realistic_001} for I, \texttt  {map_realistic_01}).}}{11}{table.caption.23}\protected@file@percent }
+\newlabel{tab:insight4-dist-realistic}{{I.13}{11}{Precision and recall of the observed surfaces by distance from the independent probe route (\repo {realistic_000} for U, \repo {map_realistic}; \repo {realistic_001} for I, \repo {map_realistic_01})}{table.caption.23}{}}
+\newlabel{tab:insight4-dist-realistic@cref}{{[table][13][4]I.13}{[1][8][]11}}
+\@writefile{lof}{\contentsline {figure}{\numberline {I.8}{\ignorespaces Precision of the occupied cells and recall of the observed surfaces against distance from the independent probe route (left, a proxy only: the probe did not build any map) and against the number of graph nodes that observed the cell (right), for the four realistic-warehouse maps.\relax }}{11}{figure.caption.24}\protected@file@percent }
+\newlabel{fig:bins-realistic}{{I.8}{11}{Precision of the occupied cells and recall of the observed surfaces against distance from the independent probe route (left, a proxy only: the probe did not build any map) and against the number of graph nodes that observed the cell (right), for the four realistic-warehouse maps.\relax }{figure.caption.24}{}}
+\newlabel{fig:bins-realistic@cref}{{[figure][8][4]I.8}{[1][8][]11}}
+\@writefile{lot}{\contentsline {table}{\numberline {I.14}{\ignorespaces Drivability of the realistic-warehouse maps under the true footprint along their independent probe routes.}}{12}{table.caption.25}\protected@file@percent }
+\newlabel{tab:insight4-driv-realistic}{{I.14}{12}{Drivability of the realistic-warehouse maps under the true footprint along their independent probe routes}{table.caption.25}{}}
+\newlabel{tab:insight4-driv-realistic@cref}{{[table][14][4]I.14}{[1][12][]12}}
+\@writefile{lot}{\contentsline {table}{\numberline {I.15}{\ignorespaces Where the probe route collides with the maps.}}{12}{table.caption.26}\protected@file@percent }
+\newlabel{tab:insight4-blocked-realistic}{{I.15}{12}{Where the probe route collides with the maps}{table.caption.26}{}}
+\newlabel{tab:insight4-blocked-realistic@cref}{{[table][15][4]I.15}{[1][12][]12}}
+\@writefile{toc}{\contentsline {section}{\numberline {8}What these data cannot answer}{13}{section.4.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {9}Summary}{13}{section.4.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Consequences for Chapter 4.}{13}{section*.28}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {I.16}{\ignorespaces Questions, answers and the strength of the evidence.\relax }}{14}{table.caption.27}\protected@file@percent }
+\newlabel{tab:insight4-summary}{{I.16}{14}{Questions, answers and the strength of the evidence.\relax }{table.caption.27}{}}
+\newlabel{tab:insight4-summary@cref}{{[table][16][4]I.16}{[1][13][]14}}
+\gdef \@abspage@last{15}

@@ -90,14 +90,15 @@ are each located on one block of this loop:
 \toprule
 \# & Experiment & Block under test \\
 \midrule
-1 & Non-visual baseline and estimator comparison & the robot's own odometry
-  against the SLAM output: is vision earning its place? \\
+1 & Estimator comparison against a non-visual baseline & the SLAM front end
+  and the robot's own odometry, scored against each other: is vision earning
+  its place? \\
 2 & Offline YOLO detector performance & the object-detection block, in
   isolation \\
-3 & Visual-inertial odometry with dynamic-environment filtering & the SLAM
-  front end, with and without the detector's mask \\
-4 & Dense map reconstruction and map-quality evaluation & the SLAM back end and
-  the map it delivers \\
+3 & Dense map reconstruction and map-quality evaluation & the SLAM back end and
+  the map it delivers, including what a dynamic environment leaves in it \\
+4 & Autonomous navigation on the reconstructed map & the whole pipeline driving
+  a planner: is the map good enough to navigate on? \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -149,31 +150,33 @@ with baked occupancy truth. \\
 ORB-SLAM3 ROS~2 stereo-inertial wrapper & \status{Implemented; verified in both
 domains} & Live topics, worker-thread tracking, TF and trajectory output. The
 fork carries fifteen patches, among them five out-of-bounds reads in the
-mapping thread that caused the real-rig crashes. \\
+mapping thread that caused the real-rig crashes and two switches that change
+the inertial initialisation away from upstream
+(\cref{tab:real-rig}). \\
 ORB-SLAM3 GPU front end & \status{Implemented; verified} & The feature
 extractor and stereo matcher run on the GPU through a run-time-compiled kernel
 and need no CUDA toolkit; selected by configuration and measured in
 \cref{tab:mapping-resources}. \\
-ORB-SLAM3 semantic filtering & \status{Implemented; mechanism verified;
-untested} & Detector messages reach the tracker and masked candidates are
-rejected before octree distribution, but no filtered run exists in the current
-dataset set. \\
+ORB-SLAM3 semantic filtering & \status{Implemented; mechanism verified; not
+reported} & Detector messages reach the tracker and masked candidates are
+rejected before octree distribution. The arm was built for an experiment the
+campaign no longer runs, and no result rests on it. \\
 VINS-Fusion stereo-inertial estimator & \status{Implemented; verified in
 simulation} & Simulation and real-rig configurations, odometry publication, TF
 and trajectory output. On the real rig it has no valid run; two delivery and
-configuration defects are diagnosed in \cref{sec:exp3-real}. \\
-VINS-Fusion semantic filtering & \status{Implemented; mechanism verified;
-untested} & Existing KLT tracks are culled and new features suppressed in
-detected regions; as above, no filtered run exists. \\
+configuration defects are diagnosed in \cref{sec:exp1-real}. \\
+VINS-Fusion semantic filtering & \status{Implemented; mechanism verified; not
+reported} & Existing KLT tracks are culled and new features suppressed in
+detected regions; as above. \\
 Offline YOLO evaluation & \status{Implemented; evaluated} & Ground-truth
 projection, IoU matching, per-frame records and overlays, applied to the four
 realistic recordings with the four-class checkpoint
 (\cref{sec:yolo-performance}). \\
 RTAB-Map construction and saved-map localisation & \status{Implemented;
 partially verified} & Five databases scored for geometry and drivability
-(\cref{sec:map-quality}). Localisation against a closure-free prior does not
-work until the loop-closure threshold is restored, which is fixed;
-arbitrary-start aliasing rejection is untested. \\
+(\cref{sec:map-quality}). Localisation is \emph{known-start}: the run is seeded
+at the pose the prior was recorded from and corrected from there
+(\cref{sec:reloc-limits}). Two failure modes are closed and one is open. \\
 RTAB-Map extend and multi-session merging & \status{Implemented at launch level;
 experimentally unverified} & The mode exists; no multi-session experiment has
 been run. \\
@@ -573,8 +576,9 @@ Plan and drive & \texttt{navigate\_sim}\newline \texttt{navigate\_real} & the ab
 
 \subsubsection{Status at the cutoff}
 
-The mapping and relocalisation tasks are \status{implemented} and are the ones
-the reported Experiment~4 results rest on. The planning task is
+The mapping and relocalisation tasks are \status{implemented}: the first
+supplies the databases Experiment~3 scores, and the second is the stage
+Experiment~4 would begin from. The planning task is
 \status{untested} in simulation: its planner, controller and behaviour tree
 have been exercised offline against a served prior grid and a stationary
 transform tree, which confirms that the configuration loads and that the
@@ -583,8 +587,120 @@ in Gazebo has been completed. On the real robot it is \status{blocked}: the
 platform has been unavailable since the navigation layer was written, and the
 one command-unit scale that the bridge needs is fitted from a single operating
 point. Relocalisation on the real rig has been demonstrated once, against a
-prior that does contain closures, and is reported with that provenance
-(\cref{sec:exp4-real}).
+prior that does contain closures.
+
+\subsubsection{What relocalisation does, and what it does not}
+\label{sec:reloc-limits}
+
+Relocalisation as implemented is \emph{known-start}, not arbitrary-start. The
+launch argument \repo{start_pose} defaults to \texttt{origin}, the dock the
+prior was recorded from, and the alternatives are the pose left in the database
+or six numbers given in the map frame
+(\repo{vslam_navigation/launch/localize_real.launch.py}). The run is therefore
+seeded with an approximate pose and corrected from it; nothing in the pipeline
+recovers a pose from no prior information, and no claim of arbitrary-start
+localisation is made anywhere in this report.
+
+Two ways of producing a prior that can never be localised against have been
+found and closed. The first is a closure-free database, which restores
+\repo{Rtabmap/LoopThr} to 1.0 on load so that no appearance match can ever be
+accepted. The second is a database whose visual vocabulary is absent: the
+\texttt{Feature} table stores each keypoint's word identifier, but only the
+\texttt{Word} table stores the descriptors that a query is matched against, and
+on 11 November 2026 one prior was measured holding 122 \texttt{Word} rows
+against the 35\,683 distinct word identifiers its features referenced. Every
+pose from such a prior carries RTAB-Map's no-information covariance, trace
+\num{3e4}, and no fix is ever accepted. The fault is not a consequence of
+building without closures, since priors built earlier the same week are intact;
+the launch now reads both counts before starting and refuses the prior rather
+than letting a run discover it.
+
+The remaining limitation is orientation at the first fix, and it is partly
+closed. A fix taken while the front end is still settling latches the map frame
+\SIrange{73}{76}{\degree} wrong and holds that correction for roughly
+\SI{16}{\second}; holding the back end back through the transient with
+\repo{localize_delay_s} removes it, and the largest correction yaw falls from
+\SIrange{110}{177}{\degree} to \SI{25}{\degree} (\cref{sec:exp4-sim}). What
+remains is that residual, because the warehouse aisles present the same rack
+faces from several places and an appearance match can be accepted at the wrong
+one.
+
+\Cref{tab:reloc-config} is the relocalisation configuration every run in this
+report uses. It is short because the sweep that produced it rejected more than
+it adopted: of the five acceptance controls tried, four were either inert or
+destructive, so the configuration departs from RTAB-Map's own defaults in
+exactly one parameter, with a second measure applied at the launch rather than
+in the library.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Relocalisation configuration adopted. Launch arguments are those of
+\repo{vslam_navigation}; the parameter column names what each sets in RTAB-Map.
+Frozen for Experiment~4 in \repo{script/exp4_protocol.yaml} and recorded in
+every run's manifest.}
+\label{tab:reloc-config}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}X}
+\toprule
+Launch argument & Parameter, value & Reason \\
+\midrule
+\repo{estimation_type} & \repo{Vis/EstimationType} 0 &
+Three-dimensional sparse-geometry registration in place of the default
+perspective-n-point. A perspective estimate needs only the matched map points to
+reproject consistently, which a misplaced match can satisfy; this requires their
+positions to agree in metres. \\
+\repo{localize_delay_s} & none; a \SI{5}{\second} delay on starting the node &
+The back end is started late so that no fix can be taken during the front end's
+unstable first second. \repo{wait_for_imu_init} does not cover it, because the
+inertial state is already valid through that window, and the navigation pose
+gate does not either, because it withholds the pose only after the correction
+has been formed. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{table}[p]
+\centering\small
+\caption{Settings tried and rejected in reaching \cref{tab:reloc-config}. Four
+of the five acceptance controls available were either inert or destructive,
+which is why the adopted configuration departs from RTAB-Map's defaults in one
+parameter only.}
+\label{tab:reloc-rejected}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}X}
+\toprule
+Launch argument & Parameter & Outcome \\
+\midrule
+\repo{min_inliers_distribution} & \repo{Vis/MinInliersDistribution} &
+An off switch at every value tried: at 0.03 and 0.05 no fix was accepted in an
+entire run. \\
+\repo{odom_cache_size} & \repo{RGBD/MaxOdomCacheSize} &
+Inert alone and harmful combined with a tight consistency threshold. Odometry
+links are relative, so a rigid displacement of the whole cached window leaves
+their residual near zero and more context cannot see it. \\
+\repo{optimize_max_error} & \repo{RGBD/OptimizeMaxError} &
+Kept at its loosened 10.0. Tightening to 3.0 reduced the warp rate but cost up
+to \SI{165}{\second} to the first fix and left a larger worst case. \\
+\repo{min_inliers} & \repo{Vis/MinInliers} &
+Kept at 20. Raising it to 28 reduced the warp rate by less than the spread
+between repeats of one setting. \\
+\repo{geometric_check} & \repo{Reg/Strategy} 2 &
+Not applicable to these priors: RTAB-Map's ICP registers laser scans, and these
+databases hold image, depth and calibration but no scan, so every closure fails
+verification and nothing localises. The launch now refuses it and prints the
+\repo{rtabmap-reprocess} repair. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Each run of the sweep writes a manifest beside its data recording the settings
+it used, the full launch command, the git commit and the wall duration, and
+\repo{script/aisle_sweep.py --analyse} reads them into a single table, so a
+result cannot be attributed to the wrong configuration.
+\flag{An earlier revision of this chapter stated that the sweep had no scored
+summary and that its run directories recorded the estimator configuration but
+not the relocalisation parameters. That is no longer true and the statement is
+withdrawn.} Its one carried conclusion --- that run-to-run spread over identical
+settings is as wide as most differences between settings --- is used in
+\cref{sec:exp4-sim} to refuse comparisons.
 
 \section{Simulation Platform}
 \label{sec:sim-platform}
@@ -985,8 +1101,11 @@ the AWS RoboMaker small-warehouse model and all held in one directory,
 The two realistic layouts are the subject of \cref{sec:realistic-worlds},
 which gives their zones, traffic model and baked occupancy truth. They are
 generated by \repo{script/make_realistic_world.py} and
-\repo{script/make_static_world.py} and are never hand-edited, so a layout can
-be rebuilt exactly from its generator.
+\repo{script/make_static_world.py} and are never hand-edited. The committed
+\texttt{.world} file, not the generator, is the recorded environment: the
+generator still reproduces the U world exactly, but it no longer reproduces
+the I world, so every object count in this report is read from the world file
+(\cref{tab:realistic-zones}).
 
 Earlier work used three further arrangements of the rescaled warehouse, with
 scripted props moving on fixed segments, and a textured \texttt{bayline} floor
@@ -1014,18 +1133,18 @@ attributed to.}
 \toprule
 Factor & Levels realised & Read by \\
 \midrule
-Layout & U-shape, I-shape & Exp.\ 1, 3, 4; never pooled \\
-Environment dynamics & static twin, warehouse traffic & Exp.\ 3, as a
+Layout & U-shape, I-shape & Exp.\ 1, 3; never pooled \\
+Environment dynamics & static twin, warehouse traffic & Exp.\ 1, as a
   condition of a recording, not a factor: no two recordings share a route \\
 Floor texture & featureless only & held constant; the textured variant is
   unexercised \\
 Route & one per recording & confounded with layout and traffic; a second
   route per layout is the first thing a repeat needs \\
-Estimator & ORB-SLAM3, VINS-Fusion & Exp.\ 1, 3 \\
-Front end & CPU, GPU feature extractor & Exp.\ 3 \\
-Loop closer & active, disabled & Exp.\ 1, 3 \\
-Dynamic filter & off only & Exp.\ 3: no filtered run exists in the current
-  dataset set, so the hypothesis is untested \\
+Estimator & ORB-SLAM3, VINS-Fusion & Exp.\ 1 \\
+Front end & CPU, GPU feature extractor & Exp.\ 1 \\
+Loop closer & active, disabled & Exp.\ 1 \\
+Dynamic filter & off only & not an experimental factor; the masking arm is
+  implemented in both pipelines and is not reported \\
 Replay rate & \num{1.0} only & held constant; it is the deployment condition \\
 Compute platform & one laptop & held constant; no hardware comparison is
   possible \\
@@ -1108,14 +1227,14 @@ and \repo{/hwt101ct_yaw_publisher} on the real rig.}
 Recording & Role & Layout & Span [\si{\second}] & Route [\si{\metre}] &
   Stereo & IMU & Truth & Prop. & Size [MB] \\
 \midrule
-\repo{allsensor_realistic_000} & Exp.\ 1, 3; Exp.\ 4 probe & U static & 125.5 & 171.3 & 3\,805 & 25\,112 & 6\,278 & full & 1\,529 \\
-\repo{allsensor_realistic_001} & Exp.\ 1, 3; Exp.\ 4 probe & I static & 96.9 & 133.0 & 2\,937 & 19\,388 & 4\,847 & full & 1\,159 \\
-\repo{allsensor_realistic_002} & Exp.\ 1, 3 & U traffic & 79.5 & 102.7 & 2\,409 & 15\,903 & 3\,975 & full & 1\,017 \\
-\repo{allsensor_realistic_003} & Exp.\ 1, 3 & I traffic & 117.0 & 158.0 & 3\,547 & 23\,409 & 5\,852 & full & 1\,520 \\
+\repo{allsensor_realistic_000} & Exp.\ 1; Exp.\ 3 probe & U static & 125.5 & 171.3 & 3\,805 & 25\,112 & 6\,278 & full & 1\,529 \\
+\repo{allsensor_realistic_001} & Exp.\ 1; Exp.\ 3 probe & I static & 96.9 & 133.0 & 2\,937 & 19\,388 & 4\,847 & full & 1\,159 \\
+\repo{allsensor_realistic_002} & Exp.\ 1 & U traffic & 79.5 & 102.7 & 2\,409 & 15\,903 & 3\,975 & full & 1\,017 \\
+\repo{allsensor_realistic_003} & Exp.\ 1 & I traffic & 117.0 & 158.0 & 3\,547 & 23\,409 & 5\,852 & full & 1\,520 \\
 \midrule
-\repo{allsensor_realistic_map} & Exp.\ 4 build; Exp.\ 3 resources & U static & 288.2 & 374.3 & 8\,725 & 57\,645 & 14\,411 & full & 3\,736 \\
-\repo{allsensor_realistic_01_map} & Exp.\ 4 build; Exp.\ 3 resources & I static & 315.2 & 384.6 & 9\,552 & 63\,040 & 15\,760 & full & 3\,835 \\
-\repo{map_tiny} & Exp.\ 4 build (tiny world) & tiny & 60.6 & 70.1 & 1\,837 & 12\,127 & 3\,032 & --- & 726 \\
+\repo{allsensor_realistic_map} & Exp.\ 3 build; Exp.\ 1 resources & U static & 288.2 & 374.3 & 8\,725 & 57\,645 & 14\,411 & full & 3\,736 \\
+\repo{allsensor_realistic_01_map} & Exp.\ 3 build; Exp.\ 1 resources & I static & 315.2 & 384.6 & 9\,552 & 63\,040 & 15\,760 & full & 3\,835 \\
+\repo{map_tiny} & Exp.\ 3 build (tiny world) & tiny & 60.6 & 70.1 & 1\,837 & 12\,127 & 3\,032 & --- & 726 \\
 \midrule
 \repo{realv6_000} & Exp.\ 1, 3 (real) & Gensurv & 220.1 & 37.3 & 6\,601 & 43\,903 & 277 & feedback & 5\,422 \\
 \repo{realv7_000} & Exp.\ 1, 3 (real) & Gensurv & 90.7 & 21.6 & 2\,722 & 18\,107 & 524 & feedback & 2\,642 \\
@@ -1325,6 +1444,13 @@ Stationary $\lVert a\rVert$ & \SI{9.8858}{\metre\per\second\squared} & measured
   at rest on this rig \\
 Inertial noise (ORB-SLAM3) & \texttt{NoiseGyro} 0.1, \texttt{NoiseAcc} 1.0 &
   ten times the simulated values, by experiment \\
+Inertial initialisation (ORB-SLAM3) & \texttt{LocalMapping.resetOnLowMotion}
+  0, \texttt{LocalMapping.initWithBacklog} 1 & fork patch 15; both differ from
+  upstream, which discards a map whose keyframes move less than
+  \SI{2}{\centi\metre} in the ten seconds after initialisation and retries the
+  initialisation only with an empty keyframe queue. A robot that stands still
+  before it is driven meets the first condition, which is why the switches
+  exist (\cref{sec:exp1-real}) \\
 Extrinsic estimation (VINS) & \repo{estimate_extrinsic: 1} & online \\
 Time-offset estimation (VINS) & \repo{estimate_td: 1} & online \\
 Marker-to-IMU lever arm & not measured & \flag{placeholder; bounds every real
@@ -1354,7 +1480,7 @@ marker and body coincide. Real trajectories can therefore be compared with an
 independent planar reference, which the \repo{realv6} and \repo{realv7}
 recordings now provide, but every metric computed from them is provisional
 until that lever arm is measured
-(\cref{sec:exp1-real,sec:exp3-real}).
+(\cref{sec:exp1-real}).
 
 \subsection{Test site and experimental variables}
 \label{sec:real-site}
@@ -1400,7 +1526,7 @@ frameworks in keeping enough inlier features for odometry under variable light.
 \cref{tab:dataset-registry}: \repo{dataset_realv6_000} and
 \repo{dataset_realv7_000} to \repo{_002}, each with inertial data at
 \SI{200}{\hertz} and a planar optical-tracker reference
-(\cref{sec:exp3-real}). Varied illumination is still absent, so the
+(\cref{sec:exp1-real}). Varied illumination is still absent, so the
 illumination variable of this section is unexercised, and the real slots of
 Experiments~2 and~4 remain planned for want of annotated frames and a surveyed
 reference grid.
@@ -1413,7 +1539,7 @@ metrics, its constraints and the validity rule that decides whether a run
 counts. Each is run in both domains; \cref{chap:results} reports each domain in
 its own slot.
 
-\subsection{Experiment 1: Non-visual baseline and estimator comparison}
+\subsection{Experiment 1: Estimator comparison against a non-visual baseline}
 \label{sec:proprio-method}
 
 \textbf{Objective.} Establish a dead-reckoning baseline to determine whether the
@@ -1690,6 +1816,36 @@ remove the objection; until then the real-domain comparison between this
 baseline and the visual pipelines is weaker than its simulated counterpart.
 \end{queried}
 
+
+\textbf{Process, visual estimators.} Accuracy and compute are measured on different
+recordings, because they need different designs.
+
+\emph{Accuracy} is measured on the four \repo{dataset_allsensor_realistic}
+recordings, one run per cell. The factors are the estimator, the feature
+extractor (CPU or GPU) and the loop closer (active or disabled), each replayed
+at rate 1.0 from the bag with the node live, which is the deployment condition.
+The loop-closer state is read from each run's own log rather than from its
+name, because a run can be launched with the closer enabled and have it
+disabled by configuration.
+
+\emph{Latency and resources} are measured only on the two mapping recordings,
+each configuration run three times, so that a mean and a spread exist. One run
+per cell cannot support an uncertainty, and the accuracy recordings are too
+short to separate a steady state from the initialisation transient.
+
+\textbf{Evaluation metrics, visual estimators.} ATE and rotational RMSE after rigid alignment,
+RPE at $\Delta = \SI{1}{\second}$ (all pairs and jump-free), tracking-loss and
+reset events, retained input fraction, throughput, process CPU and peak memory,
+and per-module latency against the inter-frame budget.
+
+\textbf{Validity rule, visual estimators.} A trajectory containing steps that imply more than
+\SI{10}{\metre\per\second} is not read as ordinary drift; an indoor error above
+\SI{50}{\metre} is divergence. A timing comparison between two
+configurations is admissible only when their runs are interleaved from a cool
+start, because the laptop throttles at \SI{90}{\celsius} and a block of
+consecutive runs in one configuration confounds the configuration with the
+thermal state.
+
 \subsection{Experiment 2: Offline YOLO detector performance}
 \label{sec:yolo-eval-method}
 
@@ -1725,73 +1881,7 @@ plausible but wrong boxes.
 
 \input{chapters/fragments/m3_detect_eval}
 
-\subsection{Experiment 3: Visual-inertial odometry with dynamic-environment
-filtering}
-\label{sec:vio-filter-method}
-
-\textbf{Objective.} Determine whether masking dynamic-object features improves
-localization, measure the compute cost of doing so, and verify that tracking
-survives the filtering and that the added detector cost does not push either
-pipeline below the input frame rate.
-
-\textbf{Process, simulation.} Accuracy and compute are measured on different
-recordings, because they need different designs.
-
-\emph{Accuracy} is measured on the four \repo{dataset_allsensor_realistic}
-recordings, one run per cell. The factors are the estimator, the feature
-extractor (CPU or GPU) and the loop closer (active or disabled), each replayed
-at rate 1.0 from the bag with the node live, which is the deployment condition.
-The loop-closer state is read from each run's own log rather than from its
-name, because a run can be launched with the closer enabled and have it
-disabled by configuration.
-
-\emph{Latency and resources} are measured only on the two mapping recordings,
-each configuration run three times, so that a mean and a spread exist. One run
-per cell cannot support an uncertainty, and the accuracy recordings are too
-short to separate a steady state from the initialisation transient.
-
-A filtered treatment, when one exists, is paired with the baseline of the same
-estimator, extractor and closer state, and the pair is admissible only when the
-filter demonstrably acted (matched detections, non-zero mask coverage, removed
-tracks), the two runs received the same input to within \SI{5}{\percent} in
-image count and duration, and both ran on the same node binary. No filtered run
-exists in the current dataset set, so no pair has yet been formed. The
-collection protocol is given in \cref{sec:collection-validity}.
-
-\textbf{Process, real robot (planned).} The online procedure has four steps.
-\emph{Step~1, initialisation and time synchronisation:} power the NRU-51V, the
-stereo cameras and the IMU; start the optical tracker and calibrate the room.
-The tracker and the robot keep separate clocks and the recordings made so far
-are aligned after the fact by cross-correlating the tracker's speed with the
-wheel-speed feedback (\cref{sec:method-trajectory}); synchronising the two
-clocks at record time, by PTP or Chrony, would remove that estimation step and
-the uncertainty it carries. \emph{Step~2, execution and environment alteration:} drive from the origin
-in Zone~A to the goal in Zone~B at a linear speed not above
-\SI{1.5}{\metre\per\second} through the Nav2 package; on arrival, trigger the
-dynamic variable by randomly re-placing the $k$ stacks in Zone~A; return, alter
-Zone~B, and alternate for five minutes per test cycle to represent a
-lifelong-mapping load. \emph{Step~3, data logging:} record with rosbag2 the
-6-DoF SLAM pose, the motion-capture reference, the detector boxes with
-confidences, and the whole-pipeline latency per frame. \emph{Step~4, iteration
-over the experimental matrix:} repeat steps 1--3 for both pipelines under the
-three illumination levels. The \texttt{.db3} bags are then trajectory-extracted
-and timestamp-matched before evaluation.
-
-\textbf{Evaluation metrics.} ATE and rotational RMSE after rigid alignment,
-RPE at $\Delta = \SI{1}{\second}$ (all pairs and jump-free), tracking-loss and
-reset events, retained input fraction, throughput, process CPU and peak memory,
-and per-module latency against the inter-frame budget.
-
-\textbf{Validity rule.} A trajectory containing steps that imply more than
-\SI{10}{\metre\per\second} is not read as ordinary drift; an indoor error above
-\SI{50}{\metre} is divergence. A comparison across treatments is admissible only
-for input-matched pairs with an active filter. A timing comparison between two
-configurations is admissible only when their runs are interleaved from a cool
-start, because the laptop throttles at \SI{90}{\celsius} and a block of
-consecutive runs in one configuration confounds the configuration with the
-thermal state.
-
-\subsection{Experiment 4: Dense map reconstruction and map-quality evaluation}
+\subsection{Experiment 3: Dense map reconstruction and map-quality evaluation}
 \label{sec:map-eval-method}
 
 \textbf{Objective.} Verify whether the reconstructed map accurately reflects the
@@ -1841,12 +1931,51 @@ configurations, against the static twin of their layout and probed with
 (\cref{sec:map-quality}). The tiny map's own independent probe recording is
 lost, so its drivability figure cannot be regenerated.
 
+
+\subsection{Experiment 4: Autonomous navigation on the reconstructed map}
+\label{sec:nav-eval-method}
+
+\textbf{Objective.} Determine whether a map that passes, or fails, the geometry
+test of \cref{sec:map-eval-method} supports autonomous navigation: whether the
+robot relocalises against a prior it did not build, plans through it, and
+reaches a goal set without colliding with structure the map placed wrongly.
+
+\textbf{Process.} The three stages of \repo{vslam_navigation}
+(\cref{tab:nav-integration}) are run in order on a prior already scored in
+\cref{sec:map-eval-method}, so that map quality and navigation outcome refer to
+the same artefact. The simulator is driven live rather than replayed, because
+the outcome depends on the control loop.
+
+\textbf{Evaluation metrics.} Share of goals reached (base frame within
+\SI{0.25}{\metre} and \SI{10}{\degree}, planner reporting success), path length
+against the shortest collision-free path in the ground-truth grid, collisions
+with true structure, Nav2 recovery behaviours triggered, share of the run with a
+valid localisation fix, and wall time for the goal set.
+
+\textbf{Validity rule.} A run that loses localisation and does not recover
+within \SI{30}{\second} is reported as failed, not excluded. The goal set is
+fixed before the first run and is not changed between configurations.
+
 \section{Evaluation Metrics and Analysis}
 \label{sec:evaluation-method}
 
 \subsection{Trajectory evaluation}
 \label{sec:method-trajectory}
 \input{chapters/fragments/m3_traj_eval}
+
+\paragraph{A frame repair, written and then retired.}
+\label{sec:method-realv7-repair}
+While the cause of the tilted \repo{realv7} estimates was being found, the
+scorer was given two options that repaired the symptom without using the
+truth: \texttt{--join-imu-init} rotates the poses written before the inertial
+initialisation by the rotation measured at the initialisation frame, and
+\texttt{--level-plane} levels each map's fitted plane. They are recorded here
+because every \repo{realv7} figure published before 11 November 2026 depended
+on them, and because a repair applied at scoring time is a threat to validity
+that a reader is entitled to see named. They are not used for any result in
+\cref{chap:results}: the defect was traced to two pieces of upstream
+behaviour and fixed in the fork (\cref{tab:real-rig}), and the runs reported
+there are scored raw.
 
 \paragraph{Planar reference (added after the cutoff).} The real recordings
 of \cref{sec:dataset-registry} carry an optical-tracker reference that differs
@@ -1905,9 +2034,14 @@ Semantic segmentation & pixel masks, as in the reference RY-SLAM approach &
   reported configuration & deviation \\
 Dynamic rejection point & not specified & ORB-SLAM3 rejects before octree
   distribution; VINS-Fusion also removes persistent KLT tracks & implemented \\
-Dynamic filtering result & accuracy with and without masking & the mechanism
-  exists in both pipelines, but no filtered run exists in the current dataset
-  set & \flag{untested} \\
+Dynamic-environment handling & masking the detector's boxes out of the
+  estimator & the mechanism exists in both pipelines but is not reported; the
+  dynamic-environment question is asked of the map instead
+  (\cref{sec:map-eval-method}) & deviation \\
+Inertial initialisation & stock ORB-SLAM3 & two fork switches disable the
+  low-motion map discard and allow the initialisation to be attempted with a
+  queued backlog; active in the real-rig configuration, and the real-robot
+  results of \cref{sec:exp1-real} are obtained with them on & deviation \\
 Estimator coupling & shared output representation & two independent estimators,
   not one fused estimator & deviation \\
 RTAB-Map correction & integrated back end & separate process consuming external
@@ -1962,7 +2096,7 @@ Objective & Status at the cutoff \\
   implementation in the repository \\
 5. Integrated system with a 2-D cost map and localization error below
   \SI{10}{\centi\metre} under differing illumination & \status{planned}: the
-  integrated live test of \cref{sec:vio-filter-method} has not been run;
+  integrated live test of \cref{sec:nav-eval-method} has not been run;
   illumination has not been varied in any recording. The bring-up the test
   needs now exists and serves the prior map to a planner
   (\cref{sec:nav-integration}), verified offline only \\

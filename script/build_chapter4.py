@@ -25,20 +25,20 @@ CH = os.path.join(ROOT, "docs/report/final_report/chapters/chapter_4_experiments
 
 BOLD = ("Objective.", "Process.", "Dataset.", "Datasets.", "Reporting rules.", "Reason.",
         "Reason the baselines are absent.", "Retired result, for the record.", "Next action.")
-ALIASES = {1: (["sec:results-proprio"], ["sec:exp1-real"]),
-           2: (["sec:yolo-performance", "fig:yolo-ground-truth-overlay"], ["sec:exp2-real"]),
-           3: (["sec:results-validity", "sec:realistic-ab", "sec:rpe", "sec:trajectory-results"], ["sec:exp3-real"])}
+ALIASES = {1: (["sec:results-proprio", "sec:results-validity", "sec:realistic-ab", "sec:rpe",
+                "sec:trajectory-results"], ["sec:exp1-real"]),
+           2: (["sec:yolo-performance", "fig:yolo-ground-truth-overlay"], ["sec:exp2-real"])}
 XNOTE = [
     ("The visual results are those of Experiment~3's\nreal-robot section, scored by the same procedure and not repeated here:",
      "The visual results are those of \\cref{sec:exp3-real},\nscored by the same procedure and not repeated here:"),
     ("(the dataset table of the Experiment~1 write-up)", "(\\cref{tab:exp1-datasets})"),
-    ("and the pair is admissible only under three gates: an\nactive filter",
-     "and the pair is admissible only under the three gates of\n\\cref{sec:vio-filter-method}: an active filter"),
-    ("\\textbf{Reporting rules.}\n\\label{sec:vio-filter-method}\n", "\\textbf{Reporting rules.}\n"),
+    ("frame and levels each map's fitted plane, both without using the truth.\nIt is kept for the record",
+     "frame and levels each map's fitted plane, both without using the truth\n(\\cref{sec:method-realv7-repair}). It is kept for the record"),
+    ("beside the real robot's much shorter ones,\nand it separates",
+     "beside the real robot's much shorter ones\n(\\cref{sec:sim-vs-real}), and it separates"),
 ]
-HEADS = {1: "\\section{Experiment 1: Non-Visual Baseline and Estimator Comparison}\n\\label{sec:exp1}\n",
-         2: "\\section{Experiment 2: Offline YOLO Detector Performance}\n\\label{sec:exp2}\n",
-         3: "\\section{Experiment 3: Visual-Inertial Odometry With Dynamic-Environment\nFiltering}\n\\label{sec:exp3}\n"}
+HEADS = {1: "\\section{Experiment 1: Estimator Comparison Against a Non-Visual Baseline}\n\\label{sec:exp1}\n",
+         2: "\\section{Experiment 2: Offline YOLO Detector Performance}\n\\label{sec:exp2}\n"}
 RULE = "% =====================================================================\n\\FloatBarrier\n"
 
 
@@ -65,9 +65,9 @@ def xf(s, aliases):
 def build():
     old = open(CH).read()
     i1 = old.index(RULE + "\\section{Experiment 1")
-    i4 = old.index(RULE + "\\section{Experiment 4")
+    i4 = old.index(RULE + "\\section{Experiment 3")
     parts = [old[:i1]]
-    for n in (1, 2, 3):
+    for n in (1, 2):
         sim, real = note(n)
         sim_a, real_a = ALIASES[n]
         sim, real = xf(sim, sim_a), xf(real, real_a)
@@ -79,7 +79,6 @@ def build():
     labs = re.findall(r"\\label\{([^}]*)\}", new)
     dup = [k for k, v in collections.Counter(labs).items() if v > 1]
     assert not dup, "duplicate labels: %s" % dup
-    assert "\\label{sec:vio-filter-method}" not in new
     return old, new
 
 

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  4 NOV 2026 13:55
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  12 NOV 2026 15:48
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1101,10 +1101,10 @@ Package rerunfilecheck Info: File `rtab.out' has not changed.
 (rerunfilecheck)             Checksum: 11B84C81421F649995219B6ED7B3EC3B;2547.
  ) 
 Here is how much of TeX's memory you used:
- 20640 strings out of 480171
- 392802 string characters out of 5894489
+ 20641 strings out of 480171
+ 392822 string characters out of 5894489
  709704 words of memory out of 5000000
- 37884 multiletter control sequences out of 15000+600000
+ 37885 multiletter control sequences out of 15000+600000
  558907 words of font info for 376 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
  76i,14n,82p,1001b,891s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1115,7 +1115,7 @@ fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/
 type1/urw/courier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/tim
 es/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb><
 /usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on rtab.pdf (12 pages, 2968435 bytes).
+Output written on rtab.pdf (12 pages, 2968434 bytes).
 PDF statistics:
  223 PDF objects out of 1000 (max. 8388607)
  187 compressed objects within 2 object streams

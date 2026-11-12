@@ -188,15 +188,15 @@
       \footnotesize
       \begin{itemize}
         \item Grey bands = turning
-        \item Bottom row, brown: heading error steps \emph{inside} the grey bands and holds between them, all 5 bags
-        \item Top row: along-track (distance) error stays near zero until the heading error has integrated
-        \item Scale error of the wheels: within \SI{1}{\percent} on 5/5
+        \item Bottom row, brown: heading error steps \emph{inside} the grey bands and holds between them, all 4 bags
+        \item Heading error grows \num{77}$\times$ faster while turning; position error grows faster on the straights that follow
+        \item Scale error of the wheels: within \SI{0.4}{\percent} on 4/4
         \item Green (EKF): flat in all three rows
       \end{itemize}
     \column{0.7\textwidth}
       \includegraphics[width=\textwidth]{\OUT/exp1-insights/fig_decomposition_light.png}
   \end{columns}
-  \src{\repo{exp1-insights/decomposition.tex}, \repo{turning.tex}}
+  \src{\repo{exp1-insights/decomposition.tex}, \repo{turning.tex}; figures regenerated 12 Nov 2026 on the four current recordings}
 \end{frame}
 
 \begin{frame}{2. Exp.~1: the EKF is consistent until the first turn, then never again}
@@ -207,29 +207,28 @@
         \item Grey line: NEES = 3, the consistent value for 3 DOF
         \item Red dashed: 97.5 \% band
         \item Dotted: first ground-truth heading change
-        \item In all 5 panels the green curve crosses the band at the dotted line (within \SI{0.6}{\second}) and stays above it
-        \item Teal (VSLAM noise file): less accurate but closer to the band
+        \item In all 4 panels the green curve crosses the band at the dotted line (within \SI{4}{\second}) and stays above it
+        \item Teal (VSLAM noise file): \numrange{3.5}{7.5}$\times$ less accurate but closer to the band --- inside it on one bag
       \end{itemize}
     \column{0.7\textwidth}
       \includegraphics[width=\textwidth]{\OUT/exp1-insights/fig_nees_light.png}
   \end{columns}
-  \src{\repo{exp1-insights/nees_timing.tex}: leaves at 26.0 / 9.0 / 12.0 / 16.0 / 15.0 s; first turn at 25.6 / 9.6 / 12.2 / 16.4 / 15.0 s}
+  \src{\repo{exp1-insights/nees_timing.tex}: leaves at 10.0 / 25.0 / 9.0 / 20.0 s; first turn at 10.5 / 24.7 / 12.7 / 20.6 s; regenerated 12 Nov 2026}
 \end{frame}
 
-\begin{frame}{2. Exp.~1: ORB-SLAM3's \SI{6.4}{\metre} on \repo{allsensor_003} is one loop-closure event}
+\begin{frame}{2. Exp.~1: ORB-SLAM3's \SI{4.85}{\metre} on the I-layout static bag is one loop-closure event}
   \begin{columns}[T]
     \column{0.3\textwidth}
       \footnotesize
       \begin{itemize}
-        \item Left: aligned error stays at 2--4 m for \SI{88}{\second}
-        \item Red lines at 88--90 s: three jumps of 30.0, 11.6 and \SI{2.5}{\metre}
-        \item Right: the jump points (red dots) sit where the route closes its loop
-        \item Tracking state OK on every frame; the no-loop-closure run scores \SI{0.21}{\metre}
+        \item Red lines at 71--75 s: five jumps, the largest \SI{17.7}{\metre} in one step; \SI{4.56}{\metre} of the net error change is taken in jumps against \SI{2.42}{\metre} of drift
+        \item Right: the jump points (red dots) sit at \SI{78}{\percent} of the route, where the I layout's aisles repeat
+        \item Tracking state OK on every frame; the no-loop-closure run scores \SI{0.06}{\metre} in the plane
       \end{itemize}
     \column{0.7\textwidth}
       \includegraphics[width=\textwidth]{\OUT/exp1-insights/fig_orb_failure_light.png}
   \end{columns}
-  \src{\repo{exp1-insights/visual.tex}}
+  \src{\repo{exp1-insights/visual.tex}; regenerated 12 Nov 2026 --- the bag presented in October was retired on 6 Nov}
 \end{frame}
 
 \begin{frame}{2. Exp.~2: 67--74 \% of false positives are near misses on the right object}

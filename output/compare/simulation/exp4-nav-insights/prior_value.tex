@@ -1,0 +1,18 @@
+\begin{table}[htbp]
+\centering\small
+\caption{The localised pose against unaided ORB-SLAM3 over the same run, metres. The front end is rigidly aligned to ground truth first, so its column is DRIFT alone with the unknown initial pose given away free -- the kindest possible reading of odometry, and the one thing the prior actually supplies.}
+\label{tab:insight4nav-prior}
+\begin{tabular}{lrrrrrr}
+\toprule
+Run & Driven & Loc. med. & Loc. max & VIO med. & VIO max & VIO end \\
+\midrule
+U static straight & 24.6 & 0.162 & 0.24 & 0.045 & 0.17 & 0.03 \\
+U static square & 109.2 & 0.188 & 6.80 & 0.176 & 0.35 & 0.18 \\
+U static figure-8 & 152.0 & 0.098 & 3.99 & 0.303 & 0.76 & 0.60 \\
+I static straight & 20.9 & 0.097 & 0.61 & 0.302 & 0.47 & 0.23 \\
+I static square & 66.8 & 0.361 & 0.69 & 0.283 & 0.72 & 0.39 \\
+I static figure-8 & 123.7 & 0.136 & 0.93 & 0.345 & 0.53 & 0.22 \\
+U dynamic straight & 26.0 & 0.298 & 1.17 & 0.053 & 0.16 & 0.08 \\
+\bottomrule
+\end{tabular}
+\end{table}

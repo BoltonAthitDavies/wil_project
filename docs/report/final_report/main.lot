@@ -5,59 +5,67 @@
 \addvspace {10\p@ }
 \contentsline {table}{\numberline {3.1}{\ignorespaces The four experiments and the architecture block each one tests.\relax }}{17}{table.caption.32}%
 \contentsline {table}{\numberline {3.2}{\ignorespaces Implementation status at the reporting cutoff.\relax }}{18}{table.3.2}%
-\contentsline {table}{\numberline {3.3}{\ignorespaces Design comparison of the two pipeline architectures, as proposed.\relax }}{21}{table.caption.36}%
+\contentsline {table}{\numberline {3.3}{\ignorespaces Design comparison of the two pipeline architectures, as proposed.\relax }}{22}{table.caption.36}%
 \contentsline {table}{\numberline {3.4}{\ignorespaces ORB-SLAM3 configuration at the cutoff.}}{24}{table.caption.38}%
-\contentsline {table}{\numberline {3.5}{\ignorespaces VINS-Fusion simulation configuration at the cutoff, from \repo {vins_fusion_ros2/config/wil_sim/stereo_imu.yaml}.}}{24}{table.caption.40}%
-\contentsline {table}{\numberline {3.6}{\ignorespaces Navigation parameters for the two platforms.}}{30}{table.caption.46}%
+\contentsline {table}{\numberline {3.5}{\ignorespaces VINS-Fusion simulation configuration at the cutoff, from \repo {vins_fusion_ros2/config/wil_sim/stereo_imu.yaml}.}}{26}{table.caption.40}%
+\contentsline {table}{\numberline {3.6}{\ignorespaces Navigation parameters for the two platforms.}}{31}{table.caption.46}%
 \contentsline {table}{\numberline {3.7}{\ignorespaces Tasks provided by the \repo {vslam_navigation} package.}}{31}{table.caption.48}%
-\contentsline {table}{\numberline {3.8}{\ignorespaces Computing and software environment.}}{32}{table.caption.50}%
-\contentsline {table}{\numberline {3.9}{\ignorespaces Simulated sensor configuration.}}{33}{table.caption.52}%
-\contentsline {table}{\numberline {3.10}{\ignorespaces Inertial noise: configured against measured.}}{34}{table.caption.53}%
-\contentsline {table}{\numberline {3.11}{\ignorespaces Platform geometry and drivetrain limits.}}{34}{table.caption.54}%
-\contentsline {table}{\numberline {3.12}{\ignorespaces Noise injected by the simulator.}}{35}{table.caption.56}%
-\contentsline {table}{\numberline {3.13}{\ignorespaces Gazebo physics configuration.}}{36}{table.caption.59}%
-\contentsline {table}{\numberline {3.14}{\ignorespaces Measured wheel slip on the four recordings.}}{37}{table.caption.61}%
-\contentsline {table}{\numberline {3.15}{\ignorespaces Configured against injected inertial noise.}}{37}{table.caption.63}%
-\contentsline {table}{\numberline {3.16}{\ignorespaces Controlled experimental factors and the levels realised.}}{40}{table.caption.65}%
-\contentsline {table}{\numberline {3.17}{\ignorespaces Zones of the two realistic worlds and the number of object instances each holds.}}{41}{table.caption.70}%
-\contentsline {table}{\numberline {3.18}{\ignorespaces Dataset registry: the eleven recordings in use.}}{47}{table.caption.78}%
-\contentsline {table}{\numberline {3.19}{\ignorespaces Specification of the AC-IMX390-H190 camera.\relax }}{49}{table.caption.84}%
-\contentsline {table}{\numberline {3.20}{\ignorespaces Summary of the hardware technical specification.\relax }}{51}{table.caption.87}%
-\contentsline {table}{\numberline {3.21}{\ignorespaces Real sensor rig, and the calibration status of each quantity.}}{51}{table.caption.88}%
-\contentsline {table}{\numberline {3.22}{\ignorespaces Sensor noise and scale measured from each recording.}}{54}{table.caption.91}%
-\contentsline {table}{\numberline {3.23}{\ignorespaces Implemented non-visual estimators.}}{55}{table.caption.94}%
-\contentsline {table}{\numberline {3.24}{\ignorespaces Parameters of the detection evaluation.}}{58}{table.caption.104}%
-\contentsline {table}{\numberline {3.25}{\ignorespaces Principal stored artifacts.\relax }}{63}{table.caption.108}%
-\contentsline {table}{\numberline {3.26}{\ignorespaces Planned-versus-implemented deviations at the reporting cutoff.}}{65}{table.caption.109}%
-\contentsline {table}{\numberline {3.27}{\ignorespaces Original objectives (\cref {sec:objectives}) against the work reported here.\relax }}{66}{table.caption.110}%
+\contentsline {table}{\numberline {3.8}{\ignorespaces Relocalisation configuration adopted. Launch arguments are those of \repo {vslam_navigation}; the parameter column names what each sets in RTAB-Map. Frozen for Experiment\nobreakspace {}4 in \repo {script/exp4_protocol.yaml} and recorded in every run's manifest.\relax }}{33}{table.caption.51}%
+\contentsline {table}{\numberline {3.9}{\ignorespaces Settings tried and rejected in reaching \cref {tab:reloc-config}. Four of the five acceptance controls available were either inert or destructive, which is why the adopted configuration departs from RTAB-Map's defaults in one parameter only.\relax }}{33}{table.caption.52}%
+\contentsline {table}{\numberline {3.10}{\ignorespaces Computing and software environment.}}{34}{table.caption.53}%
+\contentsline {table}{\numberline {3.11}{\ignorespaces Simulated sensor configuration.}}{35}{table.caption.55}%
+\contentsline {table}{\numberline {3.12}{\ignorespaces Inertial noise: configured against measured.}}{36}{table.caption.56}%
+\contentsline {table}{\numberline {3.13}{\ignorespaces Platform geometry and drivetrain limits.}}{36}{table.caption.57}%
+\contentsline {table}{\numberline {3.14}{\ignorespaces Noise injected by the simulator.}}{37}{table.caption.59}%
+\contentsline {table}{\numberline {3.15}{\ignorespaces Gazebo physics configuration.}}{38}{table.caption.62}%
+\contentsline {table}{\numberline {3.16}{\ignorespaces Measured wheel slip on the four recordings.}}{39}{table.caption.64}%
+\contentsline {table}{\numberline {3.17}{\ignorespaces Configured against injected inertial noise.}}{39}{table.caption.66}%
+\contentsline {table}{\numberline {3.18}{\ignorespaces Controlled experimental factors and the levels realised.}}{42}{table.caption.68}%
+\contentsline {table}{\numberline {3.19}{\ignorespaces Zones of the two realistic worlds and the number of object instances each holds.}}{43}{table.caption.73}%
+\contentsline {table}{\numberline {3.20}{\ignorespaces Dataset registry: the eleven recordings in use.}}{49}{table.caption.81}%
+\contentsline {table}{\numberline {3.21}{\ignorespaces Specification of the AC-IMX390-H190 camera.\relax }}{51}{table.caption.87}%
+\contentsline {table}{\numberline {3.22}{\ignorespaces Summary of the hardware technical specification.\relax }}{52}{table.caption.90}%
+\contentsline {table}{\numberline {3.23}{\ignorespaces Real sensor rig, and the calibration status of each quantity.}}{53}{table.caption.91}%
+\contentsline {table}{\numberline {3.24}{\ignorespaces Sensor noise and scale measured from each recording.}}{56}{table.caption.94}%
+\contentsline {table}{\numberline {3.25}{\ignorespaces Implemented non-visual estimators.}}{57}{table.caption.97}%
+\contentsline {table}{\numberline {3.26}{\ignorespaces Parameters of the detection evaluation.}}{61}{table.caption.107}%
+\contentsline {table}{\numberline {3.27}{\ignorespaces Principal stored artifacts.\relax }}{66}{table.caption.112}%
+\contentsline {table}{\numberline {3.28}{\ignorespaces Planned-versus-implemented deviations at the reporting cutoff.}}{68}{table.caption.113}%
+\contentsline {table}{\numberline {3.29}{\ignorespaces Original objectives (\cref {sec:objectives}) against the work reported here.\relax }}{69}{table.caption.114}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {4.1}{\ignorespaces Status of the eight result slots at the reporting cutoff.\relax }}{67}{table.caption.111}%
-\contentsline {table}{\numberline {4.2}{\ignorespaces Recordings of Experiment 1.}}{68}{table.caption.112}%
-\contentsline {table}{\numberline {4.3}{\ignorespaces Estimator comparison on the four realistic recordings.}}{69}{table.caption.114}%
-\contentsline {table}{\numberline {4.4}{\ignorespaces Relative pose error at $\Delta t=\SI {1}{\second }$ on the four realistic recordings.}}{70}{table.caption.115}%
-\contentsline {table}{\numberline {4.5}{\ignorespaces Wheel+gyro dead reckoning against the optical tracker.}}{74}{table.caption.121}%
-\contentsline {table}{\numberline {4.6}{\ignorespaces Detector scores per recording and pooled.}}{75}{table.caption.126}%
-\contentsline {table}{\numberline {4.7}{\ignorespaces Recall against truth-box size.}}{76}{table.caption.128}%
-\contentsline {table}{\numberline {4.8}{\ignorespaces What the unmatched predictions are.}}{76}{table.caption.129}%
-\contentsline {table}{\numberline {4.9}{\ignorespaces Structure of the misses.}}{77}{table.caption.130}%
-\contentsline {table}{\numberline {4.10}{\ignorespaces Score-threshold sweep.}}{77}{table.caption.131}%
-\contentsline {table}{\numberline {4.11}{\ignorespaces Misses and false positives by class.}}{77}{table.caption.132}%
-\contentsline {table}{\numberline {4.12}{\ignorespaces Unfiltered arms on the four realistic-warehouse recordings.}}{82}{table.caption.138}%
-\contentsline {table}{\numberline {4.13}{\ignorespaces Realistic world: onset of sustained error, unfiltered runs.}}{84}{table.caption.145}%
-\contentsline {table}{\numberline {4.14}{\ignorespaces Real-time and resource measurements on the mapping recordings.}}{86}{table.caption.152}%
-\contentsline {table}{\numberline {4.15}{\ignorespaces Realv6: every surviving run against the cleaned tracker truth.}}{90}{table.caption.157}%
-\contentsline {table}{\numberline {4.16}{\ignorespaces Realv6: raw versus cleaned tracker export.}}{90}{table.caption.159}%
-\contentsline {table}{\numberline {4.17}{\ignorespaces Realv6: ORB-SLAM3 drift while turning versus on straights.}}{91}{table.caption.162}%
-\contentsline {table}{\numberline {4.18}{\ignorespaces Realv6: the VINS-Fusion run.}}{92}{table.caption.163}%
-\contentsline {table}{\numberline {4.19}{\ignorespaces Realv7: the plane of every ORB-SLAM3 estimate as written in the live log.}}{93}{table.caption.166}%
-\contentsline {table}{\numberline {4.20}{\ignorespaces Realv7: every run after the frame repair, with its initialisation history.}}{94}{table.caption.168}%
-\contentsline {table}{\numberline {4.21}{\ignorespaces Realv7: the VINS-Fusion runs.}}{95}{table.caption.170}%
-\contentsline {table}{\numberline {4.22}{\ignorespaces Conditions for the dense-map evaluation.}}{97}{table.caption.173}%
-\contentsline {table}{\numberline {4.23}{\ignorespaces Stored contents of \repo {map/map_tiny.db}.}}{98}{table.caption.176}%
-\contentsline {table}{\numberline {4.24}{\ignorespaces Occupied-cell geometry of \repo {map/map_tiny.db} against \repo {small_warehouse_static_tinymap.world} at \SI {0.25}{\metre } tolerance.\relax }}{98}{table.caption.178}%
-\contentsline {table}{\numberline {4.25}{\ignorespaces Drivability of \repo {map/map_tiny.db} under the true $0.83\times 0.50$\nobreakspace {}m nav2 footprint, evaluated against two different routes.}}{99}{table.caption.180}%
-\contentsline {table}{\numberline {4.26}{\ignorespaces Occupied-cell geometry of the four realistic databases.}}{103}{table.caption.187}%
-\contentsline {table}{\numberline {4.27}{\ignorespaces Drivability of the realistic-warehouse databases under the true nav2 footprint, against independent routes.}}{104}{table.caption.188}%
-\contentsline {table}{\numberline {4.28}{\ignorespaces Stored contents and build parameters of the realistic-warehouse databases.}}{104}{table.caption.189}%
-\contentsline {table}{\numberline {4.29}{\ignorespaces Limitations of the results reported in this chapter, and what each one prevents.}}{114}{table.caption.198}%
+\contentsline {table}{\numberline {4.1}{\ignorespaces Status of the eight result slots at the reporting cutoff.\relax }}{70}{table.caption.115}%
+\contentsline {table}{\numberline {4.2}{\ignorespaces Recordings of Experiment 1.}}{71}{table.caption.116}%
+\contentsline {table}{\numberline {4.3}{\ignorespaces Estimator comparison on the four realistic recordings.}}{73}{table.caption.120}%
+\contentsline {table}{\numberline {4.4}{\ignorespaces Relative pose error at $\Delta t=\SI {1}{\second }$ on the four realistic recordings.}}{74}{table.caption.121}%
+\contentsline {table}{\numberline {4.5}{\ignorespaces Visual estimators on the four realistic-warehouse recordings.}}{77}{table.caption.126}%
+\contentsline {table}{\numberline {4.6}{\ignorespaces Translation error of the visual arms, split by direction.}}{80}{table.caption.133}%
+\contentsline {table}{\numberline {4.7}{\ignorespaces Orientation error of the visual arms, by axis and by turn rate.}}{81}{table.caption.135}%
+\contentsline {table}{\numberline {4.8}{\ignorespaces Realistic world: onset of sustained error, unfiltered runs.}}{82}{table.caption.136}%
+\contentsline {table}{\numberline {4.9}{\ignorespaces Real-time and resource measurements on the mapping recordings.}}{85}{table.caption.144}%
+\contentsline {table}{\numberline {4.10}{\ignorespaces Real-time and resource measurements of the twenty realistic-world runs.}}{86}{table.caption.146}%
+\contentsline {table}{\numberline {4.11}{\ignorespaces Run-to-run spread over the three repeats of each mapping-recording configuration.}}{88}{table.caption.149}%
+\contentsline {table}{\numberline {4.12}{\ignorespaces Wheel+gyro dead reckoning against the optical tracker.}}{90}{table.caption.156}%
+\contentsline {table}{\numberline {4.13}{\ignorespaces Realv6: every surviving run against the cleaned tracker truth.}}{91}{table.caption.161}%
+\contentsline {table}{\numberline {4.14}{\ignorespaces Realv6: raw versus cleaned tracker export.}}{91}{table.caption.163}%
+\contentsline {table}{\numberline {4.15}{\ignorespaces Realv6: ORB-SLAM3 drift while turning versus on straights.}}{92}{table.caption.166}%
+\contentsline {table}{\numberline {4.16}{\ignorespaces Realv6: the VINS-Fusion run.}}{92}{table.caption.167}%
+\contentsline {table}{\numberline {4.17}{\ignorespaces Evidence of the initialisation defect: the plane of every estimate under stock ORB-SLAM3.}}{94}{table.caption.170}%
+\contentsline {table}{\numberline {4.18}{\ignorespaces Every real-robot run, with the upstream initialisation defect patched out.}}{95}{table.caption.172}%
+\contentsline {table}{\numberline {4.19}{\ignorespaces Realv7: the VINS-Fusion runs.}}{95}{table.caption.174}%
+\contentsline {table}{\numberline {4.20}{\ignorespaces Detector scores per recording and pooled.}}{101}{table.caption.177}%
+\contentsline {table}{\numberline {4.21}{\ignorespaces Recall against truth-box size.}}{101}{table.caption.179}%
+\contentsline {table}{\numberline {4.22}{\ignorespaces What the unmatched predictions are.}}{102}{table.caption.180}%
+\contentsline {table}{\numberline {4.23}{\ignorespaces Structure of the misses.}}{102}{table.caption.181}%
+\contentsline {table}{\numberline {4.24}{\ignorespaces Score-threshold sweep.}}{102}{table.caption.182}%
+\contentsline {table}{\numberline {4.25}{\ignorespaces Misses and false positives by class.}}{103}{table.caption.183}%
+\contentsline {table}{\numberline {4.26}{\ignorespaces Conditions for the dense-map evaluation.}}{105}{table.caption.189}%
+\contentsline {table}{\numberline {4.27}{\ignorespaces Stored contents of \repo {map/map_tiny.db}.}}{106}{table.caption.192}%
+\contentsline {table}{\numberline {4.28}{\ignorespaces Occupied-cell geometry of \repo {map/map_tiny.db} against \repo {small_warehouse_static_tinymap.world} at \SI {0.25}{\metre } tolerance.\relax }}{106}{table.caption.194}%
+\contentsline {table}{\numberline {4.29}{\ignorespaces Drivability of \repo {map/map_tiny.db} under the true $0.83\times 0.50$\nobreakspace {}m nav2 footprint, evaluated against two different routes.}}{107}{table.caption.196}%
+\contentsline {table}{\numberline {4.30}{\ignorespaces Occupied-cell geometry of the four realistic databases.}}{112}{table.caption.203}%
+\contentsline {table}{\numberline {4.31}{\ignorespaces Drivability of the realistic-warehouse databases.}}{112}{table.caption.204}%
+\contentsline {table}{\numberline {4.32}{\ignorespaces Stored contents and build parameters of the realistic-warehouse databases.}}{112}{table.caption.205}%
+\contentsline {table}{\numberline {4.33}{\ignorespaces Pose accuracy of the graph each realistic map was built from.}}{118}{table.caption.213}%
+\contentsline {table}{\numberline {4.34}{\ignorespaces Pose tracking against ground truth, 12 November 2026. Route shapes were driven by hand: straight, approximately square, approximately a figure-of-eight. Offset is the length of the mean error vector, scatter the spread about it, both over samples within \SI {2}{\metre } so that one diverged run does not swamp them. Blind is the share of localisation poses carrying RTAB-Map's no-information covariance.\relax }}{123}{table.caption.216}%
+\contentsline {table}{\numberline {4.35}{\ignorespaces Limitations of the results reported in this chapter, and what each one prevents.}}{127}{table.caption.219}%
 \addvspace {10\p@ }

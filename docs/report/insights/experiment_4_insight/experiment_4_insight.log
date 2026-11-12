@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  6 NOV 2026 23:54
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  12 NOV 2026 17:05
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -761,220 +761,104 @@ LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <8> not available
 (Font)              Font shape `OT1/ptm/b/n' tried instead on input line 20.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <6> not available
 (Font)              Font shape `OT1/ptm/b/n' tried instead on input line 20.
-LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 7
-3.
+LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 4
+8.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ts1ptm.fd
 File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
-) [1
-
-{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
-(../../../../output/compare/simulation/exp4-insights/cell_classes.tex
+)
+(../../../../output/compare/simulation/exp4-nav-insights/rotation.tex
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 6.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 3.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <7.4> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 6.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 3.
 )
-<../../../../output/compare/simulation/exp4-insights/fig_cells_map_tiny_light.p
-ng, id=59, 794.97pt x 520.344pt>
-File: ../../../../output/compare/simulation/exp4-insights/fig_cells_map_tiny_li
-ght.png Graphic file (type png)
-<use ../../../../output/compare/simulation/exp4-insights/fig_cells_map_tiny_lig
-ht.png>
-Package pdftex.def Info: ../../../../output/compare/simulation/exp4-insights/fi
-g_cells_map_tiny_light.png  used on input line 96.
-(pdftex.def)             Requested size: 455.24411pt x 297.98862pt.
- [2]
-[3 <../../../../output/compare/simulation/exp4-insights/fig_cells_map_tiny_ligh
-t.png>] (../../../../output/compare/simulation/exp4-insights/bins_angle.tex)
-(../../../../output/compare/simulation/exp4-insights/bins_views.tex
-LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <5> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 8.
-)
-(../../../../output/compare/simulation/exp4-insights/bins_distance.tex)
-<../../../../output/compare/simulation/exp4-insights/fig_bins_light.png, id=76,
- 722.7pt x 289.08pt>
-File: ../../../../output/compare/simulation/exp4-insights/fig_bins_light.png Gr
-aphic file (type png)
-<use ../../../../output/compare/simulation/exp4-insights/fig_bins_light.png>
-Package pdftex.def Info: ../../../../output/compare/simulation/exp4-insights/fi
-g_bins_light.png  used on input line 129.
-(pdftex.def)             Requested size: 455.24411pt x 182.0993pt.
+<../../../../output/compare/simulation/exp4-nav-insights/fig_rotation.png, id=2
+8, 903.375pt x 332.442pt>
+File: ../../../../output/compare/simulation/exp4-nav-insights/fig_rotation.png 
+Graphic file (type png)
+<use ../../../../output/compare/simulation/exp4-nav-insights/fig_rotation.png>
+Package pdftex.def Info: ../../../../output/compare/simulation/exp4-nav-insight
+s/fig_rotation.png  used on input line 73.
+(pdftex.def)             Requested size: 455.24411pt x 167.5344pt.
+ [1
 
-(../../../../output/compare/simulation/exp4-insights/missed_by_obstacle.tex)
-[4
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [2 <../../../../output/com
+pare/simulation/exp4-nav-insights/fig_rotation.png>]
+(../../../../output/compare/simulation/exp4-nav-insights/excursions.tex)
+<../../../../output/compare/simulation/exp4-nav-insights/fig_excursions.png, id
+=50, 903.375pt x 462.528pt>
+File: ../../../../output/compare/simulation/exp4-nav-insights/fig_excursions.pn
+g Graphic file (type png)
+<use ../../../../output/compare/simulation/exp4-nav-insights/fig_excursions.png
+>
+Package pdftex.def Info: ../../../../output/compare/simulation/exp4-nav-insight
+s/fig_excursions.png  used on input line 115.
+(pdftex.def)             Requested size: 455.24411pt x 233.09134pt.
 
-] [5 <../../../../output/compare/simulation/exp4-insights/fig_bins_light.png>] 
-(../../../../output/compare/simulation/exp4-insights/closures.tex)
-<../../../../output/compare/simulation/exp4-insights/fig_graph_light.png, id=96
-, 794.97pt x 375.804pt>
-File: ../../../../output/compare/simulation/exp4-insights/fig_graph_light.png G
-raphic file (type png)
-<use ../../../../output/compare/simulation/exp4-insights/fig_graph_light.png>
-Package pdftex.def Info: ../../../../output/compare/simulation/exp4-insights/fi
-g_graph_light.png  used on input line 167.
-(pdftex.def)             Requested size: 455.24411pt x 215.214pt.
- [6 <../../../../output/compare/simulation/exp4-insights/fig_graph_light.png>]
-(../../../../output/compare/simulation/exp4-insights/drivability.tex)
-(../../../../output/compare/simulation/exp4-insights/blocked_segments.tex)
-(../../../../output/compare/simulation/exp4-insights/databases.tex
-Underfull \hbox (badness 10000) in paragraph at lines 11--12
-[]|\T1/ptm/m/n/8 (+20) the scored tiny
+[3 <../../../../output/compare/simulation/exp4-nav-insights/fig_excursions.png>
+] (../../../../output/compare/simulation/exp4-nav-insights/prior_value.tex)
+<../../../../output/compare/simulation/exp4-nav-insights/fig_prior_value.png, i
+d=59, 903.375pt x 346.896pt>
+File: ../../../../output/compare/simulation/exp4-nav-insights/fig_prior_value.p
+ng Graphic file (type png)
+<use ../../../../output/compare/simulation/exp4-nav-insights/fig_prior_value.pn
+g>
+Package pdftex.def Info: ../../../../output/compare/simulation/exp4-nav-insight
+s/fig_prior_value.png  used on input line 172.
+(pdftex.def)             Requested size: 455.24411pt x 174.8185pt.
+
+[4 <../../../../output/compare/simulation/exp4-nav-insights/fig_prior_value.png
+>]
+Underfull \hbox (badness 2080) in paragraph at lines 256--256
+\T1/ptm/m/n/10 (+20) (11.0\TS1/ptm/m/n/10 (+20) ° \T1/ptm/m/n/10 (+20) cor-rec-
+tion, $\OML/ztmcm/m/it/10 r \OT1/ztmcm/m/n/10 =
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 11--12
-\T1/ptm/m/n/8 (+20) map (reg-is-tered);
+Underfull \hbox (badness 2913) in paragraph at lines 256--256
+\OT1/ztmcm/m/n/10 0\OML/ztmcm/m/it/10 :\OT1/ztmcm/m/n/10 97$ \T1/ptm/m/n/10 (+2
+0) with po-si-tion er-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 11--12
-\T1/ptm/m/n/8 (+20) built on the
+Underfull \hbox (badness 4048) in paragraph at lines 256--256
+\T1/ptm/m/n/10 (+20) ror), one trans-la-tional
  []
 
 
-Overfull \hbox (8.2736pt too wide) in paragraph at lines 11--12
-\T1/pcr/m/n/8 dataset_map_tiny
- []
-
-) [7]
-(../../../../output/compare/simulation/exp4-insights/cell_classes_realistic.tex
-)
-<../../../../output/compare/simulation/exp4-insights/fig_cells_map_realistic_li
-ght.png, id=120, 794.97pt x 520.344pt>
-File: ../../../../output/compare/simulation/exp4-insights/fig_cells_map_realist
-ic_light.png Graphic file (type png)
-<use ../../../../output/compare/simulation/exp4-insights/fig_cells_map_realisti
-c_light.png>
-Package pdftex.def Info: ../../../../output/compare/simulation/exp4-insights/fi
-g_cells_map_realistic_light.png  used on input line 282.
-(pdftex.def)             Requested size: 455.24411pt x 297.98862pt.
-<../../../../output/compare/simulation/exp4-insights/fig_cells_dataset_allsenso
-r_realistic_map_light.png, id=123, 794.97pt x 520.344pt>
-File: ../../../../output/compare/simulation/exp4-insights/fig_cells_dataset_all
-sensor_realistic_map_light.png Graphic file (type png)
-<use ../../../../output/compare/simulation/exp4-insights/fig_cells_dataset_alls
-ensor_realistic_map_light.png>
-Package pdftex.def Info: ../../../../output/compare/simulation/exp4-insights/fi
-g_cells_dataset_allsensor_realistic_map_light.png  used on input line 293.
-(pdftex.def)             Requested size: 455.24411pt x 297.98862pt.
-<../../../../output/compare/simulation/exp4-insights/fig_cells_map_realistic_01
-_light.png, id=124, 794.97pt x 520.344pt>
-File: ../../../../output/compare/simulation/exp4-insights/fig_cells_map_realist
-ic_01_light.png Graphic file (type png)
-<use ../../../../output/compare/simulation/exp4-insights/fig_cells_map_realisti
-c_01_light.png>
-Package pdftex.def Info: ../../../../output/compare/simulation/exp4-insights/fi
-g_cells_map_realistic_01_light.png  used on input line 303.
-(pdftex.def)             Requested size: 455.24411pt x 297.98862pt.
-<../../../../output/compare/simulation/exp4-insights/fig_cells_dataset_allsenso
-r_realistic_01_map_light.png, id=125, 794.97pt x 520.344pt>
-File: ../../../../output/compare/simulation/exp4-insights/fig_cells_dataset_all
-sensor_realistic_01_map_light.png Graphic file (type png)
-<use ../../../../output/compare/simulation/exp4-insights/fig_cells_dataset_alls
-ensor_realistic_01_map_light.png>
-Package pdftex.def Info: ../../../../output/compare/simulation/exp4-insights/fi
-g_cells_dataset_allsensor_realistic_01_map_light.png  used on input line 311.
-(pdftex.def)             Requested size: 455.24411pt x 297.98862pt.
- (../../../../output/compare/simulation/exp4-insights/bins_views_realistic.tex)
- (../../../../output/compare/simulation/exp4-insights/bins_angle_realistic.tex)
-
-(../../../../output/compare/simulation/exp4-insights/bins_distance_realistic.te
-x)
-<../../../../output/compare/simulation/exp4-insights/fig_bins_realistic_light.p
-ng, id=126, 722.7pt x 289.08pt>
-File: ../../../../output/compare/simulation/exp4-insights/fig_bins_realistic_li
-ght.png Graphic file (type png)
-<use ../../../../output/compare/simulation/exp4-insights/fig_bins_realistic_lig
-ht.png>
-Package pdftex.def Info: ../../../../output/compare/simulation/exp4-insights/fi
-g_bins_realistic_light.png  used on input line 337.
-(pdftex.def)             Requested size: 455.24411pt x 182.0993pt.
- [8] [9 <../../../../output/compare/simulation/exp4-insights/fig_cells_map_real
-istic_light.png> <../../../../output/compare/simulation/exp4-insights/fig_cells
-_dataset_allsensor_realistic_map_light.png>] [10 <../../../../output/compare/si
-mulation/exp4-insights/fig_cells_map_realistic_01_light.png> <../../../../outpu
-t/compare/simulation/exp4-insights/fig_cells_dataset_allsensor_realistic_01_map
-_light.png>] [11 <../../../../output/compare/simulation/exp4-insights/fig_bins_
-realistic_light.png>]
-(../../../../output/compare/simulation/exp4-insights/drivability_realistic.tex)
-(../../../../output/compare/simulation/exp4-insights/blocked_realistic.tex)
-[12]
-Underfull \hbox (badness 10000) in paragraph at lines 452--452
-\T1/ptm/m/n/10 (+20) toms: 348 thick-ened
+Underfull \hbox (badness 1762) in paragraph at lines 256--256
+\T1/ptm/m/n/10 (+20) (5.2m cor-rec-tion, yaw
  []
 
 
-Underfull \hbox (badness 2197) in paragraph at lines 452--452
-[]|\T1/ptm/m/n/10 (+20) Seen edge-on and once:
+Underfull \hbox (badness 1087) in paragraph at lines 256--256
+\T1/ptm/m/n/10 (+20) un-moved); both re-cov-
  []
 
-
-Underfull \hbox (badness 5302) in paragraph at lines 452--452
-\T1/ptm/m/n/10 (+20) re-call 95% head-on to
- []
-
-
-Underfull \hbox (badness 3965) in paragraph at lines 452--452
-[]|\T1/ptm/m/n/10 (+20) Corrected 0.26m pla-nar
- []
-
-
-Underfull \hbox (badness 1194) in paragraph at lines 452--452
-[]|\T1/ptm/m/n/10 (+20) Retired: on 22 Oct the
- []
-
-
-Underfull \hbox (badness 4913) in paragraph at lines 452--452
-[]|\T1/ptm/m/n/10 (+20) Scored map built from
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 452--452
-\T1/pcr/m/n/10 dataset_map_tiny
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 452--452
-\T1/ptm/m/n/10 (+20) (re-gen-er-ated); \T1/pcr/m/n/10 map_02
- []
-
-
-Underfull \hbox (badness 1412) in paragraph at lines 452--452
-[]|\T1/ptm/m/n/10 (+20) Shelves thick-ened as on
- []
-
-
-Underfull \hbox (badness 3536) in paragraph at lines 452--452
-\T1/ptm/m/n/10 (+20) at spawn-transient phan-
- []
-
-
-Underfull \hbox (badness 1132) in paragraph at lines 452--452
-\T1/ptm/m/n/10 (+20) (18%); three pa-ram-e-ters
- []
-
-[13] [14] [15] (./experiment_4_insight.aux)
+[5] [6] (./experiment_4_insight.aux)
 Package rerunfilecheck Info: File `experiment_4_insight.out' has not changed.
-(rerunfilecheck)             Checksum: C8EE67978F2CEE30E8F669166DFE2FCF;4209.
+(rerunfilecheck)             Checksum: A0A643DBDC546EF7F60F8141B6BF47D0;1600.
  ) 
 Here is how much of TeX's memory you used:
- 20744 strings out of 480171
- 399944 string characters out of 5894489
- 718752 words of memory out of 5000000
- 37914 multiletter control sequences out of 15000+600000
- 548249 words of font info for 383 fonts, out of 8000000 for 9000
+ 20432 strings out of 480171
+ 390234 string characters out of 5894489
+ 697752 words of memory out of 5000000
+ 37794 multiletter control sequences out of 15000+600000
+ 535541 words of font info for 295 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
- 76i,12n,82p,1201b,865s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 76i,12n,82p,1017b,856s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
-e/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texm
-f-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/
-type1/urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times
-/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on experiment_4_insight.pdf (15 pages, 1494917 bytes).
+e/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texm
+f-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/
+fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/
+type1/urw/courier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/tim
+es/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb><
+/usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on experiment_4_insight.pdf (6 pages, 431311 bytes).
 PDF statistics:
- 242 PDF objects out of 1000 (max. 8388607)
- 180 compressed objects within 2 object streams
- 59 named destinations out of 1000 (max. 500000)
- 86129 words of extra memory for PDF output out of 89155 (max. 10000000)
+ 126 PDF objects out of 1000 (max. 8388607)
+ 91 compressed objects within 1 object stream
+ 24 named destinations out of 1000 (max. 500000)
+ 76864 words of extra memory for PDF output out of 89155 (max. 10000000)
 

@@ -83,3 +83,11 @@
   \ifthenelse{\equal{#1}{poor}}{\colorbox{perfpoor}{\scriptsize poor}}{%
   \ifthenelse{\equal{#1}{noeffect}}{\colorbox{perfnoeffect}{\scriptsize no effect}}{%
   \colorbox{perfnone}{\scriptsize no claim}}}}}
+
+% ---- cross-document labels
+% A generated table's caption must NOT \cref a sibling table: an analysis
+% companion inputs the same table file without carrying the sibling, so the
+% reference dangles. Fixed at the generators (plain wording, or \cref a
+% section). A \gdef shim was tried here and removed: it does not satisfy
+% cleveref's internal format, so it resolved nothing and only looked like it
+% might.

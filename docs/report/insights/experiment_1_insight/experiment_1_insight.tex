@@ -8,31 +8,37 @@
 \newcommand{\insdir}{../../../../output/compare/simulation/exp1-insights}
 \newcommand{\ins}[1]{\input{\insdir/#1}}
 
-\title{Experiment 1: Why the Estimators Err the Way They Do\\
+\title{Experiment 1, non-visual arms: Why the Estimators Err the Way They Do\\
        \large Insight analysis for Chapter 4, Section 4.1}
 \author{Bolton Athit Davies}
-\date{Reporting cutoff: 22 October 2026}
+\date{Reporting cutoff: 12 November 2026}
 
 \begin{document}
 \maketitle
 
 \noindent\textbf{Purpose of this document.} The raw write-up of Experiment~1
 (\path{insights/experiment_1/}) reports how far each estimator is from the
-truth on the five static recordings. This document asks what kind of error
-each one makes and when it is made: whether wheel odometry's error is a scale
-or a heading error, why IMU dead reckoning diverges, when and why the EKF's
-covariance stops describing its error, and what the visual estimators' error
-consists of once they are scored at the IMU point. Each question is tested
-within every recording, so the recording is its own control, and the answer
-carries the evidence for and against it. Every number is written by
+truth on the four realistic-warehouse recordings. This document asks what kind
+of error each one makes and when it is made: whether wheel odometry's error is
+a scale or a heading error, why IMU dead reckoning diverges, when and why the
+EKF's covariance stops describing its error, what the transferred noise model
+does to that filter, and what the visual estimators' reported error consists
+of once they are scored at the IMU point. Each question is tested within every
+recording, so the recording is its own control, and the answer carries the
+evidence for and against it. Every number is written by
 \path{script/exp1_insights.py} into
 \path{output/compare/simulation/exp1-insights/}; the tables are input from
 there unchanged.
 
 \section{Questions and method}
 
-Six questions were put to the five \repo{dataset_allsensor} recordings
-(replay at $0.5\times$, four worlds, one run per estimator per recording).
+Six questions were put to the four \repo{dataset_allsensor_realistic}
+recordings, one run per estimator per recording:
+\repo{allsensor_realistic_000} and \repo{allsensor_realistic_002} on the U
+layout, \repo{allsensor_realistic_001} and \repo{allsensor_realistic_003} on
+the I layout, with the two odd-numbered\,/\,even-numbered pairs splitting
+static from moving traffic, as the chapter's simulation subsection records. The routes
+run \SIrange{103}{172}{\metre}.
 
 \begin{enumerate}[label=Q\arabic*.]
 \item Is wheel odometry's error a distance (scale) error, a heading error, or
@@ -41,13 +47,12 @@ Six questions were put to the five \repo{dataset_allsensor} recordings
       straights?
 \item Does IMU dead reckoning diverge through its heading or through its
       velocity?
-\item When does the EKF's covariance stop describing its error, and does the
-      per-recording noise calibration change that?
+\item When does the EKF's covariance stop describing its error?
 \item What does the transferred noise model (the VSLAM file's IMU constants)
       do to the EKF, mechanically?
-\item For the visual estimators, scored at the IMU point: what is their error
-      made of, does it grow at turns or with few features, and what was the one
-      failure?
+\item For the visual estimators, scored at the IMU point: what is their
+      reported error made of, does it grow at turns or with few features, and
+      what was the one failure?
 \end{enumerate}
 
 \paragraph{Baselines.} The wheel, IMU and EKF estimates start from the
@@ -59,28 +64,33 @@ zeroed at the start. To separate heading from velocity error, the true
 velocity is integrated through the heading error alone; the ratio of that
 prediction to the actual error says how much of the error the heading
 explains. Growth rates while turning (ground-truth yaw rate above
-\SI{10}{\degree\per\second}) and on straights are compared as in the
-Experiment~3 insight analysis. NEES is computed from the logged covariance at
-\SI{1}{\hertz}; the filter ``leaves its band'' at the first time it stays
-above the \SI{97.5}{\percent} value of a 3-DOF $\chi^2$ for \SI{5}{\second}.
+\SI{10}{\degree\per\second}) and on straights are compared as in the companion
+analysis of the visual arms (\path{insights/experiment_1_visual_insight/}).
+NEES is computed from the logged covariance at \SI{1}{\hertz}; the filter
+``leaves its band'' at the first time it stays above the \SI{97.5}{\percent}
+value of a 3-DOF $\chi^2$ for \SI{5}{\second}.
+
+\paragraph{The two EKF arms.} \repo{output_ekf_measured} is the filter driven
+by the noise constants measured on this rig and is reported in the chapter as
+the fused baseline; \repo{output_ekf} is the same filter driven by the IMU
+constants carried in the VSLAM configuration file, kept as a diagnostic. The
+tree names are the reverse of what they suggest and are easy to swap.
 
 \paragraph{Visual estimators.} VINS-Fusion and ORB-SLAM3 report the IMU,
 \SI{0.338}{\metre} ahead of the model origin, so they are scored against the
-ground truth moved to that point (the lever-arm finding of the Experiment~3
-insight analysis, now applied in every scoring script). The initialisation
-transient is cut and the start-anchored error, tracking regime and
-turning contrast of the Experiment~3 analysis are reused. Whole-run ATE is
-reported both in three dimensions, as the chapter does, and in the plane.
+ground truth moved to that point. The initialisation transient is cut and the
+start-anchored error, tracking regime and turning contrast of the companion
+analysis are reused. Whole-run ATE is reported both in three dimensions, as
+the chapter does, and in the plane.
 
 \FloatBarrier
 \section{Insight 1: wheel odometry's error is heading error made in the
-         turns, not a distance error}
-\label{sec:insight1-wheel}
+         corners}
 
-Wheel odometry measures distance to within one percent; its position error is
-heading error carried forward, and the heading error is made almost entirely
-while the robot turns. \Cref{tab:e1i-decomp,tab:e1i-turning} and
-\cref{fig:decomp} carry the evidence.
+Wheel odometry measures distance travelled almost exactly and loses its
+heading, and its position error is that heading error integrated along the
+route. \Cref{tab:e1i-decomp}, \cref{tab:e1i-turning} and \cref{fig:decomp}
+carry the evidence.
 
 \ins{decomposition.tex}
 \ins{turning.tex}
@@ -95,64 +105,92 @@ while the robot turns. \Cref{tab:e1i-decomp,tab:e1i-turning} and
   \label{fig:decomp}
 \end{figure}
 
-The path length the wheels report is within \SI{0.8}{\percent} of the true one
-on every recording ($n=5$), while the heading error reaches
-\SIrange{7}{16}{\degree} RMS. Integrating the true velocity through that
-heading error alone reproduces \SIrange{95}{104}{\percent} of the final
-position error on all five recordings. The along-track component is not a
-scale error: it appears once the heading error has rotated the path, which is
-why it is as large as the cross-track component.
+The path length the wheels report is within \SI{0.4}{\percent} of the true one
+on every recording, while the heading error reaches
+\SIrange{7.3}{35.8}{\degree} RMS. Integrating the true velocity through that
+heading error alone, with the true speed, reproduces the final position error
+to within \SI{4}{\percent} on all four recordings (heading-only share
+\numrange{1.01}{1.04}). Position error and heading error are therefore not two
+findings but one: there is no scale error to speak of, and what the chapter
+reports as \SIrange{1.40}{6.71}{\metre} of position error is
+\SIrange{7}{36}{\degree} of yaw converted into displacement by the length of
+the route.
 
-The heading error is made in the turns. Its growth rate while turning is
-\SIrange{650}{1406}{\milli\degree\per\second} against a negative or near-zero
-rate on straights, in five of five recordings; the heading-error traces of
-\cref{fig:decomp} step at each grey band and hold between them. The size of
-the step varies between turns and between recordings, which is why the raw
-write-up found no relation between the fitted yaw-rate scale and the total
-drift (its H1); the mechanism is nonetheless a per-turn heading error, not a
-continuous drift.
+The error is made in the corners and paid for on the straights.
+\Cref{tab:e1i-turning} separates the two rates: the heading error grows at
+\SI{1024}{\milli\degree\per\second} while the ground-truth yaw rate exceeds
+\SI{10}{\degree\per\second} against \SI{13}{\milli\degree\per\second} on
+straights, a factor of \num{77}, and it is the larger of the two in three of
+the four recordings. The position error does the opposite --- \SI{21.5}{} against
+\SI{69.0}{\milli\metre\per\second}, larger on straights in all four --- because a
+heading error acquired in a corner only becomes displacement over the straight
+that follows it. A reader who looks only at position growth would conclude
+that turning is harmless to wheel odometry, which is the wrong way round.
+
+\paragraph{Against the insight.} The weakest case is
+\repo{allsensor_realistic_001}, where \SI{7.3}{\degree} of heading error gives
+\SI{1.40}{\metre} RMS, a fifth of the error on the other three; its route is
+also the shortest. The mechanism is the same there, the lever is just shorter.
+Nothing in these data separates slip at the wheel from a wheel-radius or
+track-width error in the kinematic model, both of which would present as
+heading error in a corner.
 
 \FloatBarrier
 \section{Insight 2: IMU dead reckoning diverges through its velocity, not
          its heading}
 
 IMU-only dead reckoning keeps its heading to within a few degrees and loses
-its position through the velocity integral, whose error grows roughly as
-$t^{1.5}$. \Cref{tab:e1i-imu} and \cref{fig:imu} carry the evidence.
+its position through the velocity integral. \Cref{tab:e1i-imu} and
+\cref{fig:imu} carry the evidence.
 
 \ins{imu_law.tex}
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{\insdir/fig_imu_law_light.png}
-  \caption{IMU dead reckoning on the five recordings. Left: anchored position
+  \caption{IMU dead reckoning on the four recordings. Left: anchored position
   error against time on logarithmic axes, with $t$ and $t^{2}$ guides. Right:
   the same error on linear axes with, dashed, the error that the heading error
   alone would produce.}
   \label{fig:imu}
 \end{figure}
 
-The heading error of the IMU integration is \SIrange{0.6}{3.2}{\degree} RMS,
-smaller than wheel odometry's, and explains at most one percent of the final
-position error ($n=5$). The reported path length is wrong by
-\SIrange{1}{249}{\percent}: the accelerometer integral drifts in speed, and
-the position error follows a power law with exponent \SIrange{1.1}{1.75}{}
-(median \num{1.5}, $R^2$ \SIrange{0.74}{0.94}{}), between the linear growth
-of a velocity offset and the quadratic growth of an acceleration offset. The
-gyroscope is not the weak sensor in this platform; the accelerometer
-integration is. The growth is not concentrated in turns: on all five
-recordings the position error grows faster on straights, where the speed
-error accumulates over distance.
+The heading error of the IMU integration is \SIrange{0.55}{1.91}{\degree} RMS
+and \SI{3.3}{\degree} at worst at the end of a run --- an order of magnitude
+better than wheel odometry's --- yet the final position error is
+\SIrange{35.5}{76.0}{\metre} on routes of \SIrange{103}{172}{\metre}. The
+heading-only prediction accounts for \SI{1}{\percent} of it on every
+recording. The gyroscope is not the problem; the accelerometer channel is. The
+path length the integration reports is wrong by \SIrange{12}{54}{\percent},
+and the sign of that error is not even consistent across the four recordings
+(\num{+53.8}, \num{-11.9}, \num{+41.3} and \SI{-37.3}{\percent}), which is
+what a bias of either sign integrated twice looks like.
+
+The growth law is consistent with that reading. A power-law fit after the
+first \SI{5}{\second} gives $k = \numrange{0.91}{2.22}$ with $R^2$ between
+\num{0.80} and \num{0.92}: between one and two integrations, as a velocity
+error that is partly random walk and partly bias should be. The turning
+contrast in \cref{tab:e1i-turning} agrees --- position error grows at
+\SI{122}{} against \SI{541}{\milli\metre\per\second}, faster on the straights,
+and faster while turning in only one of the four recordings. The divergence
+accumulates wherever the robot is moving, not where it manoeuvres.
+
+\paragraph{Against the insight.} $k$ is not the same on all four and
+\repo{allsensor_realistic_003} fits a sub-linear \num{0.91}, so ``diverges as
+$t^{1.5}$'' would overstate what four runs support; the defensible claim is
+that the error grows faster than the distance travelled and that the heading
+explains almost none of it. No bias estimate was logged, so the split between
+bias and random walk is inferred from the exponent rather than measured.
 
 \FloatBarrier
 \section{Insight 3: the EKF removes the heading error, and its covariance
-         stops describing the error at the first turn}
+         stops describing its error at the first turn}
 
-The EKF reduces the heading error to \SIrange{0.3}{3.5}{\degree} RMS and the
-position error by an order of magnitude, and its NEES leaves the consistent
-band within one second of the first turn on every recording.
-\Cref{tab:e1i-nees} and \cref{fig:nees} carry the timing;
-\cref{tab:e1i-decomp} the decomposition.
+Fusing the gyroscope with the wheels removes the heading error that Insight~1
+isolated, and takes the position error down by between a factor of
+\num{5} and a factor of \num{18}. The filter's own covariance stops covering
+that error at the first corner of the route. \Cref{tab:e1i-decomp},
+\cref{tab:e1i-nees} and \cref{fig:nees} carry the evidence.
 
 \ins{nees_timing.tex}
 
@@ -166,163 +204,220 @@ band within one second of the first turn on every recording.
   \label{fig:nees}
 \end{figure}
 
-Before the first turn the filter is conservative: NEES sits below 3 on every
-recording. Within \SI{0.6}{\second} of the first heading change it rises by
-one to two orders of magnitude and never returns ($n=5$; departure at
-\SIrange{9.0}{26.0}{\second} against first turns at
-\SIrange{9.6}{25.6}{\second}). The covariance therefore describes the error
-on straights and not the heading error that each turn injects: the process
-model has no term for a turn-dependent heading error, so the state covariance
-does not grow when the heading does. The two recordings on which the EKF is
-least accurate, \repo{allsensor_003} and \repo{allsensor_004}, are the two
-where its heading error shows a slow ramp between the turns of about
-\SIrange{0.04}{0.07}{\degree\per\second} (\cref{fig:decomp}, bottom row),
-which a gyroscope-bias state should absorb and here does not fully.
+With the measured noise model the filter holds \SIrange{0.26}{0.79}{\metre}
+RMS against wheel odometry's \SIrange{1.40}{6.71}{\metre}, its heading error
+falls to \SIrange{0.37}{5.72}{\degree}, and its path-length error stays within
+\SI{0.5}{\percent}. The accuracy claim of the chapter's simulation subsection is, mechanically,
+a heading claim: the wheels were already measuring distance correctly, and the
+gyroscope supplies the one quantity they got wrong.
 
-\begin{queried}[Consistency and calibration are different things]
-The transferred noise model is less accurate and more consistent: its median
-NEES is \SIrange{8}{39}{} against \SIrange{21}{91}{} for the measured model
-($n=5$), because its larger process noise keeps the covariance closer to the
-larger error. Neither model is consistent after the first turn. The raw
-write-up's statement that the calibrated filter is ``overconfident by two
-orders of magnitude'' is a whole-run average that mixes a consistent straight
-with an inconsistent remainder.
-\end{queried}
+The covariance tells a different story. The \SI{97.5}{\percent} band of a
+3-DOF $\chi^2$ is \num{9.35}; the filter's median NEES over a run is
+\numrange{34.2}{116.6}, between four and twelve times it. It leaves the band
+at \SI{10.0}{}, \SI{25.0}{}, \SI{9.0}{} and \SI{20.0}{\second} against first
+ground-truth heading changes at \SI{10.5}{}, \SI{24.7}{}, \SI{12.7}{} and
+\SI{20.6}{\second} --- within \SI{4}{\second} of the first turn on all four
+recordings, and on \repo{allsensor_realistic_002} slightly before it, as the
+robot begins to rotate. The filter is accurate and overconfident, and the
+overconfidence begins at the first heading change rather than accumulating
+with distance.
+
+\paragraph{Against the insight.} The residual error is not purely heading:
+the heading-only share of the final error is \numrange{0.44}{1.13} across the
+four recordings, against wheel odometry's uniform \num{\approx 1.0}, so part of
+what is left after fusion is something else. NEES is computed from the
+covariance the filter publishes, which omits any error in the measured noise
+constants themselves, and a single run per recording cannot distinguish an
+under-modelled turn from one unlucky corner.
 
 \FloatBarrier
 \section{Insight 4: the transferred noise model turns the EKF back into
-         wheel odometry at the turns}
+         wheel odometry}
 
-With the VSLAM file's IMU constants the EKF accrues heading error at the turns
-exactly as the raw wheel odometry does, and that is the whole of the damage
-the noise transfer causes. The ``EKF @ VSLAM noise'' rows of
-\cref{tab:e1i-decomp,tab:e1i-turning} carry the evidence.
+Driving the same filter with the IMU constants carried in the VSLAM
+configuration file costs between a factor of \num{3.5} and a factor of
+\num{7.5} in accuracy, and the error it is left with has the signature of
+Insight~1. \Cref{tab:e1i-decomp} and \cref{tab:e1i-nees} carry the evidence.
 
-On the transferred model the heading error grows at
-\SIrange{431}{774}{\milli\degree\per\second} while turning and at or below
-zero on straights, in five of five recordings; the position error grows at
-\SIrange{59}{130}{\milli\metre\per\second} in the turns and at
-\SIrange{-21}{8}{\milli\metre\per\second} between them. The signature is the
-one of \cref{sec:insight1-wheel}: the loosened gyroscope noise density makes
-the filter weight the wheel yaw rate over the gyroscope in the turns, and the
-wheel yaw rate is the quantity that is wrong there. The raw write-up's
-ablation found the gyroscope density to be the responsible term; this is the
-mechanism by which it acts. Its path-length error of
-\SIrange{9}{22}{\percent} is a secondary effect of the same rotation: the
-along-track axis of the path frame moves with the true heading, so a heading
-error puts part of the lateral error on it.
+On the four recordings the transferred model gives \SI{0.94}{},
+\SI{2.49}{}, \SI{2.06}{} and \SI{4.44}{\metre} RMS against the measured
+model's \SI{0.26}{}, \SI{0.33}{}, \SI{0.59}{} and \SI{0.79}{\metre}. Three
+things change together. The heading error returns, to
+\SIrange{4.51}{28.01}{\degree} from \SIrange{0.37}{5.72}{\degree}. A
+path-length error appears where the measured filter had none ---
+\SIrange{8.2}{13.7}{\percent} against \SI{0.5}{\percent} --- so the filter is now
+mis-measuring distance as well as heading, which neither of its two inputs
+does on its own. And the error becomes a cornering error: in
+\cref{tab:e1i-turning} its position error grows at \SI{110.3}{} against
+\SI{8.4}{\milli\metre\per\second} and its heading error at \SI{659}{} against
+\SI{56}{\milli\degree\per\second}, both larger while turning in three of the
+four recordings, where the measured filter's heading error is not.
+
+The covariance moves the other way. The transferred model's median NEES is
+\numrange{3.6}{139.2}, and on \repo{allsensor_realistic_001} the median
+\num{3.6} sits inside the band that the measured filter leaves at
+\SI{25}{\second}. Inflating the assumed IMU noise buys nominal consistency on
+one recording while losing a factor of \num{3.6} in accuracy on it: the
+filter is correctly uncertain about an estimate that is worse. A consistency
+check alone would prefer the wrong configuration.
+
+\paragraph{Against the insight.} Which constant does the damage is not
+isolated here --- the VSLAM file supplies accelerometer and gyroscope noise and
+random-walk terms together, and no single-parameter sweep was run. The
+transferred model is not a competing design either; it is a configuration
+mistake that was made and measured, and it is reported as a diagnostic for
+that reason.
 
 \FloatBarrier
-\section{Insight 5: the visual estimators' reported error is largely
-         vertical, and their one failure is a loop-closure event}
+\section{Insight 5: most of the visual estimators' reported error is vertical,
+         and their one failure is a loop-closure event}
 
-Scored in the plane, the visual estimators are better than the chapter's
-three-dimensional ATE says, in four of fifteen runs by a factor of five or
-more; their planar error does not grow at turns or with fewer features in any
-consistent way; and the one gross failure is a single \SI{30}{\metre}
-relocalisation at \SI{88}{\second} with the loop closer on, on a recording the
-same estimator tracks to \SI{0.21}{\metre} with it off. \Cref{tab:e1i-visual}
-and \cref{tab:e1i-orbfail} and \cref{fig:orb} carry the evidence.
+Scored in the plane the visual estimators are better than the chapter's
+three-dimensional ATE says, because much of that ATE is height drift on a
+robot that cannot change height; their planar error does not grow at turns or
+with fewer features in any consistent way; and the one gross failure is not
+drift at all but a false loop closure. \Cref{tab:e1i-visual},
+\cref{tab:e1i-orbfail} and \cref{fig:orb} carry the evidence.
 
 \ins{visual.tex}
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{\insdir/fig_orb_failure_light.png}
-  \caption{ORB-SLAM3 with the loop closer on \repo{allsensor_003}. Left:
-  whole-run aligned planar error against time, with the impossible-speed jumps
-  of the estimate in red. Right: the aligned estimate against the ground truth
-  at the IMU point on the warehouse plan, with the jump locations.}
+  \caption{ORB-SLAM3 with the loop closer on the I-layout static recording.
+  Left: whole-run aligned planar error against time, with the
+  impossible-speed jumps of the estimate in red. Right: the aligned estimate
+  against the ground truth at the IMU point on the warehouse plan, with the
+  jump locations.}
   \label{fig:orb}
 \end{figure}
 
-The vertical component dominates where the three-dimensional ATE is large on
-a run that tracked: VINS-Fusion on \repo{allsensor_000} is \SI{0.557}{\metre}
-in three dimensions and \SI{0.115}{\metre} in the plane (vertical RMS
-\SI{0.545}{\metre}); ORB-SLAM3 on the same recording \SI{0.507}{\metre}
-against \SI{0.060}{\metre}; ORB-SLAM3 on \repo{allsensor_004}
-\SI{1.171}{\metre} against \SI{0.219}{\metre}, and without the loop closer
-\SI{0.756}{\metre} against \SI{0.135}{\metre}. The robot never leaves the
-floor, so the vertical drift of a visual-inertial estimate is an error the
-navigation task does not see, while the proprioceptive filter is planar by
-construction and pays no such penalty. The chapter's estimator comparison
-therefore charges the visual estimators for a component the baselines cannot
-have.
+In four of the twelve runs the three-dimensional ATE is at least
+\num{2.5} times the planar one, and in two of those more than eight times.
+ORB-SLAM3 on \repo{allsensor_realistic_003} is \SI{0.49}{\metre} in three
+dimensions and \SI{0.06}{\metre} in the plane, with a vertical RMS of
+\SI{0.49}{\metre}; the same recording without the loop closer is
+\SI{1.83}{\metre} against \SI{0.13}{\metre} (vertical \SI{1.82}{\metre}); and
+VINS-Fusion on \repo{allsensor_realistic_002} is \SI{0.66}{\metre} against
+\SI{0.25}{\metre} (vertical \SI{0.61}{\metre}). The robot never leaves the
+floor, so for these runs the reported figure is almost entirely an error in a
+degree of freedom the platform does not have, and it changes the ranking: on
+\repo{allsensor_realistic_003}, ORB-SLAM3 loses to VINS-Fusion in three
+dimensions (\SI{0.49}{} against \SI{0.27}{\metre}) and beats it threefold in
+the plane (\SI{0.06}{} against \SI{0.19}{\metre}).
 
-\begin{queried}[Consequence for the Experiment 1 ranking]
-In the plane the EKF is the most accurate estimator on one recording of five
-(\repo{allsensor_002}) and the margins of the other four widen: on
-\repo{allsensor_000} every visual configuration is below
-\SI{0.12}{\metre} against the filter's \SI{0.19}{\metre}, on
-\repo{allsensor_001} both estimators are below \SI{0.09}{\metre} against
-\SI{0.31}{\metre}. Which ATE the chapter quotes for a floor robot is a
-decision the methodology has to state; the planar value is the one that
-matches the task.
-\end{queried}
+This is not uniform across the arms, and that is itself the finding. With its
+loop closer on, ORB-SLAM3 is flat --- vertical RMS
+\SIrange{0.02}{0.06}{\metre}, three-dimensional and planar ATE equal to two
+decimals on three of the four recordings --- while the same front end with the
+closer off carries up to \SI{1.82}{\metre} of height error and VINS-Fusion up
+to \SI{0.61}{\metre}. Height drift is what the loop closer removes when it
+fires on a correct match, which is the other half of the closure story below.
 
-Turning and feature count do not organise the planar drift. VINS-Fusion
-drifts faster while turning on two recordings of five and ORB-SLAM3 on three
-of four with a usable regime; the Spearman correlation between matched
-features and drift rate is between $-0.16$ and $0.26$ on every run. With one
-run per estimator per recording neither is a pattern.
+ORB-SLAM3 with its closer on \repo{allsensor_realistic_001} is the
+exception to every planar figure above, at \SI{4.85}{\metre}, and it is not
+drift.
+\Cref{tab:e1i-orbfail} anatomises it: seven impossible-speed jumps, of which
+two are the initialisation transient at \SI{2.5}{\second} and five fall
+between \SI{71.1}{} and \SI{74.8}{\second} at \SI{78}{\percent} of the route;
+the largest moves the estimate \SI{17.7}{\metre} in one step;
+\SI{4.56}{\metre} of the net error change is taken in jump steps against
+\SI{2.42}{\metre} of ordinary drift; and the front end logged no frames
+outside tracking-OK state. The estimator did not lose the robot --- it
+confidently put it somewhere else. The same recording with the closer off
+tracks to \SI{0.06}{\metre} in the plane. This is the false closure between
+the I layout's repeated aisles that the companion analysis reaches
+independently from the loop-closure logs, and it is the single reason
+ORB-SLAM3's accuracy table has an outlier on that recording.
 
-The failure is one event. ORB-SLAM3 with the loop closer on
-\repo{allsensor_003} tracks for \SI{88}{\second} with no frame outside the
-OK state and a planar error below \SI{4}{\metre} under the whole-run fit (the
-fit itself is pulled by what follows), then takes jumps of \SI{30.0}{},
-\SI{11.6}{} and \SI{2.5}{\metre} within \SI{1.5}{\second}. The net error
-change inside the jump steps is \SI{+13.6}{\metre}; outside them it is
-\SI{-2.9}{\metre}. The run without the loop closer on the same recording ends
-at \SI{0.21}{\metre}. The event is therefore a loop closure or map merge that
-accepted a wrong correspondence, late in the route, not tracking loss and not
-drift; the raw write-up's flag on this value can be replaced by that
-attribution.
+Turning and feature count explain nothing here. The visual arms' drift rates
+while turning and on straights are \SI{0.2}{} against \SI{6.2}{},
+\SI{-1.8}{} against \SI{1.4}{} and \SI{0.6}{} against
+\SI{0.4}{\milli\metre\per\second}, each larger while turning in one of the
+four recordings --- a coin toss. Spearman $\rho$ between matched-feature count
+and drift rate over \numrange{23}{56} two-second bins runs from
+\num{-0.25} to \num{+0.32}, with no consistent sign within or across arms.
+
+\paragraph{Against the insight.} The planar figure is the right one for
+comparing floor robots but it is not a licence to restate the chapter's
+numbers: the three-dimensional ATE is what the raw write-up reports and what
+the chapter must keep reporting, with the planar value beside it. And
+ORB-SLAM3 is not run-to-run repeatable --- repeated runs of one configuration
+spread by up to \SI{0.277}{\metre}, \SI{80}{\percent} of their mean --- so none
+of the sub-\SI{0.25}{\metre} differences quoted in this section, in either
+projection, is an effect.
 
 \FloatBarrier
 \section{What these data cannot answer}
 
 \begin{itemize}
-\item \textbf{Why the per-turn heading error of wheel odometry varies in
-      size.} It is not the fitted yaw-rate scale alone (H1 of the raw
-      write-up); slip at the steering limit, the Ackermann model's track width
-      and the replay rate are candidates none of the logs isolate.
-\item \textbf{Whether the EKF's residual heading ramp is gyroscope bias.} The
-      bias state is logged in variance only, not in value, so the ramp on
-      \repo{allsensor_003} and \repo{004} is attributed to it by elimination.
-\item \textbf{Whether the loop-closure failure repeats.} One run with the loop
-      closer on exists per recording; ORB-SLAM3 is non-deterministic.
-\item \textbf{Anything about turning or features for the visual estimators
-      with confidence.} Five recordings, one run each.
+\item \textbf{Four recordings, one run per estimator.} Every cell of
+      \cref{tab:e1i-decomp} and \cref{tab:e1i-visual} is a single run. The
+      only repeated runs in the simulation campaign are the eighteen on the
+      two mapping recordings, scored for accuracy into
+      \path{output/compare/simulation/exp3-repeats/}, which bound
+      run-to-run noise for the visual arms and not for the baselines. A
+      difference between two cells here is a candidate, not an effect.
+\item \textbf{Mechanism is inferred from decomposition, not from an
+      intervention.} Nothing was changed and re-run: no wheel-radius sweep, no
+      bias injection, no single-parameter walk of the VSLAM noise file. The
+      claims are about what each error is made of, which the decomposition
+      measures, and not about what would happen if the suspected cause were
+      removed.
+\item \textbf{Simulation only.} These are the four realistic-warehouse
+      recordings. The chapter's real-robot subsection has no wheel,
+      IMU or EKF baseline of comparable provenance, so none of the four
+      baseline insights is shown to transfer to the rig.
+\item \textbf{Ground truth is the model origin for the baselines and the IMU
+      point for the visual arms.} The two are \SI{0.338}{\metre} apart. The
+      baseline and visual numbers in this document are therefore not directly
+      comparable to each other at the decimetre level.
+\item \textbf{No traffic contrast was tested.} Two of the four recordings
+      carry moving traffic and two do not, but with one run each the pairing
+      cannot separate a traffic effect from a layout effect or from run-to-run
+      noise.
 \end{itemize}
 
 \section{Summary}
 
-\begin{table}[htbp]
-\centering\small
-\caption{Questions, answers and the strength of the evidence.}
-\label{tab:e1i-summary}
-\begin{tabularx}{\textwidth}{lXXl}
-\toprule
- & Answer & Evidence & Confidence \\
-\midrule
-Q1 wheel error & Heading error carried into position; distance within \SI{1}{\percent} & heading-only share 0.95--1.04 on 5/5 & high \\
-Q2 turning & Wheel and transferred-noise EKF: heading made in turns, 5/5; IMU: no; visual: no pattern & \cref{tab:e1i-turning} & high / high / low \\
-Q3 IMU divergence & Velocity integral, exponent $\approx 1.5$; heading explains $\le 1$ \% & \cref{tab:e1i-imu} & high \\
-Q4 EKF consistency & Consistent until the first turn, inconsistent from it, 5/5 within \SI{1}{\second} & \cref{tab:e1i-nees} & high \\
-Q5 noise transfer & Re-weights the wheel yaw rate in turns; heading error at turns like raw wheel odometry & ``EKF @ VSLAM noise'' rows & high \\
-Q6 visual error & Vertical drift dominates 4/15 three-dimensional ATEs; planar error 0.04--0.7 m; one loop-closure event & \cref{tab:e1i-visual,tab:e1i-orbfail} & high (composition), medium (event) \\
-\bottomrule
-\end{tabularx}
-\end{table}
+\begin{enumerate}
+\item Wheel odometry has effectively no scale error (within
+      \SI{0.4}{\percent}) and \SIrange{7.3}{35.8}{\degree} of heading error,
+      which reproduces its whole position error to within \SI{4}{\percent} on
+      all four recordings. The heading error is made in the corners
+      (\num{77} times the straight-line rate) and converted into displacement
+      on the straights that follow.
+\item IMU dead reckoning keeps its heading to
+      \SIrange{0.55}{1.91}{\degree} and still reaches
+      \SIrange{35.5}{76.0}{\metre}: the heading explains \SI{1}{\percent} of
+      the error, the path length is wrong by \SIrange{12}{54}{\percent} in
+      either direction, and the error grows as $t^{k}$ with
+      $k = \numrange{0.91}{2.22}$.
+\item The EKF with its measured noise model reaches
+      \SIrange{0.26}{0.79}{\metre} by removing exactly the quantity wheel
+      odometry got wrong, and its covariance leaves the \SI{97.5}{\percent}
+      band within \SI{4}{\second} of the first turn on every recording,
+      running at four to twelve times the band thereafter.
+\item The transferred VSLAM noise model costs a factor of
+      \numrange{3.5}{7.5} in accuracy, returns the heading error, introduces a
+      \SIrange{8.2}{13.7}{\percent} path-length error that neither input has,
+      and becomes a cornering error --- while on one recording looking more
+      consistent than the correct configuration.
+\item For the visual arms, four of twelve runs report a three-dimensional ATE
+      at least \num{2.5} times their planar error, almost all of it height
+      drift; ORB-SLAM3 with its closer on is the one arm that is flat; and
+      the single \SI{4.85}{\metre} outlier is five jumps in
+      \SI{4}{\second} from a false closure, not drift, on a recording the same
+      front end tracks to \SI{0.06}{\metre} with the closer off.
+\end{enumerate}
 
 \paragraph{Consequences for Chapter 4.} State which ATE a floor robot is
-scored on and quote the planar value beside the three-dimensional one for the
-visual estimators. Report the EKF's consistency as ``until the first turn''
-rather than as a whole-run ANEES. Replace H1's falsification with the
-mechanism: per-turn heading error of varying size. Attribute the ORB-SLAM3
-\SI{6.4}{\metre} value to a single late loop-closure event rather than
-flagging it as unexplained. Name the accelerometer integral, not the
-gyroscope, as the reason IMU-only dead reckoning is unusable, since that is
-what a VIO fusion is being asked to fix.
+being judged on, and report the planar value beside the three-dimensional one
+for every visual run. Attribute the EKF baseline's accuracy to heading
+observability rather than to fusion in general. Keep the transferred noise
+model in the chapter as a configuration diagnostic, with its consistency
+result, because it is the one place where a covariance check prefers the worse
+estimate. And label the \SI{4.85}{\metre} ORB-SLAM3 cell as a closure failure
+in the table itself, so it is not read as drift.
 
 \end{document}

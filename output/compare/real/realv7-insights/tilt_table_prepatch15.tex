@@ -1,0 +1,29 @@
+% FROZEN 11 Nov 2026: the realv7_002 run directories this was computed from were
+% overwritten by the patch-15 re-runs the same day, so realv7_002 CANNOT be
+% regenerated. Do not replace this file from script/realv7_insights.py.
+\begin{table}[htbp]
+\centering
+\scriptsize\setlength{\tabcolsep}{3pt}
+\caption[Evidence of the initialisation defect: the plane of every estimate under stock ORB-SLAM3.]{ORB-SLAM3 on the three \repo{dataset_realv7} recordings, 3 November 2026 afternoon, same setting as the realv6 runs: the plane of each estimate as written in the live log, before any repair. ``Tilt'' is the angle between the plane fitted to the estimate's 3-D positions and the horizontal; ``off-plane'' the rms distance of the positions from that plane. A floor robot's estimate should be horizontal: a tilt near \SI{90}{\degree} means the poses were written while the map was not gravity-aligned (IMU not initialised; the vertical is then the camera's $y$ axis). The scores are in the patched runs of the real-robot results table.}
+\label{tab:realv7-tilt}
+\begin{tabular}{llrrrr}
+\toprule
+Recording & Run & tilt [\si{\degree}] & off-plane [m] & z range [m] & resets \\
+\midrule
+\repo{realv7_000} & GPU, LC on & \textcolor{flagred}{89.1} & 0.35 & 6.87 & 3 s \\
+\repo{realv7_000} & GPU, LC off & \textcolor{flagred}{89.5} & 0.02 & 6.98 & 3 s \\
+\repo{realv7_000} & CPU, LC on & \textcolor{flagred}{88.8} & 0.41 & 6.88 & 5 s \\
+\repo{realv7_000} & CPU, LC off & \textcolor{flagred}{87.9} & 0.58 & 6.79 & 4 s \\
+\addlinespace
+\repo{realv7_001} & GPU, LC on & \textcolor{flagred}{88.8} & 0.05 & 9.64 & 4 s \\
+\repo{realv7_001} & GPU, LC off & 6.1 & 1.12 & 5.77 & 3 s, 5 s \\
+\repo{realv7_001} & CPU, LC on & 1.5 & 0.07 & 0.38 & 4 s \\
+\repo{realv7_001} & CPU, LC off & \textcolor{flagred}{13.0} & 1.05 & 5.23 & 5 s \\
+\addlinespace
+\repo{realv7_002} & GPU, LC on & \textcolor{flagred}{37.7} & 0.87 & 4.08 & 3 s, 49 s, 59 s \\
+\repo{realv7_002} & GPU, LC off & \textcolor{flagred}{59.7} & 0.83 & 4.80 & 49 s \\
+\repo{realv7_002} & CPU, LC on & 5.2 & 0.73 & 2.94 & none \\
+\repo{realv7_002} & CPU, LC off & \textcolor{flagred}{21.7} & 0.84 & 7.03 & none \\
+\bottomrule
+\end{tabular}
+\end{table}

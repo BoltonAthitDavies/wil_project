@@ -3,54 +3,57 @@
 \contentsline {figure}{\numberline {1.2}{\ignorespaces Top view of the mock warehouse test field on the first floor of the Gensurv building.}}{3}{figure.caption.9}%
 \addvspace {10\p@ }
 \contentsline {figure}{\numberline {2.1}{\ignorespaces The eight principal wastes of lean manufacturing.}}{4}{figure.caption.11}%
-\contentsline {figure}{\numberline {2.2}{\ignorespaces Three warehouse robots with different navigation technologies: the orange robot uses QR-code navigation, the pallet truck in the centre uses SLAM navigation without floor infrastructure, and the white robot uses magnetic-tape guidance.}}{5}{figure.caption.12}%
-\contentsline {figure}{\numberline {2.3}{\ignorespaces An autonomous driverless transport vehicle navigating precisely in the BMW Group press plant at Regensburg.}}{6}{figure.caption.13}%
-\contentsline {figure}{\numberline {2.4}{\ignorespaces The indirect (feature-based) method common to SLAM systems: a front end producing pseudo-measurements and loop-closure constraints, and a back end performing geometric SLAM by factor-graph optimisation\nobreakspace {}\cite {cadena2016}.\relax }}{6}{figure.caption.14}%
-\contentsline {figure}{\numberline {2.5}{\ignorespaces Main components of ORB-SLAM3: the tracking, local mapping and loop and map-merging threads around the Atlas multi-map representation and the DBoW2 keyframe database\nobreakspace {}\cite {campos2021}.\relax }}{7}{figure.caption.15}%
-\contentsline {figure}{\numberline {2.6}{\ignorespaces Main components of monocular VINS: measurement preprocessing, initialisation, sliding-window visual-inertial odometry with relocalization, and global pose-graph optimisation and reuse\nobreakspace {}\cite {qin2018vins}.\relax }}{8}{figure.caption.19}%
-\contentsline {figure}{\numberline {2.7}{\ignorespaces Main components of RTAB-Map: sensor synchronisation, short-term and working memory, long-term memory, loop-closure and proximity detection, graph optimisation and global map assembly\nobreakspace {}\cite {labbe2019}.\relax }}{10}{figure.caption.25}%
-\contentsline {figure}{\numberline {2.8}{\ignorespaces Architecture of RY-SLAM: a YOLOv8-seg dynamic-object detection stage feeding a semantic mask into the ORB-SLAM3 tracking thread ahead of the Atlas multi-map system\nobreakspace {}\cite {chen2025}.\relax }}{14}{figure.caption.30}%
-\contentsline {figure}{\numberline {2.9}{\ignorespaces Detail of the semantic-segmentation framework in RY-SLAM and its multi-threaded operation: ONNX Runtime inference producing the dynamic mask, the neighbourhood test that deletes feature points, and the viewer outputs\nobreakspace {}\cite {chen2025}.}}{14}{figure.caption.31}%
+\contentsline {figure}{\numberline {2.2}{\ignorespaces Three warehouse robots with different navigation technologies.}}{5}{figure.caption.12}%
+\contentsline {figure}{\numberline {2.3}{\ignorespaces An autonomous transport vehicle at the BMW Regensburg plant.}}{6}{figure.caption.13}%
+\contentsline {figure}{\numberline {2.4}{\ignorespaces The indirect, feature-based SLAM method.}}{6}{figure.caption.14}%
+\contentsline {figure}{\numberline {2.5}{\ignorespaces Main components of ORB-SLAM3.}}{7}{figure.caption.15}%
+\contentsline {figure}{\numberline {2.6}{\ignorespaces Main components of monocular VINS.}}{9}{figure.caption.19}%
+\contentsline {figure}{\numberline {2.7}{\ignorespaces Main components of RTAB-Map.}}{10}{figure.caption.25}%
+\contentsline {figure}{\numberline {2.8}{\ignorespaces Architecture of RY-SLAM.}}{14}{figure.caption.30}%
+\contentsline {figure}{\numberline {2.9}{\ignorespaces Semantic-segmentation framework in RY-SLAM.}}{14}{figure.caption.31}%
 \addvspace {10\p@ }
 \contentsline {figure}{\numberline {3.1}{\ignorespaces Implemented experimental architecture.}}{18}{figure.caption.33}%
-\contentsline {figure}{\numberline {3.2}{\ignorespaces Pipeline\nobreakspace {}1: YOLO26 with ORB-SLAM3, as designed.}}{20}{figure.caption.34}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Pipeline\nobreakspace {}1: YOLO26 with ORB-SLAM3, as designed.}}{21}{figure.caption.34}%
 \contentsline {figure}{\numberline {3.3}{\ignorespaces Pipeline\nobreakspace {}2: YOLO26 with VINS-Fusion and RTAB-Map, as designed.}}{21}{figure.caption.35}%
 \contentsline {figure}{\numberline {3.4}{\ignorespaces ORB-SLAM3 pipeline and the semantic-mask insertion point.}}{23}{figure.caption.37}%
 \contentsline {figure}{\numberline {3.5}{\ignorespaces VINS-Fusion pipeline and its two semantic-mask insertion points.}}{25}{figure.caption.39}%
-\contentsline {figure}{\numberline {3.6}{\ignorespaces Simulated Ackermann platform, drawn to scale from the model definition.}}{33}{figure.caption.51}%
-\contentsline {figure}{\numberline {3.7}{\ignorespaces Coordinate-frame contract used by the composed RTAB-Map pipeline.}}{38}{figure.caption.64}%
-\contentsline {figure}{\numberline {3.8}{\ignorespaces The four realistic recordings as scenes.}}{39}{figure.caption.66}%
-\contentsline {figure}{\numberline {3.9}{\ignorespaces Plan of the U-shape realistic world.}}{42}{figure.caption.67}%
-\contentsline {figure}{\numberline {3.10}{\ignorespaces Plan of the I-shape realistic world.}}{43}{figure.caption.68}%
-\contentsline {figure}{\numberline {3.11}{\ignorespaces Baked occupancy truth of the two realistic worlds.}}{45}{figure.caption.75}%
-\contentsline {figure}{\numberline {3.12}{\ignorespaces The two mapping recordings as scenes.}}{46}{figure.caption.77}%
-\contentsline {figure}{\numberline {3.13}{\ignorespaces Dimensions of the mock AMR.}}{48}{figure.caption.81}%
-\contentsline {figure}{\numberline {3.14}{\ignorespaces Hardware components of the mock AMR.}}{48}{figure.caption.82}%
-\contentsline {figure}{\numberline {3.15}{\ignorespaces Dimensions of the AC-IMX390 camera family.}}{49}{figure.caption.83}%
-\contentsline {figure}{\numberline {3.16}{\ignorespaces The Neousys NRU-51V computing unit.}}{50}{figure.caption.85}%
-\contentsline {figure}{\numberline {3.17}{\ignorespaces Dimensions of the Neousys NRU-51V in millimetres.\relax }}{50}{figure.caption.86}%
+\contentsline {figure}{\numberline {3.6}{\ignorespaces Simulated Ackermann platform, drawn to scale from the model definition.}}{35}{figure.caption.54}%
+\contentsline {figure}{\numberline {3.7}{\ignorespaces Coordinate-frame contract used by the composed RTAB-Map pipeline.}}{40}{figure.caption.67}%
+\contentsline {figure}{\numberline {3.8}{\ignorespaces The four realistic recordings as scenes.}}{41}{figure.caption.69}%
+\contentsline {figure}{\numberline {3.9}{\ignorespaces Plan of the U-shape realistic world.}}{44}{figure.caption.70}%
+\contentsline {figure}{\numberline {3.10}{\ignorespaces Plan of the I-shape realistic world.}}{45}{figure.caption.71}%
+\contentsline {figure}{\numberline {3.11}{\ignorespaces Baked occupancy truth of the two realistic worlds.}}{47}{figure.caption.78}%
+\contentsline {figure}{\numberline {3.12}{\ignorespaces The two mapping recordings as scenes.}}{48}{figure.caption.80}%
+\contentsline {figure}{\numberline {3.13}{\ignorespaces Dimensions of the mock AMR.}}{50}{figure.caption.84}%
+\contentsline {figure}{\numberline {3.14}{\ignorespaces Hardware components of the mock AMR.}}{50}{figure.caption.85}%
+\contentsline {figure}{\numberline {3.15}{\ignorespaces Dimensions of the AC-IMX390 camera family.}}{51}{figure.caption.86}%
+\contentsline {figure}{\numberline {3.16}{\ignorespaces The Neousys NRU-51V computing unit.}}{52}{figure.caption.88}%
+\contentsline {figure}{\numberline {3.17}{\ignorespaces Dimensions of the Neousys NRU-51V in millimetres.\relax }}{52}{figure.caption.89}%
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Estimator comparison on every realistic recording, world frame.}}{71}{figure.caption.116}%
-\contentsline {figure}{\numberline {4.2}{\ignorespaces Wheel+gyro dead reckoning against the tracker.}}{74}{figure.caption.122}%
-\contentsline {figure}{\numberline {4.3}{\ignorespaces Recall against truth-box size.}}{78}{figure.caption.133}%
-\contentsline {figure}{\numberline {4.4}{\ignorespaces What the unmatched predictions are.}}{78}{figure.caption.134}%
-\contentsline {figure}{\numberline {4.5}{\ignorespaces Unfiltered estimates on the four realistic recordings.}}{81}{figure.caption.139}%
-\contentsline {figure}{\numberline {4.6}{\ignorespaces Aligned ATE and jump-free RPE of the unfiltered arms.}}{82}{figure.caption.140}%
-\contentsline {figure}{\numberline {4.7}{\ignorespaces Timelines, static U-layout recording.}}{84}{figure.caption.146}%
-\contentsline {figure}{\numberline {4.8}{\ignorespaces Timelines, static I-layout recording.}}{85}{figure.caption.147}%
-\contentsline {figure}{\numberline {4.9}{\ignorespaces Timelines, U-layout recording with traffic.}}{85}{figure.caption.148}%
-\contentsline {figure}{\numberline {4.10}{\ignorespaces Timelines, I-layout recording with traffic.}}{88}{figure.caption.149}%
-\contentsline {figure}{\numberline {4.11}{\ignorespaces Real runs against the cleaned tracker truth.}}{90}{figure.caption.158}%
-\contentsline {figure}{\numberline {4.12}{\ignorespaces ORB-SLAM3 planar error over the run.}}{91}{figure.caption.161}%
-\contentsline {figure}{\numberline {4.13}{\ignorespaces VINS-Fusion resets and IMU sample use.}}{92}{figure.caption.164}%
-\contentsline {figure}{\numberline {4.14}{\ignorespaces The twelve realv7 estimates as written in the live log.}}{94}{figure.caption.167}%
-\contentsline {figure}{\numberline {4.15}{\ignorespaces The twelve realv7 runs after the frame repair.}}{95}{figure.caption.169}%
-\contentsline {figure}{\numberline {4.16}{\ignorespaces Dense-map evaluation of \repo {map/map_tiny.db}.}}{100}{figure.caption.181}%
-\contentsline {figure}{\numberline {4.17}{\ignorespaces The same database scored against the run that built it, \repo {dataset/dataset_map_tiny}.}}{101}{figure.caption.182}%
-\contentsline {figure}{\numberline {4.18}{\ignorespaces Placement overlay of \repo {map/map_realistic} (U-Oct).}}{105}{figure.caption.190}%
-\contentsline {figure}{\numberline {4.19}{\ignorespaces Placement overlay of \repo {map/dataset_allsensor_realistic_map} (U-Nov), fitted in the \SI {-180}{\degree } basin.}}{106}{figure.caption.191}%
-\contentsline {figure}{\numberline {4.20}{\ignorespaces Dense-map evaluation of \repo {map/map_realistic} (U-Oct) against the independent probe.}}{107}{figure.caption.192}%
-\contentsline {figure}{\numberline {4.21}{\ignorespaces Dense-map evaluation of \repo {map/dataset_allsensor_realistic_map} (U-Nov) against the independent probe.}}{108}{figure.caption.193}%
-\contentsline {figure}{\numberline {4.22}{\ignorespaces Dense-map evaluation of \repo {map/map_realistic_01} (I-Oct) against the independent probe.}}{111}{figure.caption.194}%
-\contentsline {figure}{\numberline {4.23}{\ignorespaces Dense-map evaluation of \repo {map/dataset_allsensor_realistic_01_map} (I-Nov) against the independent probe.}}{112}{figure.caption.195}%
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Estimator comparison on every realistic recording, world frame.}}{75}{figure.caption.122}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Visual estimates on the four realistic recordings.}}{78}{figure.caption.127}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Aligned ATE and jump-free RPE of the visual arms.}}{79}{figure.caption.128}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Timelines, static U-layout recording.}}{82}{figure.caption.137}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Timelines, static I-layout recording.}}{83}{figure.caption.138}%
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Timelines, U-layout recording with traffic.}}{83}{figure.caption.139}%
+\contentsline {figure}{\numberline {4.7}{\ignorespaces Timelines, I-layout recording with traffic.}}{84}{figure.caption.140}%
+\contentsline {figure}{\numberline {4.8}{\ignorespaces What the visual estimators' translation error is made of.}}{84}{figure.caption.141}%
+\contentsline {figure}{\numberline {4.9}{\ignorespaces The orientation error by axis and against turn rate.}}{86}{figure.caption.142}%
+\contentsline {figure}{\numberline {4.10}{\ignorespaces Accuracy against cost on the twenty realistic-world runs.}}{87}{figure.caption.147}%
+\contentsline {figure}{\numberline {4.11}{\ignorespaces Wheel+gyro dead reckoning against the tracker.}}{90}{figure.caption.157}%
+\contentsline {figure}{\numberline {4.12}{\ignorespaces Real runs against the cleaned tracker truth.}}{96}{figure.caption.162}%
+\contentsline {figure}{\numberline {4.13}{\ignorespaces ORB-SLAM3 planar error over the run.}}{97}{figure.caption.165}%
+\contentsline {figure}{\numberline {4.14}{\ignorespaces VINS-Fusion resets and IMU sample use.}}{98}{figure.caption.168}%
+\contentsline {figure}{\numberline {4.15}{\ignorespaces The twelve realv7 estimates as written in the live log.}}{98}{figure.caption.171}%
+\contentsline {figure}{\numberline {4.16}{\ignorespaces Every real-robot run with patch 15, scored raw.}}{99}{figure.caption.173}%
+\contentsline {figure}{\numberline {4.17}{\ignorespaces Recall against truth-box size.}}{103}{figure.caption.184}%
+\contentsline {figure}{\numberline {4.18}{\ignorespaces What the unmatched predictions are.}}{103}{figure.caption.185}%
+\contentsline {figure}{\numberline {4.19}{\ignorespaces Dense-map evaluation of \repo {map/map_tiny.db}.}}{108}{figure.caption.197}%
+\contentsline {figure}{\numberline {4.20}{\ignorespaces The same database scored against the run that built it, \repo {dataset/dataset_map_tiny}.}}{109}{figure.caption.198}%
+\contentsline {figure}{\numberline {4.21}{\ignorespaces Placement overlay of \repo {map/map_realistic} (U-A).}}{113}{figure.caption.206}%
+\contentsline {figure}{\numberline {4.22}{\ignorespaces Placement overlay of the U-Bember database.}}{114}{figure.caption.207}%
+\contentsline {figure}{\numberline {4.23}{\ignorespaces Dense-map evaluation of \repo {map/map_realistic} (U-A) against the independent probe.}}{115}{figure.caption.208}%
+\contentsline {figure}{\numberline {4.24}{\ignorespaces Dense-map evaluation of the U-Bember database.}}{116}{figure.caption.209}%
+\contentsline {figure}{\numberline {4.25}{\ignorespaces Dense-map evaluation of \repo {map/map_realistic_01} (I-A) against the independent probe.}}{120}{figure.caption.210}%
+\contentsline {figure}{\numberline {4.26}{\ignorespaces Dense-map evaluation of the I-Bember database.}}{121}{figure.caption.211}%
 \addvspace {10\p@ }

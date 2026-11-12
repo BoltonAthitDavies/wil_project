@@ -12,7 +12,7 @@
 \renewcommand{\thefigure}{R.\arabic{figure}}
 \renewcommand{\thetable}{R.\arabic{table}}
 \title{RTAB-Map Back End: Simulation and Real-World Configuration\\
-       \large Engineering note for Chapter~3 (implemented system) and Experiment~4 (dense map)}
+       \large Engineering note for Chapter~3 (implemented system) and Experiment~3 (dense map)}
 \author{Bolton Athit Davies}
 \date{Reporting cutoff: 2 November 2026}
 \begin{document}
@@ -24,12 +24,12 @@ pose, and it is configured differently in the two domains because the two
 camera rigs differ. This note records both configurations as they are
 implemented at the cutoff, the measurements each setting rests on, and the
 validity checks that decide whether a real-rig map can be trusted. Every number
-traces to a file named in \cref{sec:rtab-rules}. Experiment~4 results are not
+traces to a file named in \cref{sec:rtab-rules}. Experiment~3 results are not
 restated here beyond the figures needed to justify a setting.
 
 \slotstatus{completed}{\textbf{Simulation configuration.} Construct, extend and
 localize modes are implemented and exercised; the tiny-map and realistic-world
-databases were built and scored against ground truth (Experiment~4,
+databases were built and scored against ground truth (Experiment~3,
 simulation slot). The configuration has been stable since 9~September 2026
 apart from the \repo{loop_closure} switch added on 26~October.}
 
@@ -203,7 +203,7 @@ measured by replaying a recorded VINS trajectory through
 \repo{script/gt_tf_publisher.py} instead. The same replay route is the
 standard procedure on the real rig (\cref{sec:rtab-real-passes}).
 
-Maps built with this configuration are scored in the Experiment~4 write-up,
+Maps built with this configuration are scored in the Experiment~3 write-up,
 with their tolerances and sample counts; the scores are not restated here.
 
 % =====================================================================

@@ -683,8 +683,8 @@ def main():
 def main_realistic():
     """Insight 6: do the realistic-warehouse maps fail by the tiny map's mechanism?
     Writes *_realistic.* beside the tiny outputs; never rewrites them."""
-    SHORT.update({"map_realistic": "U-Oct", "map_realistic_01": "I-Oct",
-                  "dataset_allsensor_realistic_map": "U-Nov", "dataset_allsensor_realistic_01_map": "I-Nov"})
+    SHORT.update({"map_realistic": "U-A", "map_realistic_01": "I-A",
+                  "dataset_allsensor_realistic_map": "U-B", "dataset_allsensor_realistic_01_map": "I-B"})
     OUT.mkdir(parents=True, exist_ok=True)
     tmp = tempfile.mkdtemp(prefix="exp4ins.")
     try:
@@ -705,12 +705,12 @@ def main_realistic():
                           "Precision and recall of the observed surfaces by the number of graph nodes whose stored local "
                           "grid covers the cell, for the two realistic-warehouse maps (U is \\repo{map_realistic}, I is \\repo{map_realistic_01}). The tiny-map contrast was 91 to 99 "
                           "percent precision and 78 to 97 percent recall from one node to three or more.", "views-realistic", integer=True,
-                          short={"map_realistic": "U-Oct", "map_realistic_01": "I-Oct", "dataset_allsensor_realistic_map": "U-Nov", "dataset_allsensor_realistic_01_map": "I-Nov"})
+                          short={"map_realistic": "U-A", "map_realistic_01": "I-A", "dataset_allsensor_realistic_map": "U-B", "dataset_allsensor_realistic_01_map": "I-B"})
         bins_d = tex_bins(scores, scores[0]["scene"], OUT / "bins_distance_realistic.tex", "d_route", DIST_BINS, "Distance from route", "[m]",
                           "Precision and recall of the observed surfaces by distance from the independent probe route "
                           "(\\repo{realistic_000} for U, \\repo{map_realistic}; \\repo{realistic_001} for I, \\repo{map_realistic_01}). The probe is not the route "
                           "that built either map, so this is only a proxy for range from the mapping camera.", "dist-realistic",
-                          short={"map_realistic": "U-Oct", "map_realistic_01": "I-Oct", "dataset_allsensor_realistic_map": "U-Nov", "dataset_allsensor_realistic_01_map": "I-Nov"})
+                          short={"map_realistic": "U-A", "map_realistic_01": "I-A", "dataset_allsensor_realistic_map": "U-B", "dataset_allsensor_realistic_01_map": "I-B"})
         bins_a = tex_bins_angle(scores, OUT / "bins_angle_realistic.tex", label="tab:insight4-angle-realistic")
         tex_drivability(scores, OUT / "drivability_realistic.tex", label="tab:insight4-driv-realistic",
                         caption=(r"\caption[Drivability of the realistic-warehouse maps under the true footprint along their "

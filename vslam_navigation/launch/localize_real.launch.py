@@ -106,12 +106,34 @@ def _setup(context, *args, **kwargs):
             'shim_rate': cfg('shim_rate'),
             'optimize_max_error': cfg('optimize_max_error'),
             'loop_closure': 'true',
+            'start_pose': cfg('start_pose'),
+            'relocalize': cfg('relocalize'),
+            'min_inliers': cfg('min_inliers'),
+            'min_inliers_distribution': cfg('min_inliers_distribution'),
+            'odom_cache_size': cfg('odom_cache_size'),
+            'geometric_check': cfg('geometric_check'),
+            'icp_correspondence_ratio': cfg('icp_correspondence_ratio'),
+            'icp_max_rotation': cfg('icp_max_rotation'),
+            'estimation_type': cfg('estimation_type'),
+            'vis_inlier_distance': cfg('vis_inlier_distance'),
+            'gen_scan': cfg('gen_scan'),
+            'localize_delay_s': cfg('localize_delay_s'),
             'rviz': cfg('rviz'),
         }.items())
 
     # Evidence of what localisation did: /localization_pose and the map->odom
     # correction, each pose checked against the prior map's extent.
     record_csv = os.path.join(WORKSPACE, 'map', map_name, f'localize_{run_name}.csv')
+    # A localisation run is evidence, so this launch will not quietly replace one.
+    # Added 11 Nov 2026 after short configuration tests, run with the default
+    # run_name, overwrote a recorded run's CSV; map/ is gitignored, so it was not
+    # recoverable.
+    if os.path.exists(record_csv) and os.path.getsize(record_csv) > 0 and \
+            cfg('overwrite').lower() not in ('true', '1', 'yes'):
+        raise RuntimeError(
+            f'{record_csv} already exists.\n'
+            f'  That file is a recorded run. Pass run_name:=<other name> to keep both,\n'
+            f'  or overwrite:=true to replace it deliberately.')
     recorder = ExecuteProcess(
         cmd=['python3', RECORDER, '--ros-args',
              '-p', 'use_sim_time:=true',
@@ -148,8 +170,45 @@ def generate_launch_description():
         DeclareLaunchArgument('optimize_max_error', default_value='3.0',
                               description='RGBD/OptimizeMaxError: relocalisation hypotheses whose '
                                           'optimisation error ratio exceeds this are rejected.'),
+        DeclareLaunchArgument('min_inliers', default_value='20',
+                              description='Vis/MinInliers; try 35 against aisle aliasing.'),
+        DeclareLaunchArgument('min_inliers_distribution', default_value='0.0',
+                              description='Vis/MinInliersDistribution; 0 disables. Try 0.05-0.1: '
+                                          'rejects a match bunched on repeating structure.'),
+        DeclareLaunchArgument('odom_cache_size', default_value='10',
+                              description='RGBD/MaxOdomCacheSize; anti-teleport context.'),
+        DeclareLaunchArgument('relocalize', default_value='true',
+                              description='false = dead reckon on the prior from the '
+                                          'start_pose seed; no correction is applied and '
+                                          'drift is unbounded.'),
+        DeclareLaunchArgument('start_pose', default_value='origin',
+                              description="where the run is assumed to begin: 'origin' (the "
+                                          "dock the prior was recorded from), 'last' (the pose "
+                                          'left in the database), or six numbers "x y z roll '
+                                          'pitch yaw" in the map frame.'),
         DeclareLaunchArgument('rtabmap_delay', default_value='5.0'),
         DeclareLaunchArgument('extent_margin', default_value='2.0',
                               description='metres beyond the prior map\'s node extent a pose may lie and still count as inside'),
+        DeclareLaunchArgument('geometric_check', default_value='false',
+                              description='Reg/Strategy 2: verify an accepted loop closure by ICP against the 3-D '
+                        'structure, not only the 2-D features that proposed it. The '
+                        'one acceptance test outside the null space that defeats '
+                        'OptimizeMaxError and MaxOdomCacheSize.'),
+        DeclareLaunchArgument('icp_correspondence_ratio', default_value='0.3',
+                              description='Icp/CorrespondenceRatio, the veto itself. geometric_check:=true only.'),
+        DeclareLaunchArgument('icp_max_rotation', default_value='0.35',
+                              description='Icp/MaxRotation in rad (0.35 = 20 deg). geometric_check:=true only.'),
+        DeclareLaunchArgument('estimation_type', default_value='1',
+                              description='Vis/EstimationType: 0 = 3D->3D sparse-geometry veto, '
+                      '1 = PnP (RTAB-Map default).'),
+        DeclareLaunchArgument('vis_inlier_distance', default_value='0.1',
+                              description='Vis/InlierDistance (m); estimation_type:=0 only.'),
+        DeclareLaunchArgument('gen_scan', default_value='false',
+                              description='generate a laser scan from depth for the live frames; '
+                      'geometric_check needs it.'),
+        DeclareLaunchArgument('localize_delay_s', default_value='0.0',
+                              description='hold RTAB-Map back this long so its first '
+                                          'fix cannot latch on an unstable front-end '
+                                          'orientation.'),
         OpaqueFunction(function=_setup),
     ])

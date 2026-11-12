@@ -36,8 +36,9 @@ and reduce that time and waste.
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.8\textwidth]{figures/template/lean_wastes.png}
-  \caption[The eight principal wastes of lean manufacturing.]{The eight principal wastes of lean manufacturing. Source:
-  \url{https://teachme-biz.com/th/blog/reduce-waste/}.}
+  \caption[The eight principal wastes of lean manufacturing.]{The eight
+  principal wastes of lean manufacturing.}
+  \figsource{\flag{teachme-biz.com, no reference entry yet}}
   \label{fig:lean-wastes}
 \end{figure}
 
@@ -54,11 +55,11 @@ environment changes the AGV cannot adapt immediately.
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.8\textwidth]{figures/template/agv_navigation_types.jpg}
-  \caption[Three warehouse robots with different navigation technologies: the orange robot uses QR-code navigation, the pallet truck in the centre uses SLAM navigation without floor infrastructure, and the white robot uses magnetic-tape guidance.]{Three warehouse robots with different navigation technologies: the
+  \caption[Three warehouse robots with different navigation technologies.]{Three warehouse robots with different navigation technologies: the
   orange robot uses QR-code navigation, the pallet truck in the centre uses SLAM
   navigation without floor infrastructure, and the white robot uses
-  magnetic-tape guidance. Source:
-  \url{https://www.linkedin.com/pulse/agv-amr-navigation-technologies-which-one-drives-your-abdul-rahman-6pjyc}.}
+  magnetic-tape guidance.}
+  \figsource{\flag{www.linkedin.com, no reference entry yet}}
   \label{fig:agv-navigation}
 \end{figure}
 
@@ -84,9 +85,9 @@ AMRs have fully overcome the limits of the older navigation systems.
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.7\textwidth]{figures/template/bmw_agv.png}
-  \caption[An autonomous driverless transport vehicle navigating precisely in the BMW Group press plant at Regensburg.]{An autonomous driverless transport vehicle navigating precisely in
-  the BMW Group press plant at Regensburg. Source:
-  \url{https://www.press.bmwgroup.com/global/video/detail/PF0009726/}.}
+  \caption[An autonomous transport vehicle at the BMW Regensburg plant.]{An autonomous driverless transport vehicle navigating precisely in
+  the BMW Group press plant at Regensburg~\cite{bmw2024}.}
+  \figsource{BMW Group, 2024}
   \label{fig:bmw-agv}
 \end{figure}
 
@@ -123,9 +124,10 @@ data-flow diagram, a visual SLAM architecture has three main parts
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.85\textwidth]{figures/template/slam_indirect.png}
-  \caption{The indirect (feature-based) method common to SLAM systems: a front
+  \caption[The indirect, feature-based SLAM method.]{The indirect (feature-based) method common to SLAM systems: a front
   end producing pseudo-measurements and loop-closure constraints, and a back end
   performing geometric SLAM by factor-graph optimisation~\cite{cadena2016}.}
+  \figsource{Cadena et al., 2016}
   \label{fig:slam-indirect}
 \end{figure}
 
@@ -142,9 +144,10 @@ relevant to this project are as follows.
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.8\textwidth]{figures/template/orbslam3_components.png}
-  \caption{Main components of ORB-SLAM3: the tracking, local mapping and loop
+  \caption[Main components of ORB-SLAM3.]{Main components of ORB-SLAM3: the tracking, local mapping and loop
   and map-merging threads around the Atlas multi-map representation and the
   DBoW2 keyframe database~\cite{campos2021}.}
+  \figsource{Campos et al., 2021}
   \label{fig:orbslam3-components}
 \end{figure}
 
@@ -213,9 +216,10 @@ VINS is used as a local 6-DoF visual-inertial odometry (VIO) estimator
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.95\textwidth]{figures/template/vins_components.png}
-  \caption{Main components of monocular VINS: measurement preprocessing,
+  \caption[Main components of monocular VINS.]{Main components of monocular VINS: measurement preprocessing,
   initialisation, sliding-window visual-inertial odometry with relocalization,
   and global pose-graph optimisation and reuse~\cite{qin2018vins}.}
+  \figsource{Qin et al., 2018}
   \label{fig:vins-components}
 \end{figure}
 
@@ -315,9 +319,10 @@ SLAM in the back end through three main mechanisms
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.95\textwidth]{figures/template/rtabmap_components.png}
-  \caption{Main components of RTAB-Map: sensor synchronisation, short-term and
+  \caption[Main components of RTAB-Map.]{Main components of RTAB-Map: sensor synchronisation, short-term and
   working memory, long-term memory, loop-closure and proximity detection, graph
   optimisation and global map assembly~\cite{labbe2019}.}
+  \figsource{Labb\'e and Michaud, 2019}
   \label{fig:rtabmap-components}
 \end{figure}
 
@@ -469,9 +474,10 @@ estimate the camera pose at the same time without losing real-time throughput
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.9\textwidth]{figures/template/ryslam_architecture.png}
-  \caption{Architecture of RY-SLAM: a YOLOv8-seg dynamic-object detection stage
+  \caption[Architecture of RY-SLAM.]{Architecture of RY-SLAM: a YOLOv8-seg dynamic-object detection stage
   feeding a semantic mask into the ORB-SLAM3 tracking thread ahead of the Atlas
   multi-map system~\cite{chen2025}.}
+  \figsource{Chen et al., 2025}
   \label{fig:ryslam-architecture}
 \end{figure}
 
@@ -496,10 +502,11 @@ in three technical steps:
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.9\textwidth]{figures/template/ryslam_framework.png}
-  \caption[Detail of the semantic-segmentation framework in RY-SLAM and its multi-threaded operation: ONNX Runtime inference producing the dynamic mask, the neighbourhood test that deletes feature points, and the viewer outputs~\cite{chen2025}.]{Detail of the semantic-segmentation framework in RY-SLAM and its
+  \caption[Semantic-segmentation framework in RY-SLAM.]{Detail of the semantic-segmentation framework in RY-SLAM and its
   multi-threaded operation: ONNX Runtime inference producing the dynamic mask,
   the neighbourhood test that deletes feature points, and the viewer
   outputs~\cite{chen2025}.}
+  \figsource{Chen et al., 2025}
   \label{fig:ryslam-framework}
 \end{figure}
 

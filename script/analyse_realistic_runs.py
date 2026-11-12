@@ -42,7 +42,7 @@ LOOP-CLOSER STATE
 
 Outputs under output/compare/simulation/exp-realistic-ab/:
     runs_metrics.csv          one row per run, every number and gate field
-    baseline_table.tex        the unfiltered arms, four bags x three estimators
+    baseline_table.tex        the visual arms, four bags x three estimators
     filtered_table.tex        every filtered run with its gates and verdict
     trajectories_<theme>.png  aligned overlays, one panel per bag
     metrics_<theme>.png       ATE and jump-free RPE per bag and arm
@@ -115,7 +115,7 @@ def parse_run(tree, name):
     est = {"output_vins": "VINS-Fusion", "output_orb": "ORB-SLAM3",
            "output_vins_yolo": "VINS-Fusion", "output_orb_yolo": "ORB-SLAM3"}[tree]
     filtered = tree.endswith("_yolo")
-    # Since the 6 November 2026 restructuring the unfiltered runs carry a
+    # Since the 6 November 2026 restructuring the visual runs carry a
     # front-end suffix (loopclosing_gpu, noloopclosing_cpu; VINS-Fusion's single
     # run is "cpu"). The October names (loopclosing, nofilter) are kept for the
     # retired runs under trash/. `frontend` is a factor of Experiment 3, so it is
@@ -179,6 +179,31 @@ def started(meta):
 
 # ------------------------------------------------------------------ scoring
 
+# Every ORB-SLAM3 run on these recordings peaks at about 2.5 s, on the gravity
+# re-alignment that ends its inertial initialisation, and the peak is an order
+# above anything the rest of the run does.  A raw maximum therefore reports the
+# initialisation, not the driving, and would read as though ORB-SLAM3 threw
+# itself four metres across a warehouse it in fact tracked to a quarter of a
+# metre.  The run is cut at the same place the onset analysis of
+# analyse_exp3_timelines cuts it: after the last jump inside the first
+# INIT_SEARCH_S seconds, plus half a second.
+INIT_SEARCH_S, INIT_PAD_S = 15.0, 0.5
+
+
+def post_init_max(aligned):
+    """Largest position error after the initialisation transient, same alignment
+    as the ATE column (global SE(3), three-dimensional)."""
+    import numpy as np
+    t, err = aligned["t"], aligned["err"]
+    jumps = vm.find_jumps(t, aligned["p"])[0]
+    early = [j for j in jumps if t[j + 1] <= t[0] + INIT_SEARCH_S]
+    t_a = (t[early[-1] + 1] + INIT_PAD_S) if early else t[0]
+    keep = t >= t_a
+    if keep.sum() < 30:
+        return None
+    return float(np.max(err[keep]))
+
+
 def score(run):
     ds = run["dataset"]
     label = (run["estimator"] + (" GPU" if run.get("frontend") == "gpu" else "")
@@ -211,7 +236,8 @@ def score(run):
         out["valid"] = False
         return out, None
     row, aligned = res[0][0], res[1][0]
-    out.update(valid=True, ate_rms=row["rms"], ate_max=row["max"], rot_rms=row["rot_rms"],
+    out.update(valid=True, ate_rms=row["rms"], ate_max=row["max"], ate_final=row["final"],
+               ate_max_post=post_init_max(aligned), rot_rms=row["rot_rms"],
                jumps=int(len(row["jumps"])), biggest_jump=row["biggest"], secs=row["secs"], poses=row["poses"],
                path_est=row["path"], path_ref=row["ref"])
     # RPE on the raw poses against ground truth, same call as the other chapters.
@@ -237,7 +263,7 @@ def score(run):
 
 
 def baseline_for(run, rows):
-    """The unfiltered run this filtered run is paired with, or None."""
+    """The visual run this filtered run is paired with, or None."""
     if not run["filtered"] or run["atlas"]:
         return None
     for b in rows:
@@ -298,7 +324,8 @@ def fmt_b(v, best, p=3):
 def write_csv(rows):
     keys = ["dataset", "layout", "scene", "tree", "run", "label", "estimator", "filtered", "mode", "lc_state", "atlas",
             "started", "binary", "replay_rate", "received", "processed", "dropped", "retention", "of_bag", "resets", "shutdown",
-            "match_rate", "filter_status", "valid", "poses", "secs", "ate_rms", "ate_max", "rot_rms", "jumps",
+            "match_rate", "filter_status", "valid", "poses", "secs", "ate_rms", "ate_max", "ate_max_post",
+            "ate_final", "rot_rms", "jumps",
             "biggest_jump", "path_est", "path_ref", "rpe1_trans", "rpe1_trans_clean", "rpe1_rot", "rpe1_rot_clean",
             "rpe1_pairs", "baseline", "filter_active", "input_matched", "input_delta", "same_binary", "admissible"]
     with open(os.path.join(OUT, "runs_metrics.csv"), "w", newline="") as f:
@@ -308,43 +335,60 @@ def write_csv(rows):
             w.writerow({k: (v.isoformat() if isinstance(v, dt.datetime) else v) for k, v in r.items()})
 
 
+def pct_of_path(r):
+    """Aligned ATE as a percentage of the ground-truth path length.
+
+    Routes here run 103-171 m and the real-robot routes are a fifth to a tenth
+    of that, so an absolute ATE cannot be compared across them.  This is the
+    plain ratio, NOT a KITTI-style sub-sequence drift rate; the caption says so.
+    """
+    ate, path = r.get("ate_rms"), r.get("path_ref")
+    if ate is None or not path:
+        return "---"
+    return "%.2f" % (100.0 * float(ate) / float(path))
+
+
 def write_baseline_table(rows):
     with open(os.path.join(OUT, "baseline_table.tex"), "w") as f:
         w = f.write
         w("% Generated by script/analyse_realistic_runs.py -- do not edit by hand.\n")
         w("\\begin{table}[htbp]\n\\centering\n")
-        w("\\caption[Unfiltered arms on the four realistic-warehouse recordings.]{Unfiltered arms on the four realistic-warehouse recordings, 6 November 2026, replay rate 1.0. "
+        w("\\caption[Visual estimators on the four realistic-warehouse recordings.]{Visual estimators on the four realistic-warehouse recordings, 6 November 2026, replay rate 1.0. "
           "Aligned ATE is RMSE after a rigid $SE(3)$ fit with scale fixed; RPE is translational, at "
           "$\\Delta=\\SI{1}{\\second}$ over pairs that do not span a jump; ``Jumps'' counts steps above "
           "\\SI{10}{\\metre\\per\\second}; ``Kept'' is the fraction of the bag's stereo pairs the estimator processed (frames lost before the node's own queue count as lost). "
           "Loop-closer state is read from \\repo{loop_closing.csv}, not from the run name. Static and dynamic rows of "
           "one layout share a world geometry and differ in traffic only. "
-          "\\textbf{Bold} marks the lowest ATE and the lowest jump-free RPE among the five arms of a recording; "
+          "``Max'' is the largest single position error the run reaches \\emph{after} its initialisation transient --- the same cut the onset analysis of \\cref{tab:realistic-timelines-baseline} makes, after the last jump inside the first \\SI{15}{\\second} --- on the same alignment as the ATE column, and records the excursion that the RMSE averages away. Every ORB-SLAM3 run peaks near \\SI{2.5}{\\second} on the gravity re-alignment that ends its inertial initialisation, at three to four metres; that peak is excluded here because it measures the initialisation and not the driving. ``ATE/path'' is the aligned ATE as a percentage of the ground-truth path length, so that runs over routes of different length can be compared; it is a ratio, not a sub-sequence drift rate. "
+          "\\textbf{Bold} marks the lowest ATE, the lowest Max and the lowest jump-free RPE among the five arms of a recording; "
           "with one run per arm it records which run came lowest, not that the arm is better.}\n")
         w("\\label{tab:realistic-baseline}\n\\small\n\\resizebox{\\textwidth}{!}{%\n")
-        w("\\begin{tabular}{llll rrrrrr}\n\\toprule\n")
-        w("Recording & Layout & Scene & Estimator & ATE [\\si{\\metre}] & Rot.\\ [\\si{\\degree}] & "
+        w("\\begin{tabular}{llll rrrrrrrr}\n\\toprule\n")
+        w("Recording & Layout & Scene & Estimator & ATE [\\si{\\metre}] & Max [\\si{\\metre}] & "
+          "ATE/path [\\si{\\percent}] & Rot.\\ [\\si{\\degree}] & "
           "RPE$_{1\\,\\mathrm{s}}$ [\\si{\\metre}] & Jumps & Kept & Resets \\\\\n\\midrule\n")
         unfiltered = [r for r in rows if not r["filtered"]]
         best = {ds: (best_of([r for r in unfiltered if r["dataset"] == ds], "ate_rms"),
-                     best_of([r for r in unfiltered if r["dataset"] == ds], "rpe1_trans_clean"))
+                     best_of([r for r in unfiltered if r["dataset"] == ds], "rpe1_trans_clean"),
+                     best_of([r for r in unfiltered if r["dataset"] == ds], "ate_max_post"))
                 for ds in {r["dataset"] for r in unfiltered}}
         last = None
         for r in rows:
             if r["filtered"]:
                 continue
             lay, sc = SCENE[r["dataset"]]
-            b_ate, b_rpe = best[r["dataset"]]
+            b_ate, b_rpe, b_max = best[r["dataset"]]
             first = r["dataset"] != last
             if not first:
                 pass
             elif last is not None:
                 w("\\addlinespace\n")
             last = r["dataset"]
-            w("%s & %s & %s & %s & %s & %s & %s & %s & %s & %s \\\\\n" % (
+            w("%s & %s & %s & %s & %s & %s & %s & %s & %s & %s & %s & %s \\\\\n" % (
                 "\\repo{%s}" % r["dataset"].replace("dataset_allsensor_", "") if first else "",
                 lay if first else "", sc if first else "", r["label"],
-                fmt_b(r.get("ate_rms"), b_ate), fmt(r.get("rot_rms"), 2),
+                fmt_b(r.get("ate_rms"), b_ate), fmt_b(r.get("ate_max_post"), b_max),
+                pct_of_path(r), fmt(r.get("rot_rms"), 2),
                 fmt_b(r.get("rpe1_trans_clean"), b_rpe),
                 r.get("jumps", "---"), fmt(r["of_bag"], 2), r["resets"]))
         w("\\bottomrule\n\\end{tabular}}\n\\end{table}\n")

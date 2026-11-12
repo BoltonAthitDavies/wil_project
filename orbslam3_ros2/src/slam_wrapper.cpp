@@ -289,9 +289,33 @@ void SlamWrapper::workerLoop()
     // must not reach the trajectory CSV.
     r.tracking_ok = (r.state == 2);
 
-    // Hold everything back until the inertial state is valid; see
-    // SlamConfig::wait_for_imu_init.
-    if (r.tracking_ok && cfg_.use_imu && cfg_.wait_for_imu_init && !imu_ready_) {
+    // Hold back EVERY frame whose inertial state is invalid, not merely the ones
+    // before the first initialisation; see SlamConfig::wait_for_imu_init.
+    //
+    // This condition used to carry `&& !imu_ready_`, which made it a latch: once
+    // the inertial state had been valid a single time the test was skipped for
+    // the rest of the run. That is not enough, because ORB-SLAM3 RE-initialises.
+    // Measured on a simulation navigation run, 11 Nov 2026, from the published
+    // quaternions (tilt = angle of body z from vertical; ~0 deg gravity-aligned,
+    // ~90 deg not):
+    //
+    //     NOT aligned  0.00-2.57 s    ALIGNED 2.57-3.07
+    //     NOT aligned  3.07-5.71      ALIGNED 5.71-6.24
+    //     NOT aligned  6.24-8.94      ALIGNED 8.94-9.47
+    //     NOT aligned  9.47-12.14     ALIGNED 12.14-12.64
+    //     NOT aligned 12.64-15.48     ALIGNED 15.48-70.82  (holds)
+    //
+    // Five initialisations on a ~2.7 s cycle, 274 of 1528 poses not gravity
+    // aligned, four tracking-loss events. The latch released at the first one and
+    // every later un-aligned pose was published. RTAB-Map localised against one
+    // and LATCHED a map->odom correction with 73.8 deg of yaw error, which no
+    // later correction could undo until a good localisation replaced it wholesale
+    // -- the pose visibly wrong in RViz for tens of seconds, then snapping.
+    //
+    // Frame::HasVelocity() goes false again after a reset, so testing it every
+    // frame is exactly the signal wanted. The member is kept as a "has ever been
+    // ready" flag; it no longer suppresses the test.
+    if (r.tracking_ok && cfg_.use_imu && cfg_.wait_for_imu_init) {
       auto * tk = slam_->GetTracker();
       if (tk && tk->mCurrentFrame.HasVelocity()) {
         imu_ready_ = true;

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Experiment 1 insight analysis: WHY each estimator errs the way it does.
 
-Tests, on the five static `dataset_allsensor_00*` recordings, the mechanisms a
+Tests, on the four `dataset_allsensor_realistic_*` recordings, the mechanisms a
 reader would propose for the Experiment 1 numbers, each within a recording so
 that the recording is its own control:
 
@@ -18,7 +18,7 @@ that the recording is its own control:
   visual         for VINS-Fusion and ORB-SLAM3 (scored at the IMU point): drift
                  while turning against straights in the tracking regime, matched
                  features against drift, and the anatomy of the one failure
-                 (ORB-SLAM3 with loop closure on allsensor_003)
+                 (ORB-SLAM3 with loop closure on the I-layout recording)
 
 Ground truth: the baselines are referenced to the model origin and use the raw
 ground truth; the visual estimators report the IMU and are scored against the
@@ -33,7 +33,8 @@ Outputs (output/compare/simulation/exp1-insights/):
   fig_decomposition_light.png                along/cross/heading error, wheel+EKF
   fig_nees_light.png                         NEES over time, both EKFs, first turn
   fig_imu_law_light.png                      IMU error vs time, log-log, and heading-only prediction
-  fig_orb_failure_light.png                  allsensor_003 ORB-SLAM3 error, jumps, route
+  fig_orb_failure_light.png                  ORB-SLAM3 error, jumps and route on the
+                                             one recording where it diverges
 """
 import csv
 import os
@@ -55,18 +56,36 @@ import matplotlib.pyplot as plt               # noqa: E402
 
 ROOT = Path(vm.ROOT)
 OUT = ROOT / "output" / "compare" / "simulation" / "exp1-insights"
-BAGS = ["dataset_allsensor_%03d" % i for i in range(5)]
+# The dataset set fixed on 6 Nov 2026. The dataset_allsensor_00x recordings
+# this used to name were retired that day (001 and 004 are lost outright), so
+# every artefact of this script was retired with them rather than regenerated.
+BAGS = ["dataset_allsensor_realistic_%03d" % i for i in range(4)]
+# The one recording where ORB-SLAM3 with its closer active diverges (4.78 m, the
+# false 14 m closure between the I layout's repeated aisles). It was
+# dataset_allsensor_003 in the retired campaign.
+ORB_FAILURE_BAG = "dataset_allsensor_realistic_001"
 TURN_DEG_S = 10.0
 NEES_BAND = stats.chi2.ppf(0.975, 3)          # 9.35 for 3 DOF
 NEES_HZ = 1.0
 SUSTAIN_S = 5.0
 BASELINES = [("Wheel odometry", "output_wheel", "#887b2c"),
              ("IMU dead reckoning", "output_imu", "#b00020"),
-             ("EKF wheel+IMU", "output_ekf", "#458554"),
-             ("EKF @ VSLAM noise", "output_ekf_vslamcfg", "#2a9d8f")]
-VISUAL = [("VINS-Fusion", "output_vins", "logging_20260916_01", "#cc8319"),
-          ("ORB-SLAM3", "output_orb", "logging_20260916_01", "#2a78d6"),
-          ("ORB-SLAM3 (no LC)", "output_orb", "logging_20260916_02", "#a347b2")]
+             # 6 Nov 2026: output_ekf IS the VSLAM-noise baseline and
+             # output_ekf_measured the measured-noise diagnostic. Before that
+             # date the two names meant the opposite; do not swap them back.
+             # The labels must match the reported table of
+             # output/compare/simulation/exp1-realistic/proprio_baseline_table.tex,
+             # which calls output_ekf "EKF wheel+IMU".  Using that label for
+             # output_ekf_measured here put the same name on opposite arms in
+             # two documents (12 Nov 2026), so both are named by their noise
+             # model and neither carries the bare name.
+             ("EKF @ measured noise", "output_ekf_measured", "#458554"),
+             ("EKF @ VSLAM noise", "output_ekf", "#2a9d8f")]
+# Run names since 6 Nov 2026; the logging_20260916_* campaign these used to
+# name was retired that day and no longer exists on disk.
+VISUAL = [("VINS-Fusion", "output_vins", "cpu", "#cc8319"),
+          ("ORB-SLAM3", "output_orb", "loopclosing_gpu", "#2a78d6"),
+          ("ORB-SLAM3 (no LC)", "output_orb", "noloopclosing_gpu", "#a347b2")]
 COL = {n: c for n, _, c in BASELINES}
 COL.update({n: c for n, _, _, c in VISUAL})
 
@@ -77,9 +96,23 @@ def wrap(a):
     return (a + np.pi) % (2 * np.pi) - np.pi
 
 
+def gt_path(ds):
+    """Canonical ground truth for a simulation bag, following the 6 Nov 2026 move."""
+    for c in vm.gt_candidates("simulation/" + ds):
+        if os.path.exists(c):
+            return c
+    raise SystemExit("no ground truth for %s: looked in\n  %s"
+                     % (ds, "\n  ".join(vm.gt_candidates("simulation/" + ds))))
+
+
 def gt_raw(ds):
-    p = ROOT / "output" / "output_ekf" / "simulation" / ds / "ground_truth.csv"
-    g = tl.gt_series(str(p), lever=False)
+    # Canonical truth since 6 Nov 2026 is dataset/gt/<bag>/ground_truth.csv; the
+    # flat per-tree copies this used to read went to trash/ that day, which is
+    # why every artefact of this script was retired rather than regenerated.
+    # vio_metrics.gt_candidates() returns the canonical path first and keeps the
+    # tree copies as fallbacks, so this follows the move automatically.
+    p = gt_path(ds)
+    g = tl.gt_series(p, lever=False)
     g["yaw"] = g["yaw_unwrapped"]
     g["speed"] = np.gradient(g["p"][:, 0], g["t"]), np.gradient(g["p"][:, 1], g["t"])
     return g, str(p)
@@ -206,7 +239,7 @@ def visual_run(ds, name, tree, run):
         return None
     return dict(testbed="exp1", dataset=ds, tree=tree, system=name.split(" (")[0], run=run, dir=str(d),
                 filtered=False, mode="off", lc="n/a", atlas=False, september=True,
-                gt=str(ROOT / "output" / "output_ekf" / "simulation" / ds / "ground_truth.csv"), label=name)
+                gt=gt_path(ds), label=name)
 
 
 def visual_contrasts(ds, g_imu, rec):
@@ -241,7 +274,7 @@ def visual_contrasts(ds, g_imu, rec):
 
 
 def orb_failure(ds, g_imu, rec):
-    """Anatomy of the allsensor_003 ORB-SLAM3 failure: where the error is accrued."""
+    """Anatomy of the ORB_FAILURE_BAG ORB-SLAM3 failure: where the error is accrued."""
     e = vm.load(os.path.join(rec["dir"], "vio.csv"))
     t, p = e[0], e[1]
     m = (t >= g_imu["t"][0]) & (t <= g_imu["t"][-1])
@@ -302,7 +335,7 @@ def tex_turning(recs, vis, path):
     L = [r"\begin{table}[htbp]", r"\centering", r"\footnotesize",
          r"\caption[Growth of position and heading error while turning against straights, every estimator.]"
          r"{Growth rate of the position error and of the heading error while the ground-truth yaw rate exceeds "
-         r"\SI{10}{\degree\per\second} and on straights, median over the five recordings, with the number of recordings "
+         r"\SI{10}{\degree\per\second} and on straights, median over the four recordings, with the number of recordings "
          r"in which the turning rate is the larger ($n_{>}$). Baselines: anchored error over the whole run. Visual "
          r"estimators: start-anchored error at the IMU point, tracking regime only (before the first jump, below "
          r"\SI{3}{\metre}); heading contrast not computed for them.}",
@@ -360,7 +393,7 @@ def tex_nees(rows, path):
          r"``never'': the band is not left for \SI{5}{\second} in the run.}",
          r"\label{tab:e1i-nees}",
          r"\begin{tabular}{lrrrrrrr}", r"\toprule",
-         r"Recording & first turn & \multicolumn{3}{c}{EKF, measured noise} & \multicolumn{3}{c}{EKF @ VSLAM noise} \\",
+         r"Recording & first turn & \multicolumn{3}{c}{EKF @ measured noise} & \multicolumn{3}{c}{EKF @ VSLAM noise} \\",
          r" & [s] & leaves at [s] & at [m] & median NEES & leaves at [s] & at [m] & median NEES \\", r"\midrule"]
     for r in rows:
         L.append(f"\\repo{{{r['dataset'].replace('dataset_', '')}}} & {fmt(r['first_turn'],1)} & "
@@ -396,8 +429,9 @@ def tex_visual(vis, fail, path):
     L += [r"\bottomrule", r"\end{tabular}}", r"\end{table}"]
     if fail is not None:
         L += ["", r"\begin{table}[htbp]", r"\centering", r"\small",
-              r"\caption[Anatomy of the ORB-SLAM3 failure on allsensor\_003.]{Anatomy of the ORB-SLAM3 (loop closer on) run "
-              r"on \repo{allsensor_003}: whole-run aligned ATE, the number and sizes of impossible-speed jumps, when they "
+              r"\caption[Anatomy of the ORB-SLAM3 failure on the I layout.]{Anatomy of the ORB-SLAM3 (loop closer on) run "
+              "on \\repo{" + ORB_FAILURE_BAG.replace("dataset_", "") + "}: whole-run aligned ATE, the number and sizes "
+              r"of impossible-speed jumps, when they "
               r"occur, how much of the net error change is taken in jump steps against ordinary drift, and the "
               r"tracking-state losses the front end logged.}",
               r"\label{tab:e1i-orbfail}",
@@ -420,7 +454,7 @@ def tex_visual(vis, fail, path):
 def fig_decomposition(recs, path):
     fig, axes = plt.subplots(3, 5, figsize=(15, 8), sharex="col")
     for j, ds in enumerate(BAGS):
-        for name in ("Wheel odometry", "EKF wheel+IMU"):
+        for name in ("Wheel odometry", "EKF @ measured noise"):
             r = next((x for x in recs if x["dataset"] == ds and x["name"] == name), None)
             if r is None:
                 continue
@@ -446,7 +480,7 @@ def fig_nees(series, rows, path):
     fig, axes = plt.subplots(1, 5, figsize=(15, 3.6), sharey=True)
     for j, ds in enumerate(BAGS):
         ax = axes[j]
-        for tree, lab, col in (("output_ekf", "measured noise", COL["EKF wheel+IMU"]), ("output_ekf_vslamcfg", "VSLAM noise", COL["EKF @ VSLAM noise"])):
+        for tree, lab, col in (("output_ekf_measured", "measured noise", COL["EKF @ measured noise"]), ("output_ekf", "VSLAM noise", COL["EKF @ VSLAM noise"])):
             ns = series.get((ds, tree))
             if ns is None:
                 continue
@@ -489,8 +523,9 @@ def fig_orb(fail, path):
     if fail["lost_t"] is not None and len(fail["lost_t"]):
         ax.scatter(fail["lost_t"], np.zeros(len(fail["lost_t"])), s=6, color="#e040fb", label="not tracking OK")
     ax.set_xlabel("time [s]"); ax.set_ylabel("error [m]"); ax.grid(True, alpha=0.3); ax.legend(fontsize=7)
-    ax.set_title("allsensor_003, ORB-SLAM3 (loop closer on): error and jumps (red)", fontsize=9, loc="left")
-    draw_map(ax2, "simulation/dataset_allsensor_003")
+    ax.set_title(ORB_FAILURE_BAG.replace("dataset_", "") + ", ORB-SLAM3 (loop closer on): error and jumps (red)",
+                 fontsize=9, loc="left")
+    draw_map(ax2, "simulation/" + ORB_FAILURE_BAG)
     ax2.plot(fail["gp"][:, 0], fail["gp"][:, 1], color="#8a8983", lw=2, label="ground truth (IMU point)")
     ax2.plot(fail["pa"][:, 0], fail["pa"][:, 1], color=COL["ORB-SLAM3"], lw=0.9, label="ORB-SLAM3 aligned")
     if len(fail["jumps"]):
@@ -517,7 +552,7 @@ def main():
         row = dict(dataset=ds, first_turn=None, cross_m=None, dist_m=None, med_m=np.nan, cross_v=None, dist_v=None, med_v=np.nan)
         ft = first_turn(g)
         row["first_turn"] = (ft - g["t"][0]) if ft is not None else None
-        for tree, k in (("output_ekf", "m"), ("output_ekf_vslamcfg", "v")):
+        for tree, k in (("output_ekf_measured", "m"), ("output_ekf", "v")):
             ns = nees_series(ds, g, tree)
             if ns is None:
                 continue
@@ -534,7 +569,7 @@ def main():
             v = visual_contrasts(ds, g_imu, rec)
             if v is not None:
                 vis.append(v)
-            if ds == "dataset_allsensor_003" and name == "ORB-SLAM3":
+            if ds == ORB_FAILURE_BAG and name == "ORB-SLAM3":
                 fail = orb_failure(ds, g_imu, rec)
     # csv
     keys = [k for k in recs[0] if k not in ("series", "law")] + ["law_k", "law_r2"]

@@ -59,6 +59,16 @@ def _setup(context, *args, **kwargs):
             f'map_name:={map_name} loop_closure:=false')
     run_name = cfg('run_name') or f'{map_name}_localize'
     csv = os.path.join(map_dir, f'localize_{run_name}.csv')
+    # A localisation run is evidence, so this launch will not quietly replace one.
+    # Added 11 Nov 2026 after three 25 s configuration tests, run with the default
+    # run_name, overwrote a recorded run's CSV; map/ is gitignored, so it was not
+    # recoverable.
+    if os.path.exists(csv) and os.path.getsize(csv) > 0 and \
+            cfg('overwrite').lower() not in ('true', '1', 'yes'):
+        raise RuntimeError(
+            f'{csv} already exists.\n'
+            f'  That file is a recorded run. Pass run_name:=<other name> to keep both,\n'
+            f'  or overwrite:=true to replace it deliberately.')
     # vslam_navigation spells ORB-SLAM3 'orb' everywhere -- rtabmap.launch.py's
     # frontend:=orb, mapping_sim, mapping_real. localization_rtabmap.launch.py
     # spells it 'orbslam3' and rejects anything else. Translate at the boundary
@@ -95,6 +105,20 @@ def _setup(context, *args, **kwargs):
             'detection_rate': cfg('detection_rate'),
             'shim_rate': cfg('shim_rate'),
             'publish_joint_states': cfg('publish_joint_states'),
+            'wait_for_imu_init': cfg('wait_for_imu_init'),
+            'orb_output_path': cfg('orb_output_path'),
+            'start_pose': cfg('start_pose'),
+            'relocalize': cfg('relocalize'),
+            'min_inliers': cfg('min_inliers'),
+            'min_inliers_distribution': cfg('min_inliers_distribution'),
+            'odom_cache_size': cfg('odom_cache_size'),
+            'geometric_check': cfg('geometric_check'),
+            'icp_correspondence_ratio': cfg('icp_correspondence_ratio'),
+            'icp_max_rotation': cfg('icp_max_rotation'),
+            'estimation_type': cfg('estimation_type'),
+            'vis_inlier_distance': cfg('vis_inlier_distance'),
+            'gen_scan': cfg('gen_scan'),
+            'localize_delay_s': cfg('localize_delay_s'),
         }.items())
 
     rec = ExecuteProcess(
@@ -133,8 +157,55 @@ def generate_launch_description():
         DeclareLaunchArgument('detection_rate', default_value='1.0'),
         DeclareLaunchArgument('shim_rate', default_value='4.0'),
         DeclareLaunchArgument('publish_joint_states', default_value='true'),
+        DeclareLaunchArgument('overwrite', default_value='false',
+                              description='true replaces an existing run CSV of the same '
+                                          'name instead of refusing to start.'),
+        DeclareLaunchArgument('wait_for_imu_init', default_value='true',
+                              description='hold the front end back until its inertial state is '
+                                          'valid, so no map->odom correction can be latched from '
+                                          'a provisional orientation. false restores the old '
+                                          'behaviour if the signal never fires.'),
+        DeclareLaunchArgument('orb_output_path', default_value='',
+                              description="directory for the front end's vio.csv; empty writes "
+                                          'nothing.'),
+        DeclareLaunchArgument('min_inliers', default_value='20',
+                              description='Vis/MinInliers; try 35 against aisle aliasing.'),
+        DeclareLaunchArgument('min_inliers_distribution', default_value='0.0',
+                              description='Vis/MinInliersDistribution; 0 disables. Try 0.05-0.1: '
+                                          'rejects a match bunched on repeating structure.'),
+        DeclareLaunchArgument('odom_cache_size', default_value='10',
+                              description='RGBD/MaxOdomCacheSize; anti-teleport context.'),
+        DeclareLaunchArgument('relocalize', default_value='true',
+                              description='false = dead reckon on the prior from the '
+                                          'start_pose seed; no correction is applied and '
+                                          'drift is unbounded.'),
+        DeclareLaunchArgument('start_pose', default_value='origin',
+                              description="where the run is assumed to begin: 'origin' (the spawn "
+                                          "point, to within 5 cm), 'last' (the pose left in the database), or six "
+                                          'numbers \"x y z roll pitch yaw\" in the map frame.'),
         DeclareLaunchArgument('extent_margin', default_value='2.0',
                               description='metres outside the prior still counted as inside its extent.'),
         DeclareLaunchArgument('rviz', default_value='true'),
+        DeclareLaunchArgument('geometric_check', default_value='false',
+                              description='Reg/Strategy 2: verify an accepted loop closure by ICP against the 3-D '
+                        'structure, not only the 2-D features that proposed it. The '
+                        'one acceptance test outside the null space that defeats '
+                        'OptimizeMaxError and MaxOdomCacheSize.'),
+        DeclareLaunchArgument('icp_correspondence_ratio', default_value='0.3',
+                              description='Icp/CorrespondenceRatio, the veto itself. geometric_check:=true only.'),
+        DeclareLaunchArgument('icp_max_rotation', default_value='0.35',
+                              description='Icp/MaxRotation in rad (0.35 = 20 deg). geometric_check:=true only.'),
+        DeclareLaunchArgument('estimation_type', default_value='1',
+                              description='Vis/EstimationType: 0 = 3D->3D sparse-geometry veto, '
+                      '1 = PnP (RTAB-Map default).'),
+        DeclareLaunchArgument('vis_inlier_distance', default_value='0.1',
+                              description='Vis/InlierDistance (m); estimation_type:=0 only.'),
+        DeclareLaunchArgument('gen_scan', default_value='false',
+                              description='generate a laser scan from depth for the live frames; '
+                      'geometric_check needs it.'),
+        DeclareLaunchArgument('localize_delay_s', default_value='0.0',
+                              description='hold RTAB-Map back this long so its first '
+                                          'fix cannot latch on an unstable front-end '
+                                          'orientation.'),
         OpaqueFunction(function=_setup),
     ])

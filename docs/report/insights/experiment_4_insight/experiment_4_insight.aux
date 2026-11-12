@@ -17,89 +17,35 @@
 \providecommand\HyField@AuxAddToFields[1]{}
 \providecommand\HyField@AuxAddToCoFields[2]{}
 \@writefile{toc}{\contentsline {section}{\numberline {1}Questions and method}{1}{section.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Raster.}{1}{section*.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Per-node observation.}{1}{section*.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Second map (retired).}{2}{section*.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {2}Insight 1: the wrong cells are thick surfaces, not phantom obstacles}{2}{section.4.2}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {I.1}{\ignorespaces Occupied map cells by distance to the true structure.}}{2}{table.caption.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Q1 Is the error rotational?}{1}{section*.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Q2 What does the prior buy?}{1}{section*.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Q3 What happens at an excursion?}{1}{section*.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Insight 1: heading is accurate, and traffic is what degrades it}{1}{section.4.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {I.1}{\ignorespaces Heading error against ground truth, degrees. The first sample after the first fix is excluded: it carries the correction still settling and held both runs' apparent 160-degree maxima. ``In exc.'' is the median while the position error is over \SI {1}{\metre }, ``out'' while it is not, and $r$ their correlation.\relax }}{2}{table.caption.4}\protected@file@percent }
 \providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
-\newlabel{tab:insight4-classes}{{I.1}{2}{Occupied map cells by distance to the true structure}{table.caption.4}{}}
-\newlabel{tab:insight4-classes@cref}{{[table][1][4]I.1}{[1][2][]2}}
-\@writefile{lof}{\contentsline {figure}{\numberline {I.1}{\ignorespaces \texttt  {map_tiny.db} against the tiny world: correct occupied cells (green), surfaces drawn too thick (orange), phantom cells (red, the largest clusters labelled with their cell count), true surfaces the map observed but did not reproduce (blue), the recorded route and the optimised graph nodes.\relax }}{3}{figure.caption.5}\protected@file@percent }
-\newlabel{fig:cells-tiny}{{I.1}{3}{\repo {map_tiny.db} against the tiny world: correct occupied cells (green), surfaces drawn too thick (orange), phantom cells (red, the largest clusters labelled with their cell count), true surfaces the map observed but did not reproduce (blue), the recorded route and the optimised graph nodes.\relax }{figure.caption.5}{}}
-\newlabel{fig:cells-tiny@cref}{{[figure][1][4]I.1}{[1][2][]3}}
-\@writefile{toc}{\contentsline {section}{\numberline {3}Insight 2: surfaces are missed when they are seen edge-on and only once, not when they are far}{4}{section.4.3}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {I.2}{\ignorespaces Recall of the observed surfaces by incidence angle.}}{4}{table.caption.6}\protected@file@percent }
-\newlabel{tab:insight4-angle}{{I.2}{4}{Recall of the observed surfaces by incidence angle}{table.caption.6}{}}
-\newlabel{tab:insight4-angle@cref}{{[table][2][4]I.2}{[1][4][]4}}
-\@writefile{lot}{\contentsline {table}{\numberline {I.3}{\ignorespaces Precision and recall of the observed surfaces by the number of graph nodes whose stored local grid covers the cell.}}{4}{table.caption.7}\protected@file@percent }
-\newlabel{tab:insight4-views}{{I.3}{4}{Precision and recall of the observed surfaces by the number of graph nodes whose stored local grid covers the cell}{table.caption.7}{}}
-\newlabel{tab:insight4-views@cref}{{[table][3][4]I.3}{[1][4][]4}}
-\@writefile{lot}{\contentsline {table}{\numberline {I.4}{\ignorespaces Precision and recall of the observed surfaces by distance from the recorded route (\texttt  {dataset_map_tiny}, the route that built \texttt  {map_tiny.db}; for \texttt  {map_02.db} the same route is only a proxy for its own, unknown route).}}{4}{table.caption.8}\protected@file@percent }
-\newlabel{tab:insight4-dist}{{I.4}{4}{Precision and recall of the observed surfaces by distance from the recorded route (\repo {dataset_map_tiny}, the route that built \repo {map_tiny.db}; for \repo {map_02.db} the same route is only a proxy for its own, unknown route)}{table.caption.8}{}}
-\newlabel{tab:insight4-dist@cref}{{[table][4][4]I.4}{[1][4][]4}}
-\@writefile{lof}{\contentsline {figure}{\numberline {I.2}{\ignorespaces Precision of the occupied cells and recall of the observed surfaces against distance from the recorded route (left) and against the number of graph nodes that observed the cell (right), for both tiny-warehouse maps.\relax }}{5}{figure.caption.9}\protected@file@percent }
-\newlabel{fig:bins}{{I.2}{5}{Precision of the occupied cells and recall of the observed surfaces against distance from the recorded route (left) and against the number of graph nodes that observed the cell (right), for both tiny-warehouse maps.\relax }{figure.caption.9}{}}
-\newlabel{fig:bins@cref}{{[figure][2][4]I.2}{[1][4][]5}}
-\@writefile{lot}{\contentsline {table}{\numberline {I.5}{\ignorespaces Recall of the observed surfaces, per world object.}}{5}{table.caption.10}\protected@file@percent }
-\newlabel{tab:insight4-objects}{{I.5}{5}{Recall of the observed surfaces, per world object}{table.caption.10}{}}
-\newlabel{tab:insight4-objects@cref}{{[table][5][4]I.5}{[1][4][]5}}
-\@writefile{toc}{\contentsline {section}{\numberline {4}Insight 3: the loop closures corrected the graph, and the map did not need it}{6}{section.4.4}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {I.6}{\ignorespaces Loop closures and the correction they applied, \texttt  {map_tiny.db}.}}{6}{table.caption.11}\protected@file@percent }
-\newlabel{tab:insight4-closures}{{I.6}{6}{Loop closures and the correction they applied, \repo {map_tiny.db}}{table.caption.11}{}}
-\newlabel{tab:insight4-closures@cref}{{[table][6][4]I.6}{[1][6][]6}}
-\@writefile{lof}{\contentsline {figure}{\numberline {I.3}{\ignorespaces \texttt  {map_tiny.db}: odometry poses and optimised poses of the 29 nodes in the optimised graph, with the loop-closure links (left), and the planar and vertical correction each node received (right).\relax }}{6}{figure.caption.12}\protected@file@percent }
-\newlabel{fig:graph}{{I.3}{6}{\repo {map_tiny.db}: odometry poses and optimised poses of the 29 nodes in the optimised graph, with the loop-closure links (left), and the planar and vertical correction each node received (right).\relax }{figure.caption.12}{}}
-\newlabel{fig:graph@cref}{{[figure][3][4]I.3}{[1][6][]6}}
-\@writefile{toc}{\contentsline {section}{\numberline {5}Insight 4: on an independent route the second map blocks the robot at its phantom cells}{6}{section.4.5}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {I.7}{\ignorespaces Drivability of both maps under the true footprint along the recorded tiny route.}}{7}{table.caption.13}\protected@file@percent }
-\newlabel{tab:insight4-driv}{{I.7}{7}{Drivability of both maps under the true footprint along the recorded tiny route}{table.caption.13}{}}
-\newlabel{tab:insight4-driv@cref}{{[table][7][4]I.7}{[1][7][]7}}
-\@writefile{lot}{\contentsline {table}{\numberline {I.8}{\ignorespaces Where the probe route collides with the maps.}}{7}{table.caption.14}\protected@file@percent }
-\newlabel{tab:insight4-blocked}{{I.8}{7}{Where the probe route collides with the maps}{table.caption.14}{}}
-\newlabel{tab:insight4-blocked@cref}{{[table][8][4]I.8}{[1][7][]7}}
-\@writefile{toc}{\contentsline {section}{\numberline {6}Insight 5: the scored map was built from the recorded tiny bag, and the large-warehouse attempt left a database}{7}{section.4.6}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {I.9}{\ignorespaces The five RTAB-Map databases under \texttt  {map/}.}}{8}{table.caption.15}\protected@file@percent }
-\newlabel{tab:insight4-dbs}{{I.9}{8}{The five RTAB-Map databases under \repo {map/}}{table.caption.15}{}}
-\newlabel{tab:insight4-dbs@cref}{{[table][9][4]I.9}{[1][7][]8}}
-\@writefile{toc}{\contentsline {section}{\numberline {7}Insight 6: on the realistic maps the shelves are thickened and the walls displaced; the October builds are blocked at cells laid during initialisation, the November I build at cells laid in the aisles}{8}{section.4.7}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {I.10}{\ignorespaces Occupied map cells by distance to the true structure.}}{8}{table.caption.16}\protected@file@percent }
-\newlabel{tab:insight4-classes-realistic}{{I.10}{8}{Occupied map cells by distance to the true structure}{table.caption.16}{}}
-\newlabel{tab:insight4-classes-realistic@cref}{{[table][10][4]I.10}{[1][8][]8}}
-\@writefile{lof}{\contentsline {figure}{\numberline {I.4}{\ignorespaces \texttt  {map_realistic.db} (U, October) against the U-layout realistic world, placed by its fit; conventions as \cref  {fig:cells-tiny}. The route drawn is the independent probe \texttt  {realistic_000}, which did not build the map; the graph nodes are the build route. Phantom clusters are labelled with their cell count.\relax }}{9}{figure.caption.17}\protected@file@percent }
-\newlabel{fig:cells-realistic}{{I.4}{9}{\repo {map_realistic.db} (U, October) against the U-layout realistic world, placed by its fit; conventions as \cref {fig:cells-tiny}. The route drawn is the independent probe \repo {realistic_000}, which did not build the map; the graph nodes are the build route. Phantom clusters are labelled with their cell count.\relax }{figure.caption.17}{}}
-\newlabel{fig:cells-realistic@cref}{{[figure][4][4]I.4}{[1][8][]9}}
-\@writefile{lof}{\contentsline {figure}{\numberline {I.5}{\ignorespaces \texttt  {dataset_allsensor_realistic_map.db} (U, November) against the same world and probe. The \SI {10}{\metre } grid range reaches the west wall and the outer bays, which carry new phantom clusters; the spawn stretch is longer than in October.\relax }}{9}{figure.caption.18}\protected@file@percent }
-\newlabel{fig:cells-realistic-nov}{{I.5}{9}{\repo {dataset_allsensor_realistic_map.db} (U, November) against the same world and probe. The \SI {10}{\metre } grid range reaches the west wall and the outer bays, which carry new phantom clusters; the spawn stretch is longer than in October.\relax }{figure.caption.18}{}}
-\newlabel{fig:cells-realistic-nov@cref}{{[figure][5][4]I.5}{[1][8][]9}}
-\@writefile{lof}{\contentsline {figure}{\numberline {I.6}{\ignorespaces \texttt  {map_realistic_01.db} (I, October) against the I-layout realistic world; the route drawn is the probe \texttt  {realistic_001}.\relax }}{10}{figure.caption.19}\protected@file@percent }
-\newlabel{fig:cells-realistic-01}{{I.6}{10}{\repo {map_realistic_01.db} (I, October) against the I-layout realistic world; the route drawn is the probe \repo {realistic_001}.\relax }{figure.caption.19}{}}
-\newlabel{fig:cells-realistic-01@cref}{{[figure][6][4]I.6}{[1][8][]10}}
-\@writefile{lof}{\contentsline {figure}{\numberline {I.7}{\ignorespaces \texttt  {dataset_allsensor_realistic_01_map.db} (I, November) against the same world and probe. The blocked stretches sit in the aisles of the probe's left loop and along its bottom straight, on phantom cells first observed mid-run.\relax }}{10}{figure.caption.20}\protected@file@percent }
-\newlabel{fig:cells-realistic-01-nov}{{I.7}{10}{\repo {dataset_allsensor_realistic_01_map.db} (I, November) against the same world and probe. The blocked stretches sit in the aisles of the probe's left loop and along its bottom straight, on phantom cells first observed mid-run.\relax }{figure.caption.20}{}}
-\newlabel{fig:cells-realistic-01-nov@cref}{{[figure][7][4]I.7}{[1][8][]10}}
-\@writefile{lot}{\contentsline {table}{\numberline {I.11}{\ignorespaces Precision and recall of the observed surfaces by the number of graph nodes whose stored local grid covers the cell, for the two realistic-warehouse maps (U is \texttt  {map_realistic}, I is \texttt  {map_realistic_01}).}}{11}{table.caption.21}\protected@file@percent }
-\newlabel{tab:insight4-views-realistic}{{I.11}{11}{Precision and recall of the observed surfaces by the number of graph nodes whose stored local grid covers the cell, for the two realistic-warehouse maps (U is \repo {map_realistic}, I is \repo {map_realistic_01})}{table.caption.21}{}}
-\newlabel{tab:insight4-views-realistic@cref}{{[table][11][4]I.11}{[1][8][]11}}
-\@writefile{lot}{\contentsline {table}{\numberline {I.12}{\ignorespaces Recall of the observed surfaces by incidence angle.}}{11}{table.caption.22}\protected@file@percent }
-\newlabel{tab:insight4-angle-realistic}{{I.12}{11}{Recall of the observed surfaces by incidence angle}{table.caption.22}{}}
-\newlabel{tab:insight4-angle-realistic@cref}{{[table][12][4]I.12}{[1][8][]11}}
-\@writefile{lot}{\contentsline {table}{\numberline {I.13}{\ignorespaces Precision and recall of the observed surfaces by distance from the independent probe route (\texttt  {realistic_000} for U, \texttt  {map_realistic}; \texttt  {realistic_001} for I, \texttt  {map_realistic_01}).}}{11}{table.caption.23}\protected@file@percent }
-\newlabel{tab:insight4-dist-realistic}{{I.13}{11}{Precision and recall of the observed surfaces by distance from the independent probe route (\repo {realistic_000} for U, \repo {map_realistic}; \repo {realistic_001} for I, \repo {map_realistic_01})}{table.caption.23}{}}
-\newlabel{tab:insight4-dist-realistic@cref}{{[table][13][4]I.13}{[1][8][]11}}
-\@writefile{lof}{\contentsline {figure}{\numberline {I.8}{\ignorespaces Precision of the occupied cells and recall of the observed surfaces against distance from the independent probe route (left, a proxy only: the probe did not build any map) and against the number of graph nodes that observed the cell (right), for the four realistic-warehouse maps.\relax }}{11}{figure.caption.24}\protected@file@percent }
-\newlabel{fig:bins-realistic}{{I.8}{11}{Precision of the occupied cells and recall of the observed surfaces against distance from the independent probe route (left, a proxy only: the probe did not build any map) and against the number of graph nodes that observed the cell (right), for the four realistic-warehouse maps.\relax }{figure.caption.24}{}}
-\newlabel{fig:bins-realistic@cref}{{[figure][8][4]I.8}{[1][8][]11}}
-\@writefile{lot}{\contentsline {table}{\numberline {I.14}{\ignorespaces Drivability of the realistic-warehouse maps under the true footprint along their independent probe routes.}}{12}{table.caption.25}\protected@file@percent }
-\newlabel{tab:insight4-driv-realistic}{{I.14}{12}{Drivability of the realistic-warehouse maps under the true footprint along their independent probe routes}{table.caption.25}{}}
-\newlabel{tab:insight4-driv-realistic@cref}{{[table][14][4]I.14}{[1][12][]12}}
-\@writefile{lot}{\contentsline {table}{\numberline {I.15}{\ignorespaces Where the probe route collides with the maps.}}{12}{table.caption.26}\protected@file@percent }
-\newlabel{tab:insight4-blocked-realistic}{{I.15}{12}{Where the probe route collides with the maps}{table.caption.26}{}}
-\newlabel{tab:insight4-blocked-realistic@cref}{{[table][15][4]I.15}{[1][12][]12}}
-\@writefile{toc}{\contentsline {section}{\numberline {8}What these data cannot answer}{13}{section.4.8}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {9}Summary}{13}{section.4.9}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Consequences for Chapter 4.}{13}{section*.28}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {I.16}{\ignorespaces Questions, answers and the strength of the evidence.\relax }}{14}{table.caption.27}\protected@file@percent }
-\newlabel{tab:insight4-summary}{{I.16}{14}{Questions, answers and the strength of the evidence.\relax }{table.caption.27}{}}
-\newlabel{tab:insight4-summary@cref}{{[table][16][4]I.16}{[1][13][]14}}
-\gdef \@abspage@last{15}
+\newlabel{tab:insight4nav-rotation}{{I.1}{2}{Heading error against ground truth, degrees. The first sample after the first fix is excluded: it carries the correction still settling and held both runs' apparent 160-degree maxima. ``In exc.'' is the median while the position error is over \SI {1}{\metre }, ``out'' while it is not, and $r$ their correlation.\relax }{table.caption.4}{}}
+\newlabel{tab:insight4nav-rotation@cref}{{[table][1][4]I.1}{[1][1][]2}}
+\@writefile{lof}{\contentsline {figure}{\numberline {I.1}{\ignorespaces Left: heading error per run, median and 95th percentile, the run with traffic in orange. Every static run sits under \SI {1.2}{\degree } median and the dynamic one at \SI {4.85}{\degree }; the gap is the finding, not the level. Right: heading error while turning against heading error while driving straight. The points sit on the diagonal, so whatever sets the floor is not the motion.\relax }}{2}{figure.caption.5}\protected@file@percent }
+\newlabel{fig:insight4nav-rotation}{{I.1}{2}{Left: heading error per run, median and 95th percentile, the run with traffic in orange. Every static run sits under \SI {1.2}{\degree } median and the dynamic one at \SI {4.85}{\degree }; the gap is the finding, not the level. Right: heading error while turning against heading error while driving straight. The points sit on the diagonal, so whatever sets the floor is not the motion.\relax }{figure.caption.5}{}}
+\newlabel{fig:insight4nav-rotation@cref}{{[figure][1][4]I.1}{[1][1][]2}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Insight 2: the two excursions are two different faults}{3}{section.4.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {I.2}{\ignorespaces The two excursions, and the correction that produced each. Yaw in degrees, $x$ in metres.\relax }}{3}{table.caption.6}\protected@file@percent }
+\newlabel{tab:insight4nav-exc}{{I.2}{3}{The two excursions, and the correction that produced each. Yaw in degrees, $x$ in metres.\relax }{table.caption.6}{}}
+\newlabel{tab:insight4nav-exc@cref}{{[table][2][4]I.2}{[1][3][]3}}
+\@writefile{lof}{\contentsline {figure}{\numberline {I.2}{\ignorespaces The two excursions, shaded where the position error exceeds \SI {1}{\metre }. Top row: position error with heading error on the right axis. Bottom row: the \texttt  {map}\nobreakspace  {}$\rightarrow $\nobreakspace  {}\texttt  {odom} correction in yaw and in translation. \leavevmode {\color  {flagred}Both excursions move the correction in both quantities, so the corrections alone do not separate them} --- the heading error does. On the figure-of-eight it rises with the position error and stays up for the whole \SI {23}{\second }; on the square it spikes once at the transition and falls back to about \SI {2}{\degree } while the position error holds at \SI {6}{\metre } for \SI {35}{\second }. A persistent heading error is a wrong orientation; a transient one is the pose being moved.\relax }}{3}{figure.caption.7}\protected@file@percent }
+\newlabel{fig:insight4nav-exc}{{I.2}{3}{The two excursions, shaded where the position error exceeds \SI {1}{\metre }. Top row: position error with heading error on the right axis. Bottom row: the \texttt {map}~$\rightarrow $~\texttt {odom} correction in yaw and in translation. \flag {Both excursions move the correction in both quantities, so the corrections alone do not separate them} --- the heading error does. On the figure-of-eight it rises with the position error and stays up for the whole \SI {23}{\second }; on the square it spikes once at the transition and falls back to about \SI {2}{\degree } while the position error holds at \SI {6}{\metre } for \SI {35}{\second }. A persistent heading error is a wrong orientation; a transient one is the pose being moved.\relax }{figure.caption.7}{}}
+\newlabel{fig:insight4nav-exc@cref}{{[figure][2][4]I.2}{[1][3][]3}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Insight 3: over these distances the prior supplies a datum, not accuracy}{4}{section.4.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {I.3}{\ignorespaces The localised pose against unaided ORB-SLAM3 over the same run, metres. The front end is rigidly aligned to ground truth first, so its column is DRIFT alone with the unknown initial pose given away free -- the kindest possible reading of odometry, and the one thing the prior actually supplies.\relax }}{4}{table.caption.8}\protected@file@percent }
+\newlabel{tab:insight4nav-prior}{{I.3}{4}{The localised pose against unaided ORB-SLAM3 over the same run, metres. The front end is rigidly aligned to ground truth first, so its column is DRIFT alone with the unknown initial pose given away free -- the kindest possible reading of odometry, and the one thing the prior actually supplies.\relax }{table.caption.8}{}}
+\newlabel{tab:insight4nav-prior@cref}{{[table][3][4]I.3}{[1][4][]4}}
+\@writefile{lof}{\contentsline {figure}{\numberline {I.3}{\ignorespaces Left: each run's median error, unaided front end against localised pose, joined; green where the prior helps, orange where it hurts. They split three to three with one level. Right: the same medians as bars with each column's worst instant as a tick, logarithmic. The front end never exceeds \SI {0.76}{\metre }; the localised pose reaches \SI {6.80}{\metre }. The asymmetry on the right, not the split on the left, is what the prior costs over these distances.\relax }}{4}{figure.caption.9}\protected@file@percent }
+\newlabel{fig:insight4nav-prior}{{I.3}{4}{Left: each run's median error, unaided front end against localised pose, joined; green where the prior helps, orange where it hurts. They split three to three with one level. Right: the same medians as bars with each column's worst instant as a tick, logarithmic. The front end never exceeds \SI {0.76}{\metre }; the localised pose reaches \SI {6.80}{\metre }. The asymmetry on the right, not the split on the left, is what the prior costs over these distances.\relax }{figure.caption.9}{}}
+\newlabel{fig:insight4nav-prior@cref}{{[figure][3][4]I.3}{[1][4][]4}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}What these data cannot answer}{5}{section.4.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}Summary}{5}{section.4.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Consequences for the raw write-up.}{5}{section*.11}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {I.4}{\ignorespaces Questions, answers and the strength of the evidence.\relax }}{6}{table.caption.10}\protected@file@percent }
+\newlabel{tab:insight4nav-summary}{{I.4}{6}{Questions, answers and the strength of the evidence.\relax }{table.caption.10}{}}
+\newlabel{tab:insight4nav-summary@cref}{{[table][4][4]I.4}{[1][5][]6}}
+\gdef \@abspage@last{6}

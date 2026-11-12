@@ -1,2 +1,0 @@
-timestamp_ns,keyframe_id,map_id,keyframe_insertion_ms,map_point_culling_ms,map_point_creation_fusion_ms,local_ba_ms,imu_initialization_ms,keyframe_culling_ms,inertial_refinement_ms,total_ms,lba_executed,lba_aborted,optimized_keyframes,fixed_keyframes,ba_map_points,ba_edges,keyframes_in_map,map_points_in_map,queue_after,imu_initialized,inertial_ba1,inertial_ba2,reset_requested,reset_reason
-1793447932345478400,0,0,24.338,0.044,2.493,0.000,0.011,0.011,0.001,26.902,0,0,0,0,0,0,1,144,0,0,0,0,0,none

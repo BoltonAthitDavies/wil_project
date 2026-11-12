@@ -1,3 +1,0 @@
-timestamp_ns,frame_id,tracking_state,features,map_matches_inliers,image_preprocessing_feature_stereo_ms,imu_preintegration_ms,pose_prediction_ms,local_map_tracking_ms,keyframe_decision_ms,tracking_total_ms,keyframes_created
-1793447932345478400,0,1,4012,0,279.174,1.469,0.000,0.000,0.000,283.697,0
-1793447932945707520,1,2,4011,0,126.472,5.464,0.000,0.000,0.000,138.019,1

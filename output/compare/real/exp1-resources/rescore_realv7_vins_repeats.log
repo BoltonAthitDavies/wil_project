@@ -1,0 +1,47 @@
+##### realv7_000 vins rep 01
+/home/ambushee/.local/lib/python3.10/site-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+
+=== dataset_realv7_000
+  bag  /media/ambushee/New Volume/wil_rescue/dataset_realv7_000/dataset_realv7_000_0.db3
+       first message 1793448177.755 (2026-10-31 12:02:57 UTC, robot clock), 90.75 s
+  gt   /home/ambushee/wil_project/dataset/gt/dataset_realv7_000
+       524 samples, 96.76 s, median dt 0.168 s, max gap 0.336 s, max step 0.090 m, path 21.55 m, recorded 'Tue 11/03/2026 09:48:56 AM'
+       checks {'samples_ok': True, 'gap_ok': True, 'step_ok': True, 'duration_ok': True} -> OK
+  VINS-Fusion: /home/ambushee/wil_project/output/output_vins/real/dataset_realv7_000/rate1_002_01
+       1159 poses, 90.30 s, body axes forward=z conf=7.3
+  offset via wheel /feedback/velocity: d = -2.573 s, r = 0.99, next peak 0.90
+  offset via VINS-Fusion: d = -2.559 s, r = 0.99, next peak 0.90
+  => offset used: -2.573 s (wheel-speed correlation); alignment OK
+  VINS-Fusion: completed (provisional: lever arm not provided)
+       matched 489/489 GT samples over 90.0 s; ATE RMSE 0.543 m, median 0.503, max 0.907, final 0.906; RPE(1 s) 0.068 m over 482 pairs
+       path est/gt 23.96/21.54 m (ratio 1.11); Sim(2) scale diag 0.868; yaw align 89.0 deg; z range 0.20 m; ATE at offset -0.2/-0.1/+0.1/+0.2 s: 0.531/0.537/0.550/0.557
+
+wrote /home/ambushee/wil_project/output/compare/real/realv7_000_vins_rate1_002_r01/real_gt_metrics.csv, real_gt_table.tex, real_gt_rpe_table.tex
+
+status summary:
+  dataset_realv7_000       VINS-Fusion    completed (provisional: lever arm not provided)
+##### realv7_000 vins rep 02
+/home/ambushee/.local/lib/python3.10/site-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+
+=== dataset_realv7_000
+  bag  /media/ambushee/New Volume/wil_rescue/dataset_realv7_000/dataset_realv7_000_0.db3
+       first message 1793448177.755 (2026-10-31 12:02:57 UTC, robot clock), 90.75 s
+  gt   /home/ambushee/wil_project/dataset/gt/dataset_realv7_000
+       524 samples, 96.76 s, median dt 0.168 s, max gap 0.336 s, max step 0.090 m, path 21.55 m, recorded 'Tue 11/03/2026 09:48:56 AM'
+       checks {'samples_ok': True, 'gap_ok': True, 'step_ok': True, 'duration_ok': True} -> OK
+  VINS-Fusion: /home/ambushee/wil_project/output/output_vins/real/dataset_realv7_000/rate1_002_02
+       1274 poses, 89.23 s, body axes forward=z conf=7.0
+  offset via wheel /feedback/velocity: d = -2.573 s, r = 0.99, next peak 0.90
+  offset via VINS-Fusion: d = -2.553 s, r = 0.99, next peak 0.89
+  => offset used: -2.573 s (wheel-speed correlation); alignment OK
+  VINS-Fusion: completed (provisional: lever arm not provided)
+       matched 483/483 GT samples over 88.9 s; ATE RMSE 0.571 m, median 0.524, max 0.955, final 0.955; RPE(1 s) 0.069 m over 476 pairs
+       path est/gt 24.04/21.54 m (ratio 1.12); Sim(2) scale diag 0.862; yaw align 89.3 deg; z range 0.16 m; ATE at offset -0.2/-0.1/+0.1/+0.2 s: 0.558/0.565/0.578/0.584
+
+wrote /home/ambushee/wil_project/output/compare/real/realv7_000_vins_rate1_002_r02/real_gt_metrics.csv, real_gt_table.tex, real_gt_rpe_table.tex
+
+status summary:
+  dataset_realv7_000       VINS-Fusion    completed (provisional: lever arm not provided)
+DONE

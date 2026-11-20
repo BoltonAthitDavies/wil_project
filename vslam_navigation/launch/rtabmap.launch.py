@@ -52,11 +52,12 @@ _PKG = 'vslam_navigation'
 _LIB = os.path.join(get_package_prefix(_PKG), 'lib', _PKG)
 SHIM = os.path.join(_LIB, 'rtab_camera_shim.py')
 WRITER = os.path.join(_LIB, 'rtab_trajectory_writer.py')
+GATE = os.path.join(_LIB, 'correction_gate.py')
 RVIZ_CFG = os.path.join(get_package_share_directory(_PKG), 'rviz', 'rtab_map.rviz')
 CONFIG_DIR = os.path.join(WORKSPACE, 'vins_fusion_ros2', 'config', 'wil_sim')
 
 
-def _mode_params(mode, read_only, start_pose='origin'):
+def _mode_params(mode, read_only, start_pose='origin', local_grid=False):
     """The ~6 parameters that separate the three modes.
 
     Everything else in the node is shared, and the shared block is where the
@@ -135,7 +136,13 @@ def _mode_params(mode, read_only, start_pose='origin'):
         # building. Slowing the bag to --rate 0.3 made it WORSE, so the problem
         # is total CPU, not pacing. Feature extraction for loop closure is
         # unaffected -- relocalization still works.
-        'RGBD/CreateOccupancyGrid': 'false',
+        # Measured 15 Nov 2026: with this false the obstacle layer added to both
+        # costmaps that day has NO DATA. gridObstacleCellsRaw() stays empty, so
+        # /local_grid_obstacle never publishes (it is lazy), so the costmaps mark
+        # nothing and the robot still cannot see a person walking in front of it.
+        # local_grid:=true turns it on and pays the dense-stereo cost above; the
+        # launch warns when the costmap layer would be starved.
+        'RGBD/CreateOccupancyGrid': 'true' if local_grid else 'false',
     }
     if read_only:
         # Protects the prebuilt map, but RTAB-Map documents it as incompatible with
@@ -255,6 +262,7 @@ def _geometric_check_params(enabled, correspondence_ratio, max_rotation):
 
 
 def launch_setup(context, *args, **kwargs):
+    cfgf = lambda k: LaunchConfiguration(k).perform(context)   # noqa: E731
     mode = LaunchConfiguration('mode').perform(context).lower()
     if mode not in ('construct', 'extend', 'localize'):
         raise RuntimeError(
@@ -331,6 +339,11 @@ def launch_setup(context, *args, **kwargs):
     gen_scan = LaunchConfiguration('gen_scan').perform(context).lower() \
         in ('true', '1', 'yes')
     localize_delay_s = float(LaunchConfiguration('localize_delay_s').perform(context))
+    correction_gate = LaunchConfiguration('correction_gate').perform(context).lower() \
+        in ('true', '1', 'yes')
+    gate_log = LaunchConfiguration('gate_correction_log').perform(context)
+    local_grid = LaunchConfiguration('local_grid').perform(context).lower() \
+        in ('true', '1', 'yes')
     loop_closure = LaunchConfiguration('loop_closure').perform(context).lower() in (
         'true', '1', 'yes')
 
@@ -549,6 +562,13 @@ def launch_setup(context, *args, **kwargs):
             # The cost is losing the odometry covariance RTAB-Map would
             # otherwise weight its graph edges with.
             'odom_frame_id': odom_frame,
+            # EXACTLY ONE PUBLISHER PER EDGE. correction_gate.py republishes
+            # map -> odom after testing each correction against what the front
+            # end says the robot could have travelled, so RTAB-Map must stop
+            # broadcasting it or the two fight and the gate accomplishes
+            # nothing. Measured need: on exp4/U_static_P2_return_1 a single
+            # correction stepped 13.92 m and -21.6 deg and was held 36 s.
+            'publish_tf': not correction_gate,
             'database_path': database,
 
             'subscribe_stereo': True,
@@ -728,7 +748,7 @@ def launch_setup(context, *args, **kwargs):
             'gen_scan_max_depth': 8.0,
         }] + [_geometric_check_params(geometric_check, icp_correspondence_ratio,
                                       icp_max_rotation),
-              _mode_params(mode, read_only, start_pose),
+              _mode_params(mode, read_only, start_pose, local_grid),
               _loop_closure_params(loop_closure),
               {'initial_pose': initial_pose} if initial_pose else {}],
         remappings=[
@@ -770,7 +790,38 @@ def launch_setup(context, *args, **kwargs):
         print(f'[rtab_sim] localise = held back {localize_delay_s:g} s so the first fix '
               f'cannot latch on an unstable front-end orientation')
 
+    if mode == 'localize' and not local_grid:
+        print('[rtab_sim] local_grid = OFF -> no /local_grid_obstacle, so a Nav2 '
+              'obstacle layer fed by it marks NOTHING.')
+        print('[rtab_sim]              Live obstacle perception needs local_grid:=true, '
+              'which costs dense stereo (~464 ms/keyframe when last measured).')
+    elif mode == 'localize':
+        print('[rtab_sim] local_grid = ON -> /local_grid_obstacle published for the '
+              'Nav2 obstacle layer; watch RTAB-Map proc time.')
+
     nodes = [shim, rtabmap]
+
+    if correction_gate:
+        if mode != 'localize':
+            raise RuntimeError(
+                'correction_gate is for mode:=localize only: in construct/extend '
+                'the correction is the map being built, and refusing one would '
+                'refuse the mapping.')
+        gate_args = ['--ros-args',
+                     '-p', 'use_sim_time:=true',
+                     '-p', f'odom_frame:={odom_frame}',
+                     '-p', f'base_frame:={base_frame}',
+                     '-p', f'eps:={cfgf("gate_eps")}',
+                     '-p', f'eps0:={cfgf("gate_eps0")}',
+                     '-p', f'eps_yaw_deg:={cfgf("gate_eps_yaw_deg")}',
+                     '-p', f'yaw0_deg:={cfgf("gate_yaw0_deg")}',
+                     '-p', f'warmup_s:={cfgf("gate_warmup_s")}',
+                     '-p', f'confirm:={cfgf("gate_confirm")}']
+        if gate_log:
+            gate_args += ['-p', f'log_csv:={gate_log}']
+        nodes.append(ExecuteProcess(
+            cmd=['python3', GATE] + gate_args,
+            output='screen'))
 
     if publish_base_tf:
         nodes.append(Node(
@@ -973,6 +1024,44 @@ def generate_launch_description():
                         'to make it fit. RTAB-Map default 0.78 (45 deg) is wide enough to '
                         'absorb a 23-24 deg error; 0.35 is 20 deg. geometric_check:=true '
                         'only.'),
+        DeclareLaunchArgument(
+            'local_grid', default_value='false',
+            description='build a local occupancy grid while localising, which is what '
+                        'publishes /local_grid_obstacle and therefore the only thing '
+                        'that feeds the Nav2 obstacle layer. OFF by default because it '
+                        'runs dense stereo per keyframe (464 ms when measured) and that '
+                        'load once starved VINS into a 1595 m divergence -- but that '
+                        'measurement predates the in-process decode and was taken with '
+                        'VINS, so re-measure before believing it applies here.'),
+        DeclareLaunchArgument(
+            'correction_gate', default_value='false',
+            description='publish map->odom through correction_gate.py instead of from '
+                        'RTAB-Map, accepting a correction only when it is within what '
+                        'the front end says the robot could have travelled since the '
+                        'last accepted fix. Defends against a match at the wrong one of '
+                        'several identical-looking aisles, which covariance cannot '
+                        'screen and RGBD/OptimizeMaxError is structurally blind to. '
+                        'localize mode only; sets rtabmap publish_tf false.'),
+        DeclareLaunchArgument('gate_eps', default_value='0.02',
+                              description='allowed correction per metre driven (m/m)'),
+        DeclareLaunchArgument('gate_eps0', default_value='1.5',
+                              description='fixed allowance (m)'),
+        DeclareLaunchArgument('gate_eps_yaw_deg', default_value='0.10',
+                              description='allowed yaw correction per metre (deg/m)'),
+        DeclareLaunchArgument('gate_yaw0_deg', default_value='8.0',
+                              description='fixed yaw allowance (deg)'),
+        DeclareLaunchArgument('gate_warmup_s', default_value='10.0',
+                              description='seconds after the first fix during which '
+                                          'every correction is accepted, so the startup '
+                                          'transform transient is not latched'),
+        DeclareLaunchArgument('gate_confirm', default_value='8',
+                              description='consecutive REJECTIONS after which the gate '
+                                          'concedes. Aliasing rejections interleave with '
+                                          'accepts (longest static streak 6); a wrong '
+                                          'held belief is a solid block (10 measured). '
+                                          '8 separates them.'),
+        DeclareLaunchArgument('gate_correction_log', default_value='',
+                              description='CSV of every verdict; empty writes none'),
         DeclareLaunchArgument(
             'localize_delay_s', default_value='0.0',
             description="seconds to hold RTAB-Map back after the front end starts, so "

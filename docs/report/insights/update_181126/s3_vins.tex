@@ -1,0 +1,330 @@
+% =============================================================================
+% 1.3  VINS-FUSION
+% Sources: Qin, Li & Shen, VINS-Mono, IEEE T-RO 2018 (Fig. 2, sections IV-VIII);
+% Qin & Shen, Online Temporal Calibration, IROS 2018; and
+% vins_fusion_ros2/config/wil_sim/stereo_imu.yaml, config/wil/stereo_imu.yaml,
+% vins/include/vins/estimator/parameters.h (WINDOW_SIZE = 10).
+% =============================================================================
+\section{1.3 VINS-Fusion}
+
+\begin{frame}{1.3 \;VINS-Fusion: a sliding window over the last 10 keyframes}
+  \centering
+  \adjustbox{max width=\textwidth, max height=0.70\textheight}{%
+  \begin{tikzpicture}[font=\scriptsize,
+      cb/.style={box, fill=vinsc!12, text width=25mm, minimum height=10mm},
+      bl/.style={font=\scriptsize\bfseries, text=vinsc!80!black, anchor=north west}]
+    \fill[vinsc!5, draw=vinsc!30, rounded corners=3pt] (1.6,-0.05) rectangle (4.45,1.75);
+    \node[bl] at (1.65,1.72) {FRONT END};
+    \fill[vinsc!5, draw=vinsc!30, rounded corners=3pt] (5.0,-3.1) rectangle (13.55,2.85);
+    \node[bl] at (5.05,2.82) {ESTIMATOR \;$\cdot$\; every frame};
+    \node[box, text width=17mm] (st) at (0,0.6)  {stereo pair\\30 Hz};
+    \node[box, text width=17mm] (im) at (0,-1.9) {IMU\\200 Hz};
+    \node[cb, VINS1] (v1) at (3.0,0.6)  {\textbf{VINS-1}\\feature tracker (KLT)};
+    \node[cb, VINS3] (v3) at (6.5,0.6)  {\textbf{VINS-3}\\initialisation\\(once, at start)};
+    \node[cb, VINS2] (v2) at (6.5,-1.9) {\textbf{VINS-2}\\IMU preintegration};
+    \node[cb, VINS4, text width=29mm, minimum height=14mm] (v4) at (9.9,-0.2)
+      {\textbf{VINS-4}\\sliding-window optimisation\\10 keyframes};
+    \node[cb, VINS5] (v5) at (9.9,1.95) {\textbf{VINS-5}\\marginalisation};
+    \node[cb, VINS6] (v6) at (12.2,-2.3) {\textbf{VINS-6}\\time offset $t_d$};
+    \node[box, text width=22mm, fill=dpose!10] (out) at (15.6,-0.2)
+      {pose every frame\\TF, odometry, \repo{vio.csv}};
+    \node[box, off, text width=22mm, VINS7] (v7) at (15.6,-2.3) {\textbf{VINS-7}\\pose graph\\not in our fork};
+    \draw[arr, dimg] (st) -- node[rate]{30 Hz} (v1);
+    \draw[arr, dimu] (im) -- node[rate]{200 Hz} (v2);
+    \draw[arr] (v1) -- node[rate]{points 25 Hz} (v3);
+    \draw[arr] (v2) -- (v3);
+    \draw[arr] (v3.east) -- node[rate, pos=0.45]{start} ($(v4.west)+(0,0.35)$);
+    \draw[arr] (v2.east) -| ($(v4.south)+(-0.7,0)$);
+    \draw[arr] (v1.north) |- (8.2,3.25) -- ($(v4.north)+(-1.25,0)$);
+    \node[rate] at (5.6,3.25) {points, every frame after start-up};
+    \draw[arr] ($(v4.north)+(-0.3,0)$) -- node[rate, left]{oldest} ($(v5.south)+(-0.3,0)$);
+    \draw[arr] ($(v5.south)+(0.3,0)$) -- node[rate, right]{prior} ($(v4.north)+(0.3,0)$);
+    \draw[darr] (v6.north) |- node[rate, pos=0.3]{$t_d$} ($(v4.east)+(0,-0.45)$);
+    \draw[arr, dpose] ($(v4.east)+(0,0.2)$) -- ($(out.west)+(0,0.2)$);
+    \draw[darr, offc] (out) -- (v7);
+  \end{tikzpicture}}
+  \par\vspace{0.3em}
+  \small The front end follows points from frame to frame; the estimator fits
+  the last 10 keyframes to every camera and IMU measurement at once. Unlike
+  ORB-SLAM3 there is \textbf{no map to come back to}: what leaves the window
+  is summarised, never revisited.
+  \src{After Qin, Li \& Shen, VINS-Mono, IEEE T-RO 2018, Fig.~2.}
+\end{frame}
+
+% ---------------------------------------------------------------- VINS-1
+\begin{frame}{1.3.1 \;VINS-1 \;Feature tracker: follow the same points from frame to frame}
+  \hl{VINS1}\res{\R{5}{}, \R{6}{}, \R{7}{}, \R{8}{}}
+  \compbody{\vinsstrip}{vinsc}{%
+  \begin{tikzpicture}[font=\scriptsize]
+    \draw[black!60, fill=black!4] (0,0) rectangle (4.6,2.8);
+    \foreach \x/\y in {0.6/2.3,1.5/1.6,2.2/2.4,3.1/1.2,3.9/2.2,1.0/0.6,2.6/0.5,4.0/0.7} {
+      \node[pt=vinsc] at (\x,\y) {};
+      \draw[-{Latex[length=1.3mm]}, vinsc, thick] (\x,\y) -- ++(0.34,-0.13);}
+    \draw[bad, very thick] (3.4,1.75) -- ++(0.22,0.22) (3.4,1.97) -- ++(0.22,-0.22);
+    \draw[-{Latex[length=1.3mm]}, vinsc, thick] (5.0,2.3) -- ++(0.34,-0.13);
+    \node[anchor=west] at (5.4,2.25) {where each point moved};
+    \draw[bad, very thick] (5.05,1.45) -- ++(0.2,0.2) (5.05,1.65) -- ++(0.2,-0.2);
+    \node[anchor=west] at (5.4,1.55) {failed the back-check};
+    \node[pt=vinsc] at (5.15,0.85) {};
+    \node[anchor=west] at (5.4,0.85) {up to 150, $\ge$30 px apart};
+  \end{tikzpicture}}%
+  {Follow each point forward into the new image, then backward to check; drop
+   those that do not come back. Top up with new corners.}
+  {To measure motion you need the same points in consecutive images. Following
+   each by its local patch (optical flow) is cheaper than re-describing it.}
+  {stereo pair, 30 Hz}
+  {tracked points (ID + position), 25 Hz sim / 20 Hz real}
+  {Blank walls leave little to follow. Points near a fisheye's edge are badly modelled.}
+  {\repo{frontend.csv}: feature\_count, stereo\_feature\_count, tracking time}
+  \src{Ours: a mask (\texttt{setMask}) can forbid image regions --- used for the real fisheye's outer ring (\texttt{fov\_mask\_deg}) and for YOLO.}
+\end{frame}
+
+% ---------------------------------------------------------------- VINS-1 inside
+% Where the points come from. Read from vins/src/featureTracker/feature_tracker.cpp:
+% KLT calcOpticalFlowPyrLK 21x21, 3 levels (L154-178); reverse check <= 0.5 px
+% (L183-193); setMask with min_feature_distance circles, seeded from the dynamic
+% mask (L53); goodFeaturesToTrack(max - current, 0.01, min_dist, mask) (L307);
+% rejectWithF() commented out (L297); first frame skips tracking (L154).
+\begin{frame}{1.3.1 \;VINS-1 \;Inside: where the points come from}
+  \hl{VINS1}\res{\R{5}{}, \R{6}{}, \R{7}{}, \R{8}{}}
+  \vinsstrip\par\vspace{0.3em}
+  \centering
+  \adjustbox{max width=\textwidth, max height=0.60\textheight}{%
+  \begin{tikzpicture}[font=\scriptsize,
+      capt/.style={align=center, text width=35mm, font=\scriptsize}]
+    \foreach \i/\x/\t in {1/0/FOLLOW OLD POINTS, 2/4.4/CHECK BACKWARDS, 3/8.8/KEEP THEM APART, 4/13.2/ADD NEW CORNERS} {
+      \draw[vinsc, line width=0.8pt, rounded corners=2pt, fill=white] (\x,0) rectangle ++(4.0,5.4);
+      \fill[vinsc, rounded corners=2pt] (\x,4.9) rectangle ++(4.0,0.5);
+      \node[text=white, font=\scriptsize\bfseries] at (\x+2.0,5.15) {\i \;$\cdot$\; \t};}
+    \foreach \x in {4.0,8.4,12.8} \draw[-{Latex[length=2mm]}, very thick, vinsc] (\x+0.02,2.7) -- (\x+0.38,2.7);
+    % ---- 1: KLT, previous position (hollow) -> current position (filled)
+    \draw[black!55, fill=black!4] (0.25,1.75) rectangle (3.75,4.6);
+    \foreach \x/\y in {0.7/4.0, 1.6/3.2, 2.5/4.1, 3.1/2.6, 1.0/2.3, 2.2/2.1} {
+      \draw[vinsc!70, thick] (\x,\y) circle (0.08);
+      \draw[-{Latex[length=1.2mm]}, vinsc] (\x+0.07,\y-0.03) -- (\x+0.36,\y-0.15);
+      \node[pt=vinsc] at (\x+0.42,\y-0.17) {};}
+    \node[capt] at (2.0,0.95) {track each point from the last image into this one (KLT: 21$\times$21 window, 3 pyramid levels)};
+    % ---- 2: reverse check
+    \begin{scope}[shift={(4.4,0)}]
+      \node[pt=black] (a) at (0.7,3.9) {}; \node[pt=vinsc] (a2) at (2.9,3.9) {};
+      \draw[-{Latex}, thick, vinsc] (a) to[bend left=18] node[above, font=\tiny]{forward} (a2);
+      \draw[-{Latex}, thick, good] (a2) to[bend left=18] node[below, font=\tiny]{back} ($(a)+(0.08,-0.06)$);
+      \node[text=good, font=\scriptsize\bfseries, anchor=east] at (3.85,3.3) {$\checkmark$ kept};
+      \node[pt=black] (b) at (0.7,2.4) {}; \node[pt=vinsc] (b2) at (2.9,2.4) {};
+      \draw[-{Latex}, thick, vinsc] (b) to[bend left=18] (b2);
+      \draw[-{Latex}, thick, bad] (b2) to[bend left=18] (1.35,1.95);
+      \draw[{Latex}-{Latex}, bad] (0.75,2.25) -- (1.3,2.0);
+      \node[text=bad, font=\scriptsize\bfseries, anchor=east] at (3.85,1.98) {$\times$ dropped};
+    \end{scope}
+    \node[capt] at (6.4,0.95) {track back again: it must land within \textbf{0.5 px} of where it started; points that leave the image go too};
+    % ---- 3: mask
+    \begin{scope}[shift={(8.8,0)}]
+      \draw[black!55, fill=black!4] (0.25,1.75) rectangle (3.75,4.6);
+      \fill[black!22] (2.95,1.75) rectangle (3.75,4.6);
+      \node[rotate=90, font=\tiny, text=black!70] at (3.35,3.17) {masked (ours)};
+      \foreach \x/\y in {0.9/3.9, 1.9/3.1, 1.0/2.4, 2.4/4.1} {
+        \fill[black!12] (\x,\y) circle (0.42);
+        \draw[vinsc, dashed] (\x,\y) circle (0.42);
+        \node[pt=vinsc] at (\x,\y) {};}
+    \end{scope}
+    \node[capt] at (10.8,0.95) {no new point within \textbf{30 px} of a kept one, nor in masked areas (YOLO, fisheye edge)};
+    % ---- 4: Shi-Tomasi top-up
+    \begin{scope}[shift={(13.2,0)}]
+      \foreach \c/\lab/\ok/\yy in {0/flat/0/4.15, 1/edge/0/3.3, 2/corner/1/2.45} {
+        \draw[black!50] (0.45,\yy-0.32) rectangle ++(0.64,0.64);
+        \ifnum\c=1 \fill[black!65] (0.45,\yy-0.32) rectangle ++(0.32,0.64); \fi
+        \ifnum\c=2 \fill[black!65] (0.77,\yy) rectangle ++(0.32,0.32); \fi
+        \node[anchor=west, font=\scriptsize] at (1.2,\yy+0.12) {\textbf{\lab}};
+        \ifnum\ok=1 \node[text=good, font=\scriptsize\bfseries] at (3.4,\yy) {$\checkmark$};
+        \else       \node[text=bad, font=\scriptsize\bfseries] at (3.4,\yy) {$\times$}; \fi}
+      \node[font=\tiny, text=black!60] at (2.0,4.65) {brightness changes in \ldots};
+      \node[font=\tiny, text=black!60, anchor=west] at (1.2,3.9) {no direction};
+      \node[font=\tiny, text=black!60, anchor=west] at (1.2,3.05) {one direction};
+      \node[font=\tiny, text=black!60, anchor=west] at (1.2,2.2) {every direction};
+    \end{scope}
+    \node[capt] at (15.2,1.15) {Shi--Tomasi: score = $\min(\lambda_1,\lambda_2)$, high only at corners; strongest first, until \textbf{150} points};
+    \draw[-{Latex[length=2.2mm]}, very thick, vinsc!85!black] (15.2,0) -- (15.2,-0.5) --
+      node[below, font=\scriptsize\bfseries, text=vinsc!70!black]{next frame: the points added in step 4 are followed in step 1}
+      (2.0,-0.5) -- (2.0,0);
+  \end{tikzpicture}}
+  \par\vspace{0.15em}
+  \scriptsize\color{black!70}
+  \textbf{Frame 0:} step 4 only --- nothing to follow yet, so all 150 points are new.
+  \textbf{Frame 1 onward:} 1$\rightarrow$2$\rightarrow$3$\rightarrow$4, every frame.
+  Each point is also tracked left$\rightarrow$right for depth and turned into a ray.
+  \src{\repo{feature_tracker.cpp}: \texttt{rejectWithF} (the fundamental-matrix test) is commented out in our fork, so \texttt{F\_threshold} has no effect.}
+\end{frame}
+
+% ---------------------------------------------------------------- VINS-2
+\begin{frame}{1.3.2 \;VINS-2 \;IMU preintegration: the same idea as ORB-2}
+  \hl{VINS2}\res{\R{8}{}}
+  \compbody{\vinsstrip}{vinsc}{%
+  \begin{tikzpicture}[font=\scriptsize]
+    \draw[thick,-{Latex}] (0,0) -- (7.4,0) node[right]{time};
+    \foreach \x/\l in {0.5/frame $k$, 6.5/frame $k{+}1$} {
+      \draw[line width=2.4pt, dimg] (\x,-0.45) -- (\x,0.6);
+      \node[above] at (\x,0.6) {\l};}
+    \foreach \k in {1,...,6} \draw[dimu, line width=1.2pt]
+      ({0.5+\k*6/7},-0.25) -- ({0.5+\k*6/7},0.3);
+    \node[below, text=dimu] at (3.5,-0.3) {6--7 IMU readings at 200 Hz};
+    \draw[decorate, decoration={brace, amplitude=5pt}, thick]
+      (0.5,1.05) -- node[above=6pt]{position $\alpha$, velocity $\beta$, rotation $\gamma$} (6.5,1.05);
+  \end{tikzpicture}}%
+  {If the bias estimate changes a little, the summary is corrected by a formula
+   instead of being added up again.}
+  {Same job as ORB-2: summarise the IMU readings between two frames, once.}
+  {IMU, 200 Hz}
+  {one motion step + uncertainty per frame pair}
+  {Wrong noise values; IMU gaps; a wrong gravity magnitude (\texttt{g\_norm}).}
+  {\repo{backend.csv}: imu\_wait\_ms, imu\_propagation\_ms}
+  \src{In simulation VINS-Fusion and ORB-SLAM3 are given identical IMU noise values.}
+\end{frame}
+
+% ---------------------------------------------------------------- VINS-3
+\begin{frame}{1.3.3 \;VINS-3 \;Initialisation: start the estimator from nothing}
+  \hl{VINS3}
+  \compbody{\vinsstrip}{vinsc}{%
+  \begin{tikzpicture}[font=\scriptsize]
+    \draw[black!60, fill=vinsc!15, rounded corners=1pt] (0,0) rectangle (1.3,0.8);
+    \node[above] at (0.65,0.8) {robot at rest};
+    \draw[-{Latex}, very thick, dimu] (0.65,0.4) -- (0.65,-0.9);
+    \node[below, align=center] at (0.65,-0.9) {average of first IMU\\readings $=$ ``down''};
+    \foreach \k in {0,...,6} \draw[black!60, fill=vinsc!40] (2.3+\k*0.42,0) rectangle ++(0.34,0.5);
+    \foreach \k in {7,8,9} \draw[black!40, dashed] (2.3+\k*0.42,0) rectangle ++(0.34,0.5);
+    \node[above] at (4.4,0.55) {window filling: 7 of 10};
+    \node[below, align=center] at (4.4,-0.1) {full $\rightarrow$ solve the gyro bias,\\then start optimising};
+  \end{tikzpicture}}%
+  {Stereo makes this simpler than the paper's single camera: depth is known,
+   the first IMU readings give ``down'', the gyro bias is solved once the window is full.}
+  {The optimiser needs a sensible first guess of speed, gravity and biases, or
+   it settles on a wrong answer.}
+  {first window of frames + IMU}
+  {starting states for the sliding window}
+  {Moving too early; a wrong \texttt{g\_norm} tilts the starting gravity.}
+  {\repo{backend.csv}: solver\_state, initialized\_this\_frame; \repo{events.csv}}
+\end{frame}
+
+% ---------------------------------------------------------------- VINS-4
+\begin{frame}{1.3.4 \;VINS-4 \;Sliding window: fit the last 10 keyframes to everything measured}
+  \hl{VINS4}\res{\R{5}{}, \R{6}{}, \R{7}{}}
+  \compbody{\vinsstrip}{vinsc}{%
+  \begin{tikzpicture}[font=\scriptsize]
+    \foreach \k in {0,...,9} \node[draw=black!60, fill=vinsc!25, minimum size=4.4mm, inner sep=0pt] (w\k) at (\k*0.64,0) {};
+    \foreach \k [evaluate=\k as \n using int(\k+1)] in {0,...,8} \draw[dimu, very thick] (w\k) -- (w\n);
+    \foreach \x/\a/\b in {0.9/0/3, 1.7/1/4, 2.5/2/6, 3.6/4/8, 4.6/6/9} {
+      \node[pt=black] (f) at (\x,1.35) {};
+      \draw[black!30] (f) -- (w\a); \draw[black!30] (f) -- (w\b);}
+    \draw[decorate, decoration={brace, amplitude=4pt, mirror}, thick]
+      (-0.22,-0.35) -- node[below=5pt]{the last 10 keyframes} (5.98,-0.35);
+    \node[anchor=west, text=dimu] at (6.4,0.0) {IMU step};
+    \node[anchor=west, text=black!55] at (6.4,1.35) {same point, seen twice};
+  \end{tikzpicture}}%
+  {Every frame: adjust all 10 keyframes (position, speed, rotation, biases) and
+   every point's depth until the IMU steps and the camera views agree.}
+  {Using every measurement ever made would get slower forever. A fixed window
+   keeps the cost constant, so it stays real-time.}
+  {points (VINS-1) + IMU steps (VINS-2)}
+  {pose, velocity, biases every frame $\rightarrow$ TF, odometry, \repo{vio.csv}}
+  {The solve runs past its 0.08\,s budget; bad points pull the answer.}
+  {\repo{backend.csv}: visual\_update\_ms; \repo{estimator_state.csv}: pose, velocity, biases}
+\end{frame}
+
+% ---------------------------------------------------------------- VINS-5
+\begin{frame}{1.3.5 \;VINS-5 \;Marginalisation: let the window slide without forgetting}
+  \hl{VINS5}
+  \compbody{\vinsstrip}{vinsc}{%
+  \begin{tikzpicture}[font=\scriptsize]
+    \node[draw=black!30, dashed, fill=black!5, minimum size=4.4mm, inner sep=0pt] (w0) at (0,0) {};
+    \foreach \k in {1,...,9} \node[draw=black!60, fill=vinsc!25, minimum size=4.4mm, inner sep=0pt] (w\k) at (\k*0.64,0) {};
+    \node[draw=vinsc, very thick, fill=vinsc!50, minimum size=4.4mm, inner sep=0pt] (wn) at (6.85,0) {};
+    \node[above] at (wn.north) {new};
+    \node[draw=mapcol, fill=mapcol!10, rounded corners=2pt, align=center] (pr) at (0,-1.5) {prior: a summary\\of the past};
+    \draw[arr] (w0) -- node[right]{oldest leaves} (pr);
+    \draw[-{Latex}, thick, black!50] (5.5,0.6) -- node[above]{the window slides one step} (1.2,0.6);
+  \end{tikzpicture}}%
+  {The oldest keyframe is folded into a prior. If the newest frame is not a
+   keyframe (parallax under 10 px), its images are dropped and its IMU step kept.}
+  {When a keyframe enters, the oldest must leave. Deleting it outright would
+   throw away what it told us.}
+  {the window after each solve}
+  {a prior for the next solve}
+  {The past is frozen into the prior: drift builds up smoothly and is never undone here.}
+  {\repo{backend.csv}: marginalization, keyframe}
+\end{frame}
+
+% ---------------------------------------------------------------- VINS-6
+\begin{frame}{1.3.6 \;VINS-6 \;Time offset: are the camera and IMU clocks aligned?}
+  \hl{VINS6}
+  \compbody{\vinsstrip}{vinsc}{%
+  \begin{tikzpicture}[font=\scriptsize]
+    \draw[thick] (0,1.2) -- (6,1.2) node[right]{IMU};
+    \foreach \k in {0,...,24} \draw[dimu] ({0.1+\k*0.24},1.05) -- ++(0,0.3);
+    \draw[thick] (0,0) -- (6,0) node[right]{camera};
+    \draw[dimg, line width=2.4pt] (2.6,-0.2) -- (2.6,0.4);
+    \node[above, text=dimg] at (2.6,0.4) {true capture};
+    \draw[dimg!45, line width=2.4pt] (3.3,-0.2) -- (3.3,0.4);
+    \node[above right, text=black!55] at (3.3,0.1) {timestamp};
+    \draw[{Latex}-{Latex}, hlc, thick] (2.6,-0.5) -- node[below]{$t_d$} (3.3,-0.5);
+  \end{tikzpicture}}%
+  {If the timestamp is late by $t_d$, each image is paired with the wrong IMU
+   motion. VINS can estimate $t_d$; ours fixes it at 0.}
+  {The calibration paper shows VINS tolerates only about 6\,ms of clock
+   mismatch before accuracy suffers.}
+  {feature velocities, the window}
+  {$t_d$ --- fixed at 0 in both our configs}
+  {On the real rig an unmodelled offset would look like a motion error.}
+  {\repo{estimator_state.csv}: time\_delay\_s; config \texttt{estimate\_td}}
+  \src{Qin \& Shen, Online Temporal Calibration for Monocular Visual-Inertial Systems, IROS 2018. The simulator's clock is exact by construction.}
+\end{frame}
+
+% ---------------------------------------------------------------- VINS-7
+\begin{frame}{1.3.7 \;VINS-7 \;Loop closure and pose graph: in VINS, but not in our fork}
+  \hl{VINS7}
+  \compbody{\vinsstrip}{offc!80!black}{%
+  \begin{tikzpicture}[font=\scriptsize]
+    \draw[thick, offc] (0,0) .. controls (0,1.6) and (2,1.8) .. (2.2,0.8)
+                            .. controls (2.3,0.2) and (1.2,-0.3) .. (0.5,0.3);
+    \draw[offc, dashed, thick] (0,0) -- (0.5,0.3);
+    \node[draw=bad, thick, rotate=10, text=bad, font=\small\bfseries, fill=white] at (1.15,0.75) {not in our fork};
+    \node[anchor=west, align=left, text=black!55] at (2.8,0.8)
+      {upstream: recognise a revisit\\(DBoW2) $\rightarrow$ 4-DoF pose graph\\(x, y, z, yaw)};
+  \end{tikzpicture}}%
+  {Roll and pitch are already fixed by gravity, so upstream VINS optimises only
+   x, y, z and heading when it closes a loop.}
+  {Without it, VINS-Fusion never recognises a revisited place: it is pure odometry.}
+  {--- (not run)}
+  {---}
+  {Drift inside VINS is never removed; in this system only RTAB-Map uses revisits.}
+  {none: the module does not run}
+\end{frame}
+
+% ---------------------------------------------------------------- config
+\begin{frame}{1.3.8 \;VINS-Fusion configuration}
+  \centering
+  \adjustbox{max width=\textwidth, max height=0.80\textheight}{%
+  \begin{tabular}{l l l l l}
+    \toprule
+    & Parameter & Sim & Real rig & What it means \\
+    \midrule
+    VINS-1 & camera model, image size & pinhole, 1280$\times$720 & Kannala-Brandt, 1920$\times$1080 & lens model, what the node receives \\
+           & \texttt{max\_cnt} / \texttt{min\_dist} & 150 / 30 px & 150 / 30 px & points tracked, minimum spacing \\
+           & \texttt{freq} & 25 Hz & 20 Hz & tracker output rate \\
+           & \texttt{flow\_back} / \texttt{F\_threshold} & on / \textcolor{bad}{unused} & on / \textcolor{bad}{unused} & back-check 0.5 px; F-test commented out in our fork \\
+           & \textcolor{ourc}{\texttt{fov\_mask\_deg}} & --- & 70$^\circ$ & ignore the fisheye's outer ring \\
+    \addlinespace
+    VINS-2 & \texttt{acc\_n} / \texttt{gyr\_n} & 0.02 / 0.002 & 0.1 / 0.01 & how much each IMU reading is trusted \\
+           & \texttt{acc\_w} / \texttt{gyr\_w} & 1e-3 / 1e-4 & 1e-3 / 1e-4 & how fast the biases may drift \\
+           & \texttt{g\_norm} & 9.8 & 9.8858 & gravity magnitude (real: measured at rest) \\
+    \addlinespace
+    VINS-4 & \texttt{WINDOW\_SIZE} & 10 & 10 & keyframes in the window (compile-time) \\
+           & \texttt{max\_solver\_time} / iterations & 0.08 s / 100 & 0.08 s / 100 & solver budget per frame \\
+    VINS-5 & \texttt{keyframe\_parallax} & 10 px & 10 px & parallax that makes a keyframe \\
+    \addlinespace
+    VINS-6 & \texttt{estimate\_td} / \texttt{td} & 0 / 0.0 & 0 / --- & time offset fixed, not estimated \\
+           & \texttt{estimate\_extrinsic} & 0 & 0 & camera--IMU mounting held fixed \\
+    \bottomrule
+  \end{tabular}}
+  \par\vspace{0.5em}
+  \scriptsize\color{black!65}\textcolor{ourc}{\textbf{Amber}} = a parameter added by our fork.
+  \src{\repo{vins_fusion_ros2/config/wil_sim/stereo_imu.yaml}, \repo{vins_fusion_ros2/config/wil/stereo_imu.yaml}, \repo{parameters.h}}
+\end{frame}

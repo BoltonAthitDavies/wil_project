@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  12 NOV 2026 17:05
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  17 NOV 2026 19:23
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1190,41 +1190,42 @@ Overfull \hbox (18.17699pt too wide) in paragraph at lines 504--515
 \T1/ptm/b/n/10.95 (-20) 1. [][][] 
  []
 
-[4]
-Overfull \hbox (18.99823pt too wide) in paragraph at lines 552--567
-\T1/ptm/b/n/10.95 (-20) 6. [][][] 
- []
-
-
-Overfull \hbox (23.54248pt too wide) in paragraph at lines 607--616
-\T1/ptm/b/n/10.95 (-20) 11. [][][] 
- []
-
-[5]
-Overfull \hbox (23.54248pt too wide) in paragraph at lines 620--621
-\T1/ptm/b/n/10.95 (-20) 12. [][][] 
- []
-
-
-Overfull \hbox (23.54248pt too wide) in paragraph at lines 625--631
-\T1/ptm/b/n/10.95 (-20) 13. [][][] 
- []
-
-
-Overfull \hbox (23.54248pt too wide) in paragraph at lines 668--670
-\T1/ptm/b/n/10.95 (-20) 17. [][][] 
- []
-
-
-Overfull \hbox (23.54248pt too wide) in paragraph at lines 674--682
+[4] [5]
+Overfull \hbox (23.54248pt too wide) in paragraph at lines 640--664
 \T1/ptm/b/n/10.95 (-20) 18. [][][] 
  []
 
-[6]
-Overfull \hbox (24.36372pt too wide) in paragraph at lines 709--713
-\T1/ptm/b/n/10.95 (-20) 22. [][][] 
+
+Overfull \hbox (24.36372pt too wide) in paragraph at lines 705--714
+\T1/ptm/b/n/10.95 (-20) 24. [][][] 
  []
 
+[6]
+Overfull \hbox (24.36372pt too wide) in paragraph at lines 718--719
+\T1/ptm/b/n/10.95 (-20) 25. [][][] 
+ []
+
+
+Overfull \hbox (24.36372pt too wide) in paragraph at lines 723--729
+\T1/ptm/b/n/10.95 (-20) 26. [][][] 
+ []
+
+
+Overfull \hbox (24.36372pt too wide) in paragraph at lines 766--768
+\T1/ptm/b/n/10.95 (-20) 30. [][][] 
+ []
+
+
+Overfull \hbox (24.36372pt too wide) in paragraph at lines 772--782
+\T1/ptm/b/n/10.95 (-20) 31. [][][] 
+ []
+
+[7] [8]
+Overfull \hbox (23.98047pt too wide) in paragraph at lines 918--923
+\T1/ptm/b/n/10.95 (-20) 49. [][][] 
+ []
+
+[9]
 
 Package caption Warning: Unused \captionsetup[table] on input line 113.
 See the caption package documentation for explanation.
@@ -1233,16 +1234,16 @@ See the caption package documentation for explanation.
 Package caption Warning: Unused \captionsetup[figure] on input line 114.
 See the caption package documentation for explanation.
 
-[7] (./concerns.aux)
+[10] (./concerns.aux)
 Package rerunfilecheck Info: File `concerns.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
  ) 
 Here is how much of TeX's memory you used:
- 32809 strings out of 480171
- 655985 string characters out of 5894489
+ 32847 strings out of 480171
+ 656338 string characters out of 5894489
  943237 words of memory out of 5000000
- 49953 multiletter control sequences out of 15000+600000
- 526674 words of font info for 272 fonts, out of 8000000 for 9000
+ 49955 multiletter control sequences out of 15000+600000
+ 527950 words of font info for 292 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
  84i,12n,89p,1005b,773s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
@@ -1254,10 +1255,10 @@ rier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/symbol/usyr.pfb>
 </usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/tex
 live/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist
 /fonts/type1/urw/times/utmri8a.pfb>
-Output written on concerns.pdf (7 pages, 126541 bytes).
+Output written on concerns.pdf (10 pages, 137606 bytes).
 PDF statistics:
- 90 PDF objects out of 1000 (max. 8388607)
- 62 compressed objects within 1 object stream
- 8 named destinations out of 1000 (max. 500000)
+ 106 PDF objects out of 1000 (max. 8388607)
+ 75 compressed objects within 1 object stream
+ 14 named destinations out of 1000 (max. 500000)
  57869 words of extra memory for PDF output out of 61914 (max. 10000000)
 

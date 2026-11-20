@@ -2019,16 +2019,28 @@ Material deviations from the originally proposed method are given in
 that exists, not failures: each is recorded so that no proposal capability is
 read into the implemented pipeline.
 
-\begin{table}[htbp]
-\centering
+% See tab:limitations: a tabularx inside a table float cannot break, and this
+% one is 266 pt taller than the text block, so it overprinted the bottom margin
+% and lost its last three rows and bottom rule. longtable breaks and repeats
+% the header, with the manual's "(Continue)" caption on each later page.
+\begingroup\small
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.17\textwidth}
+                  >{\raggedright\arraybackslash}p{0.25\textwidth}
+                  >{\raggedright\arraybackslash}p{0.325\textwidth}
+                  >{\raggedright\arraybackslash}p{0.135\textwidth}}
 \caption[Planned-versus-implemented deviations at the reporting cutoff.]{Planned-versus-implemented deviations at the reporting cutoff. ``Added''
 marks work not present in the original proposal.}
-\label{tab:deviations}
-\small
-\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.19\textwidth}>{\raggedright\arraybackslash}p{0.28\textwidth}>{\raggedright\arraybackslash}X l}
+\label{tab:deviations}\\
 \toprule
 Component & Proposed & Implemented & Status \\
 \midrule
+\endfirsthead
+\caption[]{Planned-versus-implemented deviations at the reporting cutoff.
+(Continue)}\\
+\toprule
+Component & Proposed & Implemented & Status \\
+\midrule
+\endhead
 Semantic segmentation & pixel masks, as in the reference RY-SLAM approach &
   four-class bounding boxes (bin, box, bucket, forklift), no motion gate in the
   reported configuration & deviation \\
@@ -2068,8 +2080,8 @@ Covariance consistency & not proposed & NEES and $\sigma$-coverage testing for t
 GPU feature extraction & not proposed & ORB-SLAM3 extractor and stereo matcher
   on the GPU, selected by configuration & added \\
 \bottomrule
-\end{tabularx}
-\end{table}
+\end{longtable}
+\endgroup
 
 These deviations define the actual system at the reporting cutoff. Chapter~4
 reports only measurements satisfying the validity rules above; failed, excluded

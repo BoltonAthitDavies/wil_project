@@ -16,16 +16,12 @@
 \begin{document}
 \maketitle
 
-\noindent\textbf{Purpose of this document.} The raw write-up of Experiment~1
-(\path{insights/experiment_1/}) reports how far each estimator is from the
-truth on the four realistic-warehouse recordings. This document asks what kind
-of error each one makes and when it is made: whether wheel odometry's error is
-a scale or a heading error, why IMU dead reckoning diverges, when and why the
-EKF's covariance stops describing its error, what the transferred noise model
-does to that filter, and what the visual estimators' reported error consists
-of once they are scored at the IMU point. Each question is tested within every
-recording, so the recording is its own control, and the answer carries the
-evidence for and against it. Every number is written by
+\noindent\textbf{Purpose of this document.} This document asks what kind of
+error each estimator makes and when it is made; the raw write-up of
+Experiment~1 (\path{insights/experiment_1/}) reports only how far each one is
+from the truth on the four realistic-warehouse recordings. Each question below
+is tested within every recording, so the recording is its own control, and
+each answer carries the evidence for and against it. Every number is written by
 \path{script/exp1_insights.py} into
 \path{output/compare/simulation/exp1-insights/}; the tables are input from
 there unchanged.
@@ -33,12 +29,12 @@ there unchanged.
 \section{Questions and method}
 
 Six questions were put to the four \repo{dataset_allsensor_realistic}
-recordings, one run per estimator per recording:
-\repo{allsensor_realistic_000} and \repo{allsensor_realistic_002} on the U
-layout, \repo{allsensor_realistic_001} and \repo{allsensor_realistic_003} on
-the I layout, with the two odd-numbered\,/\,even-numbered pairs splitting
-static from moving traffic, as the chapter's simulation subsection records. The routes
-run \SIrange{103}{172}{\metre}.
+recordings, one run per estimator per recording.
+\repo{allsensor_realistic_000} and \repo{allsensor_realistic_002} run the U
+layout, \repo{allsensor_realistic_001} and \repo{allsensor_realistic_003} the
+I layout; the first two of the four are static and the last two carry moving
+traffic, as the chapter's simulation subsection records. The routes run
+\SIrange{103}{172}{\metre}.
 
 \begin{enumerate}[label=Q\arabic*.]
 \item Is wheel odometry's error a distance (scale) error, a heading error, or
@@ -63,19 +59,22 @@ frame, giving an along-track part (distance travelled) and a cross-track part
 zeroed at the start. To separate heading from velocity error, the true
 velocity is integrated through the heading error alone; the ratio of that
 prediction to the actual error says how much of the error the heading
-explains. Growth rates while turning (ground-truth yaw rate above
-\SI{10}{\degree\per\second}) and on straights are the median growth of the
-error within the segments of each kind, the convention the translation and
-rotation error patterns of \path{output/compare/simulation/exp1-error-pattern/}
-also use. NEES is computed from the logged covariance at \SI{1}{\hertz}; the filter
+explains. A growth rate is the median growth of the error within segments of
+one kind, turning segments being those where the ground-truth yaw rate exceeds
+\SI{10}{\degree\per\second}. The translation and rotation error patterns of
+\path{output/compare/simulation/exp1-error-pattern/} use the same convention.
+NEES is computed from the logged covariance at \SI{1}{\hertz}; the filter
 ``leaves its band'' at the first time it stays above the \SI{97.5}{\percent}
 value of a 3-DOF $\chi^2$ for \SI{5}{\second}.
 
-\paragraph{The two EKF arms.} \repo{output_ekf_measured} is the filter driven
-by the noise constants measured on this rig and is reported in the chapter as
-the fused baseline; \repo{output_ekf} is the same filter driven by the IMU
-constants carried in the VSLAM configuration file, kept as a diagnostic. The
-tree names are the reverse of what they suggest and are easy to swap.
+\paragraph{The two EKF arms, and which one the chapter reports.}
+\repo{output_ekf} is the filter driven by the inertial noise the VSLAM
+configurations declare, and it is the \emph{reported} non-visual baseline, by
+the chapter's rule that both families are scored on the same hand-set inertial
+model. \repo{output_ekf_measured} is the same filter driven by the constants
+measured on this rig; it is a diagnostic row and never the baseline. Neither
+tree name says which is which, and they are easy to swap: the check is that
+\repo{output_ekf} must be the worse of the two on every recording.
 
 \paragraph{Visual estimators.} VINS-Fusion and ORB-SLAM3 report the IMU,
 \SI{0.338}{\metre} ahead of the model origin, so they are scored against the
@@ -90,8 +89,9 @@ dimensions, as the chapter does, and in the plane.
          corners}
 
 Wheel odometry measures distance travelled almost exactly and loses its
-heading, and its position error is that heading error integrated along the
-route. \Cref{tab:e1i-decomp}, \cref{tab:e1i-turning} and \cref{fig:decomp}
+heading; its position error is that heading error integrated along the route,
+which the heading error alone reproduces to within \SI{4}{\percent}.
+\Cref{tab:e1i-decomp}, \cref{tab:e1i-turning} and \cref{fig:decomp}
 carry the evidence.
 
 \ins{decomposition.tex}
@@ -107,16 +107,15 @@ carry the evidence.
   \label{fig:decomp}
 \end{figure}
 
-The path length the wheels report is within \SI{0.4}{\percent} of the true one
-on every recording, while the heading error reaches
-\SIrange{7.3}{35.8}{\degree} RMS. Integrating the true velocity through that
-heading error alone, with the true speed, reproduces the final position error
-to within \SI{4}{\percent} on all four recordings (heading-only share
-\numrange{1.01}{1.04}). Position error and heading error are therefore not two
-findings but one: there is no scale error to speak of, and what the chapter
-reports as \SIrange{1.40}{6.71}{\metre} of position error is
-\SIrange{7}{36}{\degree} of yaw converted into displacement by the length of
-the route.
+Position error and heading error are not two findings here but one. The path
+length the wheels report is within \SI{0.4}{\percent} of the true one on every
+recording, while the heading error reaches \SIrange{7.3}{35.8}{\degree} RMS;
+integrating the true velocity through that heading error alone reproduces the
+final position error to within \SI{4}{\percent} on all four recordings
+(heading-only share \numrange{1.01}{1.04}). There is no scale error to speak
+of, so what the chapter reports as \SIrange{1.40}{6.71}{\metre} of position
+error is \SIrange{7}{36}{\degree} of yaw converted into displacement by the
+length of the route.
 
 The error is made in the corners and paid for on the straights.
 \Cref{tab:e1i-turning} separates the two rates: the heading error grows at
@@ -126,8 +125,8 @@ straights, a factor of \num{77}, and it is the larger of the two in three of
 the four recordings. The position error does the opposite --- \SI{21.5}{} against
 \SI{69.0}{\milli\metre\per\second}, larger on straights in all four --- because a
 heading error acquired in a corner only becomes displacement over the straight
-that follows it. A reader who looks only at position growth would conclude
-that turning is harmless to wheel odometry, which is the wrong way round.
+that follows it. Position growth alone would suggest that turning is harmless to wheel
+odometry, which is the wrong way round.
 
 \paragraph{Against the insight.} The weakest case is
 \repo{allsensor_realistic_001}, where \SI{7.3}{\degree} of heading error gives
@@ -157,21 +156,22 @@ its position through the velocity integral. \Cref{tab:e1i-imu} and
   \label{fig:imu}
 \end{figure}
 
-The heading error of the IMU integration is \SIrange{0.55}{1.91}{\degree} RMS
-and \SI{3.3}{\degree} at worst at the end of a run --- an order of magnitude
-better than wheel odometry's --- yet the final position error is
-\SIrange{35.5}{76.0}{\metre} on routes of \SIrange{103}{172}{\metre}. The
+The gyroscope is not the problem; the accelerometer channel is. The heading
+error of the IMU integration is \SIrange{0.55}{1.91}{\degree} RMS and
+\SI{3.3}{\degree} at worst at the end of a run --- an order of magnitude better
+than wheel odometry's --- yet the final position error is
+\SIrange{35.5}{76.0}{\metre} on routes of \SIrange{103}{172}{\metre}, and the
 heading-only prediction accounts for \SI{1}{\percent} of it on every
-recording. The gyroscope is not the problem; the accelerometer channel is. The
-path length the integration reports is wrong by \SIrange{12}{54}{\percent},
+recording. The path length the integration reports is wrong by
+\SIrange{12}{54}{\percent},
 and the sign of that error is not even consistent across the four recordings
 (\num{+53.8}, \num{-11.9}, \num{+41.3} and \SI{-37.3}{\percent}), which is
 what a bias of either sign integrated twice looks like.
 
-The growth law is consistent with that reading. A power-law fit after the
-first \SI{5}{\second} gives $k = \numrange{0.91}{2.22}$ with $R^2$ between
-\num{0.80} and \num{0.92}: between one and two integrations, as a velocity
-error that is partly random walk and partly bias should be. The turning
+The growth law puts the error between one and two integrations, as a velocity
+error that is partly random walk and partly bias should be: a power-law fit
+after the first \SI{5}{\second} gives $k = \numrange{0.91}{2.22}$ with $R^2$
+between \num{0.80} and \num{0.92}. The turning
 contrast in \cref{tab:e1i-turning} agrees --- position error grows at
 \SI{122}{} against \SI{541}{\milli\metre\per\second}, faster on the straights,
 and faster while turning in only one of the four recordings. The divergence
@@ -206,23 +206,25 @@ that error at the first corner of the route. \Cref{tab:e1i-decomp},
   \label{fig:nees}
 \end{figure}
 
-With the measured noise model the filter holds \SIrange{0.26}{0.79}{\metre}
-RMS against wheel odometry's \SIrange{1.40}{6.71}{\metre}, its heading error
-falls to \SIrange{0.37}{5.72}{\degree}, and its path-length error stays within
-\SI{0.5}{\percent}. The accuracy claim of the chapter's simulation subsection is, mechanically,
-a heading claim: the wheels were already measuring distance correctly, and the
-gyroscope supplies the one quantity they got wrong.
+What the fusion achieves on this rig is mechanically a heading result: the
+wheels were already measuring distance correctly, and the gyroscope supplies
+the one quantity they got wrong. With the measured noise model the filter
+holds \SIrange{0.26}{0.79}{\metre} RMS against wheel odometry's
+\SIrange{1.40}{6.71}{\metre}, its heading error falls to
+\SIrange{0.37}{5.72}{\degree}, and its path-length error stays within
+\SI{0.5}{\percent}. This arm is the diagnostic, not the reported baseline, so
+it establishes a capability and not the chapter's figure.
 
-The covariance tells a different story. The \SI{97.5}{\percent} band of a
-3-DOF $\chi^2$ is \num{9.35}; the filter's median NEES over a run is
-\numrange{34.2}{116.6}, between four and twelve times it. It leaves the band
-at \SI{10.0}{}, \SI{25.0}{}, \SI{9.0}{} and \SI{20.0}{\second} against first
-ground-truth heading changes at \SI{10.5}{}, \SI{24.7}{}, \SI{12.7}{} and
-\SI{20.6}{\second} --- within \SI{4}{\second} of the first turn on all four
-recordings, and on \repo{allsensor_realistic_002} slightly before it, as the
-robot begins to rotate. The filter is accurate and overconfident, and the
-overconfidence begins at the first heading change rather than accumulating
-with distance.
+The filter is accurate and overconfident, and the overconfidence begins at the
+first heading change rather than accumulating with distance. The
+\SI{97.5}{\percent} band of a 3-DOF $\chi^2$ is \num{9.35}; the filter's median
+NEES over a run is \numrange{34.2}{116.6}, between four and twelve times it.
+It leaves the band at \SI{10.0}{}, \SI{25.0}{}, \SI{9.0}{} and
+\SI{20.0}{\second} against first ground-truth heading changes at \SI{10.5}{},
+\SI{24.7}{}, \SI{12.7}{} and \SI{20.6}{\second} --- within \SI{4}{\second} of
+the first turn on all four recordings, and on
+\repo{allsensor_realistic_002} slightly before it, as the robot begins to
+rotate.
 
 \paragraph{Against the insight.} The residual error is not purely heading:
 the heading-only share of the final error is \numrange{0.44}{1.13} across the
@@ -239,12 +241,16 @@ under-modelled turn from one unlucky corner.
 Driving the same filter with the IMU constants carried in the VSLAM
 configuration file costs between a factor of \num{3.5} and a factor of
 \num{7.5} in accuracy, and the error it is left with has the signature of
-Insight~1. \Cref{tab:e1i-decomp} and \cref{tab:e1i-nees} carry the evidence.
+Insight~1. Because this configuration is the one the chapter reports as the
+non-visual baseline, that deficit is not an aside about a misconfigured run:
+it is the handicap carried by the number Experiment~1 compares the visual
+pipelines against. \Cref{tab:e1i-decomp} and \cref{tab:e1i-nees} carry the
+evidence.
 
-On the four recordings the transferred model gives \SI{0.94}{},
+Three things change together. On the four recordings the transferred model
+gives \SI{0.94}{},
 \SI{2.49}{}, \SI{2.06}{} and \SI{4.44}{\metre} RMS against the measured
-model's \SI{0.26}{}, \SI{0.33}{}, \SI{0.59}{} and \SI{0.79}{\metre}. Three
-things change together. The heading error returns, to
+model's \SI{0.26}{}, \SI{0.33}{}, \SI{0.59}{} and \SI{0.79}{\metre}. The heading error returns, to
 \SIrange{4.51}{28.01}{\degree} from \SIrange{0.37}{5.72}{\degree}. A
 path-length error appears where the measured filter had none ---
 \SIrange{8.2}{13.7}{\percent} against \SI{0.5}{\percent} --- so the filter is now
@@ -255,30 +261,32 @@ does on its own. And the error becomes a cornering error: in
 \SI{56}{\milli\degree\per\second}, both larger while turning in three of the
 four recordings, where the measured filter's heading error is not.
 
-The covariance moves the other way. The transferred model's median NEES is
+A consistency check alone would prefer this configuration, because the
+covariance moves the other way. The transferred model's median NEES is
 \numrange{3.6}{139.2}, and on \repo{allsensor_realistic_001} the median
 \num{3.6} sits inside the band that the measured filter leaves at
 \SI{25}{\second}. Inflating the assumed IMU noise buys nominal consistency on
-one recording while losing a factor of \num{3.6} in accuracy on it: the
-filter is correctly uncertain about an estimate that is worse. A consistency
-check alone would prefer the wrong configuration.
+that recording while losing a factor of \num{3.6} in accuracy on it: the
+filter is correctly uncertain about an estimate that is worse.
 
 \paragraph{Against the insight.} Which constant does the damage is not
 isolated here --- the VSLAM file supplies accelerometer and gyroscope noise and
 random-walk terms together, and no single-parameter sweep was run. The
-transferred model is not a competing design either; it is a configuration
-mistake that was made and measured, and it is reported as a diagnostic for
-that reason.
+transferred model is also not a mistake to be corrected: it is the baseline by
+design, so this insight is about a handicap accepted deliberately in exchange
+for giving both families the same declared inertial model, and the measured-noise
+diagnostic is what shows the deficit is the noise model and not the
+architecture.
 
 \FloatBarrier
 \section{Insight 5: most of the visual estimators' reported error is vertical,
          and their one failure is a loop-closure event}
 
-Scored in the plane the visual estimators are better than the chapter's
-three-dimensional ATE says, because much of that ATE is height drift on a
-robot that cannot change height; their planar error does not grow at turns or
-with fewer features in any consistent way; and the one gross failure is not
-drift at all but a false loop closure. \Cref{tab:e1i-visual},
+Much of the three-dimensional ATE the chapter reports for the visual
+estimators is height drift on a robot that cannot change height, so in the
+plane they are better than that figure says. Their planar error does not grow
+at turns or with fewer features in any consistent way. The one gross failure
+is not drift at all but a false loop closure. \Cref{tab:e1i-visual},
 \cref{tab:e1i-orbfail} and \cref{fig:orb} carry the evidence.
 
 \ins{visual.tex}
@@ -325,8 +333,10 @@ between \SI{71.1}{} and \SI{74.8}{\second} at \SI{78}{\percent} of the route;
 the largest moves the estimate \SI{17.7}{\metre} in one step;
 \SI{4.56}{\metre} of the net error change is taken in jump steps against
 \SI{2.42}{\metre} of ordinary drift; and the front end logged no frames
-outside tracking-OK state. The estimator did not lose the robot --- it
-confidently put it somewhere else. The same recording with the closer off
+outside tracking-OK state.
+
+The estimator did not lose the robot --- it confidently put it somewhere else.
+The same recording with the closer off
 tracks to \SI{0.06}{\metre} in the plane. This is the false closure between
 the I layout's repeated aisles that the chapter's loop-closer analysis reaches
 independently from each run's \repo{loop_closing.csv}, and it is the single
@@ -368,9 +378,10 @@ projection, is an effect.
       measures, and not about what would happen if the suspected cause were
       removed.
 \item \textbf{Simulation only.} These are the four realistic-warehouse
-      recordings. The chapter's real-robot subsection has no wheel,
-      IMU or EKF baseline of comparable provenance, so none of the four
-      baseline insights is shown to transfer to the rig.
+      recordings. The rig has a wheel\,+\,gyro dead-reckoning
+      baseline but no IMU-only arm and no EKF, and this decomposition was not
+      repeated on it, so none of the four baseline insights is shown to
+      transfer.
 \item \textbf{Ground truth is the model origin for the baselines and the IMU
       point for the visual arms.} The two are \SI{0.338}{\metre} apart. The
       baseline and visual numbers in this document are therefore not directly
@@ -416,11 +427,11 @@ projection, is an effect.
 
 \paragraph{Consequences for Chapter 4.} State which ATE a floor robot is
 being judged on, and report the planar value beside the three-dimensional one
-for every visual run. Attribute the EKF baseline's accuracy to heading
-observability rather than to fusion in general. Keep the transferred noise
-model in the chapter as a configuration diagnostic, with its consistency
-result, because it is the one place where a covariance check prefers the worse
-estimate. And label the \SI{4.85}{\metre} ORB-SLAM3 cell as a closure failure
+for every visual run. Attribute the fused filter's accuracy to heading
+observability rather than to fusion in general, and say beside the baseline
+that its deficit is the noise model and not the architecture. Keep the
+consistency result, because the reported baseline is the one place in the
+experiment where a covariance check prefers the worse estimate. And label the \SI{4.85}{\metre} ORB-SLAM3 cell as a closure failure
 in the table itself, so it is not read as drift.
 
 \end{document}

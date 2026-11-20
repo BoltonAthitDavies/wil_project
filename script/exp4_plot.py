@@ -224,8 +224,8 @@ def plot_run(spec, world, path, rep, out_dir, grid_cache):
     return png
 
 
-def summary(spec, out_dir):
-    """Error against distance driven, every run on one axis.
+def summary(spec, out_dir, arm='gated'):
+    """Error against distance driven, split by layout as fig_heading is.
 
     The per-run path figures show WHERE the pose went; this shows whether the
     error grows. That is the claim the slot rests on -- localising against a
@@ -233,20 +233,27 @@ def summary(spec, out_dir):
     median in a table states it far less plainly than a flat line over 150 m.
 
     x is distance driven rather than time so that runs at different speeds are
-    comparable, and y is logarithmic because the one diverged run is two orders
-    of magnitude above the rest and would otherwise flatten them all.
+    comparable, and y is logarithmic because an excursion is an order of
+    magnitude above the rest and would otherwise flatten them all.
+
+    Split U beside I, on a shared y-axis and with one colour per route shape,
+    so that this reads against the heading figure of the same slot: the two then
+    answer the same question -- does the layout matter? -- for position and for
+    orientation, in the same visual language.
     """
-    fig, ax = plt.subplots(figsize=(10, 5.6))
-    cmap = plt.get_cmap('tab10')
-    rows = []
-    for i, world in enumerate(spec['worlds']):
+    cols = {'straight': '#1b9e77', 'square': '#d95f02', 'figure-8': '#7570b3'}
+    panels = {'U': [], 'I': []}
+    for world in spec['worlds']:
         lay = spec['worlds'][world]['layout']
         prior = spec['priors'][lay]['database']
         al = eg._align(prior)
         for path in spec['priors'][lay]['paths']:
-            for rep in (1, 2, 3):
-                rob = os.path.join(WORKSPACE, 'map', prior, 'exp4',
-                                   f'{world}_{path}_{rep}', 'robot_gt.csv')
+            for rep in es.reps_present(prior, world, path):
+                rund = os.path.join(WORKSPACE, 'map', prior, 'exp4',
+                                    f'{world}_{path}_{rep}')
+                if arm != 'all' and es.is_gated(rund) != (arm == 'gated'):
+                    continue
+                rob = os.path.join(rund, 'robot_gt.csv')
                 est = os.path.join(WORKSPACE, 'map', prior,
                                    f'localize_exp4_{world}_{path}_{rep}.csv')
                 if not (os.path.exists(rob) and os.path.exists(est)):
@@ -272,48 +279,55 @@ def summary(spec, out_dir):
                 dist = np.interp(et[m], t, np.r_[0, np.cumsum(step)])
                 shape = {'P1_transit': 'straight', 'P2_return': 'square',
                          'P3_circuit': 'figure-8'}.get(path, path)
-                lab = f'{world.replace("_", " ")} {shape}'
-                # Label by how LONG the error stayed up, not by its peak. A peak
-                # threshold called the U figure-of-eight 'lost the pose' when it
-                # was above 2 m for 23 s and then recovered to 0.12 m, and said
-                # nothing about the square being up for 36 s. Both recovered;
-                # neither was lost.
-                tt = et[m]
-                up = err > 1.0
+                # Label by how LONG the error stayed up, not by its peak: a peak
+                # threshold calls a 23 s excursion that recovered "lost" and says
+                # nothing about one that lasted longer at a lower level.
+                tt, up = et[m], err > 1.0
                 longest, start = 0.0, None
-                for j, b in enumerate(up):
-                    if b and start is None:
+                for j, bb in enumerate(up):
+                    if bb and start is None:
                         start = tt[j]
-                    elif not b and start is not None:
+                    elif not bb and start is not None:
                         longest = max(longest, tt[j] - start)
                         start = None
                 if start is not None:
                     longest = max(longest, tt[-1] - start)
-                bad = longest > 10.0
-                ax.plot(dist, err, lw=2.2 if bad else 1.3,
-                        color=cmap(len(rows) % 10), alpha=0.95 if bad else 0.8,
-                        label=lab + (f' (over 1 m for {longest:.0f} s)' if bad else ''))
-                rows.append(lab)
-    ax.set_yscale('log')
-    ax.axhline(0.40, color='#7f8c8d', ls='--', lw=1,
-               label="prior graph's own rms, upper end (Exp 3)")
-    ax.axhline(0.10, color='#7f8c8d', ls=':', lw=1,
-               label="prior graph's own rms, lower end")
-    ax.set_xlabel('distance driven since the first fix (m)')
-    ax.set_ylabel('planar error against ground truth (m)')
-    ax.set_title('Experiment 4: error against distance, every run')
-    ax.grid(alpha=0.2, which='both', lw=0.5)
-    # Below a centimetre the comparison is noise in the interpolation, and a log
-    # axis gives those samples a whole decade of the picture.
-    ax.set_ylim(0.01, None)
-    ax.legend(fontsize=8, loc='center left', bbox_to_anchor=(1.01, 0.5),
-              framealpha=0.95)
-    fig.tight_layout()
+                panels[lay].append((shape, dist, err, longest))
+
+    n = sum(len(v) for v in panels.values())
+    # Headroom computed from the data, not left to autoscale: with sharey the
+    # autoscaled top followed the first panel and clipped the other panel's
+    # excursion straight off the figure.
+    top = max((e.max() for v in panels.values() for _, _, e, _ in v), default=1.0)
+    fig, axes = plt.subplots(1, 2, figsize=(12.5, 4.8), sharey=True)
+    for ax, lay in zip(axes, ('U', 'I')):
+        for shape, dist, err, longest in panels[lay]:
+            bad = longest > 5.0
+            ax.plot(dist, err, lw=2.2 if bad else 1.3, color=cols.get(shape, '#555'),
+                    alpha=0.95 if bad else 0.85,
+                    label=shape + (f' (over 1 m for {longest:.0f} s)' if bad else ''))
+        ax.axhline(0.40, color='#7f8c8d', ls='--', lw=1)
+        ax.axhline(0.10, color='#7f8c8d', ls=':', lw=1)
+        ax.set_yscale('log')
+        ax.set_ylim(0.008, top * 2.2)
+        ax.set_xlabel('distance driven since the first fix (m)')
+        ax.set_title(f'{lay} layout')
+        ax.grid(alpha=0.2, which='both', lw=0.5)
+        ax.legend(fontsize=8, loc='upper right', framealpha=0.95)
+    axes[0].set_ylabel('planar error against ground truth (m)')
+    # Labelled on the left panel's left edge, clear of both legends.
+    axes[0].text(0.01, 0.40, "prior graph's own rms, upper end (Exp 3)",
+                 transform=axes[0].get_yaxis_transform(), ha='left', va='bottom',
+                 fontsize=8, color='#7f8c8d')
+    axes[0].text(0.01, 0.10, "lower end", transform=axes[0].get_yaxis_transform(),
+                 ha='left', va='bottom', fontsize=8, color='#7f8c8d')
+    fig.suptitle('Experiment 4: error against distance driven, by layout', y=0.99)
+    fig.tight_layout(rect=(0, 0, 1, 0.94))
     os.makedirs(out_dir, exist_ok=True)
     png = os.path.join(out_dir, 'exp4_error_vs_distance.png')
     fig.savefig(png, dpi=150)
     plt.close(fig)
-    print(f'  {len(rows)} run(s) -> {png}')
+    print(f'  {n} run(s) -> {png}')
     return png
 
 
@@ -325,21 +339,32 @@ def main():
     ap.add_argument('--summary', action='store_true',
                     help='one axis, every run: error against distance driven')
     ap.add_argument('--out', default=os.path.join(WORKSPACE, 'output', 'exp4_plots'))
+    ap.add_argument('--arm', choices=('ungated', 'gated', 'all'),
+                    default='gated',
+                    help='which configuration to plot. Experiment 4 reports '
+                         'the ungated arm (the default)')
     a = ap.parse_args()
     spec = yaml.safe_load(open(os.path.join(WORKSPACE, 'script',
                                             'exp4_protocol.yaml')))
     if a.summary:
-        summary(spec, a.out)
+        summary(spec, a.out, arm=a.arm)
         if not a.all and not a.run:
             return
     cache = {}
     done = 0
     for world in spec['worlds']:
         for path in spec['priors'][spec['worlds'][world]['layout']]['paths']:
-            for rep in (1, 2, 3):
+            for rep in es.reps_present(
+                    spec['priors'][spec['worlds'][world]['layout']]['database'],
+                    world, path):
                 name = f'{world}_{path}_{rep}'
                 if a.run and a.run != name:
                     continue
+                if not a.run:
+                    prior = spec['priors'][spec['worlds'][world]['layout']]['database']
+                    rund = os.path.join(WORKSPACE, 'map', prior, 'exp4', name)
+                    if a.arm != 'all' and es.is_gated(rund) != (a.arm == 'gated'):
+                        continue
                 if plot_run(spec, world, path, rep, a.out, cache):
                     done += 1
     if not done:

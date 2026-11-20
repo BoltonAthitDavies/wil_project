@@ -1,0 +1,157 @@
+% =============================================================================
+% Shared preamble for update_181126: the architecture deck.
+% Visual vocabulary follows the two references in this folder:
+%   image copy.png  -> 1.1 (function columns, colour-coded data lines)
+%   image.png       -> sub-component slides (one stage panel: picture + caption)
+% =============================================================================
+\usetheme{default}
+\usecolortheme{seagull}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+\setbeamerfont{frametitle}{size=\large,series=\bfseries}
+\setbeamercolor{frametitle}{fg=black!85}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{siunitx}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{amssymb}
+\usepackage{adjustbox}
+\usepackage[most]{tcolorbox}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,calc,backgrounds,
+                decorations.pathreplacing,shapes.geometric,shadows}
+\sisetup{detect-all,range-phrase=--,range-units=single,retain-explicit-plus}
+\DeclareSIUnit{\mebi}{Mi}
+\newcommand{\repo}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\src}[1]{\vfill{\tiny\color{black!50}#1}}
+
+% ---------------------------------------------------------------- colours
+% function columns (1.1), after image copy.png
+\definecolor{sensorcol}{HTML}{2FB5E8}
+\definecolor{perccol}{HTML}{26A69A}
+\definecolor{plancol}{HTML}{F2735A}
+\definecolor{ctrlcol}{HTML}{8FA3BA}
+\definecolor{mapcol}{HTML}{34495E}
+% one colour per system
+\definecolor{orbc}{HTML}{D6336C}
+\definecolor{vinsc}{HTML}{E67E22}
+\definecolor{rtabc}{HTML}{27AE60}
+\definecolor{navc}{HTML}{2E86DE}
+\definecolor{sysc}{HTML}{5D6D7E}
+% data-line colours: one per kind of data
+\definecolor{dimg}{HTML}{E74C3C}
+\definecolor{dimu}{HTML}{F39C12}
+\definecolor{dwhl}{HTML}{16A085}
+\definecolor{dpose}{HTML}{8E44AD}
+\definecolor{dmap}{HTML}{2C3E50}
+\definecolor{dcmd}{HTML}{2E86DE}
+% marks
+\definecolor{ourc}{HTML}{E0A100}
+\definecolor{hlc}{HTML}{C0392B}
+\definecolor{offc}{HTML}{AAB7B8}
+\definecolor{good}{HTML}{1E8449}
+\definecolor{bad}{HTML}{C0392B}
+
+% ---------------------------------------------------------------- tikz styles
+\tikzset{
+  box/.style={draw=black!45, rounded corners=2pt, align=center, font=\scriptsize,
+              inner sep=2pt, minimum height=8mm, text width=22mm, fill=white},
+  arr/.style={-{Latex[length=1.8mm]}, thick, black!65},
+  darr/.style={arr, dashed},
+  rate/.style={font=\tiny, fill=white, inner sep=1pt, text=black!75, align=center},
+  % "added by this project" and "switched off"
+  ours/.style={draw=ourc, dashed, line width=1.2pt},
+  off/.style={draw=offc, dashed, fill=offc!15, text=black!45},
+  % the current component
+  hl/.style={draw=hlc, line width=1.6pt, fill=yellow!35},
+  % locator chips
+  chip/.style={draw=black!35, rounded corners=1.5pt, align=center, font=\scriptsize,
+               inner sep=1.5pt, minimum height=8mm, text width=17mm},
+  grouplbl/.style={font=\scriptsize\bfseries, text=black!60},
+  brace/.style={decorate, decoration={brace, amplitude=3pt, raise=2pt}, thick, black!40},
+  % small drawing helpers for the stage panels
+  pt/.style={circle, fill=#1, inner sep=0pt, minimum size=1.6mm},
+  pt/.default=black,
+  cam/.style={isosceles triangle, shape border rotate=#1, draw=black!70, fill=white,
+              minimum width=4mm, minimum height=4mm, inner sep=0pt},
+  cam/.default=0,
+}
+% Every component has a style of its own name, empty by default.
+% \hl{ORB3} inside a frame turns that one component yellow-and-red, so the
+% locator strip and the block diagram both show "you are here".
+\tikzset{ORB1/.style={},ORB2/.style={},ORB3/.style={},ORB4/.style={},
+         ORB5/.style={},ORB6/.style={},ORB7/.style={},ORB8/.style={},
+         VINS1/.style={},VINS2/.style={},VINS3/.style={},VINS4/.style={},
+         VINS5/.style={},VINS6/.style={},VINS7/.style={},
+         RTAB1/.style={},RTAB2/.style={},RTAB3/.style={},RTAB4/.style={},
+         RTAB5/.style={},RTAB6/.style={},RTAB7/.style={},RTAB8/.style={},RTAB9/.style={},
+         NAV1/.style={},NAV2/.style={},NAV3/.style={},NAV4/.style={},
+         NAV5/.style={},NAV6/.style={},NAV7/.style={},NAV8/.style={}}
+\newcommand{\hl}[1]{\tikzset{#1/.style={hl}}}
+
+% ---------------------------------------------------------------- panels
+% The stage panel: a coloured header, one picture, one caption.  The picture is
+% scaled to fit, never to overflow.
+\newtcolorbox{stagepanel}[2][]{enhanced, colback=white, colframe=#2,
+  boxrule=0.8pt, arc=2pt, left=3pt, right=3pt, top=2pt, bottom=2pt,
+  fonttitle=\scriptsize\bfseries, coltitle=white, title={#1}}
+\newcommand{\stage}[4]{% #1 colour, #2 header, #3 tikz body, #4 caption
+  \begin{stagepanel}[#2]{#1}
+    \centering
+    \adjustbox{max width=\linewidth, max height=3.3cm}{#3}\par\vspace{2pt}
+    {\scriptsize #4}
+  \end{stagepanel}}
+% The right-hand column of a component slide.
+\newtcolorbox{linkpanel}{enhanced, colback=mapcol!5, colframe=mapcol,
+  boxrule=0.8pt, arc=2pt, left=3pt, right=3pt, top=2pt, bottom=2pt,
+  fonttitle=\scriptsize\bfseries, coltitle=white, title={LINK TO RESULTS}}
+\newcommand{\side}[5]{% #1 why, #2 in, #3 out, #4 can go wrong, #5 signal
+  {\scriptsize\textbf{\color{mapcol}WHY IT EXISTS}\par\footnotesize #1\par}
+  \vspace{0.3em}
+  {\scriptsize\raggedright\textbf{\color{mapcol}IN}\quad #2\par
+   \textbf{\color{mapcol}OUT}\enspace #3\par}
+  \vspace{0.3em}
+  \begin{linkpanel}\scriptsize\raggedright
+    \textbf{Can go wrong:} #4\par\smallskip
+    \textbf{Signal:} #5\par\smallskip
+    \textbf{Results:} \resref
+  \end{linkpanel}}
+% A whole component slide body: strip, then panel (left) + side (right).
+\newcommand{\compbody}[9]{% #1 strip macro, #2 colour, #3 tikz, #4 caption,
+                          % #5 why, #6 in, #7 out, #8 wrong, #9 signal
+  #1\par\vspace{0.25em}
+  \begin{columns}[T]
+    \column{0.55\textwidth}\stage{#2}{HOW IT WORKS}{#3}{#4}
+    \column{0.43\textwidth}\side{#5}{#6}{#7}{#8}{#9}
+  \end{columns}}
+
+% One lane of the "three clocks" timeline (1.1): y, label, rate in Hz, colour.
+\newcommand{\lane}[4]{%
+  \node[anchor=east, align=right] at (-0.02,#1) {#2};
+  \draw[black!15] (0,#1) -- (1,#1);
+  \foreach \k in {1,...,#3} \draw[#4, line width=0.7pt]
+    ({(\k-0.5)/#3},#1-0.18) -- ({(\k-0.5)/#3},#1+0.18);}
+
+% ---------------------------------------------------------------- results
+% A component slide's "Results" line.  \res{...} inside a frame sets it for that
+% frame only; \R{n}{text} links to the finding slide labelled Rn.
+\newcommand{\resref}{{\color{black!40}\emph{no finding yet}}}
+\newcommand{\res}[1]{\renewcommand{\resref}{#1}}
+\newcommand{\R}[2]{\hyperlink{R#1}{\textbf{\color{hlc}R#1}}~#2}
+\graphicspath{{../../final_report/figures/}{../experiment_4/fig/}}
+% A finding slide body, under its strip(s): picture left, two panels right.
+\newcommand{\finding}[5]{% #1 colour, #2 picture, #3 what we saw, #4 why, #5 caveat
+  \begin{columns}[T]
+    \column{0.57\textwidth}\centering
+      \adjustbox{max width=\linewidth, max height=0.50\textheight}{#2}
+    \column{0.42\textwidth}
+      \begin{stagepanel}[WHAT WE SAW]{mapcol}\scriptsize\raggedright #3\end{stagepanel}
+      \vspace{-0.4em}
+      \begin{stagepanel}[WHY: INSIDE THE BLOCK]{#1}\scriptsize\raggedright #4\end{stagepanel}
+  \end{columns}
+  \vspace{0.2em}
+  {\scriptsize\color{black!70}\textbf{\color{bad}Careful:} #5\par}}

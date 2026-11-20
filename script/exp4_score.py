@@ -40,6 +40,7 @@ import csv
 import json
 import math
 import os
+import re
 import sys
 
 import numpy as np
@@ -50,6 +51,81 @@ sys.path.insert(0, os.path.join(WORKSPACE, 'script'))
 import exp4_goals as eg                                        # noqa: E402
 
 LEVER = np.array([0.338, 0.0, 0.192])      # vio_metrics.IMU_LEVER_M
+
+
+def reps_present(prior, world, path):
+    """Rep numbers actually on disk for one cell, ascending.
+
+    The enumeration was hardcoded to (1, 2, 3), which silently hid every run
+    numbered above it: U_dynamic rep 4 and the whole U_static rep 5 set were
+    invisible to the scorer, the plotter and the mechanisms analysis alike. A
+    run that exists and is never read is worse than one that is missing, so the
+    directory is the authority.
+    """
+    import glob as _glob
+    base = os.path.join(WORKSPACE, 'map', prior, 'exp4')
+    out = []
+    for d in _glob.glob(os.path.join(base, f'{world}_{path}_*')):
+        m = re.match(rf'^{re.escape(world)}_{re.escape(path)}_(\d+)$',
+                     os.path.basename(d))
+        if m and os.path.exists(os.path.join(d, 'robot_gt.csv')):
+            out.append(int(m.group(1)))
+    return sorted(out)
+
+
+def gate_eps0(run_dir):
+    """The gate's position threshold for this run, or None if ungated.
+
+    Recovered from the verdict log rather than from a config file, because
+    correction_gate.py's thresholds were raised from 0.5 to 1.5 m mid-campaign
+    and outcome.json never recorded them. allow_p is eps*d_odom + eps0, so its
+    minimum over the accepted samples is eps0.
+
+    This is printed as a column so that two different gate tunings can never
+    again sit in one table looking like repeats of each other.
+    """
+    f = os.path.join(run_dir, 'gate_verdicts.csv')
+    if not os.path.exists(f):
+        return None
+    vals = []
+    for r in csv.DictReader(open(f)):
+        try:
+            v = float(r.get('allow_p') or 0)
+        except ValueError:
+            continue
+        if v > 0:
+            vals.append(v)
+    return round(min(vals), 1) if vals else None
+
+
+def is_gated(run_dir):
+    """Whether this run published map -> odom through correction_gate.py.
+
+    The verdict log is the authority: I_static/P2_return rep 2 ran gated but
+    its outcome.json was never written, and reading only the manifest labelled
+    a gated run as ungated. outcome.json overrides it where it exists, because
+    a run can carry an empty log.
+
+    WHY SELECTION IS ON THE CONFIGURATION AND NOT ON THE REP NUMBER
+        The rep index is not a repeat index here -- it is a configuration
+        index. Rep 1 of every static cell ran ungated on 12 November 2026, rep
+        2 ran gated at eps0 = 0.5 m and rep 3 at eps0 = 1.5 m, so a table
+        printing reps side by side invites reading a configuration effect as
+        run-to-run spread. Nothing in this data set is a replicate.
+
+        Experiment 4 reports the ungated arm, so the arm is selected by the
+        configuration that defines it rather than by a rep number or a date,
+        which the project rule against date-as-experimental-factor forbids.
+    """
+    gate = os.path.exists(os.path.join(run_dir, 'gate_verdicts.csv'))
+    man = os.path.join(run_dir, 'outcome.json')
+    if os.path.exists(man):
+        try:
+            gate = json.load(open(man)).get('config', {}).get(
+                'correction_gate') == 'true'
+        except Exception:
+            pass
+    return gate
 
 
 def _quat_R(qw, qx, qy, qz):
@@ -210,7 +286,7 @@ def score_run(spec, world, path, rep, verbose=False):
     return out
 
 
-def tracking(spec):
+def tracking(spec, arm='ungated'):
     """How well the published pose tracks ground truth. Goals are not involved.
 
     TWO ERRORS, AND THE SECOND IS THE ONE THAT MATTERS
@@ -233,7 +309,7 @@ def tracking(spec):
         al = eg._align(prior)
         crit = spec['criteria']
         for path in spec['priors'][lay]['paths']:
-            for rep in (1, 2, 3):
+            for rep in reps_present(prior, world, path):
                 d = os.path.join(WORKSPACE, 'map', prior, 'exp4',
                                  f'{world}_{path}_{rep}')
                 rob = os.path.join(d, 'robot_gt.csv')
@@ -374,7 +450,11 @@ def tracking(spec):
                 split = decompose(series('tf', False))
                 exc = excursion(series('tf', False))
                 step = np.hypot(*np.diff(gt, axis=0).T)
-                rows.append({'world': world, 'path': path, 'rep': rep,
+                gate = is_gated(d)
+                if arm != 'all' and gate != (arm == 'gated'):
+                    continue
+                rows.append({'world': world, 'path': path, 'rep': rep, 'gate': gate,
+                             'eps0': gate_eps0(d),
                              'driven_m': float(step[step < 1.0].sum()),
                              'dur': float(t[-1] - t[0]), 'fix': fix, 'pose': pose,
                              'split': split, 'exc': exc,
@@ -385,18 +465,24 @@ def tracking(spec):
     print('pose = map->base_link at 2 Hz, what RViz draws and Nav2 consumes')
     print('fix  = /localization_pose, only where RTAB-Map accepted a localisation')
     print('both against /ground_truth/odometry (map->base_link vs the model origin;\nno lever arm -- see load_robot_gt)\n')
-    print(f'{"world":10} {"shape":11} {"rep":>3} {"driven":>7} {"s":>5} | '
+    print(f'{"world":10} {"shape":11} {"rep":>3} {"gate":>5} {"eps0":>5} {"driven":>7} {"s":>5} | '
           f'{"pose med":>8} {"p95":>6} {"max":>6} {"1st/2nd half":>13} | '
           f'{"offset":>6} {"scatter":>7} | {"exc>1m":>6} {"ended":>6} | '
           f'{"blind":>6} {"jumps":>5}')
     for r in rows:
         p_, f_ = r['pose'], r['fix']
         half = (f'{p_["first_half"]:.2f}/{p_["second_half"]:.2f}' if p_ else '-')
-        print(f'{r["world"]:10} {r["path"]:11} {r["rep"]:3d} {r["driven_m"]:7.1f} '
+        print(f'{r["world"]:10} {r["path"]:11} {r["rep"]:3d} '
+              f'{("ON" if r.get("gate") else "-"):>5} '
+              f'{(f"{r[chr(39)+chr(39)] if False else r.get(chr(101)+chr(112)+chr(115)+chr(48))}" if r.get("eps0") else "-"):>5} '
+              f'{r["driven_m"]:7.1f} '
               f'{r["dur"]:5.0f} | '
               f'{(p_["median"] if p_ else float("nan")):8.3f} '
               f'{(p_["p95"] if p_ else float("nan")):6.3f} '
-              f'{(p_["max"] if p_ else float("nan")):6.2f} {half:>13} | '
+              # 3 dp, matching p95: at 2 dp a maximum can print BELOW the
+              # 95th percentile beside it (I_static straight: p95 0.7628,
+              # max 0.7647 printed as 0.763 and 0.76) and read as an error.
+              f'{(p_["max"] if p_ else float("nan")):6.3f} {half:>13} | '
               f'{(r["split"]["offset_m"] if r["split"] else float("nan")):6.3f} '
               f'{(r["split"]["scatter_m"] if r["split"] else float("nan")):7.3f} | '
               f'{(r["exc"]["longest_s"] if r["exc"] else float("nan")):6.1f} '
@@ -423,13 +509,23 @@ def tracking(spec):
           f'   worst run {max(allp):.3f} m')
 
 
-def main(only=None):
+def main(only=None, arm='ungated'):
     spec = yaml.safe_load(open(os.path.join(WORKSPACE, 'script', 'exp4_protocol.yaml')))
     rows = []
     for world in spec['worlds']:
         for path in spec['priors'][spec['worlds'][world]['layout']]['paths']:
-            for rep in (1, 2, 3):
+            for rep in reps_present(
+                    spec['priors'][spec['worlds'][world]['layout']]['database'],
+                    world, path):
                 if only and only != f'{world}_{path}_{rep}':
+                    continue
+                # score_run() does not carry the gate state, so the arm is read
+                # from the recording directory here rather than from the row.
+                rund = os.path.join(
+                    WORKSPACE, 'map',
+                    spec['priors'][spec['worlds'][world]['layout']]['database'],
+                    'exp4', f'{world}_{path}_{rep}')
+                if not only and arm != 'all' and is_gated(rund) != (arm == 'gated'):
                     continue
                 r = score_run(spec, world, path, rep, verbose=bool(only))
                 if r:
@@ -481,9 +577,15 @@ if __name__ == '__main__':
     ap.add_argument('--run', metavar='WORLD_PATH_REP')
     ap.add_argument('--tracking', action='store_true',
                     help='pose accuracy against ground truth only; no goals')
+    ap.add_argument('--arm', choices=('ungated', 'gated', 'all'),
+                    default='gated',
+                    help='which configuration to report. Experiment 4 reports '
+                         'the ungated arm (the default); the gated runs are a '
+                         'later configuration and are not replicates of it')
     a = ap.parse_args()
     if a.tracking:
         tracking(yaml.safe_load(open(os.path.join(WORKSPACE, 'script',
-                                                  'exp4_protocol.yaml'))))
+                                                  'exp4_protocol.yaml'))),
+                 arm=a.arm)
     else:
-        main(a.run)
+        main(a.run, arm=a.arm)

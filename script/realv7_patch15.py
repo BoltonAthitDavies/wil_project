@@ -92,6 +92,8 @@ def metrics_dir(name, ds):
     return d[0] if d else {}
 
 
+VINS_RUN = "rate1_002"   # the reported VINS configuration; see realv7_insights.VINS_RUN
+
 COL = {"lc_gpu": "#2a78d6", "nolc_gpu": "#a347b2", "lc_cpu": "#0097a7", "nolc_cpu": "#e040fb"}
 
 
@@ -101,7 +103,12 @@ def paths_figure(rows):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    fig, axes = plt.subplots(len(DSS), 4, figsize=(14, 3.5 * len(DSS)))
+    # Five columns, not four: the fourth estimator on these recordings is
+    # VINS-Fusion, which reaches a result only in the configuration named by
+    # VINS_RUN (fisheye field of view masked, extrinsic and td frozen). Leaving
+    # it out of the figure while reporting it in the table is what let the two
+    # disagree for a revision.
+    fig, axes = plt.subplots(len(DSS), 5, figsize=(17.5, 3.5 * len(DSS)))
     for i, ds in enumerate(DSS):
         for j, key in enumerate(CONF):
             ax = axes[i, j]
@@ -124,13 +131,51 @@ def paths_figure(rows):
                 # the recording labels the row, which keeps the per-panel titles
                 # short enough not to overrun an equal-aspect panel
                 ax.set_ylabel("%s\ny [m]" % ds[8:], fontsize=9)
+        # ---- the VINS-Fusion column
+        ax = axes[i, 4]
+        vd = R / ("%s_vins_%s" % (ds[8:], VINS_RUN)) / ds / "aligned_vins.csv"
+        mf = R / ("%s_vins_%s" % (ds[8:], VINS_RUN)) / "real_gt_metrics.csv"
+        if vd.exists():
+            a = np.loadtxt(vd, delimiter=",")
+            m = list(csv.DictReader(open(mf)))[0] if mf.exists() else {}
+            ax.plot(a[:, 1], a[:, 2], color="#2a2a2a", lw=1.8)
+            ax.plot(a[:, 3], a[:, 4], color="#d95f02", lw=1.1)
+            ax.plot(a[0, 3], a[0, 4], "o", color="#d95f02", ms=5)
+            ax.plot(a[-1, 3], a[-1, 4], "s", color="#d95f02", ms=5)
+            st = (m.get("status", "?").split("(")[0]).strip()
+            ax.set_title("VINS-Fusion: ATE %.2f m, %s" % (float(m["ate_rmse"]), st),
+                         fontsize=8.5, loc="left")
+            ax.set_aspect("equal"); ax.grid(True, alpha=0.3)
+            if i == len(DSS) - 1:
+                ax.set_xlabel("x [m]")
+        else:
+            ax.axis("off")
+
     axes[0, 0].legend(fontsize=7, loc="lower right")
-    fig.suptitle("The twelve realv7 runs re-made with fork patch 15, scored raw: no frame repair applied "
-                 "(circle = start, square = end)", fontsize=12, x=0.01, ha="left")
+    fig.suptitle("The twelve realv7 ORB-SLAM3 runs re-made with fork patch 15, and the VINS-Fusion run "
+                 "of the same recording, all scored raw (circle = start, square = end)", fontsize=12, x=0.01, ha="left")
     fig.tight_layout(rect=(0, 0, 1, 0.96))
     fig.savefig(OUT / "fig_paths_patch15_light.png", dpi=150)
     plt.close(fig)
     print("  wrote", OUT / "fig_paths_patch15_light.png")
+
+
+def rpe1(tag):
+    """Translational RPE at delta = 1 s, and its admissible-pair count.
+
+    The tracker exports position only, so rotational RPE does not exist for any
+    estimator on this rig and the translational figure is computed on relative
+    displacements in the globally aligned frame (eval_real_gt.py). The pair
+    count travels with the value because realv6's truth is exported at 1.7 Hz
+    and yields a fraction of the pairs the 7 Hz recordings do.
+    """
+    f = R / tag / "real_gt_rpe_metrics.csv"
+    if not f.exists():
+        return None, None
+    for r in csv.DictReader(open(f)):
+        if abs(float(r["delta_s"]) - 1.0) < 1e-6:
+            return float(r["trans_rmse"]), int(r["pairs"])
+    return None, None
 
 
 def main():
@@ -152,6 +197,8 @@ def main():
             reset_reason=s.get("last_reset_reason", "none"),
             loss=int(s.get("tracking_loss_events", 0) or 0),
             tilt_deg=ang, z_range_m=zr, kept=(pro / rec if rec else float("nan")),
+            rpe1_m=rpe1("%s_%s_p15" % (ds[8:], key))[0],
+            rpe1_n=rpe1("%s_%s_p15" % (ds[8:], key))[1],
             ate_new=new.get("ate_rmse"), max_new=new.get("ate_max"),
             path_new=new.get("gt_path_m"), ate_old=old.get("ate_rmse")))
         r = rows[-1]
@@ -169,34 +216,32 @@ def main():
          "Every real-robot ORB-SLAM3 run on the four recordings that carry an independent planar "
          "reference, with fork patch 15 active "
          "(\\repo{LocalMapping.resetOnLowMotion} 0, \\repo{LocalMapping.initWithBacklog} 1) and scored "
-         "\\emph{raw}: neither \\texttt{--join-imu-init} nor \\texttt{--level-plane}, the repairs every other "
-         "\\repo{realv7} figure in this chapter depends on. ``Tilt'' and ``z range'' are measured the same way as "
-         "in \\cref{tab:realv7-tilt}, so the two are comparable. ``ATE before'' is the same configuration on the "
-         "same recording on 3 November, scored raw. Front-end identity was confirmed from the median tracking "
+         "\\emph{raw}: no scorer-side repair of any kind is applied. ``Tilt'' is the angle between the plane "
+         "fitted to the estimate and the horizontal, and ``z range'' the vertical spread of a path that should "
+         "be flat. Front-end identity was confirmed from the median tracking "
          "latency (GPU \\SIrange{41}{50}{\\milli\\second}, CPU \\SIrange{104}{113}{\\milli\\second}), not from the "
-         "run name. ``Stock + repair'' is the same configuration on the same recording on 3 November, under "
-         "upstream initialisation and, for \\repo{realv7}, only after the scorer-side frame repair that "
-         "has since been retired: "
-         "it is the fair comparison, each estimator at the best obtainable from it. For \\repo{realv6_000}, which "
-         "never showed the tilt and needed no repair, ``before'' is the same run scored against the same cleaned "
-         "tracker export without the switches. Status is the scorer's: it rejects a run whose estimate spans more "
+         "run name. Status is the scorer's: it rejects a run whose estimate spans more "
          "than \\SI{1}{\\metre} vertically, and it rejects every \\repo{realv6} run because that recording's "
          "tracker export is \\SI{1.7}{\\hertz} and fails the validity rules written for the \\SI{7}{\\hertz} one, "
-         "so its rows are diagnostics. Lever arm still unmeasured, so every value is provisional.}",
+         "so its rows are diagnostics. RPE is translational over \\SI{1}{\\second} with its admissible-pair "
+         "count in parentheses; the tracker exports position only, so rotational RPE does not exist for any "
+         "estimator on this rig, and \\repo{realv6}'s count is small because its truth is exported at "
+         "\\SI{1.7}{\\hertz}. Lever arm still unmeasured, so every value is provisional.}",
          "\\label{tab:realv7-patch15}", "\\small", "\\resizebox{\\textwidth}{!}{%",
          "\\begin{tabular}{llrrr rr rrl}", "\\toprule",
          "Recording & Run & IMU init [\\si{\\second}] & resets & tilt [\\si{\\degree}] & z range [\\si{\\metre}] & "
-         "Kept & ATE [\\si{\\metre}] & Before [\\si{\\metre}] & status \\\\", "\\midrule"]
+         "Kept & ATE [\\si{\\metre}] & RPE \\SI{1}{\\second} [\\si{\\metre}] & status \\\\", "\\midrule"]
     last = None
     for r in rows:
         first = r["ds"] != last
         if first and last is not None:
             L.append("\\addlinespace")
         last = r["ds"]
-        L.append("%s & %s & %.1f & %d & %.1f & %.2f & %.2f & %.3f & %.3f & %s \\\\" % (
+        rp = ("%.3f (%d)" % (r["rpe1_m"], r["rpe1_n"])) if r["rpe1_m"] is not None else "--"
+        L.append("%s & %s & %.1f & %d & %.1f & %.2f & %.2f & %.3f & %s & %s \\\\" % (
             "\\repo{%s}" % r["ds"].replace("dataset_", "") if first else "",
             r["label"], r["imu_init_s"], r["resets"], r["tilt_deg"], r["z_range_m"], r["kept"],
-            r["ate_new"], r["ate_old"], r["status"]))
+            r["ate_new"], rp, r["status"]))
     L += ["\\bottomrule", "\\end{tabular}}", "\\end{table}"]
     (OUT / "patch15_table.tex").write_text("\n".join(L) + "\n")
 

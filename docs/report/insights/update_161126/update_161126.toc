@@ -1,0 +1,10 @@
+\beamer@sectionintoc {1}{The system}{3}{0}{1}
+\beamer@sectionintoc {2}{What a visual-SLAM system is made of}{4}{0}{2}
+\beamer@sectionintoc {3}{ORB-SLAM3}{5}{0}{3}
+\beamer@sectionintoc {4}{VINS}{8}{0}{4}
+\beamer@sectionintoc {5}{RTAB-Map}{11}{0}{5}
+\beamer@sectionintoc {6}{Nav2}{17}{0}{6}
+\beamer@sectionintoc {7}{Experiment 1, simulation}{19}{0}{7}
+\beamer@sectionintoc {8}{Experiment 1, real robot}{31}{0}{8}
+\beamer@sectionintoc {9}{Experiment 4}{34}{0}{9}
+\beamer@sectionintoc {10}{What is open}{42}{0}{10}

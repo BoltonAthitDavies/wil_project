@@ -1,0 +1,399 @@
+% =============================================================================
+% 1.2  ORB-SLAM3
+% Sources: Campos et al., ORB-SLAM3, IEEE T-RO 2021 (Fig. 1, sections III, V, VI)
+% and orbslam3_ros2/config/wil_sim/stereo_imu.yaml, config/wil/stereo_imu.yaml.
+% Signal columns are the headers of the CSVs every run writes.
+% =============================================================================
+\section{1.2 ORB-SLAM3}
+
+\begin{frame}{1.2 \;ORB-SLAM3: three threads share one map}
+  \centering
+  \adjustbox{max width=\textwidth, max height=0.70\textheight}{%
+  \begin{tikzpicture}[font=\scriptsize,
+      cb/.style={box, fill=orbc!12, text width=25mm, minimum height=10mm},
+      band/.style={fill=orbc!5, draw=orbc!30, rounded corners=3pt},
+      bl/.style={font=\scriptsize\bfseries, text=orbc!80!black, anchor=north west}]
+    % thread bands
+    \fill[band] (2.0,-1.75) rectangle (11.4,1.45);
+    \node[bl] at (2.1,1.4) {TRACKING THREAD \;$\cdot$\; every frame (30 Hz)};
+    \fill[band] (5.0,-3.75) rectangle (11.4,-2.0);
+    \node[bl] at (5.1,-2.05) {LOCAL MAPPING \;$\cdot$\; every keyframe};
+    \fill[band] (5.0,-5.85) rectangle (11.4,-4.1);
+    \node[bl] at (5.1,-4.15) {LOOP \& MERGE \;$\cdot$\; background};
+    % inputs
+    \node[box, text width=17mm] (st) at (0,0.45) {stereo pair\\30 Hz};
+    \node[box, text width=17mm] (im) at (0,-0.95) {IMU\\200 Hz};
+    % components
+    \node[cb, ORB1] (o1) at (3.5,0.45)  {\textbf{ORB-1}\\features + stereo};
+    \node[cb, ORB2] (o2) at (3.5,-0.95) {\textbf{ORB-2}\\IMU preintegration};
+    \node[cb, ORB3] (o3) at (6.7,-0.25) {\textbf{ORB-3}\\tracking};
+    \node[cb, ORB4] (o4) at (9.9,-0.25) {\textbf{ORB-4}\\keyframe?};
+    \node[cb, ORB5] (o5) at (6.7,-3.1)  {\textbf{ORB-5}\\local mapping, local BA};
+    \node[cb, ORB6] (o6) at (9.9,-3.1)  {\textbf{ORB-6}\\IMU initialisation};
+    \node[cb, ORB7] (o7) at (6.7,-5.2)  {\textbf{ORB-7}\\place recognition};
+    \node[cb, ORB8] (o8) at (9.9,-5.2)  {\textbf{ORB-8}\\loop correction, merge};
+    % outputs and the map store
+    \node[box, text width=22mm, fill=dpose!10] (out) at (13.4,-0.25)
+      {pose every frame\\TF, odometry, \repo{vio.csv}};
+    \node[box, text width=22mm, minimum height=26mm, fill=orbc!20] (atl) at (13.4,-4.15)
+      {\textbf{ATLAS}\\[2pt]all maps,\\keyframes,\\map points,\\word database};
+    % flow
+    \draw[arr, dimg] (st) -- (o1);
+    \draw[arr, dimu] (im) -- (o2);
+    \draw[arr] (o1.east) -- ($(o3.west)+(0,0.2)$);
+    \draw[arr] (o2.east) -- ($(o3.west)+(0,-0.2)$);
+    \draw[arr] (o3) -- (o4);
+    \draw[arr, dpose] (o4.east) -- (out.west);
+    \draw[arr] (o4.south) -- ++(0,-0.4) -| node[rate, pos=0.25]{keyframe} (o5.north);
+    \draw[arr] (o5) -- (o6);
+    \draw[arr] (o5) -- (o7);
+    \draw[arr] (o7) -- node[rate]{revisit} (o8);
+    \draw[arr, orbc] (o6.east) -- ($(atl.west)+(0,0.95)$);
+    \draw[arr, orbc] (o8.east) -- ($(atl.west)+(0,-1.0)$);
+    \draw[darr, orbc] ($(atl.north)+(-0.5,0)$) |- node[rate, pos=0.75]{local map} (7.25,-1.4) -- ($(o3.south)+(0.55,0)$);
+  \end{tikzpicture}}
+  \par\vspace{0.3em}
+  \small Three threads run side by side and share one store of maps, the
+  \textbf{Atlas}. Tracking must keep up with the camera; the other two take as
+  long as they need without holding it back.
+  \src{After Campos et al., ORB-SLAM3, IEEE T-RO 2021, Fig.~1.}
+\end{frame}
+
+% ---------------------------------------------------------------- ORB-1
+\begin{frame}{1.2.1 \;ORB-1 \;Features: turn an image into points you can find again}
+  \hl{ORB1}\res{\R{1}{}, \R{8}{}, \R{9}{}}
+  \compbody{\orbstrip}{orbc}{%
+  \begin{tikzpicture}[font=\scriptsize]
+    \foreach \ox/\lbl/\sh in {0/left camera/0, 3.5/right camera/-0.3} {
+      \draw[black!60, fill=black!4] (\ox,0) rectangle ++(3,2);
+      \node[above] at (\ox+1.5,2) {\lbl};
+      \draw[black!30, thick] (\ox+0.35+\sh,0.3) rectangle ++(0.9,1.4);
+      \draw[black!30, thick] (\ox+1.65+\sh,0.3) rectangle ++(1.0,1.2);
+      \draw[black!30] (\ox+0.35+\sh,1.0) -- ++(0.9,0);
+      \draw[black!30] (\ox+1.65+\sh,0.9) -- ++(1.0,0);
+    }
+    \foreach \x/\y in {0.35/0.3, 1.25/1.7, 1.25/1.0, 1.65/1.5, 2.65/0.3, 2.65/0.9, 0.35/1.7} {
+      \node[pt=orbc] at (\x,\y) {};
+      \node[pt=orbc] at (3.5+\x-0.3,\y) {};
+    }
+    \foreach \x/\y in {1.25/1.7, 2.65/0.9}
+      \draw[orbc!70, dashed, thick] (\x,\y) -- (3.5+\x-0.3,\y);
+    \draw[{Latex}-{Latex}, hlc, thick] (3.5+1.25-0.3,1.85) -- (3.5+1.25,1.85)
+      node[right, font=\tiny, text=hlc]{shift = depth};
+  \end{tikzpicture}}%
+  {Corners are found at 8 image sizes, each gets a 256-bit fingerprint, and the
+   left--right shift of a matched pair gives its distance.}
+  {A camera image is a million pixels. The system needs a few hundred
+   distinctive points it can find again in the next frame, and later.}
+  {stereo pair, 30 Hz}
+  {$\approx$1\,500 points with fingerprints, most with depth}
+  {Blank walls give few corners. Extraction slower than 33\,ms drops frames.}
+  {\repo{tracking_frontend.csv}: features, extraction time;
+   \repo{performance.csv}: frames received vs processed}
+  \src{GPU extractor in simulation is our fork's patch~10; the real rig runs the CPU one.}
+\end{frame}
+
+% ---------------------------------------------------------------- ORB-1 inside
+% How ORB itself works, after "image copy 2.png" (four stages). Values checked
+% against thirdparty/ORB_SLAM3/src: FAST(..., iniThFAST, true) = OpenCV FAST-9/16,
+% IC_Angle over HALF_PATCH_SIZE 15 (31 px patch), ORBmatcher TH_LOW 50 /
+% TH_HIGH 100, cells W = 35 px.  The Hamming example is computed, not copied.
+\begin{frame}{1.2.1 \;ORB-1 \;Inside: how ORB turns pixels into a point you can match}
+  \hl{ORB1}\res{\R{1}{}, \R{8}{}, \R{9}{}}
+  \orbstrip\par\vspace{0.3em}
+  \centering
+  \adjustbox{max width=\textwidth, max height=0.66\textheight}{%
+  \begin{tikzpicture}[font=\scriptsize,
+      capt/.style={align=center, text width=35mm, font=\scriptsize},
+      tag/.style={draw=orbc, fill=orbc!8, rounded corners=1pt, font=\tiny, inner sep=2pt}]
+    % ---- four panels with headers
+    \foreach \i/\x/\t in {1/0/FIND CORNERS, 2/4.4/ORIENTATION, 3/8.8/FINGERPRINT, 4/13.2/MATCH} {
+      \draw[orbc, line width=0.8pt, rounded corners=2pt, fill=white] (\x,0) rectangle ++(4.0,5.4);
+      \fill[orbc, rounded corners=2pt] (\x,4.9) rectangle ++(4.0,0.5);
+      \node[text=white, font=\scriptsize\bfseries] at (\x+2.0,5.15) {STAGE \i \;$\cdot$\; \t};}
+    \foreach \x in {4.0,8.4,12.8} \draw[-{Latex[length=2mm]}, very thick, orbc] (\x+0.02,2.7) -- (\x+0.38,2.7);
+    % ---- STAGE 1: pyramid
+    \foreach \k/\w in {0/2.8, 1/2.33, 2/1.94, 3/1.62}
+      \draw[black!55, fill=black!6] ({2.0-\w/2},{3.15+\k*0.36}) rectangle ++(\w,0.26);
+    \node[font=\tiny, text=black!70] at (2.0,4.62) {8 sizes, each 1.2$\times$ smaller};
+    \node[font=\tiny, text=black!70] at (2.0,2.88) {1280$\times$720 \ldots\ 357$\times$201};
+    % ---- STAGE 1: FAST circle (Bresenham radius 3, 16 pixels; 9 in a row brighter)
+    \begin{scope}[shift={(2.0,1.85)}]
+      \foreach \u in {-3,...,3} \foreach \v in {-3,...,3}
+        \draw[black!15, fill=black!3] (\u*0.2-0.1,\v*0.2-0.1) rectangle ++(0.2,0.2);
+      \foreach [count=\n] \u/\v in {0/3,1/3,2/2,3/1,3/0,3/-1,2/-2,1/-3,0/-3,-1/-3,-2/-2,-3/-1,-3/0,-3/1,-2/2,-1/3} {
+        \ifnum\n<10 \fill[orbc!70] (\u*0.2-0.1,\v*0.2-0.1) rectangle ++(0.2,0.2);
+        \else       \draw[orbc!70, thick] (\u*0.2-0.1,\v*0.2-0.1) rectangle ++(0.2,0.2); \fi}
+      \fill[black!80] (-0.1,-0.1) rectangle ++(0.2,0.2);
+      \node[font=\tiny, text=white] at (0,0) {p};
+    \end{scope}
+    \node[capt] at (2.0,0.6) {corner: \textbf{9 of the 16} pixels\\round $p$ brighter (or darker) by $>$20};
+    % ---- STAGE 2: orientation by intensity centroid
+    \begin{scope}[shift={(6.4,2.9)}]
+      \fill[black!5] (0,0) circle (1.35);
+      \fill[black!18] (0.15,0.1) circle (0.95);
+      \fill[black!32] (0.45,0.35) circle (0.55);
+      \draw[black!50] (0,0) circle (1.35);
+      \draw[black!40, dashed] (-1.2,0) -- (1.2,0);
+      \node[pt=black] (O) at (0,0) {}; \node[below left, font=\tiny] at (O) {O};
+      \node[pt=orbc] (C) at (0.62,0.5) {}; \node[above right, font=\tiny, text=orbc] at (C) {C};
+      \draw[-{Latex}, thick, orbc] (O) -- (C);
+      \draw[orbc] (0.45,0) arc (0:39:0.45); \node[font=\tiny, text=orbc] at (0.62,0.17) {$\theta$};
+      \node[font=\tiny, text=black!55] at (0,-1.6) {31$\times$31 px patch};
+    \end{scope}
+    \node[capt] at (6.4,0.55) {C = where the brightness ``leans'':\\$\theta = \mathrm{atan2}(m_{01},\, m_{10})$};
+    % ---- STAGE 3: rotated BRIEF
+    \begin{scope}[shift={(10.8,3.0)}]
+      \fill[black!5] (0,0) circle (1.3); \draw[black!50] (0,0) circle (1.3);
+      \begin{scope}[rotate=39]
+        \foreach \a/\b/\c/\d in {-0.9/0.3/0.7/-0.5, -0.4/-0.9/0.5/0.8, -0.2/0.9/0.9/0.2,
+                                 0.1/-0.4/-0.8/-0.4, -0.6/-0.2/0.2/0.5, 0.3/-1.0/0.95/-0.15} {
+          \draw[orbc!60] (\a,\b) -- (\c,\d);
+          \node[pt=orbc, minimum size=1.1mm] at (\a,\b) {}; \node[pt=black!60, minimum size=1.1mm] at (\c,\d) {};}
+      \end{scope}
+      \node[font=\tiny, text=orbc] at (0,1.5) {pattern turned by $\theta$};
+    \end{scope}
+    \node[font=\tiny] at (10.8,1.35) {$A$ brighter than $B$? \;1 : 0};
+    \node[draw=black!50, fill=black!4, font=\tiny\ttfamily, inner sep=2pt] at (10.8,0.95) {10110010\ldots\ (256 bits)};
+    \node[capt] at (10.8,0.4) {256 fixed pairs = one 256-bit fingerprint};
+    % ---- STAGE 4: Hamming distance (computed example)
+    \begin{scope}[shift={(13.55,4.2)}, font=\tiny\ttfamily]
+      \node[anchor=west, font=\tiny] at (-0.05,0.3) {fingerprint A};
+      \node[anchor=west, font=\tiny] at (-0.05,-0.55) {fingerprint B};
+      \node[anchor=west, font=\tiny] at (-0.05,-1.4) {A XOR B};
+      \foreach [count=\n] \a/\b in {1/1,0/0,1/0,1/1,0/0,0/1,1/1,0/0} {
+        \pgfmathtruncatemacro{\x}{\a==\b ? 0 : 1}
+        \node[draw=black!40, minimum size=3mm, inner sep=0pt] at (\n*0.38-0.2,0.0) {\a};
+        \node[draw=black!40, minimum size=3mm, inner sep=0pt] at (\n*0.38-0.2,-0.85) {\b};
+        \ifnum\x=1
+          \node[draw=hlc, fill=yellow!40, thick, minimum size=3mm, inner sep=0pt] at (\n*0.38-0.2,-1.7) {1};
+        \else
+          \node[draw=black!25, minimum size=3mm, inner sep=0pt, text=black!40] at (\n*0.38-0.2,-1.7) {0};
+        \fi}
+    \end{scope}
+    \node[font=\tiny, align=center] at (15.2,1.95) {count the 1s: \textbf{distance 2}\\(XOR + count: very fast)};
+    \node[tag, align=center, text width=33mm, font=\scriptsize] at (15.2,0.75) {out of 256 bits:\\$\le$50 differ = same point\\$\le$100 = loose match};
+  \end{tikzpicture}}
+  \par\vspace{0.15em}
+  \scriptsize\color{black!70}
+  ORB-SLAM3 adds one step to stage~1: the image is cut into 35$\times$35 px cells so the 1\,500 points
+  spread over the whole frame, and a dull cell retries with a lower threshold (7 instead of 20).
+  \src{Rublee et al., ORB, ICCV 2011; checked against \repo{thirdparty/ORB_SLAM3/src/ORBextractor.cc}, \repo{ORBmatcher.cc}.}
+\end{frame}
+
+% ---------------------------------------------------------------- ORB-2
+\begin{frame}{1.2.2 \;ORB-2 \;IMU preintegration: summarise the readings between two frames}
+  \hl{ORB2}\res{\R{5}{}, \R{8}{}}
+  \compbody{\orbstrip}{orbc}{%
+  \begin{tikzpicture}[font=\scriptsize]
+    \draw[thick,-{Latex}] (0,0) -- (7.4,0) node[right]{time};
+    \foreach \x/\l in {0.5/frame $i$, 6.5/frame $i{+}1$} {
+      \draw[line width=2.4pt, dimg] (\x,-0.45) -- (\x,0.6);
+      \node[above] at (\x,0.6) {\l};}
+    \foreach \k in {1,...,6} \draw[dimu, line width=1.2pt]
+      ({0.5+\k*6/7},-0.25) -- ({0.5+\k*6/7},0.3);
+    \node[below, text=dimu] at (3.5,-0.3) {6--7 IMU readings at 200 Hz};
+    \draw[decorate, decoration={brace, amplitude=5pt}, thick]
+      (0.5,1.05) -- node[above=6pt]{added up once: one motion step $\Delta R,\ \Delta v,\ \Delta p$} (6.5,1.05);
+  \end{tikzpicture}}%
+  {Rotation, velocity and position change between the frames, with an
+   uncertainty built from the IMU noise values in the config.}
+  {The IMU reports about 7 times between two frames. Adding them up once,
+   instead of at every optimiser step, keeps everything fast.}
+  {IMU, 200 Hz}
+  {one motion step + uncertainty per frame pair}
+  {Wrong noise values make the IMU over- or under-trusted. Missing samples leave a gap.}
+  {\repo{performance.csv}: imu\_samples, imu\_starved;
+   \repo{tracking_frontend.csv}: preintegration time}
+\end{frame}
+
+% ---------------------------------------------------------------- ORB-3
+\begin{frame}{1.2.3 \;ORB-3 \;Tracking: where is the camera, right now?}
+  \hl{ORB3}\res{\R{5}{}, \R{7}{}}
+  \compbody{\orbstrip}{orbc}{%
+  \begin{tikzpicture}[font=\scriptsize]
+    \draw[black!60, fill=black!4] (0,0) rectangle (4.6,2.8);
+    \foreach \x/\y/\dx/\dy in {0.8/2.2/0.12/-0.09, 1.9/1.0/-0.11/0.1, 3.0/2.1/0.09/0.11,
+                               3.9/0.8/-0.12/-0.06, 2.4/0.45/0.1/-0.1, 4.0/2.3/-0.06/0.12} {
+      \draw[orbc, dashed] (\x-0.28,\y-0.28) rectangle (\x+0.28,\y+0.28);
+      \draw[orbc, thick] (\x,\y) circle (0.09);
+      \node[pt=black] at (\x+\dx,\y+\dy) {};}
+    \draw[orbc, thick] (5.1,2.3) circle (0.09); \node[anchor=west] at (5.3,2.3) {where a map point should be};
+    \draw[orbc, dashed] (4.85,1.45) rectangle ++(0.5,0.5); \node[anchor=west] at (5.4,1.7) {small search window};
+    \node[pt=black] at (5.1,1.0) {}; \node[anchor=west] at (5.3,1.0) {feature actually found};
+  \end{tikzpicture}}%
+  {\textcircled{\tiny 1} predict the pose from the IMU \textcircled{\tiny 2} look for each
+   map point near where it should be \textcircled{\tiny 3} nudge the pose until they line up.}
+  {Every frame needs a pose now; the robot cannot wait for the map to be refined.}
+  {points (ORB-1), IMU step (ORB-2), local map}
+  {pose every frame $\rightarrow$ TF, odometry, \repo{vio.csv}}
+  {Fewer than 15 matches and tracking is lost. One slow frame delays all after it.}
+  {\repo{performance.csv}: tracking\_state, tracking\_ms;
+   \repo{tracking_frontend.csv}: map\_matches\_inliers}
+\end{frame}
+
+% ---------------------------------------------------------------- ORB-4
+\begin{frame}{1.2.4 \;ORB-4 \;Keyframe decision: which frames are worth remembering?}
+  \hl{ORB4}
+  \compbody{\orbstrip}{orbc}{%
+  \begin{tikzpicture}[font=\scriptsize]
+    \draw[thick,-{Latex}] (0,0) -- (8.4,0) node[right]{1 s};
+    \foreach \k in {0,...,29} \draw[dimg!70] ({0.25+\k*0.27},0) -- ++(0,0.35);
+    \foreach \k in {0,8,15,23} \draw[orbc, line width=2.4pt] ({0.25+\k*0.27},0) -- ++(0,0.85);
+    \node[above, text=orbc] at (4.3,0.9) {\textbf{keyframes}: a few per second, while moving};
+    \node[below, text=dimg] at (4.3,-0.05) {every frame is tracked: 30 per second};
+  \end{tikzpicture}}%
+  {A frame becomes a keyframe when it sees enough that the last keyframe did
+   not, or too long has passed since the last one.}
+  {Keeping all 30 frames a second would fill the map with near-copies. The map
+   is built from keyframes only.}
+  {each tracked frame}
+  {a keyframe, a few times per second}
+  {Too many and the mapping queue backs up; too few and the map has gaps.}
+  {\repo{tracking_frontend.csv}: keyframes\_created;
+   one row per keyframe in \repo{local_mapping.csv}}
+\end{frame}
+
+% ---------------------------------------------------------------- ORB-5
+\begin{frame}{1.2.5 \;ORB-5 \;Local mapping: refine the recent part of the map}
+  \hl{ORB5}\res{\R{9}{}}
+  \compbody{\orbstrip}{orbc}{%
+  \begin{tikzpicture}[font=\scriptsize]
+    \foreach \i/\x in {1/0.5,2/2.2,3/3.9} \node[cam=90, fill=orbc!25] (k\i) at (\x,0) {};
+    \foreach \j/\x/\y in {1/0.3/2.6, 2/1.7/3.1, 3/3.0/2.8, 4/4.3/2.5} \node[pt=black] (p\j) at (\x,\y) {};
+    \foreach \i in {1,2,3} \foreach \j in {1,2,3,4} \draw[black!22] (k\i) -- (p\j);
+    \draw[orbc, dashed, thick] (1.95,3.35) circle (0.13);
+    \draw[orbc, dashed, thick] (2.75,2.6) circle (0.13);
+    \node[anchor=west] at (4.9,2.8) {3-D points};
+    \node[anchor=west] at (4.9,0) {recent keyframes};
+    \node[anchor=west, align=left, text=orbc] at (4.9,1.45) {move both until\\every ray meets\\its point};
+  \end{tikzpicture}}%
+  {Bundle adjustment: move the recent keyframes and their 3-D points together
+   until every point lands where it was seen. IMU steps link the keyframes.}
+  {A point seen once is a rough guess. Seen from several keyframes, its place
+   --- and theirs --- can be corrected together.}
+  {keyframes (ORB-4)}
+  {refined local map, used by tracking}
+  {If bundle adjustment is slower than keyframes arrive, tracking works on a stale map.}
+  {\repo{local_mapping.csv}: local\_ba\_ms, point creation, keyframe culling}
+\end{frame}
+
+% ---------------------------------------------------------------- ORB-6
+\begin{frame}{1.2.6 \;ORB-6 \;IMU initialisation: learn which way is down}
+  \hl{ORB6}\res{\R{3}{}, \R{4}{}, \R{9}{}, \R{11}{}}
+  \compbody{\orbstrip}{orbc}{%
+  \begin{tikzpicture}[font=\scriptsize]
+    \begin{scope}[rotate=-14]
+      \draw[black!60, fill=orbc!10] (0,0) rectangle (2.2,1.4);
+      \draw[-{Latex}, thick, black!70] (1.1,0.7) -- (1.1,1.9) node[above]{map ``up''};
+    \end{scope}
+    \draw[-{Latex}, very thick, dimu] (-0.4,2.0) -- (-0.4,0.6) node[pos=0, above]{gravity};
+    \draw[-{Latex}, thick] (2.9,0.7) -- (3.7,0.7) node[midway, above]{rotate};
+    \draw[black!60, fill=orbc!10] (4.1,0.1) rectangle (6.3,1.5);
+    \draw[-{Latex}, thick, black!70] (5.2,0.8) -- (5.2,2.0) node[above]{up $=$ against gravity};
+    \draw[thick] (-0.4,-1.3) -- (6.3,-1.3);
+    \foreach \x/\l in {-0.4/start, 1.6/$\approx$2 s, 3.6/+5 s, 6.3/+15 s}
+      {\draw (\x,-1.2) -- (\x,-1.4); \node[below] at (\x,-1.4) {\l};}
+    \node[above, font=\tiny] at (0.6,-1.3) {vision only};
+    \node[above, font=\tiny] at (2.6,-1.3) {gravity, biases};
+    \node[above, font=\tiny] at (4.95,-1.3) {refine twice};
+  \end{tikzpicture}}%
+  {Watch $\approx$2 s of vision only (10 keyframes), solve for gravity, biases
+   and speed, then rotate the whole map so ``up'' matches gravity.}
+  {Before the IMU can help, the system must know which way is down and the
+   IMU's biases. Those can only be seen once the robot moves.}
+  {first $\approx$10 keyframes + IMU steps}
+  {gravity-aligned map, biases, velocity}
+  {Gravity is observed only while the robot turns. The published pose changes frame at this instant.}
+  {\repo{performance.csv}: imu\_initialized, inertial\_ba1/2;
+   \repo{local_mapping.csv}: initialisation time}
+  \src{Ours (fork patch 15): initialise even with a keyframe backlog; do not reset the map when the robot stands still at the start.}
+\end{frame}
+
+% ---------------------------------------------------------------- ORB-7
+\begin{frame}{1.2.7 \;ORB-7 \;Place recognition: have I been here before?}
+  \hl{ORB7}\res{\R{2}{}}
+  \compbody{\orbstrip}{orbc}{%
+  \begin{tikzpicture}[font=\scriptsize]
+    \draw[fill=black!5] (0,0) rectangle (1.3,1.0); \node[below, align=center] at (0.65,0) {new\\keyframe};
+    \draw[arr] (1.35,0.5) -- (1.75,0.5);
+    \foreach \i/\h in {0/0.3,1/0.85,2/0.2,3/0.6,4/0.1,5/0.5} \fill[orbc!70] (1.85+\i*0.18,0) rectangle ++(0.12,\h);
+    \node[below] at (2.35,0) {words};
+    \draw[arr] (2.95,0.5) -- (3.35,0.5);
+    \foreach \k in {0,1,2} \draw[fill=white] (3.45+\k*0.1,0.05+\k*0.1) rectangle ++(1.1,0.75);
+    \node[below, align=center] at (4.1,0) {3 most\\similar};
+    \draw[arr] (4.85,0.5) -- (5.2,0.5);
+    \node[anchor=west, align=left] at (5.2,0.5)
+      {$\checkmark$ one 3-D transform fits\\$\checkmark$ more matches agree\\
+       $\checkmark$ 3 neighbours agree\\$\checkmark$ tilt is small (gravity)};
+  \end{tikzpicture}}%
+  {A fast search by visual words finds candidates; four geometric checks decide.
+   Pass all four and a revisit is accepted.}
+  {Tracking only knows the last few seconds, so drift builds up. Recognising an
+   old place, however far you have drifted, is what removes it.}
+  {each new keyframe}
+  {a confirmed revisit + the transform --- or nothing}
+  {Two identical-looking places can pass every check. A real revisit can be missed.}
+  {\repo{loop_closing.csv}: one row per detection event}
+\end{frame}
+
+% ---------------------------------------------------------------- ORB-8
+\begin{frame}{1.2.8 \;ORB-8 \;Loop correction, map merging and the Atlas}
+  \hl{ORB8}\res{\R{2}{}, \R{3}{}}
+  \compbody{\orbstrip}{orbc}{%
+  \begin{tikzpicture}[font=\scriptsize]
+    \draw[thick, orbc] (0,0) .. controls (0,1.6) and (2,1.8) .. (2.2,0.8)
+                             .. controls (2.3,0.2) and (1.2,-0.3) .. (0.5,0.3);
+    \node[pt=black] at (0,0) {}; \node[pt=orbc] at (0.5,0.3) {};
+    \draw[hlc, thick, {Latex}-{Latex}] (0.07,0.05) -- (0.43,0.26);
+    \node[text=hlc, font=\tiny] at (0.6,-0.15) {drift};
+    \node[below] at (1.1,-0.4) {before};
+    \draw[-{Latex}, thick] (2.7,0.6) -- (3.5,0.6) node[midway, above, align=center]{revisit\\found};
+    \draw[thick, orbc] (4.0,0) .. controls (4.0,1.6) and (6.0,1.8) .. (6.2,0.8)
+                            .. controls (6.3,0.2) and (5.0,-0.3) .. (4.0,0);
+    \node[pt=black] at (4.0,0) {};
+    \node[below] at (5.1,-0.4) {after: error spread along the path};
+  \end{tikzpicture}}%
+  {The error found at the revisit is spread back over the whole path (pose
+   graph, then a full bundle adjustment). The same idea merges two maps.}
+  {Fixing only the current pose would leave the rest of the map bent.}
+  {a confirmed revisit (ORB-7)}
+  {corrected map and path --- the pose can jump}
+  {A false revisit applies a large wrong correction to the whole map.}
+  {\repo{loop_closing.csv}: correction size in m and deg; jumps in \repo{vio.csv}}
+  \src{Atlas: lost for more than 5 s $\rightarrow$ start a new map, merge it when a place is recognised.
+       Ours: one switch, \texttt{loopClosing}, turns ORB-7 and ORB-8 (and merging) on or off together.}
+\end{frame}
+
+% ---------------------------------------------------------------- config
+\begin{frame}{1.2.9 \;ORB-SLAM3 configuration}
+  \centering
+  \adjustbox{max width=\textwidth, max height=0.80\textheight}{%
+  \begin{tabular}{l l l l l}
+    \toprule
+    & Parameter & Sim & Real rig & What it means \\
+    \midrule
+    ORB-1 & \texttt{Camera.type} & PinHole & KannalaBrandt8 & lens model: how a pixel maps to a direction \\
+          & image size, \texttt{Camera.fps} & 1280$\times$720, 30 & 1920$\times$1080, 30 & what the node receives \\
+          & \texttt{ORBextractor.nFeatures} & 1500 & 2000 & points kept per image \\
+          & \texttt{scaleFactor} / \texttt{nLevels} & 1.2 / 8 & 1.2 / 8 & look at 8 image sizes, each 1.2$\times$ smaller \\
+          & \texttt{iniThFAST} / \texttt{minThFAST} & 20 / 7 & 20 / 7 & corner strength; relaxed in dull areas \\
+          & \texttt{Stereo.ThDepth} & 90 & 90 & ``close'' point = nearer than 90 $\times$ baseline \\
+          & \textcolor{ourc}{\texttt{ORBextractor.useGPU}} & 1 & 0 & GPU extractor (our patch 10) \\
+    \addlinespace
+    ORB-2 & \texttt{IMU.Frequency} & 200 & 200 & IMU rate, Hz \\
+          & \texttt{IMU.NoiseGyro} / \texttt{NoiseAcc} & 0.002 / 0.02 & 0.1 / 1.0 & how much each reading is trusted \\
+          & \texttt{IMU.GyroWalk} / \texttt{AccWalk} & 1e-4 / 1e-3 & 1e-4 / 1e-3 & how fast the biases may drift \\
+    \addlinespace
+    ORB-6 & \textcolor{ourc}{\texttt{LocalMapping.initWithBacklog}} & 1 & 1 & initialise even with keyframes queued (patch 15) \\
+          & \textcolor{ourc}{\texttt{LocalMapping.resetOnLowMotion}} & 0 & 0 & do not reset when standing still (patch 15) \\
+    \addlinespace
+    ORB-7/8 & \textcolor{ourc}{\texttt{loopClosing}} & 0 & 0 & base-file value; the on/off switch for revisits and merging \\
+    \bottomrule
+  \end{tabular}}
+  \par\vspace{0.5em}
+  \scriptsize\color{black!65}
+  \textcolor{ourc}{\textbf{Amber}} = a key added by our fork.
+  The real rig's IMU noise values were raised tenfold during commissioning.
+  \src{\repo{orbslam3_ros2/config/wil_sim/stereo_imu.yaml}, \repo{orbslam3_ros2/config/wil/stereo_imu.yaml}}
+\end{frame}

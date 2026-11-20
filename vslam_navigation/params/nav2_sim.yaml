@@ -117,6 +117,16 @@ controller_server:
       # NOTE: nav2_ackermann.yaml carries a long comment saying OFF while its value
       # says true. The comment and the value disagree there; this file states its
       # own choice explicitly.
+      # STILL OFF after the obstacle layer was added on 15 Nov 2026, deliberately.
+      # The layer gives the costmaps live obstacles, but turning this on is a
+      # SEPARATE decision with measured evidence against it (the paralysis above),
+      # and that evidence was gathered when the only thing in the costmap was the
+      # inflation ring. With real obstacles present it may now be the right
+      # choice -- but that is a thing to measure, not to assume, and flipping it
+      # here would confound the obstacle layer with a known failure mode.
+      # Consequence while it stays off: the controller will not stop for a person
+      # it can now see. Avoidance comes from the PLANNER instead, which checks the
+      # global costmap and replans at expected_planner_frequency 1.0 Hz.
       use_collision_detection: false
       max_allowed_time_to_collision_up_to_carrot: 1.00
 
@@ -257,10 +267,65 @@ global_costmap:
       footprint: "[[-0.31, 0.25], [0.52, 0.25], [0.52, -0.25], [-0.31, -0.25]]"
       footprint_padding: 0.01
       transform_tolerance: 0.30
-      plugins: ["static_layer", "inflation_layer"]
+      plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
       static_layer:
         plugin: "nav2_costmap_2d::StaticLayer"
         map_subscribe_transient_local: true
+      # ---- live obstacle perception, on the GLOBAL costmap --------------
+      # Removed on 15 Nov 2026 and restored the same day, which is worth
+      # recording because both decisions were right at the time.
+      #
+      # Removed because the first run with live obstacles came back smeared
+      # across the whole warehouse: a camera clears only along rays inside its
+      # current field of view, so the global map marks freely and barely clears,
+      # and every spurious return accumulates for the length of the run.
+      #
+      # Restored because without it NOTHING can route around a new obstacle.
+      # SmacPlannerHybrid plans on THIS costmap; RegulatedPurePursuit is a path
+      # follower and does not avoid anything, with or without a local costmap;
+      # and use_collision_detection is off for its own measured reason. So the
+      # box appeared in the local costmap and the path went straight through it.
+      #
+      # What changed between the two decisions: the smear was produced with
+      # marking at 8 m and Grid/RangeMax 10. Both are now 4 m and 5 m, chosen
+      # because stereo depth error grows with the square of range and
+      # Experiment 3 measured this pipeline displacing walls by about 0.5 m.
+      # If the smear returns at these ranges, the next lever is a
+      # ClearEntireCostmap behaviour in the recovery branch rather than a wider
+      # threshold.
+      obstacle_layer:
+        plugin: "nav2_costmap_2d::VoxelLayer"
+        enabled: true
+        publish_voxel_map: false
+        origin_z: 0.0
+        z_resolution: 0.10
+        z_voxels: 16
+        max_obstacle_height: 2.0
+        mark_threshold: 0
+        combination_method: 1
+        observation_sources: rtabmap_cloud
+        rtabmap_cloud:
+          # RELATIVE topic on a node with no namespace, so it is /local_grid_
+          # obstacle and NOT /rtabmap/local_grid_obstacle -- the same trap the
+          # trajectory writer hit with /mapPath.
+          topic: /local_grid_obstacle
+          data_type: "PointCloud2"
+          marking: true
+          clearing: true
+          # 4 m, not 8. Stereo depth error grows with the square of range, and
+          # Experiment 3 measured this pipeline spreading a planar surface over
+          # two or three cells and displacing walls by about 0.5 m. Marking at
+          # 8 m writes that error into the costmap as obstacles. Clearing is
+          # given 5 m so a cell can always be cleared from further away than it
+          # can be marked -- otherwise a stale mark at the edge is unreachable.
+          obstacle_max_range: 4.0
+          obstacle_min_range: 0.0
+          raytrace_max_range: 5.0
+          raytrace_min_range: 0.0
+          min_obstacle_height: 0.05
+          max_obstacle_height: 2.0
+          expected_update_rate: 0.0
+          inf_is_valid: false
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
@@ -287,10 +352,68 @@ local_costmap:
       footprint: "[[-0.31, 0.25], [0.52, 0.25], [0.52, -0.25], [-0.31, -0.25]]"
       footprint_padding: 0.01
       transform_tolerance: 0.30
-      plugins: ["static_layer", "inflation_layer"]
+      plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
       static_layer:
         plugin: "nav2_costmap_2d::StaticLayer"
         map_subscribe_transient_local: true
+      # ---- live obstacle perception ------------------------------------
+      # Added 15 Nov 2026. Before this both costmaps ran
+      # ["static_layer", "inflation_layer"] and the stack had NO live
+      # perception at all: everything it knew was the prior grid, a photograph
+      # of the warehouse taken at mapping time. A walking person, a moved
+      # pallet jack, a door closed since: invisible. In the one dynamic
+      # Experiment 4 run the actors walked within 1.4 m of the spawn and
+      # nothing reacted, because nothing could see them.
+      #
+      # The source is RTAB-Map's own per-frame obstacle cloud. It is produced
+      # by the SAME segmentation that built the prior -- Grid/MaxGroundHeight
+      # 0.29 matched to the chassis, MaxObstacleHeight 2.0, RayTracing, noise
+      # filtering at 0.1 m / 5 neighbours -- so a live obstacle and a mapped
+      # one are the same kind of thing, which a separately-tuned depth pipeline
+      # would not guarantee. It is lazily published: nothing appeared on the
+      # topic before because nothing subscribed.
+      #
+      # VoxelLayer, not ObstacleLayer: the cloud is 3-D and a camera needs 3-D
+      # ray tracing to clear what it no longer sees. A person who walks on
+      # would otherwise leave a trail of marks behind them.
+      #
+      # LIMIT, and it binds here: the cloud is published once per PROCESSED
+      # frame, so it updates at Rtabmap/DetectionRate, 1 Hz by default. A person
+      # at 1.4 m/s moves 1.4 m between updates. For dynamic-world runs raise
+      # detection_rate, at a CPU cost on a laptop that already throttles.
+      obstacle_layer:
+        plugin: "nav2_costmap_2d::VoxelLayer"
+        enabled: true
+        publish_voxel_map: false
+        origin_z: 0.0
+        z_resolution: 0.10
+        z_voxels: 16
+        max_obstacle_height: 2.0
+        mark_threshold: 0
+        combination_method: 1
+        observation_sources: rtabmap_cloud
+        rtabmap_cloud:
+          # RELATIVE topic on a node with no namespace, so it is /local_grid_
+          # obstacle and NOT /rtabmap/local_grid_obstacle -- the same trap the
+          # trajectory writer hit with /mapPath.
+          topic: /local_grid_obstacle
+          data_type: "PointCloud2"
+          marking: true
+          clearing: true
+          # 4 m, not 8. Stereo depth error grows with the square of range, and
+          # Experiment 3 measured this pipeline spreading a planar surface over
+          # two or three cells and displacing walls by about 0.5 m. Marking at
+          # 8 m writes that error into the costmap as obstacles. Clearing is
+          # given 5 m so a cell can always be cleared from further away than it
+          # can be marked -- otherwise a stale mark at the edge is unreachable.
+          obstacle_max_range: 4.0
+          obstacle_min_range: 0.0
+          raytrace_max_range: 5.0
+          raytrace_min_range: 0.0
+          min_obstacle_height: 0.05
+          max_obstacle_height: 2.0
+          expected_update_rate: 0.0
+          inf_is_valid: false
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0

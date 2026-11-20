@@ -101,11 +101,42 @@ def series(ds, name, tree, run):
     dist = np.concatenate([[0.0], np.cumsum(np.linalg.norm(np.diff(ref[:, :2], axis=0), axis=1))])
     return dict(t=t, along=along, cross=cross, vert=vert, dyaw=de[:, 0], dpitch=de[:, 1],
                 droll=de[:, 2], roterr=al["roterr"], omega=omega, dist=dist,
-                ate=row["rms"], name=name, dataset=ds)
+                ate=row["rms"], name=name, dataset=ds, t0=al["t0"])
 
 
 def rms(a):
     return float(np.sqrt(np.mean(np.asarray(a, float) ** 2)))
+
+
+def anchored(e, run_dir):
+    """Rotation error measured only after the published world frame exists.
+
+    ORB-SLAM3 publishes in the camera OPTICAL frame until inertial
+    initialisation gives it a gravity-aligned world frame, and the switch
+    between the two is a ~90 deg step in the published orientation. Those
+    earlier poses are accurate but expressed in a different frame, so scoring
+    them against a world-frame reference measures the frame, not the estimate:
+    on these runs 2.0-3.6 %% of the samples at ~90 deg produce the whole
+    12.8-19.0 deg RMS.
+
+    vio_metrics.world_frame_time() finds the switch in the POSE STREAM ALONE,
+    so no part of the reference enters the anchor it is then scored against.
+    An arm that publishes in one frame throughout -- VINS-Fusion here -- has no
+    switch, and its anchored columns are its ordinary ones rather than blanks,
+    so a reader comparing the two families compares like with like.
+    """
+    t_abs = vm.world_frame_time(str(run_dir))
+    keep = (np.ones_like(e["t"], bool) if t_abs is None
+            else e["t"] >= t_abs - e["t0"])
+    if keep.sum() < 30:
+        keep = np.ones_like(e["t"], bool)
+        t_abs = None
+    return dict(t_switch=float("nan") if t_abs is None else t_abs - e["t0"],
+                rot_rms_anch=rms(e["roterr"][keep]),
+                rot_med_anch=float(np.median(e["roterr"][keep])),
+                yaw_rms_anch=rms(e["dyaw"][keep]),
+                pitch_rms_anch=rms(e["dpitch"][keep]),
+                roll_rms_anch=rms(e["droll"][keep]))
 
 
 def collect():
@@ -131,6 +162,7 @@ def collect():
                 yaw_rms=rms(e["dyaw"]), pitch_rms=rms(e["dpitch"]), roll_rms=rms(e["droll"]),
                 yaw_med=float(np.median(np.abs(e["dyaw"]))),
                 rot_med=float(np.median(e["roterr"])), rot_rms=rms(e["roterr"]),
+                **anchored(e, d),
                 turn_frac=float(turning.mean()),
                 rot_turn=float(np.median(e["roterr"][turning])) if turning.sum() > 20 else float("nan"),
                 rot_straight=float(np.median(e["roterr"][~turning])) if (~turning).sum() > 20 else float("nan"),
@@ -157,157 +189,250 @@ def style(ax):
     ax.tick_params(colors=TH["ink2"], labelsize=8)
 
 
+# A run whose aligned ATE passes this is one of the five divergences reported
+# in the slot (two false closures on realistic_001, two vertical-drift runs on
+# realistic_003, one marginal run on realistic_002).  They are MARKED in every
+# panel rather than pooled silently with the fifteen that held: the spread they
+# create is a failure mode, and a reader who cannot see which points they are
+# will read that spread as ordinary variation.
+DIVERGED_ATE_M = 1.0
+
+
 def fig_translation(rows, ser, path):
-    fig = plt.figure(figsize=(13.5, 9.6), facecolor=TH["surface"])
-    gs = fig.add_gridspec(2, 3, height_ratios=[1.0, 1.0], hspace=0.62, wspace=0.26)
+    """Two panels, sharing one run order: the split, and the direction.
+
+    The earlier version carried two further panels -- a body-frame scatter of
+    every sample and planar error against distance -- which no sentence of the
+    slot cited.  The scatter was dominated by the diverged runs' loops with
+    the fifteen healthy runs an unreadable blob at the origin, and the
+    distance panel asked `accumulating or bounded?` over twenty unlabelled
+    overlapping traces, which cannot be read off it.  Both are removed.  What
+    is left is the decomposition itself and the one quantity the slot quotes
+    from it.
+    """
+    fig = plt.figure(figsize=(13.5, 7.3), facecolor=TH["surface"])
+    L, R = 0.068, 0.986
+    gs_a = fig.add_gridspec(1, 1, left=L, right=R, top=0.895, bottom=0.560)
+    gs_b = fig.add_gridspec(1, 1, left=L, right=R, top=0.505, bottom=0.392)
+
+    # one run order, used by both panels so a run sits at the same x in each
+    order = [(ds, name) for ds in BAGS for name, _, _, _ in ARMS
+             if any(q["dataset"] == ds and q["name"] == name for q in rows)]
+    pos, labels, gap = {}, [], 0.0
+    x = 0.0
+    for i, (ds, name) in enumerate(order):
+        if i and ds != order[i - 1][0]:
+            x += 0.5
+        pos[(ds, name)] = x
+        r = next(q for q in rows if q["dataset"] == ds and q["name"] == name)
+        mark = "" if r["ate"] < DIVERGED_ATE_M else " $\\dagger$"
+        labels.append((x + 0.27, short_arm(ds, name) + mark))
+        x += 1.2
 
     # (a) along / cross / vertical RMS, grouped per run
-    ax = fig.add_subplot(gs[0, :]); style(ax)
-    labels, x = [], 0
-    for ds in BAGS:
-        for name, _, _, _ in ARMS:
-            r = next((q for q in rows if q["dataset"] == ds and q["name"] == name), None)
-            if r is None:
-                continue
-            for k, (key, hatch) in enumerate((("along_rms", ""), ("cross_rms", "///"), ("vert_rms", ".."))):
-                ax.bar(x + k * 0.27, r[key], 0.26, color=COL[name], hatch=hatch,
-                       edgecolor=TH["ink2"], lw=0.4)
-            labels.append((x + 0.27, ds.replace("dataset_allsensor_realistic_", "") + " " + name))
-            x += 1.2
-        x += 0.5
-    ax.set_xticks([p for p, _ in labels])
-    ax.set_xticklabels([l for _, l in labels], rotation=90, ha="center", va="top", fontsize=6.2)
+    ax = fig.add_subplot(gs_a[0, 0]); style(ax)
+    for (ds, name), xp in pos.items():
+        r = next(q for q in rows if q["dataset"] == ds and q["name"] == name)
+        for k, (key, hatch) in enumerate((("along_rms", ""), ("cross_rms", "///"),
+                                          ("vert_rms", ".."))):
+            ax.bar(xp + k * 0.27, r[key], 0.26, color=COL[name], hatch=hatch,
+                   edgecolor=TH["ink2"], lw=0.4)
+        if r["ate"] >= DIVERGED_ATE_M:
+            ax.axvspan(xp - 0.17, xp + 0.71, color=TH["ink2"], alpha=0.07, lw=0, zorder=0)
+    ax.set_xticks([])
+    ax.set_xlim(-0.6, x - 0.5)
     ax.set_ylabel("RMS error [m]", color=TH["ink2"], fontsize=9)
     ax.set_title("(a) the error split in the ground-truth heading frame: "
-                 "solid = along-track, hatched = cross-track, dotted = vertical",
+                 "solid = along-track, hatched = cross-track, dotted = vertical. "
+                 "Shaded columns, $\\dagger$: the five diverged runs.",
                  fontsize=9.5, loc="left", color=TH["ink"])
 
-    # (b) body-frame scatter: anisotropy at a glance
-    ax = fig.add_subplot(gs[1, 0]); style(ax)
-    allv = np.concatenate([np.abs(np.r_[e["along"], e["cross"]]) for e in ser.values()])
-    lim = float(np.percentile(allv, 99))            # the five diverged runs reach metres
-    for (ds, name), e in ser.items():
-        ax.plot(e["along"], e["cross"], ".", ms=1.0, alpha=0.25, color=COL[name])
-    ax.axhline(0, color=TH["ink2"], lw=0.6); ax.axvline(0, color=TH["ink2"], lw=0.6)
-    ax.set_aspect("equal"); ax.set_xlim(-lim, lim); ax.set_ylim(-lim, lim)
-    ax.set_xlabel("along-track [m]", color=TH["ink2"], fontsize=9)
-    ax.set_ylabel("cross-track [m]", color=TH["ink2"], fontsize=9)
-    ax.set_title("(b) every sample, body frame (clipped to the 99th\npercentile; the diverged runs run off it)",
-                 fontsize=9.5, loc="left", color=TH["ink"])
-
-    # (c) cross-track share of the planar error, per run
-    ax = fig.add_subplot(gs[1, 1]); style(ax)
-    for i, name in enumerate([n for n, _, _, _ in ARMS]):
-        v = [r["cross_share"] for r in rows if r["name"] == name]
-        if v:
-            ax.plot([i] * len(v), v, "o", ms=7, color=COL[name], alpha=0.85)
-            ax.plot(i, np.median(v), "_", ms=22, color=TH["ink"], mew=2)
+    # (b) cross-track share of the planar error, same run order as (a)
+    ax = fig.add_subplot(gs_b[0, 0]); style(ax)
+    for (ds, name), xp in pos.items():
+        r = next(q for q in rows if q["dataset"] == ds and q["name"] == name)
+        div = r["ate"] >= DIVERGED_ATE_M
+        if div:
+            ax.axvspan(xp - 0.17, xp + 0.71, color=TH["ink2"], alpha=0.07, lw=0, zorder=0)
+        ax.plot(xp + 0.27, r["cross_share"], "o", ms=7, zorder=3,
+                color="none" if div else COL[name],
+                markerfacecolor="none" if div else COL[name],
+                markeredgecolor=COL[name], mew=1.6)
     ax.axhline(0.5, color=TH["ink2"], ls=":", lw=1.0)
-    ax.set_xticks(range(len(ARMS)))
-    ax.set_xticklabels([n for n, _, _, _ in ARMS], rotation=30, ha="right", fontsize=7)
+    ax.set_xticks([p for p, _ in labels])
+    ax.set_xticklabels([l for _, l in labels], rotation=90, ha="center",
+                       va="top", fontsize=6.6)
+    ax.set_xlim(-0.6, x - 0.5)
     ax.set_ylim(0, 1)
-    ax.set_ylabel("cross-track share of planar error", color=TH["ink2"], fontsize=9)
-    ax.set_title("(c) 0.5 = isotropic; above = drifts sideways", fontsize=9.5,
-                 loc="left", color=TH["ink"])
-
-    # (d) does it accumulate? error against distance travelled
-    ax = fig.add_subplot(gs[1, 2]); style(ax)
-    for (ds, name), e in ser.items():
-        ax.plot(e["dist"], np.hypot(e["along"], e["cross"]), lw=0.7, alpha=0.7, color=COL[name])
-    ax.set_yscale("symlog", linthresh=0.5)
-    ax.set_xlabel("distance travelled [m]", color=TH["ink2"], fontsize=9)
-    ax.set_ylabel("planar error [m, symlog]", color=TH["ink2"], fontsize=9)
-    ax.set_title("(d) accumulating or bounded?\n(log above 0.5 m so the healthy runs stay visible)",
+    ax.set_ylabel("cross-track share", color=TH["ink2"], fontsize=9)
+    # The share is sin^2(theta), where theta is the angle between the error's
+    # principal direction and the robot's heading, so the same axis can be
+    # read as an angle.  That is what "perpendicular" in the text means, and
+    # without this axis the reader has to take the word on trust.
+    ang = ax.secondary_yaxis(
+        "right", functions=(lambda v: np.degrees(np.arcsin(np.sqrt(np.clip(v, 0, 1)))),
+                            lambda a: np.sin(np.radians(np.clip(a, 0, 90))) ** 2))
+    ang.set_yticks([0, 15, 30, 45, 60, 75, 90])
+    ang.set_ylabel("error direction off heading [deg]", color=TH["ink2"], fontsize=8)
+    ang.tick_params(colors=TH["ink2"], labelsize=7)
+    ax.set_title("(b) the same runs, cross-track share of the planar error: "
+                 "0.5 is isotropic, above it the estimate drifts sideways. "
+                 "Open markers, $\\dagger$: the diverged runs.\n"
+                 "    The right axis reads the same number as an angle off the "
+                 "direction of travel, since the share is $\\sin^2\\theta$: "
+                 "VINS-Fusion near $56^\\circ$, ORB-SLAM3 near $25^\\circ$.",
                  fontsize=9.5, loc="left", color=TH["ink"])
 
     from matplotlib.lines import Line2D
-    fig.legend(handles=[Line2D([], [], color=COL[n], lw=3, label=n) for n, _, _, _ in ARMS],
+    fig.legend(handles=[Line2D([], [], color=COL[n], lw=3, label=n)
+                        for n, _, _, _ in ARMS],
                loc="lower center", ncol=5, frameon=False, fontsize=8.5,
-               labelcolor=TH["ink2"], bbox_to_anchor=(0.5, -0.005))
-    fig.suptitle("Experiment 1, simulation: what the visual estimators' translation error is made of "
-                 "(aligned series, the same fit the reported ATE uses)",
-                 fontsize=11.5, x=0.012, ha="left", color=TH["ink"])
-    fig.tight_layout(rect=(0, 0.045, 1, 0.96))
+               labelcolor=TH["ink2"], bbox_to_anchor=(0.5, 0.004))
+    fig.suptitle("Experiment 1, simulation: what the visual estimators' translation "
+                 "error is made of (aligned series, the same fit the reported ATE uses)",
+                 fontsize=11.5, x=0.012, y=0.972, ha="left", color=TH["ink"])
     fig.savefig(path, dpi=160, facecolor=TH["surface"])
     plt.close(fig)
     print("  wrote", path)
 
 
-def fig_rotation(rows, ser, path):
-    fig = plt.figure(figsize=(13.5, 8.0), facecolor=TH["surface"])
-    gs = fig.add_gridspec(2, 3, hspace=0.42, wspace=0.26)
+def short_arm(ds, name):
+    """`000 ORB GPU (no LC)` rather than `000 ORB-SLAM3 GPU (no LC)`.
 
-    # (a) yaw / pitch / roll RMS per run
-    ax = fig.add_subplot(gs[0, :]); style(ax)
+    Twenty tick labels stand vertically under panel (a) of the rotation
+    figure; at full length they reach into the title of the panel below it.
+    The legend carries the full arm names, so the axis does not have to.
+    """
+    return (ds.replace("dataset_allsensor_realistic_", "") + " " +
+            name.replace("ORB-SLAM3", "ORB").replace("VINS-Fusion", "VINS"))
+
+
+def fig_rotation(rows, ser, path):
+    """The orientation error, with the frame artefact separated from the estimate.
+
+    Panel (a) used to plot the unanchored per-axis RMS alone, which put every
+    ORB-SLAM3 bar at 13-19 deg and so read against the text beside it: the
+    chapter reports 0.27-3.14 deg once the published world frame exists.  Both
+    are now drawn -- the unanchored bar ghosted behind, the anchored bar solid
+    in front -- so the tall part is visibly the pre-initialisation frame and
+    the solid part is the tracking.  VINS-Fusion publishes in one frame
+    throughout, so its two coincide and only the solid bar shows, which is the
+    comparison the reader needs.
+
+    Panel (b) is the evidence for that split and is given the full width: one
+    step at the switch, then nothing, on every arm at once.
+
+    Panel (a) carries twenty run labels up to 28 characters long.  At any
+    rotation but 90 deg they reach sideways as well as down and run into the
+    titles below; the translation figure sets 90 deg for the same reason.
+    """
+    # The three bands are placed explicitly rather than by one hspace.  A
+    # single hspace has to be large enough for the twenty vertical labels
+    # under (a), which then leaves the same gap under (b), where nothing but
+    # an axis label sits -- a band of dead paper in the middle of the figure.
+    fig = plt.figure(figsize=(13.5, 10.6), facecolor=TH["surface"])
+    L, R = 0.068, 0.986
+    gs_a = fig.add_gridspec(1, 1, left=L, right=R, top=0.902, bottom=0.612)
+    gs_b = fig.add_gridspec(1, 1, left=L, right=R, top=0.468, bottom=0.330)
+    gs_c = fig.add_gridspec(1, 1, left=0.30, right=0.74, top=0.250, bottom=0.085)
+
+    # (a) yaw / pitch / roll RMS per run: unanchored ghosted, anchored solid
+    ax = fig.add_subplot(gs_a[0, 0]); style(ax)
     labels, x = [], 0
+    AXES = (("yaw_rms", "yaw_rms_anch", ""),
+            ("pitch_rms", "pitch_rms_anch", "///"),
+            ("roll_rms", "roll_rms_anch", ".."))
     for ds in BAGS:
         for name, _, _, _ in ARMS:
             r = next((q for q in rows if q["dataset"] == ds and q["name"] == name), None)
             if r is None:
                 continue
-            for k, (key, hatch) in enumerate((("yaw_rms", ""), ("pitch_rms", "///"), ("roll_rms", ".."))):
+            for k, (key, akey, hatch) in enumerate(AXES):
+                # full span first, faded: what the unanchored column measures
                 ax.bar(x + k * 0.27, r[key], 0.26, color=COL[name], hatch=hatch,
-                       edgecolor=TH["ink2"], lw=0.4)
-            labels.append((x + 0.27, ds.replace("dataset_allsensor_realistic_", "") + " " + name))
+                       edgecolor=TH["ink2"], lw=0.4, alpha=0.26, zorder=2)
+                # then the anchored value, opaque, in front
+                ax.bar(x + k * 0.27, r[akey], 0.26, color=COL[name], hatch=hatch,
+                       edgecolor=TH["ink2"], lw=0.5, zorder=3)
+            if r["ate"] >= DIVERGED_ATE_M:
+                ax.axvspan(x - 0.17, x + 0.71, color=TH["ink2"], alpha=0.07,
+                           lw=0, zorder=0)
+            labels.append((x + 0.27, short_arm(ds, name) +
+                           ("" if r["ate"] < DIVERGED_ATE_M else " $\\dagger$")))
             x += 1.2
         x += 0.5
     ax.set_yscale("log")
     ax.set_xticks([p for p, _ in labels])
-    ax.set_xticklabels([l for _, l in labels], rotation=60, ha="right", fontsize=6.5)
+    ax.set_xticklabels([l for _, l in labels], rotation=90, ha="center",
+                       va="top", fontsize=6.6)
     ax.set_ylabel("RMS [deg, log]", color=TH["ink2"], fontsize=9)
     ax.set_title("(a) orientation error by axis: solid = yaw, hatched = pitch, dotted = roll. "
-                 "A floor robot's pitch and roll error is gravity alignment, not drift.",
+                 "Faded = scored over the whole run, opaque = scored after the published\n"
+                 "    world frame exists. The faded excess is the pre-initialisation frame, "
+                 "not drift: it moves all three axes equally and VINS-Fusion has none of it. "
+                 "Shaded columns, $\\dagger$: the five diverged runs.",
                  fontsize=9.5, loc="left", color=TH["ink"])
 
-    # (b) rotation error against the truth's own turn rate
-    ax = fig.add_subplot(gs[1, 0]); style(ax)
-    edges = np.array([0, 2, 5, 10, 20, 40, 80])
-    for name in [n for n, _, _, _ in ARMS]:
-        es = [e for (d, n2), e in ser.items() if n2 == name]
-        if not es:
+    # (b) the frame switch is one event -- the evidence panel (a) is split on
+    ax = fig.add_subplot(gs_b[0, 0]); style(ax)
+    ds0 = BAGS[0]
+    sw = [r["t_switch"] for r in rows
+          if r["dataset"] == ds0 and np.isfinite(r["t_switch"])]
+    for name, _, _, _ in ARMS:
+        e = ser.get((ds0, name))
+        if e is None:
             continue
-        w = np.concatenate([np.abs(e["omega"]) for e in es])
-        r = np.concatenate([e["roterr"] for e in es])
-        med, ctr = [], []
-        for a, b in zip(edges[:-1], edges[1:]):
-            m = (w >= a) & (w < b)
-            if m.sum() > 40:
-                med.append(np.median(r[m])); ctr.append(0.5 * (a + b))
-        if med:
-            ax.plot(ctr, med, "o-", ms=4, lw=1.4, color=COL[name], label=name)
-    ax.set_xlabel("ground-truth turn rate |$\\omega$| [deg/s]", color=TH["ink2"], fontsize=9)
-    ax.set_ylabel("median rotation error [deg]", color=TH["ink2"], fontsize=9)
-    ax.set_title("(b) does turning raise it?", fontsize=9.5, loc="left", color=TH["ink"])
+        ax.plot(e["t"], np.maximum(e["roterr"], 1e-3), lw=0.9, color=COL[name],
+                label=name, zorder=3)
+    if sw:
+        ax.axvline(float(np.median(sw)), color=TH["ink"], lw=1.0, ls="--", zorder=4)
+        ax.annotate("published world frame\nbegins (%.2f s), found in the\npose stream alone"
+                    % float(np.median(sw)),
+                    xy=(float(np.median(sw)), 60), xytext=(14, 60),
+                    fontsize=8, color=TH["ink2"], va="center",
+                    arrowprops=dict(arrowstyle="->", color=TH["ink2"], lw=0.8))
+    ax.set_yscale("symlog", linthresh=0.1)
+    ax.set_ylim(0, 200)
+    ax.set_xlabel("time [s]", color=TH["ink2"], fontsize=9)
+    ax.set_ylabel("rotation error [deg, symlog]", color=TH["ink2"], fontsize=9)
+    ax.set_title("(b) the excess is one event, not drift: %s, every arm. One step of ~90 deg at "
+                 "initialisation,\n    then sub-degree for the remaining two minutes; "
+                 "VINS-Fusion publishes in one frame throughout and has no such step."
+                 % ds0.replace("dataset_allsensor_", ""),
+                 fontsize=9.5, loc="left", color=TH["ink"])
 
-    # (c) turning vs straight, paired per run
-    ax = fig.add_subplot(gs[1, 1]); style(ax)
+    # (c) turning vs straight, paired WITHIN each run -- the test the text quotes
+    #     The binned-by-turn-rate panel that used to sit beside this one pooled
+    #     twenty runs across four routes and three estimators into one curve,
+    #     and read against the sentence it illustrated: the pooled top bin rose
+    #     while the paired test below is flat.  A median over a mixture is not
+    #     evidence about any member of it, so only the paired test remains.
+    ax = fig.add_subplot(gs_c[0, 0]); style(ax)
     for r in rows:
         if np.isfinite(r["rot_turn"]) and np.isfinite(r["rot_straight"]):
-            ax.plot([0, 1], [r["rot_straight"], r["rot_turn"]], "-o", ms=4, lw=1.0,
-                    color=COL[r["name"]], alpha=0.8)
+            div = r["ate"] >= DIVERGED_ATE_M
+            ax.plot([0, 1], [r["rot_straight"], r["rot_turn"]],
+                    "--" if div else "-", marker="o", ms=4, lw=1.0,
+                    color=COL[r["name"]], alpha=0.55 if div else 0.9,
+                    markerfacecolor="none" if div else COL[r["name"]])
     ax.set_xticks([0, 1]); ax.set_xticklabels(["straight", "turning"], fontsize=9)
+    ax.set_xlim(-0.25, 1.25)
     ax.set_ylabel("median rotation error [deg]", color=TH["ink2"], fontsize=9)
-    ax.set_title("(c) each run, paired", fontsize=9.5, loc="left", color=TH["ink"])
+    ax.set_title("(c) each run, paired: straight against turning\n"
+                 "    (dashed, open = the diverged runs)",
+                 fontsize=9.5, loc="left", color=TH["ink"])
 
-    # (d) one time series, with turns shaded: is the RMS one event?
-    ax = fig.add_subplot(gs[1, 2]); style(ax)
-    key = next((k for k in ser if k[1] == "ORB-SLAM3 GPU"), None) or (list(ser) or [None])[0]
-    if key is not None:
-        e = ser[key]
-        turning = np.abs(e["omega"]) > TURN_DEG_S
-        ax.fill_between(e["t"], 0, 1, where=turning, transform=ax.get_xaxis_transform(),
-                        color=TH["grid"], alpha=0.7, lw=0)
-        ax.plot(e["t"], e["roterr"], lw=0.9, color=COL[key[1]])
-        ax.set_title("(d) %s, %s: shaded = turning" % (key[0].replace("dataset_allsensor_", ""), key[1]),
-                     fontsize=9.5, loc="left", color=TH["ink"])
-    ax.set_xlabel("time [s]", color=TH["ink2"], fontsize=9)
-    ax.set_ylabel("rotation error [deg]", color=TH["ink2"], fontsize=9)
-
-    fig.legend(*fig.axes[1].get_legend_handles_labels(), loc="lower center", ncol=5,
-               frameon=False, fontsize=8.5, labelcolor=TH["ink2"], bbox_to_anchor=(0.5, -0.005))
-    fig.suptitle("Experiment 1, simulation: the orientation error, by axis and against turn rate",
-                 fontsize=11.5, x=0.012, ha="left", color=TH["ink"])
-    fig.tight_layout(rect=(0, 0.045, 1, 0.96))
+    handles = dict()
+    for a in fig.axes:
+        for h, l in zip(*a.get_legend_handles_labels()):
+            handles.setdefault(l, h)
+    order = [n for n, _, _, _ in ARMS if n in handles]
+    fig.legend([handles[n] for n in order], order, loc="lower center", ncol=5,
+               frameon=False, fontsize=8.5, labelcolor=TH["ink2"],
+               bbox_to_anchor=(0.5, 0.004))
+    fig.suptitle("Experiment 1, simulation: the orientation error, with the published "
+                 "frame separated from the estimate",
+                 fontsize=11.5, x=0.012, y=0.978, ha="left", color=TH["ink"])
     fig.savefig(path, dpi=160, facecolor=TH["surface"])
     plt.close(fig)
     print("  wrote", path)
@@ -352,15 +477,20 @@ def tex_rotation(rows, path):
          "\\caption[Orientation error of the visual arms, by axis and by turn rate.]{Orientation error "
          "of the visual arms. Yaw, pitch and roll are the wrapped per-axis differences between the "
          "aligned estimate and the truth; for a robot on a flat floor a sustained pitch or roll error "
-         "is a gravity-alignment defect rather than drift. The median is given beside the RMS because "
-         "the RMS of an ORB-SLAM3 run is dominated by the single re-alignment at its inertial "
-         "initialisation. ``Turning'' is a ground-truth turn rate above "
-         "\\SI{10}{\\degree\\per\\second}, the threshold the onset analysis uses; the two medians are "
-         "paired within a run. One run per cell.}",
+         "is a gravity-alignment defect rather than drift. ``Anch.'' is the same RMS measured only "
+         "after the instant each run\'s published poses enter the gravity-aligned world frame: until "
+         "inertial initialisation ORB-SLAM3 publishes in the camera optical frame, and the "
+         "\\SIrange{89.8}{90.2}{\\degree} step between the two is located in the pose stream alone, "
+         "without reference to the truth. The unanchored RMS is therefore a measure of that frame "
+         "switch rather than of tracking, and the anchored column is the one to read; the median is "
+         "kept beside it because it was the previous way of saying the same thing. ``Turning'' is a "
+         "ground-truth turn rate above \\SI{10}{\\degree\\per\\second}, the threshold the onset "
+         "analysis uses; the two medians are paired within a run. One run per cell.}",
          "\\label{tab:exp1-rotation-pattern}", "\\small", "\\resizebox{\\textwidth}{!}{%",
-         "\\begin{tabular}{llrrrrrrr}", "\\toprule",
+         "\\begin{tabular}{llrrrrrrrrr}", "\\toprule",
          "Recording & Estimator & Yaw [\\si{\\degree}] & Pitch [\\si{\\degree}] & Roll [\\si{\\degree}] & "
-         "Rot.\\ RMS & Rot.\\ med. & Med.\\ turning & Med.\\ straight \\\\", "\\midrule"]
+         "Rot.\\ RMS & Anch.\\ [\\si{\\second}] & Rot.\\ RMS anch. & Rot.\\ med. & "
+         "Med.\\ turning & Med.\\ straight \\\\", "\\midrule"]
     last = None
     for r in rows:
         first = r["dataset"] != last
@@ -368,10 +498,11 @@ def tex_rotation(rows, path):
             L.append("\\addlinespace")
         last = r["dataset"]
         f = lambda v: "---" if not np.isfinite(v) else "%.2f" % v
-        L.append("%s & %s & %.2f & %.2f & %.2f & %.2f & %.2f & %s & %s \\\\" % (
+        L.append("%s & %s & %.2f & %.2f & %.2f & %.2f & %s & %.2f & %.2f & %s & %s \\\\" % (
             "\\repo{%s}" % r["dataset"].replace("dataset_allsensor_", "") if first else "",
             r["name"], r["yaw_rms"], r["pitch_rms"], r["roll_rms"], r["rot_rms"],
-            r["rot_med"], f(r["rot_turn"]), f(r["rot_straight"])))
+            "---" if not np.isfinite(r["t_switch"]) else "%.2f" % r["t_switch"],
+            r["rot_rms_anch"], r["rot_med"], f(r["rot_turn"]), f(r["rot_straight"])))
     L += ["\\bottomrule", "\\end{tabular}}", "\\end{table}"]
     open(path, "w").write("\n".join(L) + "\n")
 

@@ -241,10 +241,20 @@ def score(run):
                jumps=int(len(row["jumps"])), biggest_jump=row["biggest"], secs=row["secs"], poses=row["poses"],
                path_est=row["path"], path_ref=row["ref"])
     # RPE on the raw poses against ground truth, same call as the other chapters.
+    # vm.load_gt(), NOT vm.load(): the recorded ground truth is the model origin
+    # and every estimator reports the IMU, so the 0.338 m lever arm has to come
+    # off first.  It is a body-frame offset, so it rotates with the robot and
+    # injects a spurious relative displacement of about 0.338*dyaw into every
+    # RPE window that contains a turn.  Scoring with vm.load() here inflated
+    # the visual RPE by 1.6 to 4.9 times and, worse, squeezed the twenty runs
+    # into 0.071-0.116 m where the truth is 0.016-0.070 m -- it manufactured
+    # the uniformity a figure caption then read off it.  The ATE columns of
+    # this same row have always used vm.analyse(), which corrects the arm, so
+    # the two halves of each row were scored against different ground truths.
     e = vm.load(os.path.join(run["dir"], "vio.csv"))
     g = None
     for c in vm.gt_candidates("simulation/" + ds, [(label, run["tree"], run["run"])] + vm.SYSTEMS):
-        g = vm.load(c)
+        g = vm.load_gt(c)
         if g is not None:
             break
     if e is not None and g is not None:
@@ -359,7 +369,7 @@ def write_baseline_table(rows):
           "\\SI{10}{\\metre\\per\\second}; ``Kept'' is the fraction of the bag's stereo pairs the estimator processed (frames lost before the node's own queue count as lost). "
           "Loop-closer state is read from \\repo{loop_closing.csv}, not from the run name. Static and dynamic rows of "
           "one layout share a world geometry and differ in traffic only. "
-          "``Max'' is the largest single position error the run reaches \\emph{after} its initialisation transient --- the same cut the onset analysis of \\cref{tab:realistic-timelines-baseline} makes, after the last jump inside the first \\SI{15}{\\second} --- on the same alignment as the ATE column, and records the excursion that the RMSE averages away. Every ORB-SLAM3 run peaks near \\SI{2.5}{\\second} on the gravity re-alignment that ends its inertial initialisation, at three to four metres; that peak is excluded here because it measures the initialisation and not the driving. ``ATE/path'' is the aligned ATE as a percentage of the ground-truth path length, so that runs over routes of different length can be compared; it is a ratio, not a sub-sequence drift rate. "
+          "``Max'' is the largest single position error the run reaches \\emph{after} its initialisation transient --- the same cut the onset analysis of \\cref{tab:realistic-timelines-baseline} makes, after the last jump inside the first \\SI{15}{\\second} --- on the same alignment as the ATE column, and records the excursion that the RMSE averages away. Every ORB-SLAM3 run peaks at \\SIrange{2.44}{2.57}{\\second} on the gravity re-alignment that ends its inertial initialisation, at \\SIrange{1.09}{4.66}{\\metre}, median \\SI{3.46}{\\metre}; that peak is excluded here because it measures the initialisation and not the driving. ``ATE/path'' is the aligned ATE as a percentage of the ground-truth path length, so that runs over routes of different length can be compared; it is a ratio, not a sub-sequence drift rate. "
           "\\textbf{Bold} marks the lowest ATE, the lowest Max and the lowest jump-free RPE among the five arms of a recording; "
           "with one run per arm it records which run came lowest, not that the arm is better.}\n")
         w("\\label{tab:realistic-baseline}\n\\small\n\\resizebox{\\textwidth}{!}{%\n")
@@ -448,7 +458,17 @@ def fig_trajectories(rows, aligned, theme):
     for ax, ds in zip(axes.ravel(), DATASETS):
         style(ax, th)
         draw_map(ax, ds)
-        g = vm.load_gt(os.path.join(ROOT, "output", "output_vins", "simulation", ds, "ground_truth.csv"))
+        # Resolve the ground truth the way the scorer does.  This used to be
+        # hardcoded to output/output_vins/simulation/<ds>/ground_truth.csv,
+        # which stopped existing when the truth moved under dataset/gt/ on
+        # 6 November; `g` was then None on every panel and the `if` below
+        # silently dropped the reference line from a figure whose whole point
+        # is comparing estimates against it.
+        g = None
+        for _c in vm.gt_candidates("simulation/" + ds):
+            if os.path.exists(_c):
+                g = vm.load_gt(_c)
+                break
         if g is not None:
             ax.plot(g[1][:, 0], g[1][:, 1], color=th["ink"], lw=1.3, label="ground truth", zorder=5)
         for r in rows:

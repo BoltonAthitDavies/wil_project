@@ -1,22 +1,22 @@
 {
-  "experiment_id": "realv7_002_nolc_gpu_p15",
+  "experiment_id": "realv7_002_nolc_gpu_p15w",
   "domain": "real",
   "dataset": "dataset_realv7_002",
-  "generated": "2026-11-11T12:55:14",
-  "command": "script/eval_real_gt.py --dataset dataset_realv7_002 --run orb=noloopclosing_rate1 --systems orb --fit-lever-arm --bag-from-runs --experiment-id realv7_002_nolc_gpu_p15",
-  "git_superproject": "2840cba8418b",
+  "generated": "2026-11-17T17:33:16",
+  "command": "script/eval_real_gt.py --dataset dataset_realv7_002 --dataset-root /media/ambushee/New Volume/wil_rescue --run orb=noloopclosing_rate1 --systems orb --fit-lever-arm --experiment-id realv7_002_nolc_gpu_p15w --themes light",
+  "git_superproject": "359b3a82916b",
   "python": "3.10.12",
   "numpy": "2.2.6",
   "host": "ambushee-Katana-GF66-11UG",
   "bag": {
-    "path": "/home/ambushee/wil_project/dataset/dataset_realv7_002/(absent)",
-    "size_bytes": null,
-    "substituted_from": "estimator logs (--bag-from-runs)",
-    "first_message_robotclock_s": 1793448887.7039514,
-    "duration_s": 96.82981705665588,
-    "message_count": null,
+    "path": "/media/ambushee/New Volume/wil_rescue/dataset_realv7_002/dataset_realv7_002_0.db3",
+    "size_bytes": 2794799104,
+    "substituted_from": null,
+    "first_message_robotclock_s": 1793448886.9411905,
+    "duration_s": 97.65773132800001,
+    "message_count": 49734,
     "wheel_topic": "/feedback/velocity",
-    "wheel_messages": null
+    "wheel_messages": 4878
   },
   "ground_truth": {
     "path": "/home/ambushee/wil_project/dataset/gt/dataset_realv7_002",
@@ -47,14 +47,19 @@
     "heading": false
   },
   "time_alignment": {
-    "offset_s": -3.846571336841535,
-    "source": "estimator-speed correlation (no wheel topic)",
-    "ok": false,
+    "offset_s": -2.6048442204748214,
+    "source": "wheel-speed correlation",
+    "ok": true,
     "curves": {
+      "wheel /feedback/velocity": {
+        "offset_s": -2.6048442204748214,
+        "peak_r": 0.9320849114869425,
+        "second_peak_r": 0.8263700640351448
+      },
       "ORB-SLAM3": {
-        "offset_s": -3.846571336841535,
-        "peak_r": 0.7029877822133771,
-        "second_peak_r": 0.5740316937675304
+        "offset_s": -2.985116707886443,
+        "peak_r": 0.8262218111010716,
+        "second_peak_r": 0.7079225831872639
       }
     },
     "search_s": [
@@ -89,7 +94,7 @@
   "runs": {
     "ORB-SLAM3": {
       "dir": "/home/ambushee/wil_project/output/output_orb/real/dataset_realv7_002/noloopclosing_rate1",
-      "status": "partial (provisional: lever arm not provided; time alignment uncertain)",
+      "status": "partial (provisional: lever arm not provided)",
       "reasons": [
         "tracking loss 0.07 s"
       ],
@@ -173,15 +178,15 @@
       },
       "frame_repair": null,
       "ate_offset_sensitivity": {
-        "-0.2": 0.19859278830096627,
-        "-0.1": 0.19886597716733065,
-        "+0.1": 0.20007928199525402,
-        "+0.2": 0.20177043399921338
+        "-0.2": 0.20369045374744307,
+        "-0.1": 0.20674824345550866,
+        "+0.1": 0.21553872664812732,
+        "+0.2": 0.2205352250822248
       },
       "fitted_lever_arm": {
-        "forward_m": -0.14201210413498472,
-        "left_m": 0.1200700715287542,
-        "ate_rmse_with_fit": 0.13249445194398238
+        "forward_m": -0.21081898920118736,
+        "left_m": 0.10779526692636844,
+        "ate_rmse_with_fit": 0.13143556494527966
       }
     }
   }

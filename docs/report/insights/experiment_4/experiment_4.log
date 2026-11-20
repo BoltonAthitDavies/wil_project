@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  12 NOV 2026 17:01
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  16 NOV 2026 11:46
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -744,7 +744,7 @@ File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 (/usr/share/texlive/texmf-dist/tex/latex/microtype/mt-msb.cfg
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 )
-LaTeX Font Info:    Trying to load font information for T1+pcr on input line 35
+LaTeX Font Info:    Trying to load font information for T1+pcr on input line 36
 .
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1pcr.fd
@@ -755,101 +755,123 @@ Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10.95> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 35.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 36.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <8> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 35.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 36.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <6> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 35.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 36.
  [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
 LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 7
-3.
+4.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ts1ptm.fd
 File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
-)
+) [2]
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 149.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 191.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <7.4> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 149.
-<fig/exp4_error_vs_distance.png, id=30, 722.7pt x 404.712pt>
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 191.
+<fig/exp4_error_vs_distance.png, id=39, 903.375pt x 346.896pt>
 File: fig/exp4_error_vs_distance.png Graphic file (type png)
 <use fig/exp4_error_vs_distance.png>
-Package pdftex.def Info: fig/exp4_error_vs_distance.png  used on input line 169
+Package pdftex.def Info: fig/exp4_error_vs_distance.png  used on input line 210
 .
-(pdftex.def)             Requested size: 455.24411pt x 254.93903pt.
-<fig/exp4_path_U_static_P3_circuit_1.png, id=34, 975.645pt x 476.982pt>
-File: fig/exp4_path_U_static_P3_circuit_1.png Graphic file (type png)
-<use fig/exp4_path_U_static_P3_circuit_1.png>
-Package pdftex.def Info: fig/exp4_path_U_static_P3_circuit_1.png  used on input
- line 183.
+(pdftex.def)             Requested size: 455.24411pt x 174.8185pt.
+<fig/exp4_path_U_static_P3_circuit_5.png, id=45, 975.645pt x 476.982pt>
+File: fig/exp4_path_U_static_P3_circuit_5.png Graphic file (type png)
+<use fig/exp4_path_U_static_P3_circuit_5.png>
+Package pdftex.def Info: fig/exp4_path_U_static_P3_circuit_5.png  used on input
+ line 248.
 (pdftex.def)             Requested size: 455.24411pt x 222.56581pt.
-<fig/exp4_path_I_static_P3_circuit_1.png, id=37, 975.645pt x 476.982pt>
-File: fig/exp4_path_I_static_P3_circuit_1.png Graphic file (type png)
-<use fig/exp4_path_I_static_P3_circuit_1.png>
-Package pdftex.def Info: fig/exp4_path_I_static_P3_circuit_1.png  used on input
- line 200.
+<fig/exp4_path_I_static_P3_circuit_5.png, id=48, 975.645pt x 476.982pt>
+File: fig/exp4_path_I_static_P3_circuit_5.png Graphic file (type png)
+<use fig/exp4_path_I_static_P3_circuit_5.png>
+Package pdftex.def Info: fig/exp4_path_I_static_P3_circuit_5.png  used on input
+ line 267.
 (pdftex.def)             Requested size: 455.24411pt x 222.56581pt.
-<fig/exp4_path_U_dynamic_P1_transit_1.png, id=42, 975.645pt x 476.982pt>
-File: fig/exp4_path_U_dynamic_P1_transit_1.png Graphic file (type png)
-<use fig/exp4_path_U_dynamic_P1_transit_1.png>
-Package pdftex.def Info: fig/exp4_path_U_dynamic_P1_transit_1.png  used on inpu
-t line 214.
+
+Underfull \hbox (badness 2460) in paragraph at lines 276--276
+[]\T1/ptm/b/n/10 (+20) Figure 4.3: |\T1/pcr/m/n/10 I_static\T1/ptm/m/n/10 (+20)
+ , figure-of-eight, [][]: me-dian [][] but the only run of the six to
+ []
+
+
+Underfull \hbox (badness 2027) in paragraph at lines 276--276
+\T1/ptm/m/n/10 (+20) cross a me-tre, for [][] and peak-ing at [][]. It runs on 
+the sec-ond lay-out and its own prior
+ []
+
+<fig/exp4_path_U_static_P2_return_5.png, id=53, 975.645pt x 476.982pt>
+File: fig/exp4_path_U_static_P2_return_5.png Graphic file (type png)
+<use fig/exp4_path_U_static_P2_return_5.png>
+Package pdftex.def Info: fig/exp4_path_U_static_P2_return_5.png  used on input 
+line 282.
 (pdftex.def)             Requested size: 455.24411pt x 222.56581pt.
-<fig/exp4_path_U_static_P2_return_1.png, id=45, 975.645pt x 476.982pt>
-File: fig/exp4_path_U_static_P2_return_1.png Graphic file (type png)
-<use fig/exp4_path_U_static_P2_return_1.png>
-Package pdftex.def Info: fig/exp4_path_U_static_P2_return_1.png  used on input 
-line 226.
-(pdftex.def)             Requested size: 455.24411pt x 222.56581pt.
- [2] [3 <./fig/exp4_error_vs_distance.png>] [4 <./fig/exp4_path_U_static_P3_cir
-cuit_1.png> <./fig/exp4_path_I_static_P3_circuit_1.png>] [5 <./fig/exp4_path_U_
-dynamic_P1_transit_1.png> <./fig/exp4_path_U_static_P2_return_1.png>] [6]
-<fig/exp4_path_U_static_P1_transit_1.png, id=96, 975.645pt x 476.982pt>
-File: fig/exp4_path_U_static_P1_transit_1.png Graphic file (type png)
-<use fig/exp4_path_U_static_P1_transit_1.png>
-Package pdftex.def Info: fig/exp4_path_U_static_P1_transit_1.png  used on input
- line 385.
+[3] [4 <./fig/exp4_error_vs_distance.png>] [5 <./fig/exp4_path_U_static_P3_circ
+uit_5.png> <./fig/exp4_path_I_static_P3_circuit_5.png>] [6 <./fig/exp4_path_U_s
+tatic_P2_return_5.png>]
+<fig/exp4_heading.png, id=84, 903.375pt x 332.442pt>
+File: fig/exp4_heading.png Graphic file (type png)
+<use fig/exp4_heading.png>
+Package pdftex.def Info: fig/exp4_heading.png  used on input line 334.
+(pdftex.def)             Requested size: 455.24411pt x 167.5344pt.
+ [7
+
+ <./fig/exp4_heading.png>] [8]
+<fig/exp4_rtabmap_gating.png, id=106, 903.375pt x 332.442pt>
+File: fig/exp4_rtabmap_gating.png Graphic file (type png)
+<use fig/exp4_rtabmap_gating.png>
+Package pdftex.def Info: fig/exp4_rtabmap_gating.png  used on input line 473.
+(pdftex.def)             Requested size: 455.24411pt x 167.5344pt.
+ [9 <./fig/exp4_rtabmap_gating.png>]
+<fig/exp4_path_U_static_P1_transit_5.png, id=122, 975.645pt x 476.982pt>
+File: fig/exp4_path_U_static_P1_transit_5.png Graphic file (type png)
+<use fig/exp4_path_U_static_P1_transit_5.png>
+Package pdftex.def Info: fig/exp4_path_U_static_P1_transit_5.png  used on input
+ line 590.
 (pdftex.def)             Requested size: 418.82375pt x 204.75618pt.
-<fig/exp4_path_I_static_P1_transit_1.png, id=97, 975.645pt x 476.982pt>
-File: fig/exp4_path_I_static_P1_transit_1.png Graphic file (type png)
-<use fig/exp4_path_I_static_P1_transit_1.png>
-Package pdftex.def Info: fig/exp4_path_I_static_P1_transit_1.png  used on input
- line 398.
+ [10]
+<fig/exp4_path_I_static_P1_transit_5.png, id=130, 975.645pt x 476.982pt>
+File: fig/exp4_path_I_static_P1_transit_5.png Graphic file (type png)
+<use fig/exp4_path_I_static_P1_transit_5.png>
+Package pdftex.def Info: fig/exp4_path_I_static_P1_transit_5.png  used on input
+ line 603.
 (pdftex.def)             Requested size: 418.82375pt x 204.75618pt.
-<fig/exp4_path_I_static_P2_return_1.png, id=98, 975.645pt x 476.982pt>
-File: fig/exp4_path_I_static_P2_return_1.png Graphic file (type png)
-<use fig/exp4_path_I_static_P2_return_1.png>
-Package pdftex.def Info: fig/exp4_path_I_static_P2_return_1.png  used on input 
-line 408.
+<fig/exp4_path_I_static_P2_return_5.png, id=131, 975.645pt x 476.982pt>
+File: fig/exp4_path_I_static_P2_return_5.png Graphic file (type png)
+<use fig/exp4_path_I_static_P2_return_5.png>
+Package pdftex.def Info: fig/exp4_path_I_static_P2_return_5.png  used on input 
+line 617.
 (pdftex.def)             Requested size: 418.82375pt x 204.75618pt.
- [7] [8 <./fig/exp4_path_U_static_P1_transit_1.png> <./fig/exp4_path_I_static_P
-1_transit_1.png>] [9 <./fig/exp4_path_I_static_P2_return_1.png>] [10
+ [11] [12 <./fig/exp4_path_U_static_P1_transit_5.png> <./fig/exp4_path_I_static
+_P1_transit_5.png>] [13 <./fig/exp4_path_I_static_P2_return_5.png>] [14
 
 ] (./experiment_4.aux)
 Package rerunfilecheck Info: File `experiment_4.out' has not changed.
 (rerunfilecheck)             Checksum: A66F9E3E0D23906C31CD2EF333A92797;286.
  ) 
 Here is how much of TeX's memory you used:
- 20505 strings out of 480171
- 390535 string characters out of 5894489
+ 20602 strings out of 480171
+ 391480 string characters out of 5894489
  700728 words of memory out of 5000000
- 37822 multiletter control sequences out of 15000+600000
- 536975 words of font info for 318 fonts, out of 8000000 for 9000
+ 37835 multiletter control sequences out of 15000+600000
+ 542120 words of font info for 369 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
- 76i,9n,82p,1009b,878s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 76i,9n,82p,1009b,882s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
 e/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texm
 f-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/
 fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/
-type1/urw/courier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/tim
-es/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb><
-/usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on experiment_4.pdf (10 pages, 1489099 bytes).
+type1/urw/courier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/sym
+bol/usyr.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></
+usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texli
+ve/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on experiment_4.pdf (14 pages, 1374873 bytes).
 PDF statistics:
- 173 PDF objects out of 1000 (max. 8388607)
- 122 compressed objects within 2 object streams
- 40 named destinations out of 1000 (max. 500000)
- 74817 words of extra memory for PDF output out of 89155 (max. 10000000)
+ 207 PDF objects out of 1000 (max. 8388607)
+ 147 compressed objects within 2 object streams
+ 46 named destinations out of 1000 (max. 500000)
+ 80966 words of extra memory for PDF output out of 89155 (max. 10000000)
 

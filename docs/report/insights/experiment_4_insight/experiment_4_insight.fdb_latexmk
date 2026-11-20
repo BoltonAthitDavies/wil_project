@@ -1,11 +1,11 @@
 # Fdb version 3
-["pdflatex"] 1794477915 "experiment_4_insight.tex" "experiment_4_insight.pdf" "experiment_4_insight" 1794477916
-  "../../../../output/compare/simulation/exp4-nav-insights/excursions.tex" 1794476558 484 20fde06bc367dc477d798330bbd17e49 ""
-  "../../../../output/compare/simulation/exp4-nav-insights/fig_excursions.png" 1794476559 203873 1cff7e753ff05f1708718d920607f520 ""
-  "../../../../output/compare/simulation/exp4-nav-insights/fig_prior_value.png" 1794476559 81585 e068b97014d2650d52d38e94f0483aac ""
-  "../../../../output/compare/simulation/exp4-nav-insights/fig_rotation.png" 1794476558 112330 0028537c214aa8cb1eba8d26faf34fca ""
-  "../../../../output/compare/simulation/exp4-nav-insights/prior_value.tex" 1794476558 978 dfc4e30460fdd9e4263eaa9aed010f52 ""
-  "../../../../output/compare/simulation/exp4-nav-insights/rotation.tex" 1794476558 1086 451b85590eae9287f5c536f9aac9091f ""
+["pdflatex"] 1794747248 "experiment_4_insight.tex" "experiment_4_insight.pdf" "experiment_4_insight" 1794747249
+  "../../../../output/compare/simulation/exp4-nav-insights/excursions.tex" 1794747238 407 262819187ce37c9526269a2d2e720132 ""
+  "../../../../output/compare/simulation/exp4-nav-insights/fig_excursions.png" 1794747239 109831 3be8b2e589256194a07a82dd7822bb15 ""
+  "../../../../output/compare/simulation/exp4-nav-insights/fig_prior_value.png" 1794747239 77290 32b005769b30ef59401cbbeacdab81a3 ""
+  "../../../../output/compare/simulation/exp4-nav-insights/fig_rotation.png" 1794747238 106216 2def06ae279a322865d0b2c6f878638e ""
+  "../../../../output/compare/simulation/exp4-nav-insights/prior_value.tex" 1794747238 910 348319dd837ea1b59ebede5d41423b41 ""
+  "../../../../output/compare/simulation/exp4-nav-insights/rotation.tex" 1794747238 1000 07149e94229bd506f2c7e234c2286911 ""
   "../common/preamble.tex" 1794477676 3675 2995403dbc49cf664bb90eb0a9c106bc ""
   "/etc/texmf/web2c/texmf.cnf" 1789525515 475 c0e671620eb5563b2130f56340a5fde8 ""
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
@@ -147,9 +147,9 @@
   "/usr/share/texmf/web2c/texmf.cnf" 1644012257 39432 7155514e09a3d69036fac785183a21c2 ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1789525526 165012 f177baa1c39a3ebd62c3096a43521a0d ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1789525528 1435854 f4f5f67aa9d1ba2a312ed1460dac1994 ""
-  "experiment_4_insight.aux" 1794477916 8647 ba8d136ed4a8e077b9e52f3c795f0957 "pdflatex"
-  "experiment_4_insight.out" 1794477916 1600 a0a643dbdc546ef7f60f8141b6bf47d0 "pdflatex"
-  "experiment_4_insight.tex" 1794476592 14079 e6f8a780e79b2f0d7fbd3d8f5d9b2286 ""
+  "experiment_4_insight.aux" 1794747249 7907 e151f180ab1d2c4aaabcaba8d82f2f55 "pdflatex"
+  "experiment_4_insight.out" 1794747249 1736 8e1152269572cae0e96c8efc8eecd897 "pdflatex"
+  "experiment_4_insight.tex" 1794747237 14881 8acd9d72d961f6893f14aea8c6a120d9 ""
   (generated)
   "experiment_4_insight.aux"
   "experiment_4_insight.log"

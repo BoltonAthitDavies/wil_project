@@ -4,9 +4,9 @@
 Reads the scorer's outputs (script/eval_real_gt.py, raw tracker export, which
 passes the validity rules on all three recordings):
   output/compare/real/realv7_<ds>_{lc_gpu,nolc_gpu,lc_cpu,nolc_cpu,vins}_raw/
-realv7_000 was scored with its bag present (wheel-speed time offset); 001 and 002
-were scored with --bag-from-runs (bag absent: offset from the estimator's own
-speed, labelled uncertain), and must be re-scored when the bags are mounted.
+All twelve realv7 ORB runs are scored with the bags present (wheel-speed time
+offset, r 0.93-0.99, 17 Nov 2026); the earlier --bag-from-runs scoring (estimator-
+speed offset, labelled uncertain) is retired to trash/exp1_real_p15_nobag_scoring_20261117.
 
 Adds one diagnostic the scorer does not have: the TILT of each estimate.  A
 stereo-inertial estimate of a floor robot should lie in a horizontal plane; the
@@ -43,6 +43,14 @@ ROOT = Path(vm.ROOT)
 R = ROOT / "output" / "compare" / "real"
 OUT = R / "realv7-insights"
 DSS = ("dataset_realv7_000", "dataset_realv7_001", "dataset_realv7_002")
+# realv6_000 joins the VINS table as a DIAGNOSTIC row, exactly as it does in the
+# ORB table of realv7_patch15.py: its tracker export is 1.7 Hz and fails the
+# validity rules written for the 7 Hz one, so the scorer marks it failed. Showing
+# it in the figure and not in the table is what made the two disagree.
+VINS_DSS = ("dataset_realv6_000", "dataset_realv7_000", "dataset_realv7_001",
+            "dataset_realv7_002")
+VINS_RUN = "rate1_002"   # the reported VINS configuration; see the VINS table below
+
 CONF = {"lc_gpu": ("GPU, LC on", "loopclosing_rate1"), "nolc_gpu": ("GPU, LC off", "noloopclosing_rate1"),
         "lc_cpu": ("CPU, LC on", "loopclosing_rate1_cpu"), "nolc_cpu": ("CPU, LC off", "noloopclosing_rate1_cpu")}
 COL = {"lc_gpu": "#2a78d6", "nolc_gpu": "#a347b2", "lc_cpu": "#0097a7", "nolc_cpu": "#e040fb", "vins": "#cc8319"}
@@ -133,21 +141,42 @@ def main():
     (OUT / "tilt_table.tex").write_text("\n".join(L) + "\n")
 
     # ---- VINS table
+    # The reported VINS run is selected by CONFIGURATION, not by date or by
+    # directory order: VINS_RUN names the directory written by the setting that
+    # the real-rig root cause analysis settled on -- fisheye fov_mask_deg 70,
+    # estimate_extrinsic 0, estimate_td 0. The earlier `rate1` directory holds
+    # the diverged runs made before that setting and is kept as defect
+    # evidence, never reported beside its replacement.
     L = [r"\begin{table}[htbp]", r"\centering", r"\small",
-         r"\caption[Realv7: the VINS-Fusion runs.]{VINS-Fusion on the three \repo{dataset_realv7} recordings "
-         r"(\repo{config/wil/stereo_imu.yaml}, IMU noise $\times 10$, gravity norm \num{9.2642}). Frames received "
-         r"against the bag's count (\SI{30}{\hertz} over the recording), IMU use, resets, and where the estimate ended.}",
+         r"\caption[Realv7: the VINS-Fusion runs after the field-of-view repair.]{VINS-Fusion on the three "
+         r"\repo{dataset_realv7} recordings with the configuration the real-rig diagnosis settled on: "
+         r"\repo{config/wil/stereo_imu.yaml} with \texttt{fov\_mask\_deg}~70, \texttt{estimate\_extrinsic}~0 "
+         r"and \texttt{estimate\_td}~0. ATE is planar after SE(2) alignment and RPE is translational over "
+         r"\SI{1}{\second}, with the number of admissible pairs in parentheses --- \repo{realv6_000} has far "
+         r"fewer because its truth is exported at \SI{1.7}{\hertz}, so its RPE rests on a sixth of the evidence "
+         r"the others do and is not comparable with them. ``Frames'' is what the node received against the "
+         r"bag's count at \SI{30}{\hertz}. "
+         r"\repo{realv6_000} is a diagnostic row, as in \cref{tab:real-rig}: the scorer rejects it because that "
+         r"recording's tracker export is \SI{1.7}{\hertz} and fails the validity rules written for the "
+         r"\SI{7}{\hertz} one, not because of anything the estimator did. The lever arm is still unmeasured, "
+         r"so every value is provisional.}",
          r"\label{tab:realv7-vins}",
          r"\resizebox{\textwidth}{!}{%",
-         r"\begin{tabular}{lrrrrr}", r"\toprule",
-         r"Recording & frames received & IMU received / used & resets & z range [m] & $|p|$ at end [m] \\", r"\midrule"]
-    for ds in DSS:
-        rdir = ROOT / "output" / "output_vins" / "real" / ds / "rate1"; s = summary(rdir)
-        a = np.loadtxt(rdir / "vio.csv", delimiter=","); r_end = float(np.hypot(a[-1, 1], a[-1, 2]))
+         r"\begin{tabular}{lrrrrrrl}", r"\toprule",
+         r"Recording & ATE [\si{\metre}] & median [\si{\metre}] & RPE \SI{1}{\second} [\si{\metre}] & "
+         r"path ratio & frames & resets & status \\", r"\midrule"]
+    for ds in VINS_DSS:
+        rdir = ROOT / "output" / "output_vins" / "real" / ds / VINS_RUN
+        s_ = summary(rdir)
+        a = np.loadtxt(rdir / "vio.csv", delimiter=",")
         span = (a[-1, 0] - a[0, 0]) * 1e-9
-        L.append(f"\\repo{{{ds[8:]}}} & {s.get('images_received', '?')} of about {int(round(span * 30))} & "
-                 f"{s.get('imu_messages_received', '?')} / {s.get('imu_samples_used', '?')} & {s.get('resets', '?')} & "
-                 f"{np.ptp(a[:, 3]):.0f} & {r_end:.0f} \\\\")
+        mf = ROOT / "output" / "compare" / "real" / f"{ds[8:]}_vins_{VINS_RUN}" / "real_gt_metrics.csv"
+        m = list(csv.DictReader(open(mf)))[0] if mf.exists() else {}
+        st = (m.get("status", "?").split("(")[0]).strip()
+        L.append(f"\\repo{{{ds[8:]}}} & {float(m['ate_rmse']):.3f} & {float(m['ate_median']):.3f} & "
+                 f"{float(m['rpe1_trans_rmse']):.3f} ({m['rpe1_pairs']}) & {float(m['path_ratio']):.2f} & "
+                 f"{s_.get('images_received', '?')} of {int(round(span * 30))} & "
+                 f"{s_.get('resets', '?')} & {st} \\\\")
     L += [r"\bottomrule", r"\end{tabular}}", r"\end{table}"]
     (OUT / "vins_table.tex").write_text("\n".join(L) + "\n")
 

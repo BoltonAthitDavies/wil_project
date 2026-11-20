@@ -1,0 +1,32 @@
+\documentclass[11pt,aspectratio=169]{beamer}
+% WiL architecture deck, 18 November 2026.
+% Purpose: open the black box. Every component of the stack is explained once,
+% with the data that enters and leaves it; section 2 then attaches each result
+% with a mechanism to the component that explains it (s7_results.tex).
+% Component IDs (ORB-3, RTAB-6, ...) are stable: reference them, never page
+% numbers.
+\input{preamble}
+\input{strips}
+
+\title{How the WiL system works}
+\subtitle{The architecture, component by component \textperiodcentered\
+  ORB-SLAM3, VINS-Fusion, RTAB-Map and Nav2}
+\author{Bolton Athit Davies}
+\date{18 November 2026 \textperiodcentered\ architecture, then the results it explains}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\input{s0_howto}
+\input{s1_system}
+\input{s2_orb}
+\input{s3_vins}
+\input{s4_rtab}
+\input{s5_nav}
+\input{s7_results}
+\input{s6_index}
+
+\end{document}

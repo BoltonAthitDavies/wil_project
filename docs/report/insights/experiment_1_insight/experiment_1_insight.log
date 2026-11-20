@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  12 NOV 2026 17:44
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  13 NOV 2026 09:24
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -745,7 +745,7 @@ File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 (/usr/share/texlive/texmf-dist/tex/latex/microtype/mt-msb.cfg
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 )
-LaTeX Font Info:    Trying to load font information for T1+pcr on input line 20
+LaTeX Font Info:    Trying to load font information for T1+pcr on input line 21
 .
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1pcr.fd
@@ -756,13 +756,13 @@ Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10.95> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 20.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 21.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <8> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 20.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 21.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <6> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 20.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 21.
 LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 6
-7.
+4.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ts1ptm.fd
 File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
@@ -779,7 +779,7 @@ LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <5> not available
 )
 (../../../../output/compare/simulation/exp1-insights/turning.tex)
 <../../../../output/compare/simulation/exp1-insights/fig_decomposition_light.pn
-g, id=54, 1084.05pt x 578.16pt>
+g, id=55, 1084.05pt x 578.16pt>
 File: ../../../../output/compare/simulation/exp1-insights/fig_decomposition_lig
 ht.png Graphic file (type png)
 <use ../../../../output/compare/simulation/exp1-insights/fig_decomposition_ligh
@@ -797,7 +797,7 @@ File: ../../../../output/compare/simulation/exp1-insights/fig_imu_law_light.png
 <use ../../../../output/compare/simulation/exp1-insights/fig_imu_law_light.png>
 
 Package pdftex.def Info: ../../../../output/compare/simulation/exp1-insights/fi
-g_imu_law_light.png  used on input line 152.
+g_imu_law_light.png  used on input line 151.
 (pdftex.def)             Requested size: 455.24411pt x 182.0993pt.
  [4 <../../../../output/compare/simulation/exp1-insights/fig_imu_law_light.png>
 ]
@@ -814,7 +814,7 @@ g_nees_light.png  used on input line 201.
 ! Missing $ inserted.
 <inserted text> 
                 $
-l.229 ...heel odometry's uniform \num{\approx 1.0}
+l.231 ...heel odometry's uniform \num{\approx 1.0}
                                                   , so part of
 I've inserted a begin-math/end-math symbol since I think
 you left one out. Proceed, with fingers crossed.
@@ -822,7 +822,7 @@ you left one out. Proceed, with fingers crossed.
 ! Missing $ inserted.
 <inserted text> 
                 $
-l.229 ...heel odometry's uniform \num{\approx 1.0}
+l.231 ...heel odometry's uniform \num{\approx 1.0}
                                                   , so part of
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -838,7 +838,7 @@ File: ../../../../output/compare/simulation/exp1-insights/fig_orb_failure_light
 <use ../../../../output/compare/simulation/exp1-insights/fig_orb_failure_light.
 png>
 Package pdftex.def Info: ../../../../output/compare/simulation/exp1-insights/fi
-g_orb_failure_light.png  used on input line 288.
+g_orb_failure_light.png  used on input line 296.
 (pdftex.def)             Requested size: 455.24411pt x 191.20427pt.
  [6] [7 <../../../../output/compare/simulation/exp1-insights/fig_orb_failure_li
 ght.png>]
@@ -847,13 +847,13 @@ Package rerunfilecheck Info: File `experiment_1_insight.out' has not changed.
 (rerunfilecheck)             Checksum: B591A0E4C0ACE1BC756C266C9D9504D1;3103.
  ) 
 Here is how much of TeX's memory you used:
- 20628 strings out of 480171
- 393043 string characters out of 5894489
+ 20622 strings out of 480171
+ 393030 string characters out of 5894489
  707752 words of memory out of 5000000
- 37856 multiletter control sequences out of 15000+600000
- 561665 words of font info for 382 fonts, out of 8000000 for 9000
+ 37858 multiletter control sequences out of 15000+600000
+ 563169 words of font info for 376 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
- 76i,15n,82p,1017b,960s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 76i,15n,82p,1017b,927s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
 e/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texm
 f-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/
@@ -863,10 +863,10 @@ bol/usyr.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/symbol/usyr.pfb></u
 sr/share/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texliv
 e/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fo
 nts/type1/urw/times/utmri8a.pfb>
-Output written on experiment_1_insight.pdf (9 pages, 722711 bytes).
+Output written on experiment_1_insight.pdf (9 pages, 724323 bytes).
 PDF statistics:
  195 PDF objects out of 1000 (max. 8388607)
  156 compressed objects within 2 object streams
  48 named destinations out of 1000 (max. 500000)
- 102997 words of extra memory for PDF output out of 106986 (max. 10000000)
+ 107093 words of extra memory for PDF output out of 128383 (max. 10000000)
 

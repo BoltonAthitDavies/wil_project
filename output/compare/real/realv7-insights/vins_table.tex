@@ -1,16 +1,17 @@
 \begin{table}[htbp]
 \centering
 \small
-\caption[Realv7: the VINS-Fusion runs.]{VINS-Fusion on the three \repo{dataset_realv7} recordings (\repo{config/wil/stereo_imu.yaml}, IMU noise $\times 10$, gravity norm \num{9.2642}). Frames received against the bag's count (\SI{30}{\hertz} over the recording), IMU use, resets, and where the estimate ended.}
+\caption[Realv7: the VINS-Fusion runs after the field-of-view repair.]{VINS-Fusion on the three \repo{dataset_realv7} recordings with the configuration the real-rig diagnosis settled on: \repo{config/wil/stereo_imu.yaml} with \texttt{fov\_mask\_deg}~70, \texttt{estimate\_extrinsic}~0 and \texttt{estimate\_td}~0. ATE is planar after SE(2) alignment and RPE is translational over \SI{1}{\second}, with the number of admissible pairs in parentheses --- \repo{realv6_000} has far fewer because its truth is exported at \SI{1.7}{\hertz}, so its RPE rests on a sixth of the evidence the others do and is not comparable with them. ``Frames'' is what the node received against the bag's count at \SI{30}{\hertz}. \repo{realv6_000} is a diagnostic row, as in \cref{tab:real-rig}: the scorer rejects it because that recording's tracker export is \SI{1.7}{\hertz} and fails the validity rules written for the \SI{7}{\hertz} one, not because of anything the estimator did. The lever arm is still unmeasured, so every value is provisional.}
 \label{tab:realv7-vins}
 \resizebox{\textwidth}{!}{%
-\begin{tabular}{lrrrrr}
+\begin{tabular}{lrrrrrrl}
 \toprule
-Recording & frames received & IMU received / used & resets & z range [m] & $|p|$ at end [m] \\
+Recording & ATE [\si{\metre}] & median [\si{\metre}] & RPE \SI{1}{\second} [\si{\metre}] & path ratio & frames & resets & status \\
 \midrule
-\repo{realv7_000} & 1155 of about 2663 & 17906 / 19053 & 0 & 12834403 & 37554 \\
-\repo{realv7_001} & 1541 of about 3686 & 24809 / 26340 & 0 & 3701 & 15974 \\
-\repo{realv7_002} & 1271 of about 2910 & 19368 / 20627 & 0 & 25937 & 5252 \\
+\repo{realv6_000} & 0.786 & 0.518 & 0.048 (77) & 0.82 & 1635 of 6588 & 0 & failed \\
+\repo{realv7_000} & 0.464 & 0.434 & 0.064 (478) & 1.10 & 666 of 2709 & 0 & completed \\
+\repo{realv7_001} & 0.676 & 0.672 & 0.090 (622) & 1.13 & 991 of 3777 & 0 & completed \\
+\repo{realv7_002} & 0.374 & 0.334 & 0.055 (492) & 1.11 & 686 of 2917 & 0 & completed \\
 \bottomrule
 \end{tabular}}
 \end{table}

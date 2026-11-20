@@ -1,0 +1,244 @@
+%YAML:1.0
+
+# ---------------------------------------------------------------------------
+# MEASURED-IMU-NOISE TREATMENT, ONE RECORDING: dataset_allsensor_realistic_002
+# Generated 2026-11-13 from orbslam3_ros2/config/wil_sim/stereo_imu.yaml.
+#
+# Identical to that file except the four IMU noise parameters, which are the
+# noise model the EKF "measured noise (diag.)" arm of table 4.3 was given FOR
+# THIS RECORDING. Source, with its own provenance block:
+#   output/compare/simulation/exp1-realistic/noise/dataset_allsensor_realistic_002/sensor_noise.yaml
+# consumed by output/output_ekf_measured/simulation/dataset_allsensor_realistic_002/
+# (run_metadata.csv records the same two sigmas).
+#
+# The filter stores a per-sample sigma and ORB-SLAM3 wants a continuous
+# density, so each is divided by sqrt(200) for the 200 Hz IMU:
+#   gyro  z  sigma 0.004401494  -> 0.000311233  rad/s/sqrt(Hz)
+#   accel x  sigma 0.254973570  -> 0.018029354  m/s^2/sqrt(Hz)
+# The EKF uses the gyro z and accel x axes only, so those are the axes taken.
+# Its static calibration window on this bag was 1.40 s
+# (280 IMU samples), from 46.74 s.
+#
+# WHY PER RECORDING. The four bags were calibrated separately and do not agree:
+# gyro 3.1123e-4..3.5509e-4 across them, accel 1.5140e-2..2.4489e-2. One config
+# cannot carry four values, so stereo_imu_truenoise.yaml holds their mean and
+# these four hold the exact per-bag models. Use THESE when the point is parity
+# with table 4.3; use the mean file when one config must serve all four.
+#
+# READ BEFORE QUOTING A RESULT. Accel x is the direction of travel and its
+# static window is contaminated by real longitudinal motion. The spread above
+# tracks how still the robot happened to be during each window, not the sensor:
+# the simulator injects 4.0e-3, and every value here is three to six times that,
+# close to the inflated 2.0e-2 of the baseline config. So this treatment loosens
+# the GYRO and barely moves the accelerometer. It equalises what the two
+# estimators are told about their sensors; it is not the simulator's true noise.
+#
+# IMU.AccWalk has no counterpart: the filter carries no accelerometer-bias
+# random-walk state. It keeps the value derived from the simulator model
+# (6.0e-3 m/s^2 bias, tau 300 s -> sigma_b*sqrt(2/tau)), the only non-arbitrary
+# choice available, and is the one parameter here not taken from the EKF.
+# ---------------------------------------------------------------------------
+
+# ORB-SLAM3 STEREO-INERTIAL -- simulated WiL rig, Gazebo Fortress.
+#
+# The ORB-SLAM3 twin of vins_fusion_ros2/config/wil_sim/stereo_imu.yaml. Every
+# number here is derived from the same source of truth, the sensor definitions in
+#   aws-robomaker-small-warehouse-world/models/ackermann_robot/model.sdf
+# so the two systems are genuinely being fed the same rig and a difference in
+# their trajectories is a difference in the algorithms, not the calibration.
+#
+# Bring the sim up with
+#   ros2 launch aws_robomaker_small_warehouse_world small_warehouse.launch.py
+# or replay
+#   ros2 bag play dataset/sim --clock
+#
+# NOTE ON KEY NAMES. ORB-SLAM3 counts cameras from 1 and VINS from 0, so
+# ORB-SLAM3's "Camera1" is VINS's cam0 and its "IMU.T_b_c1" is VINS's
+# body_T_cam0. Same quantities, same directions, different spelling.
+
+File.version: "1.0"
+
+#--------------------------------------------------------------------------------------------
+# Loop closing
+#--------------------------------------------------------------------------------------------
+# The ONLY loop-closing knob ORB-SLAM3 exposes to YAML. Everything else -- the 3
+# BoW candidates, the 3 consecutive confirmations, the 30/50/100 match gates and
+# the 0.008 rad roll/pitch gravity check -- is hard-coded in LoopClosing.cc and
+# needs a library rebuild to change.
+#
+# System.cc reads it straight off the FileStorage, before the Settings parser, so
+# it is a bare top-level key like File.version rather than something namespaced.
+# It is cast to int: write 0 or 1, NOT false/true, which OpenCV will not parse.
+# Absent means 1.
+#
+# Set to 0 deliberately. On dataset_allsensor_003 place recognition ran 527 times
+# and produced 64 loop candidates; the gravity check rejected 63 of them as
+# "BAD LOOP!!!". The single one that passed (KF 467 <- KF 256) applied an 18.69 m
+# correction and put a 30 m discontinuity into vio.csv at t=88.3 s on a 190 m
+# trajectory -- a false positive that survived. The checks also cost ~51 ms per
+# keyframe, 23.9 s over that run, even when finding nothing.
+#
+# CAUTION: 0 disables place recognition, loop closure AND map merging together.
+# dataset_dynamic_nofloortexture_02_000 logged a genuine merge, so that sequence
+# is not a like-for-like comparison. Restore stock behaviour with 1.
+LocalMapping.initWithBacklog: 1    # 0 = upstream: initialise only with an empty keyframe queue
+LocalMapping.resetOnLowMotion: 0   # 1 = upstream: reset the map on <2 cm keyframe spacing within 10 s
+loopClosing: 1
+ORBextractor.useGPU: 0
+# System.SaveAtlasToFile: "warehouse_map_realistic_01_v1p5"
+# System.LoadAtlasFromFile: "warehouse_map_realistic"
+
+# System.SaveAtlasToFile: "warehouse_map_realistic_01_v2"
+# System.LoadAtlasFromFile: "warehouse_map_realistic_01"
+
+# System.SaveAtlasToFile: "warehouse_map_realistic_dynamic"
+# System.LoadAtlasFromFile: "warehouse_map_realistic_dynamic"
+
+# System.SaveAtlasToFile: "warehouse_map_realistic_01_dynamic"
+# System.LoadAtlasFromFile: "warehouse_map_realistic_01_dynamic"
+#--------------------------------------------------------------------------------------------
+# Cameras
+#--------------------------------------------------------------------------------------------
+# An ideal gz camera is a perfect pinhole with square pixels and the principal
+# point exactly at the image centre, so the intrinsics follow from <image> and
+# <horizontal_fov> alone and there is nothing to calibrate:
+#   fx = fy = (width/2) / tan(hfov/2) = 640 / tan(45 deg) = 640
+#   cx, cy = 640, 360
+#   all distortion = 0
+# Valid only while model.sdf says 1280x720 at horizontal_fov 1.5707963268.
+Camera.type: "PinHole"
+
+# Camera1 == cam0 == the LEFT camera.
+Camera1.fx: 640.0
+Camera1.fy: 640.0
+Camera1.cx: 640.0
+Camera1.cy: 360.0
+
+Camera1.k1: 0.0
+Camera1.k2: 0.0
+Camera1.p1: 0.0
+Camera1.p2: 0.0
+
+# Camera2 == cam1 == the RIGHT camera. Identical to cam0, and legitimately so:
+# both sensors are declared with the same <image> and <horizontal_fov>, and a
+# simulated pinhole has no manufacturing spread to distinguish them.
+Camera2.fx: 640.0
+Camera2.fy: 640.0
+Camera2.cx: 640.0
+Camera2.cy: 360.0
+
+Camera2.k1: 0.0
+Camera2.k2: 0.0
+Camera2.p1: 0.0
+Camera2.p2: 0.0
+
+Camera.width: 1280
+Camera.height: 720
+
+# model.sdf <update_rate>30</update_rate>. The recorded bag averages ~24 Hz
+# because Gazebo runs below real time; fps only feeds ORB-SLAM3's keyframe
+# spacing heuristic, so the nominal rate is the right thing to declare.
+Camera.fps: 30
+
+# Ignored: the node converts to mono8 before handing frames over, precisely so
+# this setting cannot silently differ between the sim (rgb8) and the real rig.
+Camera.RGB: 1
+
+#--------------------------------------------------------------------------------------------
+# Stereo geometry
+#--------------------------------------------------------------------------------------------
+# Close/far threshold, in units of the stereo baseline. EuRoC ships 60, but its
+# baseline is 0.11 m; ours is 0.0936 m, so 60 would put the split at only 5.6 m.
+# 90 gives ~8.4 m, which suits warehouse aisle depths.
+Stereo.ThDepth: 90.0
+
+# cam0 -> cam1, computed as inv(body_T_cam0) @ body_T_cam1 from the VINS config.
+# Both cameras carry the identical body->optical rotation, so the relative
+# rotation cancels exactly and what remains is a pure baseline translation on
+# cam0's optical +X -- which is the formal statement of "cam1 is the RIGHT
+# camera". If a run ever looks inverted, this sign is the first thing to check;
+# script/check_stereo_side.py settles it empirically from a bag.
+#
+# The images need no rectification: identical intrinsics, zero distortion and a
+# pure-X translation mean the pair is already rectified by construction.
+Stereo.T_c1_c2: !!opencv-matrix
+  rows: 4
+  cols: 4
+  dt: f
+  data: [1.0, 0.0, 0.0, 0.0936,
+         0.0, 1.0, 0.0, 0.0,
+         0.0, 0.0, 1.0, 0.0,
+         0.0, 0.0, 0.0, 1.0]
+
+#--------------------------------------------------------------------------------------------
+# IMU
+#--------------------------------------------------------------------------------------------
+# body(imu) <- cam0. Identical to VINS's body_T_cam0, copied verbatim.
+#
+# The rotation block [[0,0,1],[-1,0,0],[0,-1,0]] is the fixed REP-103 body
+# (x-forward, y-left, z-up) to REP-104 optical (x-right, y-down, z-forward)
+# transform. The translation is the camera origin minus the IMU origin in the
+# body frame, from the model.sdf base_footprint poses:
+#   imu_link (0.338, 0,      0.192 )
+#   cam0     (0.496, 0.0936, 0.4395)
+# giving a real 0.25 m lever arm -- unlike the real rig, where this is still a
+# zeroed placeholder. These are exact model geometry, not a calibration result.
+IMU.T_b_c1: !!opencv-matrix
+  rows: 4
+  cols: 4
+  dt: f
+  data: [ 0.0,  0.0,  1.0,  0.158,
+         -1.0,  0.0,  0.0,  0.0936,
+          0.0, -1.0,  0.0,  0.2475,
+          0.0,  0.0,  0.0,  1.0]
+
+# Mapped 1:1 from the VINS config -- ORB-SLAM3 and VINS use the same
+# continuous-density convention, so NoiseGyro==gyr_n, NoiseAcc==acc_n,
+# GyroWalk==gyr_w, AccWalk==acc_w with no unit conversion.
+#
+# These are ~5x looser than the ADIS16448 ground truth in model.sdf
+# (gyro 0.0003394, accel 0.004), deliberately, and that slack is carried over
+# from the VINS tuning so the two estimators trust the IMU equally.
+# MEASURED values for dataset_allsensor_realistic_002 (see the header).
+# Baseline (stereo_imu.yaml), kept for reference:
+# IMU.NoiseGyro: 0.002     # rad/s/sqrt(Hz)
+# IMU.NoiseAcc: 0.02       # m/s^2/sqrt(Hz)
+# IMU.GyroWalk: 0.0001     # rad/s^2/sqrt(Hz)
+# IMU.AccWalk: 0.001       # m/s^3/sqrt(Hz)
+IMU.NoiseGyro: 0.000311233    # rad/s/sqrt(Hz)   gyro z of this recording
+IMU.NoiseAcc: 0.018029354    # m/s^2/sqrt(Hz)   accel x of this recording
+IMU.GyroWalk: 0.00001000    # rad/s^2/sqrt(Hz) EKF imu_gyro_bias_rw
+IMU.AccWalk: 0.000489898     # m/s^3/sqrt(Hz)   SDF-derived; the EKF has no accel-bias state
+IMU.Frequency: 200.0
+
+# Simulated gravity is exactly 9.8 (<gravity>0 0 -9.8</gravity>) against
+# ORB-SLAM3's hardcoded 9.81 -- a 0.1% discrepancy, far below the noise floor
+# and not worth correcting. Contrast the real rig, which is off by 5.6%.
+
+#--------------------------------------------------------------------------------------------
+# ORB extractor
+#--------------------------------------------------------------------------------------------
+# 1200 is the EuRoC stereo-inertial default at 752x480. These frames are 2.5x
+# larger in area, so 1500 keeps a similar feature density without making
+# extraction the bottleneck at 30 Hz.
+ORBextractor.nFeatures: 1500
+ORBextractor.scaleFactor: 1.2
+ORBextractor.nLevels: 8
+ORBextractor.iniThFAST: 20
+ORBextractor.minThFAST: 7
+
+#--------------------------------------------------------------------------------------------
+# Viewer
+#--------------------------------------------------------------------------------------------
+Viewer.KeyFrameSize: 0.05
+Viewer.KeyFrameLineWidth: 1.0
+Viewer.GraphLineWidth: 0.9
+Viewer.PointSize: 2.0
+Viewer.CameraSize: 0.08
+Viewer.CameraLineWidth: 3.0
+Viewer.ViewpointX: 0.0
+Viewer.ViewpointY: -0.7
+Viewer.ViewpointZ: -1.8
+Viewer.ViewpointF: 500.0
+# 1280x720 side by side with the map would not fit a laptop screen.
+Viewer.imageViewScale: 0.5

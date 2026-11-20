@@ -1,0 +1,192 @@
+% =============================================================================
+% 1.1  THE WHOLE SYSTEM
+% Layout after "image copy.png": function columns left to right, sensors first,
+% a MAP box underneath, one colour per kind of data.  Rates are from the robot
+% SDF (cameras 30, IMU 200, wheel odometry 50 Hz), the VINS/ORB configs, the
+% camera shim (4 Hz), rtabmap.launch.py (DetectionRate 1 Hz),
+% correction_gate.py (20 Hz), pose_gate.py (2 Hz) and nav2_sim.yaml.
+% =============================================================================
+\section{1.1 The system}
+
+\begin{frame}{1.1 \;The whole system: from camera pixels to wheel commands}
+  \centering
+  \adjustbox{max width=\textwidth, max height=0.80\textheight}{%
+  \begin{tikzpicture}[font=\footnotesize,
+      ib/.style={draw=white, line width=1pt, rounded corners=1pt, align=center,
+                 font=\scriptsize\bfseries, text=black!80, fill=white!92!black,
+                 text width=24mm, minimum height=10mm, inner sep=2pt},
+      hdr/.style={font=\large\bfseries, text=white},
+      dl/.style={-{Latex[length=2.2mm]}, line width=1.3pt},
+      rt/.style={font=\tiny\bfseries, fill=white, inner sep=1pt, text=black!80}]
+    % ---------------- column panels
+    \fill[sensorcol] (0,-4.4) rectangle (3.4,4.2);
+    \node[hdr] at (1.7,3.75) {SENSORS};
+    \fill[perccol] (4.3,-4.4) rectangle (11.1,4.2);
+    \node[hdr] at (7.7,3.75) {PERCEPTION \& LOCALISATION};
+    \fill[plancol] (12.0,-4.4) rectangle (15.0,4.2);
+    \node[hdr] at (13.5,3.75) {PLANNING};
+    \fill[ctrlcol] (16.0,-4.4) rectangle (19.0,4.2);
+    \node[hdr] at (17.5,3.75) {CONTROL};
+    % sub-panels inside perception
+    \fill[black!25!perccol] (4.65,0.95) rectangle (10.75,3.2);
+    \node[font=\scriptsize\bfseries, text=white, anchor=north west] at (4.75,3.15)
+      {VISUAL-INERTIAL ODOMETRY \;(1.2 / 1.3)};
+    \fill[black!25!perccol] (4.65,-4.1) rectangle (10.75,0.45);
+    \node[font=\scriptsize\bfseries, text=white, anchor=north west] at (4.75,0.4)
+      {LOCALISATION ON THE PRIOR MAP \;(1.4)};
+    % ---------------- boxes
+    \node[ib] at (1.7, 2.45) (cam) {STEREO CAMERA\\[1pt]\mdseries 2 $\times$ 1280$\times$720};
+    \node[ib] at (1.7, 0.80) (imu) {IMU\\[1pt]\mdseries gyro + accel};
+    \node[ib] at (1.7,-0.85) (whl) {WHEEL ODOMETRY};
+    \node[ib] at (1.7,-2.50) (gt)  {GROUND TRUTH\\[1pt]\mdseries simulator only};
+    \node[ib, text width=50mm] at (7.7, 1.95) (fe)
+      {FRONT END\\[1pt]\mdseries ORB-SLAM3 \emph{or} VINS-Fusion (one per run)};
+    \node[ib, ours] at (6.3,-0.75) (shim) {CAMERA SHIM\\[1pt]\mdseries ours};
+    \node[ib]       at (9.15,-0.75) (rtab) {RTAB-MAP\\[1pt]\mdseries localise, read-only};
+    \node[ib, ours] at (6.3,-2.95) (cg) {CORRECTION GATE\\[1pt]\mdseries ours};
+    \node[ib, ours] at (9.15,-2.95) (pg) {POSE GATE\\[1pt]\mdseries ours};
+    \node[ib, text width=22mm] at (13.5, 2.45) (bt)  {BEHAVIOUR TREE\\[1pt]\mdseries runs the rest};
+    \node[ib, text width=22mm] at (13.5, 0.70) (gcm) {GLOBAL COSTMAP};
+    \node[ib, text width=22mm] at (13.5,-1.10) (pl)  {PLANNER\\[1pt]\mdseries Smac Hybrid-A*};
+    \node[ib, text width=22mm] at (17.5, 2.45) (lcm) {LOCAL COSTMAP};
+    \node[ib, text width=22mm] at (17.5, 0.70) (ct)  {CONTROLLER\\[1pt]\mdseries pure pursuit};
+    \node[ib, text width=22mm] at (17.5,-1.10) (sm)  {VELOCITY\\SMOOTHER};
+    \node[ib, text width=22mm] at (17.5,-2.95) (drv) {ACKERMANN\\DRIVE};
+    % MAP and SCORING, under the panels as in the reference
+    \node[draw=mapcol, line width=1.3pt, fill=white, font=\scriptsize\bfseries,
+          align=center, text width=30mm, minimum height=10mm] at (12.4,-5.45) (map)
+      {PRIOR MAP\\[1pt]\mdseries RTAB-Map database, built once};
+    \node[draw=black!45, dashed, fill=white, font=\scriptsize, align=center,
+          text width=30mm, minimum height=10mm] at (1.7,-5.45) (eval)
+      {\textbf{OFFLINE SCORING}\\ \repo{vio.csv} vs ground truth};
+    % ---------------- data lines (colour = kind of data)
+    \draw[dl, dimg] ($(cam.east)+(0,0.15)$) -- node[rt, pos=0.45]{30 Hz} ($(fe.west)+(0,0.30)$);
+    \draw[dl, dimu] (imu.east) -- node[rt, pos=0.45]{200 Hz} ($(fe.west)+(0,-0.30)$);
+    \draw[dl, dimg] ($(cam.east)+(0,-0.25)$) -- ++(0.55,0) |- node[rt, pos=0.78]{30 Hz} (shim.west);
+    \draw[dl, dimg] (shim.east) -- node[rt]{4 Hz} (rtab.west);
+    \draw[dl, dpose] (fe.south -| rtab.north) -- node[rt]{pose $\le$30 Hz} (rtab.north);
+    \draw[dl, dpose] (rtab.south west) -- node[rt, pos=0.5]{fix $\approx$1 Hz} (cg.north east);
+    \draw[dl, dpose] (cg.east) -- node[rt]{map$\rightarrow$odom} (pg.west);
+    % the robot's pose reaches planning and control through TF
+    \draw[dl, dpose] (cg.south) -- ++(0,-0.65) -| (12.18,0.45) -- ($(gcm.west)+(0,-0.25)$);
+    \draw[dl, dpose] (12.18,-3.75) -| (15.62,2.2) -- ($(lcm.west)+(0,-0.25)$);
+    \node[rt] at (11.55,-3.75) {pose 20 Hz};
+    % gate decides whether Nav2 runs at all
+    \draw[dl, black!70, dashed] (pg.east) -- (11.55,-2.95) |- node[rt, pos=0.35]{start / pause 2 Hz} (bt.west);
+    % the map
+    \draw[dl, dmap] (10.45,-4.95) |- (rtab.east);
+    \draw[dl, dmap] (map.west) -- (10.45,-5.45) -- (10.45,-4.95);
+    \draw[dl, dmap] (map.east) -| (14.82,0.45) -- ($(gcm.east)+(0,-0.25)$);
+    \node[rt] at (14.82,-2.6) {/map once};
+    % planning -> control
+    \draw[dl, dcmd] (gcm) -- (pl);
+    \draw[dl, dcmd] (pl.east) -- (15.3,-1.10) |- node[rt, pos=0.75]{path 1 Hz} (ct.west);
+    \draw[dl, dcmd] (lcm) -- (ct);
+    \draw[dl, dcmd] (ct) -- node[rt]{20 Hz} (sm);
+    \draw[dl, dcmd] (sm) -- node[rt]{/cmd\_vel 20 Hz} (drv);
+    % offline
+    \draw[dl, dwhl, dashed] (whl.west) -- ++(-0.35,0) |- ($(eval.west)+(0,0.15)$);
+    \draw[dl, black!50, dashed] (gt.south) -- node[rt]{50 Hz} (eval.north);
+    \node[rt, text=dwhl] at (0.55,-3.4) {50 Hz};
+  \end{tikzpicture}}
+  \par\vspace{0.2em}
+  \scriptsize\color{black!70}
+  Line colour = kind of data:
+  \textcolor{dimg}{\textbf{images}} \textperiodcentered\
+  \textcolor{dimu}{\textbf{IMU}} \textperiodcentered\
+  \textcolor{dpose}{\textbf{robot pose}} \textperiodcentered\
+  \textcolor{dmap}{\textbf{map}} \textperiodcentered\
+  \textcolor{dcmd}{\textbf{path and commands}} \textperiodcentered\
+  \textcolor{dwhl}{\textbf{wheels}}.
+  \quad Dashed amber box = written for this project.
+  \quad Real rig: same graph; fisheye cameras, optical-tracker ground truth.
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{1.1 \;Three clocks: the system runs at three different speeds, on purpose}
+  \begin{columns}[T]
+    \column{0.60\textwidth}
+      \centering
+      \adjustbox{max width=\linewidth}{%
+      \begin{tikzpicture}[x=9cm, font=\scriptsize]
+        \fill[dimu!10] (0,4.82) rectangle (1,5.18);
+        \lane{5.0}{IMU \textbf{200 Hz}}{200}{dimu}
+        \lane{4.2}{cameras, front end \textbf{30 Hz}}{30}{dimg}
+        \lane{3.4}{controller, gate \textbf{20 Hz}}{20}{dcmd}
+        \lane{2.6}{camera shim \textbf{4 Hz}}{4}{rtabc}
+        \lane{1.8}{costmaps, pose gate \textbf{2 Hz}}{2}{navc}
+        \lane{1.0}{RTAB-Map, planner \textbf{1 Hz}}{1}{dmap}
+        \draw[thick, -{Latex}] (0,0.45) -- (1.03,0.45) node[right]{time};
+        \node[below] at (0,0.45) {0 s}; \node[below] at (1,0.45) {1 s};
+        \draw[decorate, decoration={brace, amplitude=4pt, mirror}, black!50]
+          (1.07,5.2) -- node[right=4pt, align=left]{\textbf{estimate}} (1.07,3.95);
+        \draw[decorate, decoration={brace, amplitude=4pt, mirror}, black!50]
+          (1.07,3.6) -- node[right=4pt, align=left]{\textbf{drive}} (1.07,3.2);
+        \draw[decorate, decoration={brace, amplitude=4pt, mirror}, black!50]
+          (1.07,2.8) -- node[right=4pt, align=left]{\textbf{remember}} (1.07,0.8);
+      \end{tikzpicture}}
+      \par{\scriptsize One second of the system. Each tick is one update.}
+    \column{0.38\textwidth}
+      \small
+      \textbf{\color{dimg}Estimate, fast.} The front end must follow every
+      camera frame and IMU sample, or frames are dropped.
+      \par\vspace{0.6em}
+      \textbf{\color{dcmd}Drive, steady.} The controller corrects the steering
+      20 times a second.
+      \par\vspace{0.6em}
+      \textbf{\color{dmap}Remember, slow.} Recognising a place is expensive and
+      places do not change quickly, so RTAB-Map looks once a second.
+      \par\vspace{0.8em}
+      \scriptsize\color{black!65}
+      Consequence: a slow correction lands on top of a fast estimate. The next
+      slide shows how the two are stacked.
+  \end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{1.1 \;The frame chain: two answers to ``where is the robot?'', stacked}
+  \begin{columns}[T]
+    \column{0.52\textwidth}
+      \centering
+      \adjustbox{max width=\linewidth, max height=0.78\textheight}{%
+      \begin{tikzpicture}[font=\scriptsize,
+          fr/.style={draw=black!60, fill=white, rounded corners=2pt,
+                     font=\small\ttfamily, minimum width=30mm, minimum height=7mm},
+          lk/.style={-{Latex[length=2mm]}, line width=1.6pt}]
+        \node[fr] (map) at (0,0)    {map};
+        \node[fr] (odo) at (0,-1.7) {odom};
+        \node[fr] (vio) at (0,-3.4) {vio\_body};
+        \node[fr] (bfp) at (0,-4.7) {base\_footprint};
+        \node[fr] (bl)  at (0,-6.0) {base\_link};
+        \node[fr] (cm)  at (0,-7.3) {cam0 / cam1};
+        \draw[lk, dpose] (map) -- node[right=3mm, align=left, text=black]
+          {\textbf{RTAB-Map's correction}\\via the correction gate, 20 Hz\\
+           \textcolor{bad}{jumps} when a place is recognised} (odo);
+        \draw[lk, dimg] (odo) -- node[right=3mm, align=left, text=black]
+          {\textbf{the front end's estimate}\\ORB-SLAM3 or VINS-Fusion, $\le$30 Hz\\
+           \textcolor{good}{smooth}, but \textcolor{bad}{drifts} slowly} (vio);
+        \draw[lk, black!45] (vio) -- node[right=3mm, text=black!60]{fixed: how the IMU is mounted} (bfp);
+        \draw[lk, black!45] (bfp) -- node[right=3mm, text=black!60]{fixed} (bl);
+        \draw[lk, black!45] (bl) -- node[right=3mm, text=black!60]{fixed: camera mounting} (cm);
+        \draw[decorate, decoration={brace, amplitude=5pt, mirror}, thick, navc]
+          ($(map.west)+(-0.25,0)$) -- node[left=7pt, align=right, text=navc]
+          {\textbf{what Nav2}\\\textbf{reads}} ($(bl.west)+(-0.25,0)$);
+      \end{tikzpicture}}
+    \column{0.46\textwidth}
+      \small
+      \textbf{Why two links instead of one?}
+      \par\vspace{0.3em}
+      The front end is like a \textbf{watch}: it ticks smoothly every frame, but
+      slowly runs fast or slow.
+      \par\vspace{0.3em}
+      RTAB-Map is like a \textbf{church clock}: right, but you only see it now
+      and then.
+      \par\vspace{0.3em}
+      You keep reading the watch, and reset it whenever you see the clock.
+      \texttt{map}$\rightarrow$\texttt{odom} is that reset.
+      \par\vspace{0.8em}
+      \scriptsize\color{black!65}
+      So the pose Nav2 uses is \emph{watch} $+$ \emph{latest reset}: it moves
+      smoothly between fixes, and steps when a fix arrives.
+  \end{columns}
+\end{frame}

@@ -1,0 +1,74 @@
+% =============================================================================
+% Locator strips: one row of chips per system, in data-flow order, grouped by
+% thread.  On a component slide, \hl{ID} before the strip marks "you are here".
+% =============================================================================
+\newcommand{\orbstrip}{%
+\adjustbox{max width=\textwidth}{%
+\begin{tikzpicture}[node distance=2mm]
+  \node[chip, fill=orbc!12, ORB1] (c1) {ORB-1\\features};
+  \node[chip, fill=orbc!12, ORB2, right=of c1] (c2) {ORB-2\\IMU preint.};
+  \node[chip, fill=orbc!12, ORB3, right=of c2] (c3) {ORB-3\\tracking};
+  \node[chip, fill=orbc!12, ORB4, right=of c3] (c4) {ORB-4\\keyframe};
+  \node[chip, fill=orbc!12, ORB5, right=6mm of c4] (c5) {ORB-5\\local mapping};
+  \node[chip, fill=orbc!12, ORB6, right=of c5] (c6) {ORB-6\\IMU init};
+  \node[chip, fill=orbc!12, ORB7, right=6mm of c6] (c7) {ORB-7\\place recog.};
+  \node[chip, fill=orbc!12, ORB8, right=of c7] (c8) {ORB-8\\loop / merge};
+  \draw[brace] (c1.north west) -- node[above=4pt, grouplbl]{tracking thread $\cdot$ every frame} (c4.north east);
+  \draw[brace] (c5.north west) -- node[above=4pt, grouplbl]{local mapping $\cdot$ every keyframe} (c6.north east);
+  \draw[brace] (c7.north west) -- node[above=4pt, grouplbl]{loop \& merge $\cdot$ background} (c8.north east);
+  \foreach \a/\b in {c1/c2,c2/c3,c3/c4,c4/c5,c5/c6,c6/c7,c7/c8} \draw[arr, thin] (\a) -- (\b);
+\end{tikzpicture}}}
+
+\newcommand{\vinsstrip}{%
+\adjustbox{max width=\textwidth}{%
+\begin{tikzpicture}[node distance=2mm]
+  \node[chip, fill=vinsc!12, VINS1] (c1) {VINS-1\\feature tracker};
+  \node[chip, fill=vinsc!12, VINS2, right=6mm of c1] (c2) {VINS-2\\IMU preint.};
+  \node[chip, fill=vinsc!12, VINS3, right=of c2] (c3) {VINS-3\\initialise};
+  \node[chip, fill=vinsc!12, VINS4, right=of c3] (c4) {VINS-4\\sliding window};
+  \node[chip, fill=vinsc!12, VINS5, right=of c4] (c5) {VINS-5\\marginalise};
+  \node[chip, fill=vinsc!12, VINS6, right=of c5] (c6) {VINS-6\\time offset};
+  \node[chip, off, VINS7, right=6mm of c6] (c7) {VINS-7\\pose graph};
+  \draw[brace] (c1.north west) -- node[above=4pt, grouplbl]{front end} (c1.north east);
+  \draw[brace] (c2.north west) -- node[above=4pt, grouplbl]{estimator $\cdot$ every frame} (c6.north east);
+  \draw[brace] (c7.north west) -- node[above=4pt, grouplbl]{not in our fork} (c7.north east);
+  \foreach \a/\b in {c1/c2,c2/c3,c3/c4,c4/c5,c5/c6} \draw[arr, thin] (\a) -- (\b);
+  \draw[darr, thin, offc] (c6) -- (c7);
+\end{tikzpicture}}}
+
+\newcommand{\rtabstrip}{%
+\adjustbox{max width=\textwidth}{%
+\begin{tikzpicture}[node distance=2mm]
+  \node[chip, fill=rtabc!12, ours, RTAB1] (c1) {RTAB-1\\camera shim};
+  \node[chip, fill=rtabc!12, RTAB2, right=of c1] (c2) {RTAB-2\\odometry in};
+  \node[chip, fill=rtabc!12, RTAB3, right=6mm of c2] (c3) {RTAB-3\\new node};
+  \node[chip, off, RTAB4, right=of c3] (c4) {RTAB-4\\memory};
+  \node[chip, fill=rtabc!12, RTAB5, right=6mm of c4] (c5) {RTAB-5\\detect (words)};
+  \node[chip, fill=rtabc!12, RTAB6, right=of c5] (c6) {RTAB-6\\verify (geom.)};
+  \node[chip, fill=rtabc!12, RTAB7, right=of c6] (c7) {RTAB-7\\graph optim.};
+  \node[chip, fill=rtabc!12, RTAB8, right=6mm of c7] (c8) {RTAB-8\\map assembly};
+  \node[chip, fill=rtabc!12, ours, RTAB9, right=of c8] (c9) {RTAB-9\\output + gate};
+  \draw[brace] (c1.north west) -- node[above=4pt, grouplbl]{input} (c2.north east);
+  \draw[brace] (c3.north west) -- node[above=4pt, grouplbl]{memory} (c4.north east);
+  \draw[brace] (c5.north west) -- node[above=4pt, grouplbl]{loop closure: propose $\rightarrow$ verify $\rightarrow$ optimise} (c7.north east);
+  \draw[brace] (c8.north west) -- node[above=4pt, grouplbl]{output} (c9.north east);
+  \foreach \a/\b in {c1/c2,c2/c3,c3/c4,c4/c5,c5/c6,c6/c7,c7/c8,c8/c9} \draw[arr, thin] (\a) -- (\b);
+\end{tikzpicture}}}
+
+\newcommand{\navstrip}{%
+\adjustbox{max width=\textwidth}{%
+\begin{tikzpicture}[node distance=2mm]
+  \node[chip, fill=navc!12, NAV1] (c1) {NAV-1\\inputs};
+  \node[chip, fill=navc!12, ours, NAV2, right=of c1] (c2) {NAV-2\\pose gate};
+  \node[chip, fill=navc!12, NAV3, right=6mm of c2] (c3) {NAV-3\\global costmap};
+  \node[chip, fill=navc!12, NAV4, right=of c3] (c4) {NAV-4\\local costmap};
+  \node[chip, fill=navc!12, NAV5, right=6mm of c4] (c5) {NAV-5\\planner};
+  \node[chip, fill=navc!12, NAV6, right=of c5] (c6) {NAV-6\\controller};
+  \node[chip, fill=navc!12, NAV7, right=of c6] (c7) {NAV-7\\smoother + drive};
+  \node[chip, fill=navc!12, NAV8, right=6mm of c7] (c8) {NAV-8\\behaviour tree};
+  \draw[brace] (c1.north west) -- node[above=4pt, grouplbl]{inputs} (c2.north east);
+  \draw[brace] (c3.north west) -- node[above=4pt, grouplbl]{costmaps} (c4.north east);
+  \draw[brace] (c5.north west) -- node[above=4pt, grouplbl]{plan $\rightarrow$ follow $\rightarrow$ drive} (c7.north east);
+  \draw[brace] (c8.north west) -- node[above=4pt, grouplbl]{supervisor} (c8.north east);
+  \foreach \a/\b in {c1/c2,c2/c3,c3/c4,c4/c5,c5/c6,c6/c7,c7/c8} \draw[arr, thin] (\a) -- (\b);
+\end{tikzpicture}}}

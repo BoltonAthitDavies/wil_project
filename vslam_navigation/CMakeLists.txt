@@ -14,6 +14,7 @@ install(
     scripts/rtab_trajectory_writer.py
     scripts/localization_recorder.py
     scripts/pose_gate.py
+    scripts/correction_gate.py
     scripts/ackermann_bridge.py
   DESTINATION lib/${PROJECT_NAME})
 

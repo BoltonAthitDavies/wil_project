@@ -48,11 +48,14 @@ scaled by one constant fitted against the tracker on \repo{realv7_000} and
 held, localises the robot to \SI{0.26}{} and \SI{0.22}{\metre} on the other
 two \repo{realv7} recordings and \SI{0.46}{\metre} on \repo{realv6}, where
 the best ORB-SLAM3 run reads \SI{0.44}{}, \SI{0.17}{} and \SI{0.46}{\metre}.
-On routes of \SIrange{22}{37}{\metre} the two families are in the same
-accuracy class: the baseline leads on one held recording, ties on another, and
+On routes of \SIrange{22}{37}{\metre} the baseline and ORB-SLAM3 are in the
+same accuracy class: the baseline leads on one held recording, ties on another, and
 is beaten on the third by the runs that followed the initialisation patch of
-\cref{sec:exp1-real}. Neither result is the one a \SI{20}{\metre} route can
-settle. The baseline carries one tuned constant and no yaw-rate observation,
+\cref{sec:exp1-real}. VINS-Fusion, once its field-of-view and extrinsic
+defects were corrected, reads \SI{0.46}{}, \SI{0.68}{} and
+\SI{0.37}{\metre} on the same three: a valid comparison at last, and third of
+the three families on every recording. Neither result is the one a
+\SI{20}{\metre} route can settle. The baseline carries one tuned constant and no yaw-rate observation,
 so no EKF could be formed, and both sides are scored with the marker lever arm
 unmeasured.
 
@@ -75,8 +78,9 @@ annotated frames, so the real-robot slot stays planned.
 The visual half of the same experiment is scored on the same four recordings
 (\cref{sec:results-validity}). With physically simulated traffic
 neither pipeline loses tracking. VINS-Fusion holds \SIrange{0.22}{0.66}{\metre}
-with no jump and is worst on the U layout with traffic, where its error rises
-on the aisles the pallet jacks work; ORB-SLAM3 holds \SIrange{0.14}{0.52}{\metre}
+with no jump and is worst on the U layout with traffic, though the single
+excursion in that run's error trace is smaller than the largest on its static
+twin, so the ranking is not traced to the traffic; ORB-SLAM3 holds \SIrange{0.14}{0.52}{\metre}
 in eleven runs of sixteen, and its five divergences are the loop closer's, in
 both directions: a false closure between the repeated aisles of the I layout
 that both front ends accept at the same frame with a \SI{14}{\metre}
@@ -85,9 +89,22 @@ runs hold half a metre, and a vertical drift on the same layout with traffic
 that only an accepted closure removes (\cref{tab:realistic-baseline}). The
 front end changes throughput, \SIrange{97}{99}{\percent} of frames kept with
 the GPU extractor against \SIrange{72}{94}{\percent} with the CPU one, and not
-accuracy. ORB-SLAM3's \SIrange{13}{19}{\degree} rotational RMSE is one
-initialisation event per run, not its tracking; the median rotational error of
-every run is under \SI{0.4}{\degree}. Eighteen repeated runs on the two mapping recordings
+accuracy. ORB-SLAM3's \SIrange{13}{19}{\degree} rotational RMSE is a
+frame convention, not its tracking: the node publishes in the camera optical
+frame until inertial initialisation, and the \SIrange{89.8}{90.2}{\degree} step
+into the gravity-aligned frame at \SIrange{2.47}{2.64}{\second} is the whole of
+that column. Measured after it, the rotational RMSE is
+\SIrange{0.27}{3.14}{\degree} on the three recordings free of a false closure,
+at or below VINS-Fusion's \SIrange{1.18}{3.57}{\degree}. Both the step and
+what survives it belong to the method's own initialisation \cite{campos2021}:
+the map is rotated into the estimated gravity frame once, at ten keyframes,
+and that direction is re-estimated only twice more, the second time with the
+prior on the IMU biases removed, after which the stereo-inertial path offers
+it no further refinement. The residual pitch and roll error divides on the
+yaw available inside that window, \SIrange{0.242}{0.723}{\degree} on the two
+recordings that turn within it against \SIrange{0.455}{3.709}{\degree} on the
+two that do not, although with two routes on each side that division is not
+yet separated from the layout. Eighteen repeated runs on the two mapping recordings
 measure what each pipeline costs: VINS-Fusion optimises in
 \SI{44}{\milli\second} against ORB-SLAM3's \SIrange{211}{406}{\milli\second}
 of local mapping and holds its state in a quarter of the memory, for more
@@ -97,15 +114,43 @@ and the choice between them is a memory-against-cores trade.
 
 On the real robot ORB-SLAM3 tracks every recording: a provisional
 \SIrange{0.404}{0.480}{\metre} planar ATE on \repo{realv6_000} and
-\SIrange{0.172}{0.268}{\metre} across the three \repo{realv7} recordings, all
+\SIrange{0.192}{0.445}{\metre} across the three \repo{realv7} recordings, all
 sixteen runs scored with no repair applied and with the marker lever arm
-unmeasured (\cref{sec:exp1-real}). The cause of the IMU staying uninitialised
-for most of nine of the original \repo{realv7} runs is identified in the
-upstream code, patched in the fork and now exercised on every run; it removes
-the need for the scorer's frame repair rather than improving accuracy. VINS-Fusion has
-no valid real run: its two defects, IMU delivery and the gravity norm, are
-diagnosed and in part corrected. Loop closing changed nothing on the real
-robot that the front end did not change more.
+unmeasured (\cref{sec:exp1-real}). The four configurations of a recording
+agree to \SI{0.02}{\metre}, so on this rig neither the front end nor the loop
+closer moves the figure; the recording does, by a factor of two. The cause of
+the IMU staying uninitialised on the \repo{realv7} recordings is identified
+in the upstream code, patched in the fork and exercised on every run reported.
+VINS-Fusion completes all three \repo{realv7} recordings at
+\SIrange{0.374}{0.676}{\metre}, behind ORB-SLAM3 and the wheel+gyro
+baseline, and only once the fisheye field of view is masked at
+\SI{70}{\degree} and the stereo extrinsic frozen; the calibration's
+non-monotonic projection past \SI{109}{\degree} is the defect under that
+workaround, and the operative mechanism under it is the unbounded normalised
+coordinate a feature acquires as its incidence angle approaches
+\SI{90}{\degree}, not the unprojectable band, which is measured to be black.
+Every estimator sits \SIrange{0.2}{0.4}{\metre} ahead of the
+tracker marker along the path and the baseline does not, so measuring the
+marker-to-IMU lever arm is the largest correction still open on the real-rig
+figures.
+
+How much harder the real robot is than the simulation depends entirely on how
+the question is asked, and the two domains were measured to find out
+(\cref{sec:exp1-real}). The real recordings are not visually poorer: the frames
+carry \SI{169}{\percent} of the simulation's image gradient and
+\SI{151}{\percent} of its corners per megapixel, neither estimator starved in
+any of the three recordings, and the simulation's one identified VINS-Fusion
+failure mode did not occur. What differs is the motion. The robot travels at
+\SI{0.28}{\metre\per\second} against \SI{1.50}{}, stands still
+\SI{18}{\percent} of the time, and therefore integrates \num{5.8} times more
+inertial time for every metre of ground it covers. Charged per metre the real
+rig drifts \num{10.5} times as fast as the simulation; charged per second of
+operation, \num{1.9} times, and the ratio between those two readings is the
+integration factor itself. The real rig is about twice as hard per second, not
+twelve times, and the way to improve its numbers is the terms that accumulate
+with time --- the lever arm, the inertial calibration, the standing periods ---
+rather than a better detector, which already supplies more corners than the
+pipelines use.
 
 \subsection{Experiment 3: is the map usable?}
 
@@ -132,16 +177,15 @@ through tracking loss in repeated structure and its artefacts were not retained
 
 \subsection{Experiment 4: can the robot navigate on it?}
 
-Half answered. Seven live runs on 12 November 2026 in three of the four
-realistic worlds track ground truth to a median of \SI{0.50}{\metre} over
-hand-driven routes of \SIrange{21}{153}{\metre}, with a minimum clearance of
-\SI{0.58}{\metre} and no collision; one run of the seven lost the pose and did
-not recover (\cref{sec:exp4-sim}). The error is a constant offset rather than
-scatter, it is largest on single-aisle drives and averages away over routes
-that cross the building, and its magnitude matches the wall displacement
-Experiment~3 measured cell by cell. The slot's accuracy is therefore
-\emph{map-limited, not estimator-limited}, which says that the improvement to
-chase is a better map. The same initialisation transient that lays
+Half answered. Six live runs in the two static realistic worlds track ground
+truth to a median of \SIrange{0.13}{0.21}{\metre} per run over hand-driven
+routes of \SIrange{21}{148}{\metre}, with a minimum clearance of
+\SI{0.58}{\metre} and no collision (\cref{sec:exp4-sim}). One run crossed a
+metre, for \SI{6.5}{\second}, and recovered. The error is a constant offset
+rather than scatter, and its magnitude matches the accuracy of the prior's own
+graph, which Experiment~3 measures at \SIrange{0.10}{0.40}{\metre} over the
+build routes. The slot's accuracy is therefore \emph{map-limited, not
+estimator-limited}, which says that the improvement to chase is a better map. The same initialisation transient that lays
 Experiment~3's blocking phantoms also latches the back end's first fix
 \SIrange{73}{76}{\degree} wrong until it is held back for \SI{5}{\second}:
 one transient, two symptoms, one prescription.
@@ -150,14 +194,19 @@ What remains planned is the half the experiment is named for. No goal was
 commanded in any run, so nothing yet speaks to planning, to recovery, or to the
 question the map scores raise but cannot settle --- whether a
 \SIrange{3.8}{10.2}{\percent} false-obstacle rate blocks a route or merely
-lengthens it. Every cell is a single run, and the acceptance sweep showed
-run-to-run spread as wide as most differences between settings, so no
-comparison within \cref{tab:exp4-tracking} is evidence.
+lengthens it. Neither traffic world is measured, so this slot says nothing
+about navigating a dynamic warehouse, which is the condition the project is
+named for. Every cell is a single run of one configuration, and no two runs in
+the campaign share a configuration, so nothing here measures run-to-run spread
+and no comparison within \cref{tab:exp4-tracking} is evidence. Three
+configurations were recorded in all; the two earlier ones are retired, and part
+of their data was lost rather than retired, which cost the slot an analysis of
+excursion mechanisms and its only measurement under traffic.
 
 \section{Limitations and Threats to Validity}
 \label{sec:limitations}
 
-The limitations of \cref{tab:limitations} carry over without softening. Six
+The limitations of \cref{tab:limitations} carry over without softening. Eight
 of them bound the conclusions above most tightly.
 
 \begin{itemize}
@@ -175,10 +224,21 @@ of them bound the conclusions above most tightly.
       robot.
 \item The detector is scored against projected geometry with exemptions, and
       its moving-object truth excludes the walking people.
+\item The simulated worlds' perimeter walls and floor carry no texture, and
+      the visual estimators' excursions sit where the camera faces them
+      (\cref{fig:exp1-vins-starvation}); a textured world, or real footage,
+      would place that error elsewhere or not at all.
+\item The traffic recordings contain one four-second episode of the
+      configuration that actually degrades the estimators, a vehicle driving
+      ahead of the robot (\cref{fig:exp1-jack-ahead}); every other mover in
+      view costs nothing. The dynamic-object hypothesis is exercised by four
+      seconds of 117.
 \item The real-robot numbers are planar and provisional until the
       marker-to-IMU lever arm is measured, and rest on one tracker export that
-      fails the validity rules and three that pass; VINS-Fusion has no valid
-      real run.
+      fails the validity rules and three that pass. VINS-Fusion reaches a
+      valid run on the three passing recordings only after the fisheye field of
+      view is masked at \SI{70}{\degree}, which is a workaround for a
+      calibration that cannot describe a tenth of every frame.
 \end{itemize}
 
 The two hypotheses the project is named for, dynamic-object filtering and
@@ -198,6 +258,20 @@ test the project's own title implies.
 drift bound, or a covisibility-consistency window, and test it on
 \repo{realistic_001}, where the \SI{14}{\metre} false closure is reproducible
 in both front ends.
+
+\textbf{Follow a vehicle.} Record a route on which a pallet jack leads the
+robot down an aisle for tens of seconds rather than four, with and without the
+detector active, so that the one configuration shown to degrade both
+estimators is tested at the length a warehouse would impose and the filtered
+arm has something to filter.
+
+\textbf{Excite the gravity estimate, and separate it from the layout.} Record
+the I layout with an opening manoeuvre that turns inside the first fifteen
+seconds, so that the recordings differ in the yaw available to the inertial
+initialisation while the route is held. On the present four recordings that
+excitation is confounded with the layout, and this is the one measurement
+that would decide whether the residual gravity error is the cause of the
+vertical drift or a companion of it.
 
 \textbf{Fill the real-robot slots in the order the simulation results
 suggest.} Exercise the fork's initialisation switches on a \repo{realv7}

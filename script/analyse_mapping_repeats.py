@@ -55,6 +55,11 @@ CONF = (("output_orb", "noloopclosing_cpu", "ORB-SLAM3"),
         ("output_vins", "cpu", "VINS-Fusion"))
 
 
+# Stereo pairs in each mapping bag, as analyse_exp3_rules.py records them.
+MAPPING_BAG_FRAMES = {"dataset_allsensor_realistic_map": 8725,
+                      "dataset_allsensor_realistic_01_map": 9552}
+
+
 def runs_for(ds):
     out = []
     for tree, prefix, label in CONF:
@@ -86,7 +91,17 @@ def score(r):
                ate_max_post=ar.post_init_max(aligned), path_est=row["path"], path_ref=row["ref"],
                secs=row["secs"], poses=row["poses"], jumps=int(len(row["jumps"])),
                rot_rms=row["rot_rms"], received=rec, processed=pro,
-               kept=(pro / rec if rec else float("nan")),
+               # The share of the BAG's stereo pairs, which is what
+               # tab:mapping-resources calls ``Kept'' for the same eighteen
+               # runs.  This was processed/received, and for VINS-Fusion that
+               # is 1.00 on every run because it never drops what reaches it
+               # -- it simply never receives about a tenth of the bag.  Two
+               # adjacent tables of one run set must not put different
+               # quantities under one column name.
+               kept=(pro / MAPPING_BAG_FRAMES[r["dataset"]]
+                     if r["dataset"] in MAPPING_BAG_FRAMES and pro else
+                     (pro / rec if rec else float("nan"))),
+               kept_of_received=(pro / rec if rec else float("nan")),
                resets=int(summ.get("resets", summ.get("active_map_reset_requests", 0)) or 0),
                lc_state=ar.loop_closer_state(str(d)) if r["tree"] == "output_orb" else "n/a")
     out["ate_pct_path"] = 100.0 * row["rms"] / row["ref"] if row["ref"] else float("nan")
@@ -120,7 +135,7 @@ def main():
 
     keys = ["dataset", "layout", "tree", "run", "label", "repeat", "lc_state", "ate_rms", "ate_max",
             "ate_max_post", "ate_final", "ate_pct_path", "rot_rms", "jumps", "path_est", "path_ref",
-            "secs", "poses", "received", "processed", "kept", "resets"]
+            "secs", "poses", "received", "processed", "kept", "kept_of_received", "resets"]
     for r in rows:
         r["layout"] = LAYOUT[r["dataset"]]
     with open(OUT / "mapping_repeats.csv", "w", newline="") as f:

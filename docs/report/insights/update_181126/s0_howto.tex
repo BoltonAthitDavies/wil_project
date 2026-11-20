@@ -1,0 +1,53 @@
+% ---------------------------------------------------------------- how to read
+\begin{frame}{How to read this deck}
+  \begin{columns}[T]
+    \column{0.50\textwidth}
+      \small
+      \textbf{The order}
+      \begin{enumerate}
+        \item[1.1] the whole system on one page, with its data rates
+        \item[1.2] ORB-SLAM3 \hfill front end, option A
+        \item[1.3] VINS-Fusion \hfill front end, option B
+        \item[1.4] RTAB-Map \hfill the map you come back to
+        \item[1.5] Nav2 \hfill planning and driving
+      \end{enumerate}
+      \vspace{0.4em}
+      Each section: one block diagram, then one slide per block, then the
+      configuration we actually run.
+      \par\vspace{0.4em}
+      \textbf{No results in this deck.} Every block slide has an empty
+      \emph{Results} slot; the analysis attaches there later, by component ID.
+    \column{0.48\textwidth}
+      \small
+      \textbf{Every block slide looks like this}
+      \par\vspace{0.3em}
+      \centering
+      \adjustbox{max width=\linewidth}{%
+      \begin{tikzpicture}[node distance=2mm]
+        \node[chip, fill=orbc!12] (a) {ORB-2};
+        \node[chip, fill=orbc!12, hl, right=of a] (b) {ORB-3\\you are here};
+        \node[chip, fill=orbc!12, right=of b] (c) {ORB-4};
+        \draw[arr, thin] (a) -- (b); \draw[arr, thin] (b) -- (c);
+        \node[draw=orbc, thick, rounded corners=2pt, minimum width=26mm,
+              minimum height=20mm, below=4mm of a.south west, anchor=north west,
+              align=center, font=\scriptsize] (p) {HOW IT WORKS\\[2pt]
+              one picture\\one caption};
+        \node[draw=black!30, rounded corners=2pt, minimum width=26mm,
+              minimum height=8mm, right=3mm of p.north east, anchor=north west,
+              font=\scriptsize, align=center] (w) {why it exists\\in $\rightarrow$ out};
+        \node[draw=mapcol, thick, fill=mapcol!5, rounded corners=2pt,
+              minimum width=26mm, minimum height=10mm, below=2mm of w,
+              font=\scriptsize, align=center] (l) {LINK TO RESULTS\\wrong $\cdot$ signal $\cdot$ slot};
+      \end{tikzpicture}}
+      \par\vspace{0.5em}
+      \raggedright\scriptsize
+      \begin{tabular}{@{}l@{\ \ }l@{}}
+        \tikz\node[chip, fill=white, hl, minimum height=4mm, text width=6mm]{};
+          & the block this slide explains \\[3pt]
+        \tikz\node[chip, fill=white, ours, minimum height=4mm, text width=6mm]{};
+          & added by this project, not in the library \\[3pt]
+        \tikz\node[chip, off, minimum height=4mm, text width=6mm]{};
+          & exists, but switched off in our runs \\
+      \end{tabular}
+  \end{columns}
+\end{frame}

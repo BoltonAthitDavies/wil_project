@@ -1,0 +1,358 @@
+% =============================================================================
+% 1.4  RTAB-MAP
+% Sources: Labbe & Michaud, RTAB-Map, J. Field Robotics 2019 (Fig. 1, 3.3-3.6);
+% vslam_navigation/launch/rtabmap.launch.py; the run's launch.log (rosparams);
+% rtabmap 0.23 Parameters.h for library defaults; scripts/rtab_camera_shim.py
+% and scripts/correction_gate.py for the two nodes this project added.
+% =============================================================================
+\section{1.4 RTAB-Map}
+
+\begin{frame}{1.4 \;RTAB-Map: a memory of places, and the map Nav2 plans on}
+  \centering
+  \adjustbox{max width=\textwidth, max height=0.70\textheight}{%
+  \begin{tikzpicture}[font=\scriptsize,
+      cb/.style={box, fill=rtabc!12, text width=25mm, minimum height=10mm},
+      bl/.style={font=\scriptsize\bfseries, text=rtabc!70!black, anchor=north west}]
+    \fill[rtabc!5, draw=rtabc!30, rounded corners=3pt] (4.6,-4.45) rectangle (13.95,1.55);
+    \node[bl] at (4.65,1.52) {RTAB-MAP NODE};
+    \node[box, text width=19mm, fill=dpose!10] (fe) at (0,1.0) {front end pose\\on TF, $\le$30 Hz};
+    \node[box, text width=19mm] (cams) at (0,-0.6) {stereo images\\30 Hz};
+    \node[cb, ours, RTAB1] (r1) at (3.0,-0.6) {\textbf{RTAB-1}\\camera shim};
+    \node[cb, RTAB2] (r2) at (6.2,0.3)  {\textbf{RTAB-2}\\odometry in + sync};
+    \node[cb, RTAB3] (r3) at (9.3,0.3)  {\textbf{RTAB-3}\\new node?};
+    \node[cb, off, RTAB4] (r4) at (12.4,0.3) {\textbf{RTAB-4}\\memory STM / WM / LTM};
+    \node[cb, RTAB5] (r5) at (6.2,-1.65) {\textbf{RTAB-5}\\detect: visual words};
+    \node[cb, RTAB6] (r6) at (9.3,-1.65) {\textbf{RTAB-6}\\verify: geometry};
+    \node[cb, RTAB7] (r7) at (12.4,-1.65) {\textbf{RTAB-7}\\graph optimisation};
+    \node[cb, RTAB8] (r8) at (9.3,-3.6) {\textbf{RTAB-8}\\map assembly};
+    \node[cb, ours, RTAB9] (r9) at (12.4,-3.6) {\textbf{RTAB-9}\\output + correction gate};
+    \node[box, text width=22mm, fill=mapcol!12] (db) at (15.9,0.3) {\textbf{PRIOR DATABASE}\\written in mapping,\\read in localise};
+    \node[box, text width=22mm, fill=dmap!10] (om) at (15.9,-2.6) {\texttt{/map} grid\\to Nav2, once};
+    \node[box, text width=22mm, fill=dpose!10] (ot) at (15.9,-4.0) {TF map$\rightarrow$odom\\to Nav2, 20 Hz};
+    \draw[arr, dpose] (fe) -- node[rate, pos=0.4]{pose} (r2);
+    \draw[arr, dimg] (cams) -- node[rate]{30 Hz} (r1);
+    \draw[arr, dimg] (r1) -- node[rate]{4 Hz} (r2);
+    \draw[arr] (r2) -- node[rate]{1 Hz} (r3);
+    \draw[arr] (r3) -- (r4);
+    \draw[arr] (r3.south) -- ++(0,-0.35) -| node[rate, pos=0.25]{new node's words} (r5.north);
+    \draw[arr] (r5) -- node[rate]{candidate} (r6);
+    \draw[arr] (r6) -- node[rate]{link} (r7);
+    \draw[arr] (r7.south) -- node[rate]{pose} (r9.north);
+    \draw[arr] (r7.south west) -- (r8.north east);
+    \draw[darr, mapcol] (r4.east) -- (db.west);
+    \draw[arr, dmap] (r8.east) -- ++(0.35,0) |- (om.west);
+    \draw[arr, dpose] (r9.east) -- ++(0.35,0) |- (ot.west);
+  \end{tikzpicture}}
+  \par\vspace{0.3em}
+  \small RTAB-Map does not measure motion itself: it takes the front end's pose
+  and adds \textbf{memory}. It remembers places, recognises them in two stages
+  (words, then geometry), and builds the grid Nav2 plans on. Two modes:
+  \textbf{mapping} writes the database, \textbf{localise} only reads it.
+  \src{After Labb\'e \& Michaud, RTAB-Map, J.\ Field Robotics 2019, Fig.~1.}
+\end{frame}
+
+% ---------------------------------------------------------------- RTAB-1
+\begin{frame}{1.4.1 \;RTAB-1 \;Camera shim: hand RTAB-Map the images it expects}
+  \hl{RTAB1}
+  \compbody{\rtabstrip}{rtabc}{%
+  \begin{tikzpicture}[font=\scriptsize]
+    \draw[black!60, fill=black!80] (0,0) rectangle (2.0,1.3);
+    \fill[black!8] (1.0,0.65) circle (0.6);
+    \node[below] at (1.0,0) {real: fisheye};
+    \draw[arr] (2.2,0.65) -- node[above]{remap} (3.1,0.65);
+    \draw[black!60, fill=black!8] (3.3,0.15) rectangle (5.1,1.15);
+    \node[below] at (4.2,0.1) {virtual pinhole};
+    \node[anchor=west] at (5.4,1.0) {$+$ camera\_info};
+    \node[anchor=west] at (5.4,0.6) {$+$ camera transforms};
+    \node[anchor=west] at (5.4,0.2) {30 Hz $\rightarrow$ 4 Hz};
+    \node[anchor=west, text=black!50] at (0,-0.75) {sim: images are already ideal pinhole, passed straight through};
+  \end{tikzpicture}}%
+  {Builds the calibration messages and camera transforms from the same files VINS
+   reads, so there is one source of truth.}
+  {The recordings hold only compressed images --- no calibration messages, no
+   camera transforms --- and RTAB-Map will not start without both.}
+  {compressed stereo, 30 Hz}
+  {rectified pair + calibration, 4 Hz; camera TF}
+  {A wrong calibration or transform puts the map in the wrong place; the real-rig remap narrows the view.}
+  {shim start-up line in \repo{launch.log} (rate, field of view); the TF tree}
+  \src{4 Hz because RTAB-Map looks at one frame per second (RTAB-3); 30 Hz would only cost bandwidth.}
+\end{frame}
+
+% ---------------------------------------------------------------- RTAB-2
+\begin{frame}{1.4.2 \;RTAB-2 \;Odometry in: RTAB-Map borrows the front end's motion}
+  \hl{RTAB2}
+  \compbody{\rtabstrip}{rtabc}{%
+  \begin{tikzpicture}[font=\scriptsize]
+    \node[box, text width=18mm, fill=orbc!12] (o) at (0,0.7) {ORB-SLAM3};
+    \node[box, text width=18mm, fill=vinsc!12] (v) at (0,-0.5) {VINS-Fusion};
+    \node[box, text width=22mm, fill=dpose!10] (tf) at (3.0,0.1) {TF\\odom$\rightarrow$vio\_body};
+    \node[box, text width=18mm, fill=rtabc!15] (r) at (6.0,0.1) {RTAB-Map};
+    \node[box, text width=16mm] (im) at (6.0,1.5) {images 4 Hz};
+    \draw[arr] (o.east) -- (tf); \draw[arr, dashed] (v.east) -- (tf);
+    \draw[arr] (tf) -- node[above, font=\tiny]{pose at the} node[below, font=\tiny]{image's time} (r);
+    \draw[arr] (im) -- (r);
+    \node[text=black!55] at (1.6,-1.3) {one front end runs at a time; RTAB-Map cannot tell which};
+  \end{tikzpicture}}%
+  {Looks up the pose on TF at each image's timestamp (waiting up to 5 s), and
+   pairs it with that image.}
+  {RTAB-Map is a back end: it does not measure motion itself, it borrows it from
+   whichever front end is running.}
+  {TF odom$\rightarrow$vio\_body + images, 4 Hz}
+  {synchronised (images, pose) pairs}
+  {If the front end lags, images wait for their pose or are dropped.}
+  {TF-wait warnings in \repo{launch.log}; node count in the database}
+  \src{Reading the pose from TF rather than an odometry topic is a measured choice: on the same bag the topic route kept 3 nodes, TF kept 28.}
+\end{frame}
+
+% ---------------------------------------------------------------- RTAB-3
+\begin{frame}{1.4.3 \;RTAB-3 \;New node: which places get remembered \;(mapping only)}
+  \hl{RTAB3}\res{\R{11}{}}
+  \compbody{\rtabstrip}{rtabc}{%
+  \begin{tikzpicture}[font=\scriptsize, g/.style={box, fill=rtabc!12, text width=19mm, minimum height=12mm}]
+    \node[g] (g1) at (0,0)   {1. rate\\1 Hz};
+    \node[g] (g2) at (2.5,0) {2. not $>$60\,\% like one of the last 10 nodes\\[2pt]
+                              {\tiny\color{bad}fail $\Rightarrow$ merge, $+1$ weight}};
+    \node[g] (g3) at (5.0,0) {3. moved\\0.1 m or 5.7$^\circ$};
+    \foreach \a/\b in {g1/g2,g2/g3} \draw[arr] (\a) -- (\b);
+    \node[box, text width=50mm, fill=rtabc!25] (n) at (2.1,-2.15)
+      {\textbf{a node} = a pose, its 3-D features, its visual words, and a small occupancy grid\\[3pt]
+       \mdseries\tiny measured in \repo{map_realistic.db}: median \textbf{922} words per node, 96\,\% with a 3-D position};
+    \draw[arr] (g3.south) |- (n.east);
+  \end{tikzpicture}}%
+  {Three gates, in the library's own order: rate, then novelty, then motion.
+   Novelty compares \emph{visual words} --- not pixels --- and only against the
+   last 10 nodes, which are the ones the robot just drove past.}
+  {A node is one remembered place. Too many and the map bloats; too few and
+   places are missed on the way back.}
+  {synchronised pairs, 4 Hz}
+  {a new node --- only when the robot has moved}
+  {Nodes too far apart: a place is missed on return. Standing still still raises a node's weight, because novelty is tested before motion.}
+  {database \texttt{Node} table: count, weight, timestamps}
+\end{frame}
+
+% ---------------------------------------------------------------- RTAB-4
+\begin{frame}{1.4.4 \;RTAB-4 \;Memory: short-term, working and long-term (no limit set)}
+  \hl{RTAB4}
+  \compbody{\rtabstrip}{rtabc}{%
+  \begin{tikzpicture}[font=\scriptsize]
+    \draw[rtabc, thick, rounded corners] (0,0) rectangle (1.6,1.6);  \node[above] at (0.8,1.6) {STM};
+    \draw[rtabc, thick, rounded corners] (2.0,0) rectangle (5.0,1.6); \node[above] at (3.5,1.6) {WM: searched};
+    \draw[offc, dashed, thick, rounded corners, fill=offc!12] (5.4,0) rectangle (7.0,1.6);
+    \node[above, text=black!50] at (6.2,1.6) {LTM};
+    \foreach \x/\y in {0.4/0.5,0.8/1.1,1.2/0.6} \node[pt=rtabc] at (\x,\y) {};
+    \foreach \x/\y in {2.3/0.4,2.7/1.1,3.1/0.7,3.5/1.3,3.9/0.5,4.3/1.0,4.7/0.6,2.5/0.8,4.1/1.3}
+      \node[pt=rtabc!60!black] at (\x,\y) {};
+    \node[text=black!50, align=center, font=\tiny] at (6.2,0.8) {empty:\\no limit\\set};
+    \draw[arr] (1.6,0.8) -- (2.0,0.8);
+    \draw[darr, offc] (5.0,0.8) -- (5.4,0.8);
+    \node[below, text=black!55] at (3.5,-0.05) {the newest nodes are never searched: they would match themselves};
+  \end{tikzpicture}}%
+  {LTM is where nodes go when a time or memory budget is exceeded, and come
+   back from near a revisit. Ours: library default 0 = no limit, so LTM stays
+   empty. It must stay so: read-only localisation cannot be combined with it.}
+  {Recognition compares against every node it is allowed to search, so it slows
+   as the map grows. RTAB-Map keeps only part of the map ``awake''.}
+  {new nodes}
+  {the nodes stage 1 searches (WM)}
+  {Nothing at today's map size. Recognition time grows, because nothing is moved out.}
+  {database \texttt{Info} / \texttt{Statistics}: working-memory size, timings}
+\end{frame}
+
+% ---------------------------------------------------------------- RTAB-5
+\begin{frame}{1.4.5 \;RTAB-5 \;Detect (stage 1): which remembered place does this look like?}
+  \hl{RTAB5}\res{\R{10}{}}
+  \compbody{\rtabstrip}{rtabc}{%
+  \begin{tikzpicture}[font=\scriptsize]
+    % ---- top row: where a visual word comes from (quantisation)
+    \begin{scope}[yshift=2.28cm, font=\tiny]
+      \draw[black!55, fill=black!10] (0,-0.28) rectangle (0.55,0.28);
+      \foreach \a/\b in {0.14/0.15,0.40/0.06,0.24/-0.15,0.44/-0.19}
+        \fill[rtabc!70!black] (\a,\b) circle (0.042);
+      \node at (0.275,-0.47) {patch};
+      \draw[-{Latex}] (0.65,0) -- (1.05,0);
+      \node[font=\tiny\ttfamily] at (1.75,0) {1011\,0100$\dots$};
+      \node at (1.75,-0.47) {256 bits};
+      \draw[-{Latex}] (2.45,0) -- (2.85,0);
+      \foreach \i in {0,...,4} \draw[draw=rtabc!60, fill=rtabc!18] (2.95+\i*0.27,-0.15) rectangle ++(0.21,0.3);
+      \draw[draw=rtabc!80!black, fill=rtabc, line width=0.7pt] (2.95+2*0.27,-0.15) rectangle ++(0.21,0.3);
+      \node at (3.6,-0.47) {55{,}802 words};
+      \draw[-{Latex}] (4.40,0) -- (4.80,0);
+      \node at (4.60,0.26) {NNDR 0.8};
+      \node[draw=rtabc!70, fill=rtabc!15, rounded corners=1pt, inner sep=2pt] at (5.45,0) {word id};
+      \node[text=bad] at (5.45,-0.47) {or a new word};
+    \end{scope}
+    % ---- bottom row: scoring (unchanged)
+    % tf-idf: a word's weight against how many nodes hold it (measured, 165 nodes)
+    \draw[-{Latex}] (0,0) -- (3.4,0); \draw[-{Latex}] (0,0) -- (0,1.10);
+    \draw[thick, rtabc!80!black] plot[smooth] coordinates
+      {(0.02,1.10) (0.10,0.76) (0.19,0.60) (0.49,0.41) (0.97,0.25) (1.94,0.11) (3.20,0.00)};
+    \fill[good] (0.02,1.10) circle (0.06);
+    \fill[bad]  (0.97,0.25) circle (0.06);
+    \node[font=\tiny, text=good, anchor=west] at (0.14,1.03) {seen once: full weight};
+    \node[font=\tiny, text=bad, anchor=west] at (1.10,0.42) {50$+$ nodes: near zero};
+    \foreach \x/\l in {0.02/1, 0.97/50, 1.94/100, 3.20/165}
+      {\draw (\x,0) -- (\x,-0.08); \node[font=\tiny, below] at (\x,-0.08) {\l};}
+    \node[below] at (1.7,-0.26) {nodes holding the word};
+    \node[above] at (1.7,1.10) {weight (tf-idf)};
+    \draw[-{Latex}] (3.8,0) -- (7.2,0); \draw[-{Latex}] (3.8,0) -- (3.8,1.10);
+    \draw[thick, rtabc!80!black] plot[smooth, domain=0:3.2, samples=60]
+      ({3.8+\x},{0.05+0.82*exp(-((\x-1.55)^2)/0.07)});
+    \draw[dashed, hlc] (3.8,0.52) -- (7.1,0.52) node[right, font=\tiny, text=hlc]{LoopThr};
+    \node[below] at (5.5,0) {places};
+    \node[above] at (5.5,1.10) {Bayes filter};
+  \end{tikzpicture}}%
+  {A word's weight falls with how many nodes hold it: 44{,}716 of ours sit in
+   one node, 467 in fifty or more.}
+  {Checking every node's geometry is too slow. Stage 1 looks only at \emph{which}
+   words appear: cheap, at any map size.}
+  {the new node's words}
+  {one candidate place --- or ``new place''}
+  {Lookalike places score high: repeated racks share most of their words.}
+  {hypotheses in \repo{launch.log}; read by \repo{script/exp4_rtabmap_gating.py}}
+\end{frame}
+
+% ---------------------------------------------------------------- RTAB-6
+\begin{frame}{1.4.6 \;RTAB-6 \;Verify (stage 2): is it really the same place?}
+  \hl{RTAB6}\res{\R{10}{}}
+  \compbody{\rtabstrip}{rtabc}{%
+  \begin{tikzpicture}[font=\scriptsize]
+    \draw[black!60, fill=black!4] (0,0) rectangle (2.2,1.8); \node[above] at (1.1,1.8) {now};
+    \draw[black!60, fill=black!4] (3.6,0) rectangle (5.8,1.8); \node[above] at (4.7,1.8) {candidate place};
+    \foreach \a/\b in {0.4/0.4, 0.8/1.3, 1.5/0.7, 1.9/1.5, 1.2/0.3} {
+      \node[pt=good] (L) at (\a,\b) {}; \node[pt=good] (R) at (3.7+\a,\b+0.05) {};
+      \draw[good] (L) -- (R);}
+    \foreach \a/\b/\c/\d in {0.6/0.95/5.3/0.3, 1.7/1.1/4.0/1.55} {
+      \node[pt=bad] (L) at (\a,\b) {}; \node[pt=bad] (R) at (\c,\d) {};
+      \draw[bad, dashed] (L) -- (R);}
+    \node[anchor=west, text=good] at (6.05,1.2) {agree in metres};
+    \node[anchor=west, text=bad] at (6.05,0.6) {disagree: dropped};
+  \end{tikzpicture}}%
+  {Fit one rigid transform to the matched features (RANSAC) and count how many
+   agree within 0.1\,m in 3-D. At least 20: the link is accepted.}
+  {Words cannot tell two identical aisles apart. Geometry can: the same place
+   must line up in 3-D.}
+  {the candidate (RTAB-5)}
+  {an accepted link + transform --- or rejection}
+  {Identical objects give a geometrically consistent wrong match.}
+  {``Not enough inliers'' lines in \repo{launch.log}; \repo{exp4_rtabmap_gating.py}}
+  \src{Ours: \texttt{Vis/EstimationType 0} --- points must agree \emph{in metres}, not merely reproject (library default 1). The ICP check (\texttt{Reg/Strategy 2}) is off.}
+\end{frame}
+
+% ---------------------------------------------------------------- RTAB-7
+\begin{frame}{1.4.7 \;RTAB-7 \;Graph optimisation: make the whole map agree}
+  \hl{RTAB7}
+  \compbody{\rtabstrip}{rtabc}{%
+  \begin{tikzpicture}[font=\scriptsize]
+    \foreach \i/\x/\y in {0/0/0, 1/0.7/0.2, 2/1.2/0.75, 3/1.2/1.5, 4/0.7/2.0, 5/0/2.0, 6/-0.45/1.4, 7/-0.4/0.65}
+      \node[pt=rtabc] (a\i) at (\x,\y) {};
+    \foreach \i [evaluate=\i as \n using int(\i+1)] in {0,...,6} \draw[black!40, thick] (a\i) -- (a\n);
+    \draw[good, very thick, dashed] (a7) -- (a0);
+    \node[below] at (0.4,-0.25) {before};
+    \draw[-{Latex}, thick] (1.8,1.0) -- (2.6,1.0) node[midway, above]{GTSAM};
+    \foreach \i/\x/\y in {0/3.4/0, 1/4.1/0.15, 2/4.6/0.7, 3/4.6/1.45, 4/4.1/1.95, 5/3.4/1.95, 6/2.95/1.3, 7/3.1/0.45}
+      \node[pt=rtabc] (b\i) at (\x,\y) {};
+    \foreach \i [evaluate=\i as \n using int(\i+1)] in {0,...,6} \draw[black!40, thick] (b\i) -- (b\n);
+    \draw[good, very thick] (b7) -- (b0);
+    \node[below] at (3.8,-0.25) {after};
+    \draw[black!40, thick] (5.3,1.6) -- ++(0.4,0); \node[anchor=west] at (5.8,1.6) {odometry link};
+    \draw[good, very thick, dashed] (5.3,1.0) -- ++(0.4,0); \node[anchor=west] at (5.8,1.0) {loop link};
+  \end{tikzpicture}}%
+  {Nodes are poses; links are odometry steps, loop links and proximity links.
+   GTSAM moves the nodes until every link is satisfied as well as possible.}
+  {A new loop link means the drift built up along the way must be spread over
+   the whole graph.}
+  {links: odometry, loop, proximity}
+  {optimised node poses}
+  {A wrong link that is self-consistent passes the guard.}
+  {``Rejecting all added loop closures'' in \repo{launch.log}; node poses in the database}
+  \src{Guard: a link stretched more than 10$\times$ its expected error rejects the new closures (\texttt{RGBD/OptimizeMaxError}; library default 3). In localise mode the graph is frozen.}
+\end{frame}
+
+% ---------------------------------------------------------------- RTAB-8
+\begin{frame}{1.4.8 \;RTAB-8 \;Map assembly: from node grids to the planner's map}
+  \hl{RTAB8}\res{\R{11}{}, \R{12}{}, \R{13}{}}
+  \compbody{\rtabstrip}{rtabc}{%
+  \begin{tikzpicture}[font=\scriptsize]
+    \foreach \x/\y/\r in {0/0/0, 1.0/0.3/20, 1.9/0.9/35} {
+      \begin{scope}[shift={(\x,\y)}, rotate=\r]
+        \draw[rtabc, fill=rtabc!8] (-0.4,-0.4) rectangle (0.4,0.4);
+        \fill[black!70] (0.15,0.1) rectangle ++(0.15,0.15);
+        \fill[black!70] (-0.3,0.2) rectangle ++(0.15,0.15);
+        \node[pt=dpose] at (0,0) {};
+      \end{scope}}
+    \node[below, align=center] at (0.9,-0.55) {each node's own grid,\\placed at its pose};
+    \draw[arr] (2.6,0.5) -- (3.3,0.5);
+    \draw[black!60, fill=white] (3.5,-0.5) rectangle (6.5,1.6);
+    \foreach \x in {3.75,4.0,...,6.25} \draw[black!8] (\x,-0.5) -- (\x,1.6);
+    \foreach \y in {-0.25,0.0,...,1.35} \draw[black!8] (3.5,\y) -- (6.5,\y);
+    \fill[black!75] (3.8,0.9) rectangle (6.2,1.2);
+    \fill[black!75] (3.8,-0.2) rectangle (6.2,0.1);
+    \fill[black!20] (5.7,0.3) rectangle (6.4,0.7);
+    \node[below] at (5.0,-0.55) {one grid: free, occupied, unknown};
+  \end{tikzpicture}}%
+  {Each node's small grid is built once, from its stereo depth. The global grid
+   places them all at their optimised poses, on 0.05\,m cells.}
+  {Nav2 plans on a single occupancy grid: free, occupied or unknown, cell by cell.}
+  {each node's grid + its pose}
+  {\texttt{/map}, sent once (latched)}
+  {A node placed wrong leaves obstacles that nothing later removes.}
+  {exported grid vs ground-truth map (Experiment 3 scoring)}
+\end{frame}
+
+% ---------------------------------------------------------------- RTAB-9
+\begin{frame}{1.4.9 \;RTAB-9 \;Output: the correction, and the gate we added}
+  \hl{RTAB9}\res{\R{11}{}, \R{13}{}}
+  \compbody{\rtabstrip}{rtabc}{%
+  \begin{tikzpicture}[font=\scriptsize]
+    \fill[good!15] (0,0) -- (0,0.9) -- (6.0,1.35) -- (6.0,0) -- cycle;
+    \draw[-{Latex}] (0,0) -- (6.4,0);
+    \node[font=\tiny, below] at (3.2,-0.12) {metres driven since the last accepted fix};
+    \draw[-{Latex}] (0,0) -- (0,1.95) node[above, align=center]{step from the\\correction in force};
+    \draw[good, thick] (0,0.9) -- (6.0,1.35);
+    \node[text=good, font=\tiny, rotate=4] at (3.1,1.3) {allowed: 1.5 m $+$ 0.02 m per m driven};
+    \foreach \x/\y in {0.8/0.3,1.7/0.5,2.6/0.2,3.5/0.7,4.6/0.4,5.4/0.6} \node[pt=good] at (\x,\y) {};
+    \foreach \x/\y in {2.2/1.60,4.0/1.70}
+      \draw[bad, very thick] (\x-0.1,\y-0.1) -- (\x+0.1,\y+0.1) (\x-0.1,\y+0.1) -- (\x+0.1,\y-0.1);
+    \node[anchor=west, text=bad, font=\tiny] at (4.2,1.70) {refused};
+  \end{tikzpicture}}%
+  {RTAB-Map offers a correction about once a second; the gate republishes
+   map$\rightarrow$odom at 20 Hz. The allowance is ours: the front end's
+   \emph{measured} accuracy, spent as a budget.}
+  {In localise mode RTAB-Map's output is a correction, map$\rightarrow$odom. A wrong
+   one moves the robot to the wrong aisle instantly.}
+  {\texttt{/localization\_pose}, $\approx$1 Hz}
+  {TF map$\rightarrow$odom, 20 Hz}
+  {A refused true correction lets the pose drift until a fix is accepted.}
+  {\repo{gate_verdicts.csv}: verdict, size, allowance; \repo{localize_*.csv}}
+  \src{Refusing is cheap: the front end drifts at most \textbf{0.76 m over 21--152 m}. Eight refusals in a row and the gate concedes.}
+\end{frame}
+
+% ---------------------------------------------------------------- config
+\begin{frame}{1.4.10 \;RTAB-Map configuration}
+  \centering
+  \adjustbox{max width=\textwidth, max height=0.80\textheight}{%
+  \begin{tabular}{l l l l l}
+    \toprule
+    & Parameter & Ours & Library & What it means \\
+    \midrule
+    RTAB-1 & \textcolor{ourc}{shim rate} & 4 Hz & --- & images handed to RTAB-Map per second \\
+    RTAB-3 & \texttt{Rtabmap/DetectionRate} & 1 Hz & 1 Hz & frames considered per second \\
+           & \texttt{RGBD/LinearUpdate} / \texttt{AngularUpdate} & 0.1 m / 0.1 rad & same & move this much to make a node \\
+           & \texttt{Mem/RehearsalSimilarity} & 0.6 & 0.6 & merge a node this similar to a recent one \\
+           & \texttt{Vis/MaxFeatures} / \texttt{Kp/MaxFeatures} & 1000 / 500 & same & features / words kept per node \\
+    RTAB-4 & \texttt{Rtabmap/TimeThr} / \texttt{MemoryThr} & 0 / 0 & 0 / 0 & 0 = no limit; required by read-only localise \\
+    RTAB-5 & \texttt{Rtabmap/LoopThr} & 0.11 & 0.11 & stage-1 threshold \\
+    RTAB-6 & \texttt{Vis/EstimationType} & \textcolor{bad}{\textbf{0}} & 1 & verify in metres (3-D to 3-D) \\
+           & \texttt{Vis/MinInliers} / \texttt{InlierDistance} & 20 / 0.1 m & same & stage-2 acceptance \\
+           & \texttt{Reg/Strategy} & 0 & 0 & no ICP check \\
+    RTAB-7 & \texttt{RGBD/OptimizeMaxError} & \textcolor{bad}{\textbf{10}} & 3 & graph guard; 3 rejects a drifting VIO's closures \\
+    RTAB-9 & \textcolor{ourc}{\texttt{localize\_delay\_s}} & 5 s & --- & hold RTAB-Map back at start \\
+           & \textcolor{ourc}{correction gate} & 1.5 m $+$ 0.02 m/m, 8$^\circ$ $+$ 0.1$^\circ$/m & --- & largest correction accepted \\
+    \bottomrule
+  \end{tabular}}
+  \par\vspace{0.5em}
+  \scriptsize\color{black!65}
+  \textcolor{bad}{\textbf{Red}}: the only two values that differ from the RTAB-Map 0.23 library.
+  \textcolor{ourc}{\textbf{Amber}}: added by this project.
+  \src{\repo{vslam_navigation/launch/rtabmap.launch.py}; values as printed in each run's \repo{launch.log}; defaults from rtabmap 0.23 \repo{Parameters.h}}
+\end{frame}

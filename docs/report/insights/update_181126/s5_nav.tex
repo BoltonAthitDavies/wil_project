@@ -1,0 +1,273 @@
+% =============================================================================
+% 1.5  NAV2
+% Sources: vslam_navigation/params/nav2_sim.yaml, launch/navigate_sim.launch.py,
+% scripts/pose_gate.py; the Experiment 4 run logs for what was switched on.
+% =============================================================================
+\section{1.5 Nav2}
+
+\begin{frame}{1.5 \;Nav2: plan on the prior map, drive on the localised pose}
+  \centering
+  \adjustbox{max width=\textwidth, max height=0.70\textheight}{%
+  \begin{tikzpicture}[font=\scriptsize,
+      cb/.style={box, fill=navc!12, text width=27mm, minimum height=10mm}]
+    \node[box, text width=24mm, fill=dpose!10] (fe) at (0,1.2)  {front end\\odom$\rightarrow$vio\_body, odometry};
+    \node[box, text width=24mm, fill=rtabc!12] (rt) at (0,-1.2) {RTAB-Map\\map$\rightarrow$odom, \texttt{/map}};
+    \node[cb, NAV1] (n1) at (3.9,0)    {\textbf{NAV-1}\\inputs: pose, map, odometry};
+    \node[cb, ours, NAV2] (n2) at (3.9,-2.6) {\textbf{NAV-2}\\pose gate};
+    \node[cb, NAV3] (n3) at (7.9,1.4)  {\textbf{NAV-3}\\global costmap};
+    \node[cb, NAV4] (n4) at (7.9,-1.4) {\textbf{NAV-4}\\local costmap};
+    \node[cb, NAV5] (n5) at (11.9,1.4) {\textbf{NAV-5}\\planner};
+    \node[cb, NAV6] (n6) at (11.9,-1.4) {\textbf{NAV-6}\\controller};
+    \node[cb, NAV7] (n7) at (15.9,-1.4) {\textbf{NAV-7}\\smoother + drive};
+    \node[cb, NAV8] (n8) at (15.9,1.4) {\textbf{NAV-8}\\behaviour tree};
+    \node[box, text width=24mm, fill=dcmd!10] (cmd) at (15.9,-3.3) {wheels and steering};
+    \draw[arr, dpose] (fe) -- (n1); \draw[arr, rtabc] (rt) -- (n1);
+    \draw[arr] (n1) -- (n3); \draw[arr] (n1) -- (n4);
+    \draw[arr] (n3) -- node[rate]{costs} (n5);
+    \draw[arr] (n4) -- node[rate]{costs} (n6);
+    \draw[arr, dcmd] (n5) -- node[rate]{path 1 Hz} (n6);
+    \draw[arr, dcmd] (n6) -- node[rate]{20 Hz} (n7);
+    \draw[arr, dcmd] (n7) -- node[rate]{/cmd\_vel 20 Hz} (cmd);
+    \draw[darr] (n8) -- node[rate]{runs} (n5);
+    \draw[darr] (rt.south) |- (n2.west);
+    \draw[darr] (n2.east) -| node[rate, pos=0.3]{start / pause, 2 Hz} (n6.south);
+  \end{tikzpicture}}
+  \par\vspace{0.3em}
+  \small Nav2 is the standard ROS~2 navigation stack. It \textbf{never sees
+  ground truth}: it plans on the grid RTAB-Map built and drives on the pose the
+  front end and RTAB-Map produce together. Anything wrong upstream arrives here
+  as a planning input.
+  \src{\repo{vslam_navigation/params/nav2_sim.yaml}; \repo{launch/navigate_sim.launch.py}}
+\end{frame}
+
+% ---------------------------------------------------------------- NAV-1
+\begin{frame}{1.5.1 \;NAV-1 \;Inputs: where the robot is, what the world is, how fast it moves}
+  \hl{NAV1}
+  \compbody{\navstrip}{navc}{%
+  \begin{tikzpicture}[font=\scriptsize]
+    \node[box, text width=22mm, fill=navc!15, minimum height=24mm] (n) at (4.4,0) {\textbf{Nav2}};
+    \node[box, text width=32mm, fill=dpose!10] (a) at (0,1.0)  {robot pose\\TF map$\rightarrow$base\_link};
+    \node[box, text width=32mm, fill=dmap!10]  (b) at (0,0)    {the world\\\texttt{/map}, sent once};
+    \node[box, text width=32mm, fill=dimg!8]   (c) at (0,-1.0) {speed\\\texttt{/orbslam3/odometry}};
+    \foreach \x in {a,b,c} \draw[arr] (\x.east) -- (n.west |- \x.east);
+  \end{tikzpicture}}%
+  {Pose comes from the frame chain of 1.1; the map from RTAB-Map's database;
+   speed from the front end's own odometry. Nothing publishes \texttt{/odom} here.}
+  {To plan, Nav2 needs three things: where the robot is, what the world looks
+   like, and how fast it is moving.}
+  {TF, \texttt{/map}, odometry}
+  {--- (used by NAV-3 to NAV-7)}
+  {A transform older than 0.30\,s stops the controller; a pose jump moves the robot on the costmap.}
+  {the TF tree; Nav2 transform-timeout warnings}
+\end{frame}
+
+% ---------------------------------------------------------------- NAV-2
+\begin{frame}{1.5.2 \;NAV-2 \;Pose gate: is the localisation sound enough to drive on?}
+  \hl{NAV2}\res{\R{11}{}}
+  \compbody{\navstrip}{navc}{%
+  \begin{tikzpicture}[font=\scriptsize]
+    \node[box, text width=32mm] (c1) at (0,1.0)  {$\ge$8 s since the first fix};
+    \node[box, text width=32mm] (c2) at (0,0)    {last 6 corrections each $<$1 m};
+    \node[box, text width=32mm] (c3) at (0,-1.0) {robot inside the map ($+$2 m)};
+    \node[circle, draw, thick, fill=navc!15, minimum size=9mm, font=\scriptsize\bfseries] (and) at (3.0,0) {AND};
+    \foreach \x in {c1,c2,c3} \draw[arr] (\x.east) -- (and);
+    \node[box, text width=18mm, fill=good!15] (go) at (5.5,0.6)  {start Nav2};
+    \node[box, text width=18mm, fill=bad!12]  (st) at (5.5,-0.6) {pause Nav2};
+    \draw[arr, good] (and) -- node[above, font=\tiny]{all true} (go.west);
+    \draw[arr, bad]  (and) -- node[below, font=\tiny]{any false} (st.west);
+  \end{tikzpicture}}%
+  {Three checks, twice a second, combined into one \texttt{/localization\_ok}.
+   That is why Nav2's \texttt{autostart} is false: this node starts it.}
+  {Nav2 trusts whatever pose it is given, and a confident pose from RTAB-Map is
+   not necessarily a right one.}
+  {map$\rightarrow$odom, map$\rightarrow$base\_link, the prior's extent}
+  {\texttt{/localization\_ok}, 2 Hz; start / pause}
+  {A wrong pose that stays steady passes; a right pose that jumps once pauses driving.}
+  {\texttt{/localization\_ok}, \texttt{/localization\_status}; the gate's log file}
+\end{frame}
+
+% ---------------------------------------------------------------- NAV-3
+\begin{frame}{1.5.3 \;NAV-3 \;Global costmap: a price for every cell of the map}
+  \hl{NAV3}\res{\R{12}{}}
+  \compbody{\navstrip}{navc}{%
+  \begin{tikzpicture}[font=\scriptsize]
+    \draw[black!15, step=0.25] (0,0) grid (5,3);
+    \foreach \d/\c in {0.8/10,0.55/20,0.3/32}
+      \fill[plancol!\c, rounded corners=4pt] (1.8-\d,0.9-\d) rectangle (2.8+\d,2.0+\d);
+    \fill[black!80] (1.8,0.9) rectangle (2.8,2.0);
+    \node[text=white] at (2.3,1.45) {rack};
+    \draw[navc, very thick, -{Latex}] (0.2,0.15) .. controls (1.2,0.0) and (4.2,-0.1) .. (4.6,2.75);
+    \fill[black!80] (5.3,2.45) rectangle ++(0.3,0.3); \node[anchor=west] at (5.7,2.6) {obstacle, from \texttt{/map}};
+    \fill[plancol!32] (5.3,1.8) rectangle ++(0.3,0.3);  \node[anchor=west] at (5.7,1.95) {cost fades over 0.8 m};
+    \draw[navc, very thick] (5.3,1.3) -- ++(0.3,0);      \node[anchor=west] at (5.7,1.3) {path keeps its distance};
+  \end{tikzpicture}}%
+  {Three layers: the prior map (static), live obstacles, and inflation, which
+   makes cells near obstacles expensive so paths keep their distance.}
+  {The planner needs a price for every cell: free, near something, or blocked.}
+  {\texttt{/map} + live points + pose}
+  {costmap, 15$\times$22 m, 0.05 m cells, 2 Hz}
+  {Phantom obstacles in the prior block real aisles. Unknown cells cannot be planned through.}
+  {the published costmap; Experiment 3 map scoring}
+  \src{The live obstacle layer reads RTAB-Map's \texttt{/local\_grid\_obstacle}, published only with \texttt{local\_grid:=true}.
+       Every Experiment 4 run logged it \textbf{off}, so the costmaps held the prior map only.}
+\end{frame}
+
+% ---------------------------------------------------------------- NAV-4
+\begin{frame}{1.5.4 \;NAV-4 \;Local costmap: a window that travels with the robot}
+  \hl{NAV4}\res{not measured (\R{14}{})}
+  \compbody{\navstrip}{navc}{%
+  \begin{tikzpicture}[font=\scriptsize]
+    \draw[black!40, fill=black!3] (0,0) rectangle (6,3);
+    \node[anchor=north west, text=black!50] at (0,3) {global costmap: fixed, 15$\times$22 m};
+    \draw[navc!35, thick, dashed] (0.6,0.6) rectangle (2.2,2.2); \node[pt=navc!35] at (1.4,1.4) {};
+    \draw[navc, thick] (3.2,0.6) rectangle (4.8,2.2); \node[pt=navc] at (4.0,1.4) {};
+    \draw[arr, navc] (2.3,1.4) -- (3.1,1.4);
+    \node[below, text=navc] at (4.0,0.55) {10$\times$10 m, centred on the robot};
+  \end{tikzpicture}}%
+  {Same three layers as NAV-3, but only around the robot, rolling as it drives;
+   this is what the controller checks against.}
+  {The controller needs a fresh picture of the robot's immediate surroundings.}
+  {same layers as NAV-3}
+  {costmap, 10$\times$10 m around the robot, 2 Hz}
+  {If the pose jumps, the window --- and what is in it --- jumps with it.}
+  {the local costmap topic}
+  \src{It rolls because map$\rightarrow$odom can jump. A fixed window in the odom frame was safe only in the ground-truth setup, where that link never moved.}
+\end{frame}
+
+% ---------------------------------------------------------------- NAV-5
+\begin{frame}{1.5.5 \;NAV-5 \;Planner: a path a car can actually drive}
+  \hl{NAV5}\res{not measured (\R{14}{})}
+  \compbody{\navstrip}{navc}{%
+  \begin{tikzpicture}[font=\scriptsize]
+    \draw[black!12, step=0.25] (0,0) grid (5.5,3);
+    \fill[black!75] (1.8,0) rectangle (2.3,1.9);
+    \fill[black!75] (3.4,1.1) rectangle (3.9,3);
+    \draw[navc, very thick] (0.4,0.5) .. controls (1.4,0.5) and (1.3,2.5) .. (2.05,2.5)
+                                    .. controls (2.8,2.5) and (2.8,0.6) .. (3.65,0.6)
+                                    .. controls (4.5,0.6) and (4.8,1.6) .. (5.0,2.4);
+    \node[isosceles triangle, fill=navc, minimum size=2.6mm, inner sep=0pt] at (0.4,0.5) {};
+    \node[below, text=navc] at (0.45,0.38) {start};
+    \draw[thick] (5.0,2.4) -- (5.0,2.9);
+    \fill[good] (5.0,2.9) -- (5.3,2.78) -- (5.0,2.66) -- cycle;
+    \node[right] at (5.05,2.35) {goal};
+  \end{tikzpicture}}%
+  {Smac Hybrid-A*: searches position \emph{and} heading (72 headings) with
+   forward-only arcs, turning radius at least 0.75 m. Refuses unknown cells.}
+  {The robot is car-like: it cannot turn on the spot, so a shortest straight-line
+   path is often not drivable.}
+  {pose, global costmap, goal}
+  {a drivable path, replanned at 1 Hz}
+  {No path when unknown space blocks the route; an outdated map gives a path through something real.}
+  {planner log; per-goal result in \repo{outcome.json}}
+\end{frame}
+
+% ---------------------------------------------------------------- NAV-6
+\begin{frame}{1.5.6 \;NAV-6 \;Controller: follow the path, 20 times a second}
+  \hl{NAV6}\res{not measured (\R{14}{})}
+  \compbody{\navstrip}{navc}{%
+  \begin{tikzpicture}[font=\scriptsize]
+    \draw[navc!45, very thick] (0,0) .. controls (2,0) and (3,0.5) .. (4.5,2.0);
+    \coordinate (r) at (0.6,-0.45);
+    \coordinate (c) at (2.03,0.28);
+    \draw[black!35, dashed] (r) circle (1.6);
+    \node[isosceles triangle, fill=black!70, minimum size=3mm, inner sep=0pt, rotate=10] at (r) {};
+    \node[pt=hlc] at (c) {};
+    \node[above, text=hlc] at (c) {carrot};
+    \draw[hlc, thick, -{Latex}] (r) to[bend left=14] (c);
+    \draw[{Latex}-{Latex}, black!45] (r) -- node[below, sloped, font=\tiny]{lookahead 1.3--2.0 m} ($(r)+(-35:1.6)$);
+    \node[anchor=west, text=navc] at (3.3,1.95) {planned path};
+  \end{tikzpicture}}%
+  {Regulated Pure Pursuit: pick a ``carrot'' on the path 1.3--2.0 m ahead and
+   steer the arc that reaches it. 1.5 m/s, slower on tight curves; no reversing.}
+  {A path is a line on a map; the wheels need a speed and a turn rate, many times a second.}
+  {path, local costmap, odometry}
+  {speed + turn rate, 20 Hz}
+  {With collision checking off, it does not stop for a newly seen obstacle by itself.}
+  {\texttt{/cmd\_vel}; progress checker (must move 0.5 m in 15 s)}
+  \src{Collision checking is off (in tuning it vetoed the controller's own corner-cutting); avoidance comes from the 1 Hz replan.}
+\end{frame}
+
+% ---------------------------------------------------------------- NAV-7
+\begin{frame}{1.5.7 \;NAV-7 \;Velocity smoother and drive: turn a command into wheel motion}
+  \hl{NAV7}\res{not measured (\R{14}{})}
+  \compbody{\navstrip}{navc}{%
+  \begin{tikzpicture}[font=\scriptsize]
+    \draw[-{Latex}] (0,0) -- (3.0,0) node[right]{t};
+    \draw[-{Latex}] (0,0) -- (0,1.7) node[above]{speed};
+    \draw[black!45, dashed, thick] (0.2,0.2) -- (0.8,0.2) -- (0.8,1.3) -- (2.8,1.3);
+    \draw[navc, very thick] (0.2,0.2) -- (0.8,0.2) -- (1.9,1.3) -- (2.8,1.3);
+    \node[text=black!50, font=\tiny, anchor=west] at (0.85,1.48) {asked for};
+    \node[text=navc, font=\tiny, anchor=west] at (1.45,0.6) {sent: $\le$0.8 m/s$^2$};
+    \begin{scope}[shift={(4.3,0.4)}]
+      \draw[thick] (0,0) -- (1.6,0);
+      \draw[line width=3pt, black!70] (-0.22,0) -- (0.22,0);
+      \draw[line width=3pt, black!70, rotate around={30:(1.6,0)}] (1.38,0) -- (1.82,0);
+      \draw[{Latex}-{Latex}, black!50] (0,-0.38) -- node[below, font=\tiny]{wheelbase 0.42 m} (1.6,-0.38);
+      \draw[black!45] (1.6,0) -- (2.25,0);
+      \draw[black!45] (2.25,0) arc (0:30:0.65) node[right, font=\tiny]{$\le$35$^\circ$};
+    \end{scope}
+  \end{tikzpicture}}%
+  {Caps speed and acceleration, scaling all components together so the curve is
+   kept; the Ackermann plugin turns speed + turn rate into wheel speed and steering.}
+  {Raw commands can jump, and a real chassis has acceleration and steering limits.}
+  {controller command, 20 Hz}
+  {\texttt{/cmd\_vel}, 20 Hz $\rightarrow$ wheels and steering}
+  {A turn sharper than the steering limit cannot be executed.}
+  {\texttt{/cmd\_vel}; \repo{robot_gt.csv}: what the robot actually did}
+\end{frame}
+
+% ---------------------------------------------------------------- NAV-8
+\begin{frame}{1.5.8 \;NAV-8 \;Behaviour tree: run the sequence, recover from failure}
+  \hl{NAV8}\res{not measured (\R{14}{})}
+  \compbody{\navstrip}{navc}{%
+  \begin{tikzpicture}[font=\scriptsize, t/.style={box, text width=17mm, minimum height=7mm}]
+    \node[t, fill=navc!25, text width=22mm] (root) at (2.4,2.2) {NavigateToPose};
+    \node[t, fill=navc!10] (seq) at (0.9,1.0) {plan, then follow};
+    \node[t, fill=plancol!15] (rec) at (4.2,1.0) {on failure: recover};
+    \node[t] (cp) at (0,-0.25) {ComputePath\\1 Hz};
+    \node[t] (fp) at (1.9,-0.25) {FollowPath\\20 Hz};
+    \node[t, text width=24mm] (rv) at (4.4,-0.25) {Spin, BackUp,\\DriveOnHeading, Wait};
+    \draw[arr] (root) -- (seq); \draw[arr] (root) -- (rec);
+    \draw[arr] (seq) -- (cp); \draw[arr] (seq) -- (fp); \draw[arr] (rec) -- (rv);
+  \end{tikzpicture}}%
+  {Nav2's default tree: replan once a second, follow the path, and on failure try
+   a recovery before giving up on the goal.}
+  {Something has to run the sequence: plan, follow, notice failure, recover, try again.}
+  {goal(s) --- ours are poses of prior-map nodes}
+  {calls to planner, controller, recoveries; a result per goal}
+  {Recovery loops; the progress checker aborts a robot that has stopped moving.}
+  {\repo{outcome.json}: per-goal result; the \texttt{bt\_navigator} log}
+\end{frame}
+
+% ---------------------------------------------------------------- config
+\begin{frame}{1.5.9 \;Nav2 configuration}
+  \centering
+  \adjustbox{max width=\textwidth, max height=0.80\textheight}{%
+  \begin{tabular}{l l l l}
+    \toprule
+    & Parameter & Value & What it means \\
+    \midrule
+    NAV-1 & \texttt{transform\_tolerance} & 0.30 s & oldest pose the stack accepts \\
+          & \texttt{odom\_topic} & \texttt{/orbslam3/odometry} & speed comes from the front end \\
+    NAV-2 & \textcolor{ourc}{\texttt{init\_ignore\_s}, stability, margin} & 8 s; 6 $\times$ $<$1 m; 2 m & the three checks \\
+          & \texttt{autostart} & false & the pose gate starts Nav2 \\
+    NAV-3 & global costmap & 15$\times$22 m fixed, 0.05 m, 2 Hz & planner's map \\
+          & \texttt{inflation\_radius} / \texttt{cost\_scaling\_factor} & 0.80 m / 3.0 & how far, how fast cost fades \\
+          & obstacle layer source & \texttt{/local\_grid\_obstacle} & \textcolor{bad}{off in Exp.~4 runs} \\
+    NAV-4 & local costmap & 10$\times$10 m rolling, 0.05 m, 2 Hz & controller's window \\
+    NAV-5 & planner & Smac Hybrid-A*, Dubins, 72 headings & forward-only arcs \\
+          & \texttt{minimum\_turning\_radius} / \texttt{allow\_unknown} & 0.75 m / false & tightest turn; no unknown cells \\
+          & \texttt{expected\_planner\_frequency} & 1 Hz & replanning rate \\
+    NAV-6 & controller & Regulated Pure Pursuit, 20 Hz & follow the carrot \\
+          & \texttt{desired\_linear\_vel} / lookahead & 1.5 m/s / 1.3--2.0 m & cruise speed, carrot distance \\
+          & \texttt{use\_collision\_detection} & false & avoidance by replanning \\
+          & goal checker & 1.0 m, any heading & when a goal counts as reached \\
+    NAV-7 & smoother max / accel & 1.5 m/s, 1.0 rad/s / 0.8 m/s$^2$ & speed and acceleration caps \\
+          & chassis & wheelbase 0.42 m, steering $\le$35$^\circ$ & what the wheels can do \\
+    NAV-8 & progress checker & 0.5 m within 15 s & otherwise the goal is aborted \\
+    \bottomrule
+  \end{tabular}}
+  \par\vspace{0.4em}
+  \scriptsize\color{black!65}\textcolor{ourc}{\textbf{Amber}}: our pose gate's parameters. Simulation values; a real-rig file (\repo{nav2_real.yaml}) exists but has not been driven.
+  \src{\repo{vslam_navigation/params/nav2_sim.yaml}; \repo{scripts/pose_gate.py}; Experiment 4 \repo{launch.log}}
+\end{frame}

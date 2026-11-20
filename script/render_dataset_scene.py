@@ -75,16 +75,33 @@ def world_for(dataset):
     _002 sit in the canonical one.
     """
     for tree in ('output_orb', 'output_vins'):
-        base = os.path.join(ROOT, 'output', tree, dataset)
-        if not os.path.isdir(base):
-            continue
-        for run in sorted(os.listdir(base)):
-            man = os.path.join(base, run, 'run_metadata.csv')
-            if not os.path.exists(man):
+        # Runs moved under a DOMAIN subdirectory (simulation/, real/) on
+        # 6 November 2026.  The flat layout is still tried first so that an
+        # older tree resolves unchanged; without the domain layout this
+        # returned None for every current dataset and the caller got a
+        # TypeError from ElementTree rather than a readable error.
+        bases = [os.path.join(ROOT, 'output', tree, dataset)]
+        bases += [os.path.join(ROOT, 'output', tree, dom, dataset)
+                  for dom in ('simulation', 'real')]
+        for base in bases:
+            if not os.path.isdir(base):
                 continue
-            for line in open(man):
-                if line.startswith('world_path,'):
-                    return line.split(',', 1)[1].strip().strip('"')
+            for run in sorted(os.listdir(base)):
+                man = os.path.join(base, run, 'run_metadata.csv')
+                if not os.path.exists(man):
+                    continue
+                for line in open(man):
+                    if line.startswith('world_path,'):
+                        # A run that recorded no world leaves this field blank.
+                        # Returning '' made every caller behave as though the
+                        # dataset had no world at all -- footprints() returned
+                        # None and the warehouse vanished from that panel --
+                        # because the FIRST run directory alphabetically won.
+                        # Keep looking instead; any run of the same dataset
+                        # that did record a world answers just as well.
+                        w = line.split(',', 1)[1].strip().strip('"')
+                        if w:
+                            return w
     return None
 
 

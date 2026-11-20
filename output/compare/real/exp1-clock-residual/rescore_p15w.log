@@ -1,0 +1,289 @@
+##### realv7_000 lc_gpu (loopclosing_rate1)
+/home/ambushee/.local/lib/python3.10/site-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+
+=== dataset_realv7_000
+  bag  /media/ambushee/New Volume/wil_rescue/dataset_realv7_000/dataset_realv7_000_0.db3
+       first message 1793448177.755 (2026-10-31 12:02:57 UTC, robot clock), 90.75 s
+  gt   /home/ambushee/wil_project/dataset/gt/dataset_realv7_000
+       524 samples, 96.76 s, median dt 0.168 s, max gap 0.336 s, max step 0.090 m, path 21.55 m, recorded 'Tue 11/03/2026 09:48:56 AM'
+       checks {'samples_ok': True, 'gap_ok': True, 'step_ok': True, 'duration_ok': True} -> OK
+  ORB-SLAM3: /home/ambushee/wil_project/output/output_orb/real/dataset_realv7_000/loopclosing_rate1
+       1972 poses, 90.00 s, body axes forward=-z conf=7.7
+  offset via wheel /feedback/velocity: d = -2.573 s, r = 0.99, next peak 0.90
+  offset via ORB-SLAM3: d = -2.569 s, r = 0.71, next peak 0.64
+  => offset used: -2.573 s (wheel-speed correlation); alignment OK
+  ORB-SLAM3: partial (provisional: lever arm not provided)  [tracking loss 0.13 s]
+       matched 487/487 GT samples over 89.7 s; ATE RMSE 0.267 m, median 0.231, max 0.493, final 0.365; RPE(1 s) 0.062 m over 480 pairs
+       path est/gt 23.19/21.54 m (ratio 1.08); Sim(2) scale diag 0.946; yaw align -94.9 deg; z range 0.37 m; ATE at offset -0.2/-0.1/+0.1/+0.2 s: 0.251/0.260/0.277/0.286
+       fitted lever arm (diagnostic): forward -0.313 m, left +0.103 m -> ATE RMSE would be 0.136 m
+
+wrote /home/ambushee/wil_project/output/compare/real/realv7_000_lc_gpu_p15w/real_gt_metrics.csv, real_gt_table.tex, real_gt_rpe_table.tex
+
+status summary:
+  dataset_realv7_000       ORB-SLAM3      partial (provisional: lever arm not provided)
+##### realv7_000 nolc_gpu (noloopclosing_rate1)
+/home/ambushee/.local/lib/python3.10/site-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+
+=== dataset_realv7_000
+  bag  /media/ambushee/New Volume/wil_rescue/dataset_realv7_000/dataset_realv7_000_0.db3
+       first message 1793448177.755 (2026-10-31 12:02:57 UTC, robot clock), 90.75 s
+  gt   /home/ambushee/wil_project/dataset/gt/dataset_realv7_000
+       524 samples, 96.76 s, median dt 0.168 s, max gap 0.336 s, max step 0.090 m, path 21.55 m, recorded 'Tue 11/03/2026 09:48:56 AM'
+       checks {'samples_ok': True, 'gap_ok': True, 'step_ok': True, 'duration_ok': True} -> OK
+  ORB-SLAM3: /home/ambushee/wil_project/output/output_orb/real/dataset_realv7_000/noloopclosing_rate1
+       1819 poses, 89.93 s, body axes forward=-z conf=7.9
+  offset via wheel /feedback/velocity: d = -2.573 s, r = 0.99, next peak 0.90
+  offset via ORB-SLAM3: d = -2.616 s, r = 0.59, next peak 0.54
+  => offset used: -2.573 s (wheel-speed correlation); alignment OK
+  ORB-SLAM3: partial (provisional: lever arm not provided)  [tracking loss 0.07 s]
+       matched 486/487 GT samples over 89.7 s; ATE RMSE 0.255 m, median 0.229, max 0.457, final 0.353; RPE(1 s) 0.069 m over 478 pairs
+       path est/gt 23.11/21.54 m (ratio 1.07); Sim(2) scale diag 0.959; yaw align -95.7 deg; z range 0.36 m; ATE at offset -0.2/-0.1/+0.1/+0.2 s: 0.238/0.245/0.264/0.273
+       fitted lever arm (diagnostic): forward -0.312 m, left +0.065 m -> ATE RMSE would be 0.146 m
+
+wrote /home/ambushee/wil_project/output/compare/real/realv7_000_nolc_gpu_p15w/real_gt_metrics.csv, real_gt_table.tex, real_gt_rpe_table.tex
+
+status summary:
+  dataset_realv7_000       ORB-SLAM3      partial (provisional: lever arm not provided)
+##### realv7_000 lc_cpu (loopclosing_rate1_cpu)
+/home/ambushee/.local/lib/python3.10/site-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+
+=== dataset_realv7_000
+  bag  /media/ambushee/New Volume/wil_rescue/dataset_realv7_000/dataset_realv7_000_0.db3
+       first message 1793448177.755 (2026-10-31 12:02:57 UTC, robot clock), 90.75 s
+  gt   /home/ambushee/wil_project/dataset/gt/dataset_realv7_000
+       524 samples, 96.76 s, median dt 0.168 s, max gap 0.336 s, max step 0.090 m, path 21.55 m, recorded 'Tue 11/03/2026 09:48:56 AM'
+       checks {'samples_ok': True, 'gap_ok': True, 'step_ok': True, 'duration_ok': True} -> OK
+  ORB-SLAM3: /home/ambushee/wil_project/output/output_orb/real/dataset_realv7_000/loopclosing_rate1_cpu
+       847 poses, 89.06 s, body axes forward=-z conf=7.9
+  offset via wheel /feedback/velocity: d = -2.573 s, r = 0.99, next peak 0.90
+  offset via ORB-SLAM3: d = -2.578 s, r = 0.79, next peak 0.71
+  => offset used: -2.573 s (wheel-speed correlation); alignment OK
+  ORB-SLAM3: partial (provisional: lever arm not provided)  [1 estimator reset(s) (timestamp_jump_before_imu_initialization)]
+       matched 482/482 GT samples over 88.7 s; ATE RMSE 0.266 m, median 0.219, max 0.486, final 0.420; RPE(1 s) 0.064 m over 475 pairs
+       path est/gt 23.13/21.54 m (ratio 1.07); Sim(2) scale diag 0.944; yaw align -95.3 deg; z range 0.39 m; ATE at offset -0.2/-0.1/+0.1/+0.2 s: 0.252/0.259/0.275/0.283
+       fitted lever arm (diagnostic): forward -0.305 m, left +0.108 m -> ATE RMSE would be 0.137 m
+
+wrote /home/ambushee/wil_project/output/compare/real/realv7_000_lc_cpu_p15w/real_gt_metrics.csv, real_gt_table.tex, real_gt_rpe_table.tex
+
+status summary:
+  dataset_realv7_000       ORB-SLAM3      partial (provisional: lever arm not provided)
+##### realv7_000 nolc_cpu (noloopclosing_rate1_cpu)
+/home/ambushee/.local/lib/python3.10/site-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+
+=== dataset_realv7_000
+  bag  /media/ambushee/New Volume/wil_rescue/dataset_realv7_000/dataset_realv7_000_0.db3
+       first message 1793448177.755 (2026-10-31 12:02:57 UTC, robot clock), 90.75 s
+  gt   /home/ambushee/wil_project/dataset/gt/dataset_realv7_000
+       524 samples, 96.76 s, median dt 0.168 s, max gap 0.336 s, max step 0.090 m, path 21.55 m, recorded 'Tue 11/03/2026 09:48:56 AM'
+       checks {'samples_ok': True, 'gap_ok': True, 'step_ok': True, 'duration_ok': True} -> OK
+  ORB-SLAM3: /home/ambushee/wil_project/output/output_orb/real/dataset_realv7_000/noloopclosing_rate1_cpu
+       800 poses, 88.83 s, body axes forward=-z conf=9.3
+  offset via wheel /feedback/velocity: d = -2.573 s, r = 0.99, next peak 0.90
+  offset via ORB-SLAM3: d = -2.535 s, r = 0.73, next peak 0.65
+  => offset used: -2.573 s (wheel-speed correlation); alignment OK
+  ORB-SLAM3: partial (provisional: lever arm not provided)  [1 estimator reset(s) (timestamp_jump_before_imu_initialization)]
+       matched 481/481 GT samples over 88.5 s; ATE RMSE 0.256 m, median 0.248, max 0.467, final 0.376; RPE(1 s) 0.072 m over 474 pairs
+       path est/gt 22.70/21.54 m (ratio 1.05); Sim(2) scale diag 0.969; yaw align -95.1 deg; z range 0.34 m; ATE at offset -0.2/-0.1/+0.1/+0.2 s: 0.239/0.247/0.265/0.274
+       fitted lever arm (diagnostic): forward -0.324 m, left +0.034 m -> ATE RMSE would be 0.157 m
+
+wrote /home/ambushee/wil_project/output/compare/real/realv7_000_nolc_cpu_p15w/real_gt_metrics.csv, real_gt_table.tex, real_gt_rpe_table.tex
+
+status summary:
+  dataset_realv7_000       ORB-SLAM3      partial (provisional: lever arm not provided)
+##### realv7_001 lc_gpu (loopclosing_rate1)
+/home/ambushee/.local/lib/python3.10/site-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+
+=== dataset_realv7_001
+  bag  /media/ambushee/New Volume/wil_rescue/dataset_realv7_001/dataset_realv7_001_0.db3
+       first message 1793448434.215 (2026-10-31 12:07:14 UTC, robot clock), 126.34 s
+  gt   /home/ambushee/wil_project/dataset/gt/dataset_realv7_001
+       669 samples, 133.50 s, median dt 0.200 s, max gap 0.336 s, max step 0.106 m, path 31.66 m, recorded 'Tue 11/03/2026 09:53:12 AM'
+       checks {'samples_ok': True, 'gap_ok': True, 'step_ok': True, 'duration_ok': True} -> OK
+  ORB-SLAM3: /home/ambushee/wil_project/output/output_orb/real/dataset_realv7_001/loopclosing_rate1
+       2641 poses, 125.56 s, body axes forward=-z conf=45.7
+  offset via wheel /feedback/velocity: d = -3.766 s, r = 0.98, next peak 0.89
+  offset via ORB-SLAM3: d = -3.737 s, r = 0.86, next peak 0.76
+  => offset used: -3.766 s (wheel-speed correlation); alignment OK
+  ORB-SLAM3: completed (provisional: lever arm not provided)
+       matched 629/629 GT samples over 125.5 s; ATE RMSE 0.445 m, median 0.428, max 0.832, final 0.369; RPE(1 s) 0.075 m over 623 pairs
+       path est/gt 33.83/31.65 m (ratio 1.07); Sim(2) scale diag 0.950; yaw align -88.1 deg; z range 0.41 m; ATE at offset -0.2/-0.1/+0.1/+0.2 s: 0.399/0.421/0.467/0.492
+       fitted lever arm (diagnostic): forward -0.421 m, left +0.023 m -> ATE RMSE would be 0.168 m
+
+wrote /home/ambushee/wil_project/output/compare/real/realv7_001_lc_gpu_p15w/real_gt_metrics.csv, real_gt_table.tex, real_gt_rpe_table.tex
+
+status summary:
+  dataset_realv7_001       ORB-SLAM3      completed (provisional: lever arm not provided)
+##### realv7_001 nolc_gpu (noloopclosing_rate1)
+/home/ambushee/.local/lib/python3.10/site-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+
+=== dataset_realv7_001
+  bag  /media/ambushee/New Volume/wil_rescue/dataset_realv7_001/dataset_realv7_001_0.db3
+       first message 1793448434.215 (2026-10-31 12:07:14 UTC, robot clock), 126.34 s
+  gt   /home/ambushee/wil_project/dataset/gt/dataset_realv7_001
+       669 samples, 133.50 s, median dt 0.200 s, max gap 0.336 s, max step 0.106 m, path 31.66 m, recorded 'Tue 11/03/2026 09:53:12 AM'
+       checks {'samples_ok': True, 'gap_ok': True, 'step_ok': True, 'duration_ok': True} -> OK
+  ORB-SLAM3: /home/ambushee/wil_project/output/output_orb/real/dataset_realv7_001/noloopclosing_rate1
+       2395 poses, 121.70 s, body axes forward=-z conf=67.9
+  offset via wheel /feedback/velocity: d = -3.766 s, r = 0.98, next peak 0.89
+  offset via ORB-SLAM3: d = -4.127 s, r = 0.81, next peak 0.68
+  => offset used: -3.766 s (wheel-speed correlation); alignment OK
+  ORB-SLAM3: completed (provisional: lever arm not provided)
+       matched 607/607 GT samples over 121.4 s; ATE RMSE 0.434 m, median 0.396, max 0.948, final 0.415; RPE(1 s) 0.078 m over 601 pairs
+       path est/gt 34.19/31.64 m (ratio 1.08); Sim(2) scale diag 0.945; yaw align -87.6 deg; z range 0.44 m; ATE at offset -0.2/-0.1/+0.1/+0.2 s: 0.392/0.413/0.458/0.481
+       fitted lever arm (diagnostic): forward -0.388 m, left -0.002 m -> ATE RMSE would be 0.211 m
+
+wrote /home/ambushee/wil_project/output/compare/real/realv7_001_nolc_gpu_p15w/real_gt_metrics.csv, real_gt_table.tex, real_gt_rpe_table.tex
+
+status summary:
+  dataset_realv7_001       ORB-SLAM3      completed (provisional: lever arm not provided)
+##### realv7_001 lc_cpu (loopclosing_rate1_cpu)
+/home/ambushee/.local/lib/python3.10/site-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+
+=== dataset_realv7_001
+  bag  /media/ambushee/New Volume/wil_rescue/dataset_realv7_001/dataset_realv7_001_0.db3
+       first message 1793448434.215 (2026-10-31 12:07:14 UTC, robot clock), 126.34 s
+  gt   /home/ambushee/wil_project/dataset/gt/dataset_realv7_001
+       669 samples, 133.50 s, median dt 0.200 s, max gap 0.336 s, max step 0.106 m, path 31.66 m, recorded 'Tue 11/03/2026 09:53:12 AM'
+       checks {'samples_ok': True, 'gap_ok': True, 'step_ok': True, 'duration_ok': True} -> OK
+  ORB-SLAM3: /home/ambushee/wil_project/output/output_orb/real/dataset_realv7_001/loopclosing_rate1_cpu
+       1136 poses, 124.50 s, body axes forward=-z conf=53.7
+  offset via wheel /feedback/velocity: d = -3.766 s, r = 0.98, next peak 0.89
+  offset via ORB-SLAM3: d = -3.746 s, r = 0.81, next peak 0.70
+  => offset used: -3.766 s (wheel-speed correlation); alignment OK
+  ORB-SLAM3: completed (provisional: lever arm not provided)
+       matched 622/622 GT samples over 124.3 s; ATE RMSE 0.443 m, median 0.426, max 0.808, final 0.405; RPE(1 s) 0.078 m over 616 pairs
+       path est/gt 33.88/31.64 m (ratio 1.07); Sim(2) scale diag 0.959; yaw align -87.3 deg; z range 0.40 m; ATE at offset -0.2/-0.1/+0.1/+0.2 s: 0.396/0.420/0.467/0.492
+       fitted lever arm (diagnostic): forward -0.426 m, left +0.003 m -> ATE RMSE would be 0.153 m
+
+wrote /home/ambushee/wil_project/output/compare/real/realv7_001_lc_cpu_p15w/real_gt_metrics.csv, real_gt_table.tex, real_gt_rpe_table.tex
+
+status summary:
+  dataset_realv7_001       ORB-SLAM3      completed (provisional: lever arm not provided)
+##### realv7_001 nolc_cpu (noloopclosing_rate1_cpu)
+/home/ambushee/.local/lib/python3.10/site-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+
+=== dataset_realv7_001
+  bag  /media/ambushee/New Volume/wil_rescue/dataset_realv7_001/dataset_realv7_001_0.db3
+       first message 1793448434.215 (2026-10-31 12:07:14 UTC, robot clock), 126.34 s
+  gt   /home/ambushee/wil_project/dataset/gt/dataset_realv7_001
+       669 samples, 133.50 s, median dt 0.200 s, max gap 0.336 s, max step 0.106 m, path 31.66 m, recorded 'Tue 11/03/2026 09:53:12 AM'
+       checks {'samples_ok': True, 'gap_ok': True, 'step_ok': True, 'duration_ok': True} -> OK
+  ORB-SLAM3: /home/ambushee/wil_project/output/output_orb/real/dataset_realv7_001/noloopclosing_rate1_cpu
+       1100 poses, 126.00 s, body axes forward=-z conf=59.4
+  offset via wheel /feedback/velocity: d = -3.766 s, r = 0.98, next peak 0.89
+  offset via ORB-SLAM3: d = -3.728 s, r = 0.79, next peak 0.71
+  => offset used: -3.766 s (wheel-speed correlation); alignment OK
+  ORB-SLAM3: completed (provisional: lever arm not provided)
+       matched 631/631 GT samples over 125.8 s; ATE RMSE 0.434 m, median 0.428, max 0.808, final 0.432; RPE(1 s) 0.078 m over 625 pairs
+       path est/gt 33.94/31.65 m (ratio 1.07); Sim(2) scale diag 0.950; yaw align -87.9 deg; z range 0.41 m; ATE at offset -0.2/-0.1/+0.1/+0.2 s: 0.390/0.411/0.456/0.480
+       fitted lever arm (diagnostic): forward -0.404 m, left +0.035 m -> ATE RMSE would be 0.178 m
+
+wrote /home/ambushee/wil_project/output/compare/real/realv7_001_nolc_cpu_p15w/real_gt_metrics.csv, real_gt_table.tex, real_gt_rpe_table.tex
+
+status summary:
+  dataset_realv7_001       ORB-SLAM3      completed (provisional: lever arm not provided)
+##### realv7_002 lc_gpu (loopclosing_rate1)
+/home/ambushee/.local/lib/python3.10/site-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+
+=== dataset_realv7_002
+  bag  /media/ambushee/New Volume/wil_rescue/dataset_realv7_002/dataset_realv7_002_0.db3
+       first message 1793448886.941 (2026-10-31 12:14:46 UTC, robot clock), 97.66 s
+  gt   /home/ambushee/wil_project/dataset/gt/dataset_realv7_002
+       540 samples, 103.87 s, median dt 0.200 s, max gap 0.368 s, max step 0.104 m, path 23.45 m, recorded 'Tue 11/03/2026 10:00:46 AM'
+       checks {'samples_ok': True, 'gap_ok': True, 'step_ok': True, 'duration_ok': True} -> OK
+  ORB-SLAM3: /home/ambushee/wil_project/output/output_orb/real/dataset_realv7_002/loopclosing_rate1
+       1622 poses, 96.86 s, body axes forward=-z conf=6.3
+  offset via wheel /feedback/velocity: d = -2.605 s, r = 0.93, next peak 0.83
+  offset via ORB-SLAM3: d = -3.191 s, r = 0.77, next peak 0.69
+  => offset used: -2.605 s (wheel-speed correlation); alignment OK
+  ORB-SLAM3: completed (provisional: lever arm not provided)
+       matched 505/505 GT samples over 96.7 s; ATE RMSE 0.193 m, median 0.163, max 0.401, final 0.190; RPE(1 s) 0.052 m over 494 pairs
+       path est/gt 25.00/23.44 m (ratio 1.07); Sim(2) scale diag 0.971; yaw align -1.1 deg; z range 0.43 m; ATE at offset -0.2/-0.1/+0.1/+0.2 s: 0.183/0.188/0.199/0.206
+       fitted lever arm (diagnostic): forward -0.235 m, left +0.060 m -> ATE RMSE would be 0.122 m
+
+wrote /home/ambushee/wil_project/output/compare/real/realv7_002_lc_gpu_p15w/real_gt_metrics.csv, real_gt_table.tex, real_gt_rpe_table.tex
+
+status summary:
+  dataset_realv7_002       ORB-SLAM3      completed (provisional: lever arm not provided)
+##### realv7_002 nolc_gpu (noloopclosing_rate1)
+/home/ambushee/.local/lib/python3.10/site-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+
+=== dataset_realv7_002
+  bag  /media/ambushee/New Volume/wil_rescue/dataset_realv7_002/dataset_realv7_002_0.db3
+       first message 1793448886.941 (2026-10-31 12:14:46 UTC, robot clock), 97.66 s
+  gt   /home/ambushee/wil_project/dataset/gt/dataset_realv7_002
+       540 samples, 103.87 s, median dt 0.200 s, max gap 0.368 s, max step 0.104 m, path 23.45 m, recorded 'Tue 11/03/2026 10:00:46 AM'
+       checks {'samples_ok': True, 'gap_ok': True, 'step_ok': True, 'duration_ok': True} -> OK
+  ORB-SLAM3: /home/ambushee/wil_project/output/output_orb/real/dataset_realv7_002/noloopclosing_rate1
+       1802 poses, 96.83 s, body axes forward=-z conf=6.4
+  offset via wheel /feedback/velocity: d = -2.605 s, r = 0.93, next peak 0.83
+  offset via ORB-SLAM3: d = -2.985 s, r = 0.83, next peak 0.71
+  => offset used: -2.605 s (wheel-speed correlation); alignment OK
+  ORB-SLAM3: partial (provisional: lever arm not provided)  [tracking loss 0.07 s]
+       matched 505/505 GT samples over 96.7 s; ATE RMSE 0.211 m, median 0.165, max 0.424, final 0.166; RPE(1 s) 0.053 m over 494 pairs
+       path est/gt 25.31/23.44 m (ratio 1.08); Sim(2) scale diag 0.954; yaw align -0.8 deg; z range 0.45 m; ATE at offset -0.2/-0.1/+0.1/+0.2 s: 0.204/0.207/0.216/0.221
+       fitted lever arm (diagnostic): forward -0.211 m, left +0.108 m -> ATE RMSE would be 0.131 m
+
+wrote /home/ambushee/wil_project/output/compare/real/realv7_002_nolc_gpu_p15w/real_gt_metrics.csv, real_gt_table.tex, real_gt_rpe_table.tex
+
+status summary:
+  dataset_realv7_002       ORB-SLAM3      partial (provisional: lever arm not provided)
+##### realv7_002 lc_cpu (loopclosing_rate1_cpu)
+/home/ambushee/.local/lib/python3.10/site-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+
+=== dataset_realv7_002
+  bag  /media/ambushee/New Volume/wil_rescue/dataset_realv7_002/dataset_realv7_002_0.db3
+       first message 1793448886.941 (2026-10-31 12:14:46 UTC, robot clock), 97.66 s
+  gt   /home/ambushee/wil_project/dataset/gt/dataset_realv7_002
+       540 samples, 103.87 s, median dt 0.200 s, max gap 0.368 s, max step 0.104 m, path 23.45 m, recorded 'Tue 11/03/2026 10:00:46 AM'
+       checks {'samples_ok': True, 'gap_ok': True, 'step_ok': True, 'duration_ok': True} -> OK
+  ORB-SLAM3: /home/ambushee/wil_project/output/output_orb/real/dataset_realv7_002/loopclosing_rate1_cpu
+       847 poses, 95.80 s, body axes forward=-z conf=6.5
+  offset via wheel /feedback/velocity: d = -2.605 s, r = 0.93, next peak 0.83
+  offset via ORB-SLAM3: d = -2.571 s, r = 0.89, next peak 0.80
+  => offset used: -2.605 s (wheel-speed correlation); alignment OK
+  ORB-SLAM3: completed (provisional: lever arm not provided)
+       matched 499/499 GT samples over 95.5 s; ATE RMSE 0.192 m, median 0.163, max 0.403, final 0.208; RPE(1 s) 0.055 m over 488 pairs
+       path est/gt 24.27/23.43 m (ratio 1.04); Sim(2) scale diag 0.977; yaw align -0.9 deg; z range 0.84 m; ATE at offset -0.2/-0.1/+0.1/+0.2 s: 0.181/0.186/0.199/0.206
+       fitted lever arm (diagnostic): forward -0.251 m, left +0.038 m -> ATE RMSE would be 0.121 m
+
+wrote /home/ambushee/wil_project/output/compare/real/realv7_002_lc_cpu_p15w/real_gt_metrics.csv, real_gt_table.tex, real_gt_rpe_table.tex
+
+status summary:
+  dataset_realv7_002       ORB-SLAM3      completed (provisional: lever arm not provided)
+##### realv7_002 nolc_cpu (noloopclosing_rate1_cpu)
+/home/ambushee/.local/lib/python3.10/site-packages/matplotlib/projections/__init__.py:63: UserWarning: Unable to import Axes3D. This may be due to multiple versions of Matplotlib being installed (e.g. as a system package and as a pip package). As a result, the 3D projection is not available.
+  warnings.warn("Unable to import Axes3D. This may be due to multiple versions of "
+
+=== dataset_realv7_002
+  bag  /media/ambushee/New Volume/wil_rescue/dataset_realv7_002/dataset_realv7_002_0.db3
+       first message 1793448886.941 (2026-10-31 12:14:46 UTC, robot clock), 97.66 s
+  gt   /home/ambushee/wil_project/dataset/gt/dataset_realv7_002
+       540 samples, 103.87 s, median dt 0.200 s, max gap 0.368 s, max step 0.104 m, path 23.45 m, recorded 'Tue 11/03/2026 10:00:46 AM'
+       checks {'samples_ok': True, 'gap_ok': True, 'step_ok': True, 'duration_ok': True} -> OK
+  ORB-SLAM3: /home/ambushee/wil_project/output/output_orb/real/dataset_realv7_002/noloopclosing_rate1_cpu
+       819 poses, 95.40 s, body axes forward=-z conf=6.2
+  offset via wheel /feedback/velocity: d = -2.605 s, r = 0.93, next peak 0.83
+  offset via ORB-SLAM3: d = -2.564 s, r = 0.88, next peak 0.79
+  => offset used: -2.605 s (wheel-speed correlation); alignment OK
+  ORB-SLAM3: completed (provisional: lever arm not provided)
+       matched 496/497 GT samples over 95.2 s; ATE RMSE 0.196 m, median 0.158, max 0.427, final 0.174; RPE(1 s) 0.057 m over 485 pairs
+       path est/gt 24.51/23.43 m (ratio 1.05); Sim(2) scale diag 0.966; yaw align -0.4 deg; z range 0.98 m; ATE at offset -0.2/-0.1/+0.1/+0.2 s: 0.186/0.191/0.202/0.209
+       fitted lever arm (diagnostic): forward -0.230 m, left +0.073 m -> ATE RMSE would be 0.123 m
+
+wrote /home/ambushee/wil_project/output/compare/real/realv7_002_nolc_cpu_p15w/real_gt_metrics.csv, real_gt_table.tex, real_gt_rpe_table.tex
+
+status summary:
+  dataset_realv7_002       ORB-SLAM3      completed (provisional: lever arm not provided)
+DONE

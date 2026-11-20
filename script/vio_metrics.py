@@ -84,6 +84,87 @@ def run_dir(tree, dataset, logging="never"):
     return base
 
 
+def imu_init_time(run_dir):
+    """Absolute time, in seconds, at which ORB-SLAM3 declared its IMU initialised.
+
+    Returns None for a run that logs no such flag -- VINS-Fusion, the proprio
+    estimators, and any ORB run whose local_mapping.csv is missing.
+
+    WHY A CALLER WOULD WANT THIS. Until this instant ORB-SLAM3 has no
+    gravity-aligned world frame, and the node publishes poses in the camera
+    OPTICAL frame instead: a clean ~90 deg axis permutation, measured at
+    89.25-90.75 deg across sixteen runs, with the position's y and z
+    interchanged. Those poses are accurate -- 2 to 17 mm from truth once
+    aligned on their own -- but they are expressed in the wrong frame, so
+    scoring them against a world-frame reference is a category error rather
+    than a tolerance choice.
+
+    The fraction is small and the leverage is not: 2.0-3.6 % of each run's
+    samples at ~90 deg produce the ENTIRE rotation ATE of 12.8-19.0 deg, while
+    the same runs sit at 0.27-3.15 deg once anchored here. sqrt(0.024*90^2) is
+    13.9 deg, against 12.8-14.1 measured on realistic_000.
+
+    Anchoring at this flag is per-run and measured, which a fixed trim_start is
+    not: the flip lands at 2.38-2.51 s depending on the bag and the front end.
+    """
+    path = os.path.join(run_dir, "local_mapping.csv")
+    if not os.path.exists(path):
+        return None
+    import csv as _csv
+    with open(path, newline="") as fh:
+        for row in _csv.DictReader(fh):
+            if row.get("imu_initialized") in ("1", "True", "true"):
+                try:
+                    return int(row["timestamp_ns"]) / 1e9
+                except (KeyError, TypeError, ValueError):
+                    return None
+    return None
+
+
+def frame_switch_time(run_dir, window_s=15.0, min_step_deg=45.0):
+    """Absolute time of the published ~90 deg frame switch, or None.
+
+    Detected from the POSE STREAM ALONE -- the last single-sample rotation step
+    above min_step_deg inside the first window_s seconds -- so it uses no
+    ground truth and cannot launder the reference into the anchor it is used to
+    compute. Returns the timestamp of the first sample in the NEW frame.
+
+    This is the companion to imu_init_time(), and the better anchor of the two.
+    The flag is written by the local-mapping thread when initialisation
+    completes; the tracking thread goes on publishing in the old frame for
+    another three or four poses. Measured across twelve runs that lag is
+    0.099-0.132 s and the step itself is 89.8-90.2 deg -- tight enough to
+    detect directly rather than to pad for with a guessed constant. Anchoring
+    on the flag alone leaves two or three ~90 deg samples in, which is enough
+    to hold the rotation RMS at 2.6-3.3 deg instead of 0.3-0.6 deg.
+
+    LIMIT. A run that loses tracking inside the window can also step more than
+    min_step_deg, and this would then anchor on that instead. The window exists
+    to bound that risk, not to remove it: a caller scoring a run known to fail
+    early should check the returned time against imu_init_time().
+    """
+    rec = load(os.path.join(run_dir, "vio.csv"))
+    if rec is None:
+        return None
+    t, q = rec[0], rec[2]
+    if len(t) < 3:
+        return None
+    R = quat_to_R(q)
+    step = geodesic_deg(R[:-1], R[1:])
+    hit = np.where((step > min_step_deg) & (t[1:] < t[0] + window_s))[0]
+    return float(t[hit[-1] + 1]) if len(hit) else None
+
+
+def world_frame_time(run_dir):
+    """When this run's published poses enter the gravity-aligned world frame.
+
+    The detected frame switch where there is one, the logged IMU-init flag
+    otherwise, and None for an estimator that has neither -- VINS-Fusion and
+    the proprio filters publish in one frame throughout and need no anchor.
+    """
+    return frame_switch_time(run_dir) or imu_init_time(run_dir)
+
+
 def split(entry):
     """A systems entry is (label, tree) or (label, tree, run).
 
@@ -527,7 +608,14 @@ def analyse(dataset, log=lambda *_: None, trim_start=0.0, systems=SYSTEMS,
         # just whichever estimator ran first, and if THAT one is the broken one, the error
         # is large for the healthy run -- blaming it would be exactly backwards.
         aligned.append(dict(
-            name=name, t=tc - tc[0], p=pa, ref=rp, err=err, v=va, eul=eul,
+            # `t` is zeroed on this system's own overlap with the reference, so
+            # two systems' `t` arrays do NOT share an origin. `t0` is that
+            # origin in absolute time, for callers that must put a series back
+            # on the bag's clock -- indexing a bag-derived feed with the zeroed
+            # value silently reads the wrong instant. Additive: nothing that
+            # reads `t` is affected.
+            name=name, t=tc - tc[0], t0=float(tc[0]), p=pa, ref=rp, err=err,
+            v=va, eul=eul,
             roterr=rot_err, diverged=gt is not None and err.max() > DIVERGED_ERROR,
             refv=None if ref_v is None else resample(ref_t, ref_v, tc),
             refeul=None if ref_eul is None else resample_deg(ref_t, ref_eul, tc)))

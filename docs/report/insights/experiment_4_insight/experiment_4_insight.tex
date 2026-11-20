@@ -18,7 +18,7 @@
 
 \noindent\textbf{Purpose of this document.} The raw write-up of Experiment~4
 (\path{insights/experiment_4/}) reports that the pose published on a prior map
-tracks ground truth to \SIrange{0.10}{0.36}{\metre} over seven hand-driven runs,
+tracks ground truth to \SIrange{0.13}{0.21}{\metre} over six hand-driven runs,
 that the error is bounded rather than growing, and that two runs left the map for
 tens of seconds and came back. It does not say why the error is the size it is,
 what distinguishes the two excursions, or whether localising on the prior is
@@ -64,102 +64,105 @@ before, during and after it, in both yaw and translation.
 
 % =====================================================================
 \FloatBarrier
-\section{Insight 1: heading is accurate, and traffic is what degrades it}
+\section{Insight 1: heading splits by layout, and the motion is not what sets it}
 
 \ins{rotation.tex}
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{\insdir/fig_rotation.png}
-  \caption{Left: heading error per run, median and 95th percentile, the run with
-  traffic in orange. Every static run sits under \SI{1.2}{\degree} median and the
-  dynamic one at \SI{4.85}{\degree}; the gap is the finding, not the level.
-  Right: heading error while turning against heading error while driving
-  straight. The points sit on the diagonal, so whatever sets the floor is not
-  the motion.}
+  \caption{Left: heading error per run, median and 95th percentile. The three
+  U-layout runs sit under \SI{0.5}{\degree}; the three I-layout runs are three
+  to six times that. Right: heading error while turning against heading error
+  while driving straight. The points fall either side of the diagonal rather
+  than along it, so there is no consistent turn-rate effect and whatever sets
+  the level is not the motion.}
   \label{fig:insight4nav-rotation}
 \end{figure}
 
 
 
-Median heading error is below \SI{1.2}{\degree} in all six static runs, and the
-95th percentile below \SI{3.6}{\degree} in five of them. Against a chassis with
+Median heading error is \SIrange{0.21}{2.83}{\degree} and splits by layout:
+\SIrange{0.21}{0.49}{\degree} on the three U-layout runs,
+\SIrange{1.31}{2.83}{\degree} on the three I-layout ones. The I-layout runs
+also carry a systematic negative bias, \SIrange{-0.89}{-2.17}{\degree},
+where the U-layout biases are within \SI{0.2}{\degree} of zero. Against a chassis with
 a \SI{0.6}{\metre} wheelbase driving \SIrange{21}{152}{\metre} aisles, that is
 not a limiting quantity: a degree of heading error accumulates
 \SI{1.7}{\centi\metre} of cross-track error per metre driven, and the fixes
 arrive far more often than that takes to matter.
 
-The one dynamic run is the exception and it is not a small one.
-\SI{4.85}{\degree} median is four to thirteen times every static run, with a
-\SI{+3.35}{\degree} bias, and it is the run whose position error is also the
-worst for offset and scatter. Traffic costs heading more than it costs position
-in relative terms --- the position median is \SI{0.298}{\metre} against a static
-best of \SI{0.097}{\metre}, roughly threefold, where heading is tenfold. A
-moving occluder removes the distant, well-conditioned features that fix
-orientation while leaving the near ones that fix position, which is the shape
-this result has, and one dynamic run is enough to notice it and not enough to
-claim it.
+The obvious candidate is a residual in the I prior's own
+\texttt{map}~$\rightarrow$~world fit, which is solved independently of the U
+prior's: a fit a degree or two out would displace heading exactly this way
+while leaving position largely alone. \flag{The per-run signs argue against it
+being the whole story.} A constant fit residual would displace all three
+I-layout runs alike. Only the straight run is one-signed, with every sample
+negative; the figure-of-eight is negative in \SI{75}{\percent} of its samples
+and the square in \SI{56}{\percent}, crossing zero repeatedly. So the negative
+means of all three do not share one constant cause, and three runs per layout
+is in any case not a sample. The layout split is reported as an observation
+whose cause is unresolved, not as a finding.
 
-Heading error does not rise with turn rate. The straight and turning columns
-differ by less than \SI{0.8}{\degree} in every run and in no consistent
-direction, so whatever sets the floor is not the motion.
+\flag{Two earlier halves of this insight are withdrawn. A previous revision
+reported that heading sat under \SI{1.2}{\degree} in every run --- true of the
+retired configuration, false of this one --- and that traffic degraded heading
+about tenfold, measured on a single run whose recording was overwritten on
+15 November and cannot be recovered. The occlusion mechanism that claim
+proposed remains worth testing and needs the traffic worlds collected again.}
+
+Turn rate does not explain the level, but turning is not free either.
+Turning costs \numrange{4.1}{8.4} times the straight-driving heading error on
+every U-layout run. The straight and turning columns differ in no consistent
+direction across the six, however --- turning is worse on the three U-layout
+runs and better on the three I-layout ones, which is the layout split again
+rather than a motion effect --- so whatever sets the floor is not the motion.
 
 % =====================================================================
 \FloatBarrier
-\section{Insight 2: the two excursions are two different faults}
+\section{Insight 2: the one excursion is a refused correction, not a wrong one}
 
 \ins{excursions.tex}
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{\insdir/fig_excursions.png}
-  \caption{The two excursions, shaded where the position error exceeds
-  \SI{1}{\metre}. Top row: position error with heading error on the right axis.
-  Bottom row: the \texttt{map}~$\rightarrow$~\texttt{odom} correction in yaw and
-  in translation. \flag{Both excursions move the correction in both quantities,
-  so the corrections alone do not separate them} --- the heading error does. On
-  the figure-of-eight it rises with the position error and stays up for the whole
-  \SI{23}{\second}; on the square it spikes once at the transition and falls back
-  to about \SI{2}{\degree} while the position error holds at \SI{6}{\metre} for
-  \SI{35}{\second}. A persistent heading error is a wrong orientation; a
-  transient one is the pose being moved.}
+  \caption{The one excursion, shaded where the position error exceeds
+  \SI{1}{\metre}. Top: position error with heading error on the right axis.
+  Bottom: the \texttt{map}~$\rightarrow$~\texttt{odom} correction in yaw and in
+  translation. Neither moves across the stretch, which is the point --- the
+  pose was not placed somewhere wrong, it was left where dead reckoning put it
+  because the gate refused the corrections on offer.}
   \label{fig:insight4nav-exc}
 \end{figure}
 
+One run of the six crossed a metre: the \repo{I_static} figure-of-eight, for
+\SI{6}{\second} from $t=\SI{30}{\second}$, peaking at \SI{1.24}{\metre}.
 
+What distinguishes it from the excursions of the retired configuration is that
+the correction does not move. Its yaw holds at \SI{-3.40}{\degree} before,
+during and after, and its translation at \SI{-10.17}{\metre} throughout. An
+excursion caused by a wrong fix shows the opposite signature: the correction
+steps, and the pose steps with it. Here nothing was accepted, so the published
+pose coasted on odometry and the error grew until a fix passed the gate. The
+heading error inside the stretch is \SI{4.93}{\degree} against
+\SI{2.67}{\degree} outside, correlating with position error at $r=0.68$, which
+is consistent with accumulated dead reckoning rather than with a placement
+error.
 
-The raw write-up reports both excursions as one phenomenon --- flat shelves of
-error, abruptly entered and abruptly left. The corrections say otherwise.
+That is the gate behaving as designed. It converts the failure mode from a
+large sudden displacement into a small gradual one, and \SI{1.24}{\metre} over
+\SI{6}{\second} is the price of refusing fixes for that long. The run recovered
+to \SI{0.166}{\metre} over its last tenth.
 
-\Cref{fig:insight4nav-exc} shows why the corrections alone are not the
-discriminator: both excursions move the correction in yaw \emph{and} in
-translation. What separates them is whether the robot's heading went with it.
-
-On the \repo{U_static} figure-of-eight the correction's yaw moves from
-\SI{-0.50}{\degree} to \SI{+11.00}{\degree} and returns to
-\SI{-0.10}{\degree}, its translation moving \SI{2.45}{\metre} alongside. Heading error inside that stretch is \SI{11.02}{\degree}
-against \SI{0.39}{\degree} outside it, and heading error correlates with position
-error at $r=0.97$. That excursion is a rotation: the back end accepted a match
-that placed the robot at the right sort of place facing the wrong way, and every
-metre driven afterwards converted that angle into displacement until a correct
-fix replaced it.
-
-On the \repo{U_static} square the correction's yaw barely moves ---
-\SI{-0.60}{\degree} to \SI{-2.10}{\degree} --- while its translation shifts from
-\SI{-8.15}{\metre} to \SI{-13.32}{\metre}, over \SI{5}{\metre}. Heading error
-inside is \SI{1.99}{\degree} against \SI{0.42}{\degree} outside, correlating at
-$r=0.40$: it spikes once as the pose is moved and then falls back while the
-position error holds for \SI{35}{\second}. That excursion is a translation: the robot was placed in the wrong
-aisle at the right heading.
-
-Both are perceptual aliasing and both recovered, to \SI{0.154}{\metre} and
-\SI{0.072}{\metre}. But they are the two distinct symmetries of a warehouse ---
-the aisle pitch, and the orientation of a bay --- and a defence aimed at one
-does not catch the other. This is the same split the November acceptance sweep
-found at the level of individual fixes, where the rejected matches were
-\SI{73}{\degree}, \SI{143}{\degree}, \SI{23}{\degree} and \SI{24}{\degree} of
-yaw, and it is the reason that sweep concluded geometry, proximity and a motion
-gate compose rather than compete.
+\flag{A previous revision of this document built its strongest claim here: that
+two excursions in the ungated configuration were two distinct faults, one
+rotational and one translational, matching the two symmetries of a warehouse.
+Those two recordings were overwritten on 15 November 2026 and cannot be
+recovered. One event of a different kind cannot re-establish the distinction,
+and it is withdrawn. If it is worth recovering, the way to do it is to run the
+ungated configuration again deliberately rather than to argue from what is
+left.}
 
 % =====================================================================
 \FloatBarrier
@@ -171,32 +174,35 @@ gate compose rather than compete.
   \centering
   \includegraphics[width=\textwidth]{\insdir/fig_prior_value.png}
   \caption{Left: each run's median error, unaided front end against localised
-  pose, joined; green where the prior helps, orange where it hurts. They split
-  three to three with one level. Right: the same medians as bars with each
-  column's worst instant as a tick, logarithmic. The front end never exceeds
-  \SI{0.76}{\metre}; the localised pose reaches \SI{6.80}{\metre}. The
-  asymmetry on the right, not the split on the left, is what the prior costs
-  over these distances.}
+  pose, joined; green where the prior helps, orange where it hurts. It helps on
+  four of six, and the two it loses are the two shortest routes. Right: the
+  same medians as bars with each column's worst instant as a tick,
+  logarithmic. The front end never exceeds \SI{0.64}{\metre}; the localised
+  pose reaches \SI{1.24}{\metre}.}
   \label{fig:insight4nav-prior}
 \end{figure}
 
 
 
-This is the uncomfortable one. Unaided ORB-SLAM3, rigidly aligned to ground
-truth, drifts by a median of \SIrange{0.045}{0.345}{\metre} over
-\SIrange{21}{152}{\metre}, never exceeds \SI{0.76}{\metre} at any instant, and
-ends each run between \SI{0.03}{\metre} and \SI{0.60}{\metre} from truth. The
-localised pose, on the same runs, has a median between \SI{0.097}{\metre} and
-\SI{0.361}{\metre} and a maximum of \SI{6.80}{\metre}.
+Unaided ORB-SLAM3, rigidly aligned to ground truth, drifts by a median of
+\SIrange{0.013}{0.307}{\metre} over \SIrange{21}{148}{\metre}, never exceeds
+\SI{0.64}{\metre} at any instant, and ends each run between \SI{0.02}{\metre}
+and \SI{0.42}{\metre} from truth. The localised pose, on the same runs, has a
+median between \SI{0.126}{\metre} and \SI{0.210}{\metre} and a maximum of
+\SI{1.24}{\metre}.
 
-Run by run the medians split three to three with one tie: the prior is better on
-both figure-of-eights and the \repo{I_static} straight, worse on the
-\repo{U_static} straight, the \repo{I_static} square and the dynamic run, and
-level on the \repo{U_static} square. There is no sense in which localising
-against the map improves local accuracy here. What it does do is introduce
-excursions an order of magnitude larger than anything the front end produced
-alone: \SI{6.80}{\metre} and \SI{3.99}{\metre} against a front-end worst of
-\SI{0.76}{\metre}.
+Run by run the localised pose has the lower median on four of the six. The two
+it loses are the two shortest routes, \SI{29.1}{} and \SI{21.4}{\metre}; on
+every route of \SI{56.8}{\metre} and longer the prior wins. That is the
+ordering the slot's premise predicts, since drift must accumulate before a fix
+is worth its cost, and it places the crossover between \SI{30}{} and
+\SI{57}{\metre}.
+
+\flag{The ordering is suggestive and is not a measurement.} Route length is
+confounded with layout and with route shape, there is one run per cell, and the
+retired configuration of this same slot produced the opposite split on routes
+of similar length. A pattern that reverses when the configuration changes is
+not yet a property of the prior.
 
 \flag{The claim that survives is narrower than the slot's premise and should
 replace it.} The front-end column is drift \emph{after} a rigid alignment onto
@@ -204,29 +210,33 @@ ground truth, and that alignment is precisely what a deployed robot does not
 have. The prior supplies it: an absolute, repeatable datum in a frame that
 outlives the run, which is what lets a goal expressed in map coordinates mean
 the same thing twice, and what no amount of odometry provides. Over these route
-lengths that is the whole of its contribution, and it is bought at the cost of
-two multi-second excursions in seven runs.
+lengths that is the whole of its contribution that these data establish, and it
+is bought at the cost of one multi-second excursion in six runs.
 
 The corollary is a prediction worth testing rather than a conclusion: the prior
-should begin to pay for itself in accuracy at the distance where front-end drift
-exceeds the localisation error, which these runs place somewhere beyond
-\SI{152}{\metre} and the mapping routes --- at \SIrange{365}{381}{\metre} ---
-should already reach.
+should pay for itself in accuracy beyond the distance where front-end drift
+exceeds the localisation error. These runs put that crossover between
+\SI{30}{} and \SI{57}{\metre}, far nearer than the previous configuration
+suggested, and the mapping routes --- at \SIrange{365}{381}{\metre} --- are
+where it should be confirmed.
 
 % =====================================================================
 \FloatBarrier
 \section{What these data cannot answer}
 
-Seven runs, one per cell, hand-driven on routes that differ in shape and length,
+Six runs, one per cell, hand-driven on routes that differ in shape and length,
 so route is confounded with world and nothing here supports a comparison between
-layouts, between static and dynamic, or between route shapes. The dynamic
-condition is one run in one world. No goal was commanded in any run, so none of
+layouts or between route shapes. \flag{No traffic condition is measured at all:
+the single run that carried one was overwritten on 15 November 2026 and is
+unrecoverable, so this document says nothing about a dynamic warehouse.} The
+runs are also a single configuration --- the \texttt{rep} index of the
+recordings is a configuration index rather than a repeat index, so none of these
+are replicates and nothing here measures run-to-run spread. No goal was commanded in any run, so none of
 this speaks to planning or to the false-obstacle question that motivates the
 experiment. The front-end comparison of Insight~3 is one front end,
 ORB-SLAM3, on routes short enough that its drift stays sub-metre; it says
-nothing about VINS, and nothing about the distance at which the ordering
-reverses. Two excursions are two events, enough to show that two mechanisms
-exist and not enough to say which is more common.
+nothing about VINS. One excursion is one event: it shows what a refused
+correction costs on this route and nothing about how often one happens.
 
 % =====================================================================
 \FloatBarrier
@@ -240,28 +250,28 @@ exist and not enough to say which is more common.
 \toprule
  & Answer & Evidence & Confidence \\
 \midrule
-Q1 rotation & Heading median below 1.2\textdegree\ in all six static runs and not
-a limiting quantity; the one dynamic run is 4.85\textdegree, a tenfold
-degradation against a threefold one in position; no turn-rate dependence &
-\cref{tab:insight4nav-rotation} & high for static, one run for dynamic \\
-Q2 prior's value & No accuracy gain over unaided ORB-SLAM3 at 21--152\,m
-(3 runs better, 3 worse, 1 level) and a worst case an order of magnitude larger;
-what it supplies is the absolute datum the aligned front end was given free &
-\cref{tab:insight4nav-prior} & medium; one front end, short routes \\
-Q3 excursions & Two events, two mechanisms: one rotational (11.0\textdegree\
-correction, $r=0.97$ with position error), one translational (5.2\,m correction,
-yaw unmoved); both recovered &
-\cref{tab:insight4nav-exc} & medium, two events \\
+Q1 rotation & Heading median 0.21--2.83\textdegree, splitting by layout
+(U 0.21--0.49, I 1.31--2.83 with a $-0.9$ to $-2.2$\textdegree\ bias); no
+turn-rate dependence. The split may be the I prior's fit residual &
+\cref{tab:insight4nav-rotation} & medium; 3 runs per layout, cause unresolved \\
+Q2 prior's value & Lower median on 4 of 6, losing only the two shortest routes,
+so a crossover near 30--57\,m; but the retired configuration split the other
+way, so the durable claim remains the absolute datum rather than accuracy &
+\cref{tab:insight4nav-prior} & low for the crossover, medium for the datum \\
+Q3 excursions & One event, 6\,s and 1.24\,m, and the correction does not move
+through it: a refused fix leaving the pose on dead reckoning, not a wrong fix &
+\cref{tab:insight4nav-exc} & low, one event \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 \paragraph{Consequences for the raw write-up.} Three things should change in
-\path{insights/experiment_4/}. Report heading alongside position, and report the
-dynamic run's heading degradation as the larger of its two costs. Replace the
-single ``excursion'' description with the two mechanisms, since they imply
-different defences. And restate the slot's premise: the prior's contribution over
-these distances is a durable frame rather than accuracy, which is a weaker claim
-than the one the raw write-up currently makes and is the one the data support.
+\path{insights/experiment_4/}. Report heading alongside position, since the slot
+otherwise never looks at orientation, and report it by layout rather than as one
+figure. Describe the excursion as a refused correction rather than a wrong one,
+since the two imply opposite defences. And keep the slot's premise at the weaker
+claim the data support --- a durable frame rather than accuracy --- despite the
+four-of-six median win, because that win did not survive the last change of
+configuration and may not survive the next.
 
 \end{document}

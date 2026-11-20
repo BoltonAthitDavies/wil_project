@@ -62,14 +62,22 @@ def gt_yaw(path):
     return t, yaw, vyaw
 
 
-def runs(spec):
+def runs(spec, arm='gated'):
+    """Every run of one configuration.
+
+    Experiment 4 reports the ungated arm; the gated runs are a later
+    configuration and not repeats of it, so mixing them would read a
+    configuration effect as run-to-run spread. See exp4_score.is_gated.
+    """
     for world in spec['worlds']:
         lay = spec['worlds'][world]['layout']
         prior = spec['priors'][lay]['database']
         for path in spec['priors'][lay]['paths']:
-            for rep in (1, 2, 3):
+            for rep in es.reps_present(prior, world, path):
                 d = os.path.join(WORKSPACE, 'map', prior, 'exp4',
                                  f'{world}_{path}_{rep}')
+                if arm != 'all' and es.is_gated(d) != (arm == 'gated'):
+                    continue
                 est = os.path.join(WORKSPACE, 'map', prior,
                                    f'localize_exp4_{world}_{path}_{rep}.csv')
                 if os.path.exists(os.path.join(d, 'robot_gt.csv')) and os.path.exists(est):
@@ -219,6 +227,7 @@ def excursions(spec, thr=1.0):
             if dur >= 5.0:
                 out.append({
                     'run': f'{world} {SHAPE.get(path, path)}',
+                    'world': world, 'path': path, 'rep': rep,
                     'start_s': float(tt[i] - tt[0]), 'dur_s': float(dur),
                     'peak_m': float(err[i:j + 1].max()),
                     'corr_yaw_before': float(cyy[max(i - 1, 0)]),
@@ -262,7 +271,11 @@ def fig_rotation(spec, rot):
     a.set_xticks(x)
     a.set_xticklabels(names, rotation=30, ha='right', fontsize=8)
     a.set_ylabel('heading error (deg)')
-    a.set_title('heading error per run (orange: the run with traffic)')
+    # The traffic run is highlighted only when one is present; the single
+    # traffic recording was overwritten on 15 Nov 2026, so the reported arm
+    # has none and the title must not promise a colour that is absent.
+    a.set_title('heading error per run'
+                + (' (orange: the run with traffic)' if dyn else ''))
     a.legend(fontsize=8)
     a.grid(axis='y', alpha=0.2)
 
@@ -284,7 +297,7 @@ def fig_rotation(spec, rot):
     b.set_ylim(0, lim)
     b.set_xlabel('heading error while driving straight (deg)')
     b.set_ylabel('heading error while turning (deg)')
-    b.set_title('turning does not degrade heading')
+    b.set_title('turn rate: no consistent effect across layouts')
     b.legend(fontsize=8)
     b.grid(alpha=0.2)
     fig.tight_layout()
@@ -303,18 +316,25 @@ def fig_excursions(spec):
     the whole of Insight 2 and it is far clearer drawn than tabulated.
     """
     plt = _mpl()
-    cases = [('U_static', 'P3_circuit', 'figure-of-eight: a rotation'),
-             ('U_static', 'P2_return', 'square: a translation')]
-    fig, axes = plt.subplots(2, 2, figsize=(12.5, 6.4), sharex='col')
-    for col, (world, path, title) in enumerate(cases):
+    # Discovered, not hardcoded. An earlier version named the two excursion
+    # runs of the ungated arm directly; when the reported arm changed those
+    # runs no longer existed and the figure could not be drawn at all. The
+    # excursions are whatever excursions() finds in the arm being reported.
+    found = excursions(spec)
+    if not found:
+        return None
+    cases = [(e['world'], e['path'], e['rep'], e['run']) for e in found]
+    fig, axes = plt.subplots(2, len(cases), figsize=(6.25 * len(cases), 6.4),
+                             sharex='col', squeeze=False)
+    for col, (world, path, rep, title) in enumerate(cases):
         lay = spec['worlds'][world]['layout']
         prior = spec['priors'][lay]['database']
         al = eg._align(prior)
-        d = os.path.join(WORKSPACE, 'map', prior, 'exp4', f'{world}_{path}_1')
+        d = os.path.join(WORKSPACE, 'map', prior, 'exp4', f'{world}_{path}_{rep}')
         t, gt = es.load_robot_gt(os.path.join(d, 'robot_gt.csv'))
         gm = es.world_to_map(al, gt)
         _rec, _ff, T = series(os.path.join(WORKSPACE, 'map', prior,
-                                           f'localize_exp4_{world}_{path}_1.csv'))
+                                           f'localize_exp4_{world}_{path}_{rep}.csv'))
         et = np.array([float(r['stamp']) for r in T])
         ex = np.array([float(r['x']) for r in T])
         ey = np.array([float(r['y']) for r in T])
@@ -362,10 +382,69 @@ def fig_excursions(spec):
         h1, l1 = bot.get_legend_handles_labels()
         h2, l2 = tw.get_legend_handles_labels()
         bot.legend(h1 + h2, l1 + l2, fontsize=8, loc='best')
-    fig.suptitle('Two excursions, two mechanisms: the heading error separates them',
-                 y=0.99)
+    fig.suptitle('The excursion: the correction does not move through it'
+                 if len(cases) == 1 else
+                 'Each excursion, with what the correction did', y=0.99)
     fig.tight_layout(rect=(0, 0, 1, 0.96))
     out = os.path.join(OUT, 'fig_excursions.png')
+    fig.savefig(out, dpi=150)
+    plt.close(fig)
+    return out
+
+
+def fig_heading(spec):
+    """Signed heading error against distance driven, U layout beside I layout.
+
+    The slot reports heading only as per-run summary statistics, which hide two
+    things this draws directly: that the error is a steady offset rather than
+    excursions, and that it is one-signed on the I layout. Split by layout and
+    sharing a y-axis, because the layout split IS the finding; the two panels
+    are the comparison.
+
+    Distance on the x-axis rather than time, to match the position figure of
+    the same slot so the two can be read together.
+
+    The first sample after the first fix is dropped, as in rotation(): it
+    carries the correction still settling and is one sample wide.
+    """
+    plt = _mpl()
+    cols = {'straight': '#1b9e77', 'square': '#d95f02', 'figure-8': '#7570b3'}
+    panels = {'U': [], 'I': []}
+    for world, path, rep, lay, prior, d, est in runs(spec):
+        al = eg._align(prior)
+        t, ywld, _v = gt_yaw(os.path.join(d, 'robot_gt.csv'))
+        ymap = wrap(ywld - al['yaw_deg'])
+        _rec, _ff, T = series(est)
+        if len(T) < 5:
+            continue
+        et = np.array([float(r['stamp']) for r in T])
+        ey = np.array([float(r['yaw_deg']) for r in T])
+        m = (et >= t[0]) & (et <= t[-1])
+        gi = np.interp(et[m], t, np.unwrap(np.radians(ymap)))
+        err = wrap(ey[m] - np.degrees(gi))
+        _t, gt = es.load_robot_gt(os.path.join(d, 'robot_gt.csv'))
+        gm = es.world_to_map(al, gt)
+        gx = np.interp(et[m], _t, gm[:, 0])
+        gy = np.interp(et[m], _t, gm[:, 1])
+        dist = np.concatenate([[0.0], np.cumsum(np.hypot(np.diff(gx), np.diff(gy)))])
+        if len(err) > 2:
+            err, dist = err[1:], dist[1:]
+        panels[lay].append((SHAPE.get(path, path), dist, err))
+
+    fig, axes = plt.subplots(1, 2, figsize=(12.5, 4.6), sharey=True)
+    for ax, lay in zip(axes, ('U', 'I')):
+        ax.axhline(0.0, color='#444444', lw=1.0, zorder=2)
+        for shape, dist, err in panels[lay]:
+            ax.plot(dist, err, lw=1.3, color=cols.get(shape, '#555555'),
+                    label=shape, zorder=3)
+        ax.set_xlabel('distance driven since the first fix (m)')
+        ax.set_title(f'{lay} layout')
+        ax.grid(alpha=0.2)
+        ax.legend(fontsize=8, loc='best')
+    axes[0].set_ylabel('signed heading error (deg)')
+    fig.suptitle('Heading error against ground truth, by layout', y=0.99)
+    fig.tight_layout(rect=(0, 0, 1, 0.94))
+    out = os.path.join(OUT, 'fig_heading.png')
     fig.savefig(out, dpi=150)
     plt.close(fig)
     return out
@@ -516,7 +595,8 @@ def main(write):
                         f'{r["corr_x_before"]:+.2f} & {r["corr_x_during"]:+.2f} '
                         f'\\\\\n')
             f.write('\\bottomrule\n\\end{tabular}\n\\end{table}\n')
-        for f in (fig_rotation(spec, rot), fig_excursions(spec), fig_prior_value(pv)):
+        for f in (fig_rotation(spec, rot), fig_excursions(spec),
+                  fig_prior_value(pv), fig_heading(spec)):
             print(f'  figure -> {f}')
         print(f'\n3 tables and 3 figures -> {OUT}')
     return rot, pv, ex

@@ -1,0 +1,63 @@
+% =============================================================================
+% INDEX: one row per component, with the file that records it.  The empty
+% column links each component to its findings R1..R14 (s7_results.tex).
+% =============================================================================
+\section{Index}
+
+\begin{frame}{Index (1/2): the front ends --- and where each result attached}
+  \centering
+  \adjustbox{max width=\textwidth, max height=0.84\textheight}{%
+  \begin{tabular}{l l l p{40mm}}
+    \toprule
+    ID & Component & Signal (file: field) & Results \\
+    \midrule
+    ORB-1 & features + stereo      & \repo{tracking_frontend.csv}: features; \repo{performance.csv}: frames processed & \R{1}{} \R{8}{} \R{9}{} \\
+    ORB-2 & IMU preintegration     & \repo{performance.csv}: imu\_samples, imu\_starved & \R{5}{} \R{8}{} \\
+    ORB-3 & tracking               & \repo{performance.csv}: tracking\_state; \repo{tracking_frontend.csv}: map\_matches\_inliers & \R{5}{} \R{7}{} \\
+    ORB-4 & keyframe decision      & \repo{tracking_frontend.csv}: keyframes\_created & \\
+    ORB-5 & local mapping, BA      & \repo{local_mapping.csv}: local\_ba\_ms & \R{9}{} \\
+    ORB-6 & IMU initialisation     & \repo{performance.csv}: imu\_initialized, inertial\_ba1/2 & \R{3}{} \R{4}{} \R{9}{} \R{11}{} \\
+    ORB-7 & place recognition      & \repo{loop_closing.csv}: detection events & \R{2}{} \\
+    ORB-8 & loop correction, merge & \repo{loop_closing.csv}: correction\_translation\_m / \_rotation\_deg & \R{2}{} \R{3}{} \\
+    \midrule
+    VINS-1 & feature tracker       & \repo{frontend.csv}: feature\_count, stereo\_feature\_count & \R{5}{} \R{6}{} \R{7}{} \R{8}{} \\
+    VINS-2 & IMU preintegration    & \repo{backend.csv}: imu\_wait\_ms, imu\_propagation\_ms & \R{8}{} \\
+    VINS-3 & initialisation        & \repo{backend.csv}: initialized\_this\_frame; \repo{events.csv} & \\
+    VINS-4 & sliding window        & \repo{backend.csv}: visual\_update\_ms; \repo{estimator_state.csv} & \R{5}{} \R{6}{} \R{7}{} \\
+    VINS-5 & marginalisation       & \repo{backend.csv}: marginalization, keyframe & \\
+    VINS-6 & time offset           & \repo{estimator_state.csv}: time\_delay\_s & \\
+    VINS-7 & pose graph            & not run in our fork & \\
+    \bottomrule
+  \end{tabular}}
+  \src{Both front ends also write \repo{vio.csv} (the pose) and \repo{run_summary.csv}.}
+\end{frame}
+
+\begin{frame}{Index (2/2): RTAB-Map and Nav2 --- and where each result attached}
+  \centering
+  \adjustbox{max width=\textwidth, max height=0.84\textheight}{%
+  \begin{tabular}{l l l p{40mm}}
+    \toprule
+    ID & Component & Signal (file: field) & Results \\
+    \midrule
+    RTAB-1 & camera shim            & shim line in \repo{launch.log}; the TF tree & \\
+    RTAB-2 & odometry in + sync     & TF waits in \repo{launch.log}; node count & \\
+    RTAB-3 & new node               & database \texttt{Node} table & \R{11}{} \\
+    RTAB-4 & memory                 & database \texttt{Info} / \texttt{Statistics} & \\
+    RTAB-5 & detect (words)         & hypotheses in \repo{launch.log}; \repo{exp4_rtabmap_gating.py} & \R{10}{} \\
+    RTAB-6 & verify (geometry)      & ``Not enough inliers'' in \repo{launch.log} & \R{10}{} \\
+    RTAB-7 & graph optimisation     & ``Rejecting all added loop closures''; node poses & \\
+    RTAB-8 & map assembly           & exported grid vs ground truth (Experiment 3) & \R{11}{} \R{12}{} \R{13}{} \\
+    RTAB-9 & output + gate          & \repo{gate_verdicts.csv}; \repo{localize_*.csv} & \R{11}{} \R{13}{} \\
+    \midrule
+    NAV-1 & inputs                  & TF tree; transform-timeout warnings & \\
+    NAV-2 & pose gate               & \texttt{/localization\_ok}; the gate's log & \R{11}{} \\
+    NAV-3 & global costmap          & published costmap & \R{12}{} \\
+    NAV-4 & local costmap           & published costmap & \R{14}{} not measured \\
+    NAV-5 & planner                 & \repo{outcome.json}: per goal & \R{14}{} not measured \\
+    NAV-6 & controller              & \texttt{/cmd\_vel}; progress checker & \R{14}{} not measured \\
+    NAV-7 & smoother + drive        & \repo{robot_gt.csv} & \R{14}{} not measured \\
+    NAV-8 & behaviour tree          & \repo{outcome.json}; \texttt{bt\_navigator} log & \R{14}{} not measured \\
+    \bottomrule
+  \end{tabular}}
+  \src{Experiment 4 runs live under \repo{map/<prior>/exp4/<world>_<route>_<config>/}.}
+\end{frame}

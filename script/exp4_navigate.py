@@ -180,7 +180,7 @@ def _navigate(spec, world, path, out, deadline_s):
 
 
 # ------------------------------------------------------------------- the driver
-def _prepare(world, path, rep):
+def _prepare(world, path, rep, gate=False, obstacles=False):
     """Everything both --run and --drive need: directories, the static object
     dump, and the three commands. No process is started here."""
     spec = load()
@@ -238,6 +238,24 @@ def _prepare(world, path, rep):
            # after Gazebo had already loaded.
            'overwrite:=true'] + \
           [f'{k}:={v}' for k, v in sorted(spec['config'].items())]
+    if gate:
+        # correction_gate is NOT in the frozen protocol config, deliberately: it
+        # is the factor under test, not part of the condition every run shares.
+        # Putting it there would have changed the condition retroactively for the
+        # seven runs already collected and made rep 1 and rep 2 incomparable.
+        cmd += ['correction_gate:=true',
+                f'gate_correction_log:={out}/gate_verdicts.csv']
+    if obstacles:
+        # local_grid is what publishes /local_grid_obstacle, and the Nav2
+        # obstacle layer marks nothing without it. detection_rate is raised with
+        # it because the cloud appears once per PROCESSED frame: at 1 Hz a person
+        # at 1.4 m/s moves 1.4 m between updates.
+        # grid_range_max 5, not the 10 used for MAPPING. A map is built once and
+        # benefits from reach; an obstacle layer is read every cycle and a far,
+        # noisy return becomes a phantom obstacle in front of the robot. The
+        # costmap also refuses to mark past 4 m, so anything beyond is wasted
+        # dense stereo.
+        cmd += ['local_grid:=true', 'detection_rate:=3.0', 'grid_range_max:=5.0']
     # No bridge process here: navigate_sim starts the warehouse launch's own
     # model-pose bridge via bridge_model_poses:=true (added 12 Nov 2026). A second
     # parameter_bridge on the same topic is one more thing to go wrong and one more
@@ -248,7 +266,7 @@ def _prepare(world, path, rep):
               '-p', f'robot_out:={out}/robot_gt.csv',
               '-p', f'object_out:={out}/object_gt.csv']
 
-    return spec, w, prior, out, world_file, cmd, logger
+    return spec, w, prior, out, world_file, cmd, logger, gate, obstacles
 
 
 def _launch(cmd, log):
@@ -296,7 +314,7 @@ def _shutdown(procs):
                 pass
 
 
-def _finish(out, rec, world, path, rep, prior):
+def _finish(out, rec, world, path, rep, prior, gate=False, obstacles=False):
     """Clearance screen, then the outcome record. Shared so a driven run and an
     autonomous one are scored by exactly the same code."""
     sys.path.insert(0, os.path.join(WORKSPACE, 'script'))
@@ -337,8 +355,11 @@ def _finish(out, rec, world, path, rep, prior):
         rec['notes'] = rec.get('notes', []) + [
             'no actor poses logged: expected in a static world, a bridge failure '
             'in a dynamic one']
+    cfg = dict(load()['config'])
+    cfg['correction_gate'] = 'true' if gate else 'false'
+    cfg['local_grid'] = 'true' if obstacles else 'false'
     rec.update({'world': world, 'path': path, 'rep': rep, 'prior': prior,
-                'config': load()['config'],
+                'config': cfg,
                 'git': subprocess.run(['git', '-C', WORKSPACE, 'rev-parse', '--short',
                                        'HEAD'], capture_output=True,
                                       text=True).stdout.strip(),
@@ -355,8 +376,9 @@ def _finish(out, rec, world, path, rep, prior):
     print(f'    -> {out}/outcome.json')
 
 
-def do_run(world, path, rep, settle_s, deadline_s):
-    spec, w, prior, out, world_file, cmd, logger = _prepare(world, path, rep)
+def do_run(world, path, rep, settle_s, deadline_s, gate=False, obstacles=False):
+    spec, w, prior, out, world_file, cmd, logger, gate, obstacles = _prepare(
+        world, path, rep, gate, obstacles)
     print(f'\n=== {world} / {path} / rep {rep}   (autonomous)')
     print(f'    prior  {prior}')
     print(f'    spawn  world {w["spawn"][:2]}  ->  map seed "{w["start_pose"]}"')
@@ -382,10 +404,10 @@ def do_run(world, path, rep, settle_s, deadline_s):
         pass
     finally:
         _shutdown(procs)
-    _finish(out, rec, world, path, rep, prior)
+    _finish(out, rec, world, path, rep, prior, gate, obstacles)
 
 
-def do_drive(world, path, rep, settle_s):
+def do_drive(world, path, rep, settle_s, gate=False, obstacles=False):
     """Launch the stack, log ground truth, and let the operator drive.
 
     The same shape as aisle_sweep.py --run: print the command, start it, stand
@@ -398,12 +420,15 @@ def do_drive(world, path, rep, settle_s):
     counts as reached is a judgement the action client makes and an operator does
     not.
     """
-    spec, w, prior, out, world_file, cmd, logger = _prepare(world, path, rep)
+    spec, w, prior, out, world_file, cmd, logger, gate, obstacles = _prepare(
+        world, path, rep, gate, obstacles)
     goals = spec['priors'][w['layout']]['paths'][path]
 
     print(f'\n=== {world} / {path} / rep {rep}   (operator-driven)')
     print(f'    prior  {prior}')
     print(f'    spawn  world {w["spawn"][:2]}  ->  map seed "{w["start_pose"]}"')
+    print(f'    gate   {"ON -- map->odom via correction_gate.py" if gate else "off"}')
+    print(f'    obst   {"ON -- local_grid + detection_rate 3 Hz" if obstacles else "off (costmaps see only the prior)"}')
     print(f'    out    {out}')
     print('\n    ' + ' \\\n        '.join(cmd))
     print('\n    Goals to set in RViz (2D Nav Goal), in the map frame, in order:')
@@ -437,7 +462,7 @@ def do_drive(world, path, rep, settle_s):
     finally:
         _shutdown(procs)
     rec['duration_s'] = round(time.time() - started, 1)
-    _finish(out, rec, world, path, rep, prior)
+    _finish(out, rec, world, path, rep, prior, gate, obstacles)
 
 
 def score():
@@ -487,6 +512,14 @@ if __name__ == '__main__':
                     help='seconds for Gazebo and the stack before the bridge starts')
     ap.add_argument('--deadline', type=float, default=240.0,
                     help='wall seconds to wait for the first informative pose')
+    ap.add_argument('--gate', action='store_true',
+                    help='publish map->odom through correction_gate.py and log every '
+                         'verdict; recorded in outcome.json so a mixed set stays '
+                         'attributable')
+    ap.add_argument('--obstacles', action='store_true',
+                    help='build the local occupancy grid so the Nav2 obstacle layer '
+                         'has data, and raise detection_rate to 3 Hz; costs dense '
+                         'stereo per keyframe')
     ap.add_argument('--score', action='store_true')
     a = ap.parse_args()
     if a.list:
@@ -498,9 +531,9 @@ if __name__ == '__main__':
             for p, goals in paths.items():
                 print(f'    {p:11} ' + ' -> '.join(f'node {g["node"]}' for g in goals))
     elif a.run:
-        do_run(a.run[0], a.run[1], a.rep, a.settle, a.deadline)
+        do_run(a.run[0], a.run[1], a.rep, a.settle, a.deadline, a.gate, a.obstacles)
     elif a.drive:
-        do_drive(a.drive[0], a.drive[1], a.rep, a.settle)
+        do_drive(a.drive[0], a.drive[1], a.rep, a.settle, a.gate, a.obstacles)
     elif a.score:
         score()
     else:

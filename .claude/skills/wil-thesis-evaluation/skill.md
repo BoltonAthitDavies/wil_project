@@ -765,10 +765,10 @@ states in table 4.1 and the user updates as data arrives:
 
 | Experiment | Simulation | Real robot |
 |---|---|---|
-| 1 Estimator comparison | **completed** -- 4 realistic bags; the non-visual family (EKF at VSLAM-config noise) and 20 visual runs, one per cell; the loop closer decides ORB-SLAM3's error; latency/resources from 18 mapping-bag repeats (VINS back end 44 ms and a quarter of the memory against ORB local mapping 211-406 ms, for 2x the cores) | **partial** -- wheel+gyro dead reckoning (`script/real_wheel_baseline.py`, k=0.325 fitted on realv7_000, gyro y axis) and 16 ORB-SLAM3 runs on 4 tracker-truthed recordings, all with patch 15 and scored raw. The two families are in the SAME ACCURACY CLASS: the baseline leads on realv7_001, ties on realv6_000 and loses realv7_002 (0.219 against ORB 0.172). VINS-Fusion has no valid run; no EKF (steering is a command echo) |
+| 1 Estimator comparison | **completed** -- 4 realistic bags; the non-visual family (EKF at VSLAM-config noise) and 20 visual runs, one per cell; the loop closer decides ORB-SLAM3's error; latency/resources from 18 mapping-bag repeats (VINS back end 44 ms and a quarter of the memory against ORB local mapping 211-406 ms, for 2x the cores) | **partial** -- wheel+gyro dead reckoning (`script/real_wheel_baseline.py`, k=0.325 fitted on realv7_000, gyro y axis) and 16 ORB-SLAM3 runs on 4 tracker-truthed recordings, all with patch 15 and scored raw. The two families are in the SAME ACCURACY CLASS: the baseline leads on realv7_001 (0.259 against ORB 0.434), ties on realv6_000 and narrowly loses realv7_002 (0.219 against ORB 0.192). ORB's four configurations agree to 0.02 m within every recording (0.255-0.267 / 0.434-0.445 / 0.192-0.211). **CROSS-DOMAIN (17 Nov):** the real recordings are NOT visually poorer (169 % of the sim's image gradient, 151 % of its corners/Mpx, 3x corners per frame, VINS never below its 150 ceiling, so the sim's starvation failure mode cannot occur); what differs is motion — 0.28 vs 1.50 m/s, 18 % vs 4 % standing, 5.8x more inertial integration per metre. Drift is 10.5x the sim PER METRE but only 1.9x PER SECOND, and ATE per second is 0.7x. NEVER compare the two domains per distance; quote the per-second figure. Also 59 % vs 30 % of stereo matches beyond ThDepth (no scale). Fisheye: the 9.5 % unprojectable band is BLACK (outside the lens circle, 0 corners) — the operative mechanism is the divide-by-depth blow-up near 90 deg, the non-monotonic polynomial is a separate model defect. Scripts: exp1_dataset_compare.py, exp1_drift_rate.py, exp1_real_patterns.py. The 11 Nov ORB scoring (bags absent, estimator-speed alignment, two realv7_001 runs at 0.575 and 1.278 m) was RETIRED 17 Nov: re-scored with the wheel topic (r 0.93-0.99). With time settled, every estimator sits 0.2-0.4 m AHEAD of the marker along track (diagnostic lever fit 0.31/0.40/0.23 m, consistent within a recording) and the baseline does not -> measure the marker-to-IMU arm; never fit it. **VINS-Fusion now completes all three realv7 recordings** (0.464 / 0.676 / 0.374 m, RPE 1 s 0.055-0.090 m, zero resets) but ONLY with `fov_mask_deg` 70 + `estimate_extrinsic` 0 + `estimate_td` 0 (run dir `rate1_002`, 17 Nov); it is third of the three families on every recording. The fisheye calibration is NOT monotonic past 109.3 deg so the outer ~10 % of every frame cannot be back-projected -- the mask is a workaround, not a fix. Earlier "delivery/configuration" readings (stale g_norm 9.2642, 40-45 % frame loss) are WITHDRAWN: the valid runs receive FEWER frames (24-27 %). No EKF (steering is a command echo) |
 | 2 YOLO detector | **completed** -- 4 realistic bags, 4-class checkpoint `weight/runs_1/detect/train/weights/best.pt` (forklift = pallet jack): P 0.747, R 0.502 scored / 0.288 all, moving R 0.288, class F1 0.994 | **planned** (no annotated frames) |
 | 3 Dense map | **partial** -- tiny map passes; four realistic maps fail (P 77.8-84.8 %, false obstacles 3.8-10.2 %), and their graphs are accurate to 0.10-0.40 m rms, so the failure is grid construction and not the poses; large map failed, no artefact; **no map built with traffic present** | **planned** (no database from real imagery, no site geometry to score against) |
-| 4 Navigation | **partial** -- 7 live runs (12 Nov) in 3 of the 4 worlds, hand-driven 21-153 m, median tracking 0.50 m, min clearance 0.58 m, one run lost the pose; error is a constant OFFSET matching Experiment 3's wall displacement, so the slot is MAP-limited not estimator-limited; the init transient latches the first fix 73-76 deg wrong until held 5 s. **No goal was commanded**, so goal-reaching, planning and recovery remain `planned`. Single run per cell and the acceptance sweep shows run-to-run spread as wide as between-setting differences, so no comparison inside the table is evidence | **planned** (blocked behind Experiment 3's real-robot slot: no map to navigate on) |
+| 4 Navigation | **partial** -- 6 live runs (15 Nov) in the 2 STATIC worlds, hand-driven 21-148 m, one configuration throughout (`correction_gate.py` at 1.5 m). Median tracking 0.13-0.21 m (0.147 across runs), min clearance 0.68 m, ONE excursion (6.5 s, 1.24 m) which recovered. Error is a constant OFFSET of 0.04-0.34 m against a scatter of 0.03-0.19 m, and matches Experiment 3's 0.10-0.40 m graph rms, so the slot is MAP-limited not estimator-limited; the init transient latches the first fix 73-76 deg wrong until held 5 s. Heading SPLITS BY LAYOUT (U 0.21-0.49 deg, I 1.31-2.83 deg), cause unresolved -- a fit residual would bias all three I runs alike and does not. **No goal was commanded**, so goal-reaching, planning and recovery remain `planned`. **Neither traffic world is measured**, so the slot says nothing about a dynamic warehouse. One run per cell and no repeat of any cell anywhere, so nothing measures run-to-run spread and no comparison inside the table is evidence. Two earlier configurations (ungated; gated at 0.5 m) are RETIRED to `trash/`, and the U-traffic and U-layout ungated recordings were LOST on 15 Nov -- withdrawing the two-excursion/two-mechanism analysis and the tenfold traffic heading claim | **planned** (blocked behind Experiment 3's real-robot slot: no map to navigate on) |
 
 "Untested" and "failed" are reported as findings, with cause where confirmed and
 untested explanations labelled as such. Weak, negative, or disappointing results
@@ -796,17 +796,24 @@ write-up first, then into the chapter, so the two never disagree. **Since
 notes by a mechanical transform** (sections become subsections,
 `\paragraph{Objective/Process/Dataset/Reporting rules/Results/Reason/Next
 action.}` become `\textbf{...}`, `\reporttable{x}` becomes
-`\input{tables/x}`, `../../../../output/` becomes `../../../output/`, the
-chapter-3 cross-reference labels `sec:results-proprio`, `sec:exp1-real`,
+`\input{tables/x}`, `../../../../output/` becomes `../../../output/`, `fig/`
+becomes `figures/`, any further `\section` of a note becomes a `\subsection`,
+and the chapter-3 cross-reference labels `sec:results-proprio`, `sec:exp1-real`,
 `sec:yolo-performance`, `fig:yolo-ground-truth-overlay`, `sec:results-validity`,
-`sec:realistic-ab`, `sec:rpe`, `sec:trajectory-results`, `sec:exp3-real` are
-added as aliases). Since 11 November 2026 only slots 1 and 2 are generated
-from the notes; Experiment 3 (maps) and Experiment 4 (navigation) are
-chapter-authoritative and edited in the chapter itself. Regenerate rather than
-hand-edit the generated slots; the Experiment 3 slot still inputs the fragment
-`m4_exp4_sim` for the tiny map, and the `m4_exp1_sim`, `m4_exp2_sim`,
-`m4_exp3_*` and `m4_discussion` fragments are no longer input (they report
-retired data).
+`sec:realistic-ab`, `sec:rpe`, `sec:trajectory-results`, `sec:exp3-real`,
+`sec:exp4-real-nav` are added as aliases). From 11 November 2026 only slots 1
+and 2 were generated; **Experiment 4 joined them on 14 November 2026 (user
+decision)** after its hand-maintained slot had drifted from its note -- it had
+lost all eight of the note's figures and twelve of its paragraphs, its copy of
+`tab:exp4-tracking` reported different columns, and a paragraph it carried
+alone put the localisation offset at 0.32-0.59 m where the runs give 0.07-0.24.
+Experiment 3 (maps) remains chapter-authoritative and is edited in the chapter
+itself. Regenerate rather than hand-edit the generated slots; the Experiment 3
+slot still inputs the fragment `m4_exp4_sim` for the tiny map, and the
+`m4_exp1_sim`, `m4_exp2_sim`, `m4_exp3_*` and `m4_discussion` fragments are no
+longer input (they report retired data). Experiment 4's figures live beside its
+note in `insights/experiment_4/fig/` and are copied to
+`final_report/figures/exp4_*.png`.
 
 Each slot in the raw write-up keeps the fixed order (status; objective;
 process; dataset; results; analysis; summary; future plan), written to the

@@ -54,6 +54,8 @@ from pathlib import Path
 warnings.filterwarnings("ignore")
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import numpy as np                               # noqa: E402
+from matplotlib.ticker import FuncFormatter            # noqa: E402
+from plot_ticks import plain_log                     # noqa: E402
 import matplotlib                                # noqa: E402
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt                  # noqa: E402
@@ -339,21 +341,24 @@ def fig_rotation(rows, ser, path):
     # (a) yaw / pitch / roll RMS per run: unanchored ghosted, anchored solid
     ax = fig.add_subplot(gs_a[0, 0]); style(ax)
     labels, x = [], 0
-    AXES = (("yaw_rms", "yaw_rms_anch", ""),
-            ("pitch_rms", "pitch_rms_anch", "///"),
-            ("roll_rms", "roll_rms_anch", ".."))
+    # Markers, not bars: on a log axis a bar's length has no meaning (it depends
+    # on where the axis happens to start), so each value is a point. The open
+    # marker is the whole-run RMS, the filled one the RMS after the published
+    # world frame exists, and the thin line between them is the excess the
+    # pre-initialisation frame adds.
+    AXES = (("yaw_rms", "yaw_rms_anch", "o"),
+            ("pitch_rms", "pitch_rms_anch", "^"),
+            ("roll_rms", "roll_rms_anch", "s"))
     for ds in BAGS:
         for name, _, _, _ in ARMS:
             r = next((q for q in rows if q["dataset"] == ds and q["name"] == name), None)
             if r is None:
                 continue
-            for k, (key, akey, hatch) in enumerate(AXES):
-                # full span first, faded: what the unanchored column measures
-                ax.bar(x + k * 0.27, r[key], 0.26, color=COL[name], hatch=hatch,
-                       edgecolor=TH["ink2"], lw=0.4, alpha=0.26, zorder=2)
-                # then the anchored value, opaque, in front
-                ax.bar(x + k * 0.27, r[akey], 0.26, color=COL[name], hatch=hatch,
-                       edgecolor=TH["ink2"], lw=0.5, zorder=3)
+            for k, (key, akey, mk) in enumerate(AXES):
+                xx = x + k * 0.27
+                ax.plot([xx, xx], [r[akey], r[key]], color=COL[name], lw=0.9, alpha=0.55, zorder=2)
+                ax.plot(xx, r[key], mk, ms=5.5, mfc=TH["surface"], mec=COL[name], mew=1.1, zorder=3)
+                ax.plot(xx, r[akey], mk, ms=5.5, mfc=COL[name], mec=TH["ink2"], mew=0.4, zorder=4)
             if r["ate"] >= DIVERGED_ATE_M:
                 ax.axvspan(x - 0.17, x + 0.71, color=TH["ink2"], alpha=0.07,
                            lw=0, zorder=0)
@@ -361,16 +366,15 @@ def fig_rotation(rows, ser, path):
                            ("" if r["ate"] < DIVERGED_ATE_M else " $\\dagger$")))
             x += 1.2
         x += 0.5
-    ax.set_yscale("log")
+    ax.set_yscale("log"); plain_log(ax)
     ax.set_xticks([p for p, _ in labels])
     ax.set_xticklabels([l for _, l in labels], rotation=90, ha="center",
                        va="top", fontsize=6.6)
     ax.set_ylabel("RMS [deg, log]", color=TH["ink2"], fontsize=9)
-    ax.set_title("(a) orientation error by axis: solid = yaw, hatched = pitch, dotted = roll. "
-                 "Faded = scored over the whole run, opaque = scored after the published\n"
-                 "    world frame exists. The faded excess is the pre-initialisation frame, "
-                 "not drift: it moves all three axes equally and VINS-Fusion has none of it. "
-                 "Shaded columns, $\\dagger$: the five diverged runs.",
+    ax.set_title("(a) orientation error by axis: circle = yaw, triangle = pitch, square = roll; "
+                 "open = scored over the whole run, filled = after the published world frame exists.\n"
+                 "    The gap between them is the pre-initialisation frame, not drift: all three axes move together "
+                 "and VINS-Fusion has none of it. Shaded, $\\dagger$: the five diverged runs.",
                  fontsize=9.5, loc="left", color=TH["ink"])
 
     # (b) the frame switch is one event -- the evidence panel (a) is split on
@@ -393,6 +397,7 @@ def fig_rotation(rows, ser, path):
                     arrowprops=dict(arrowstyle="->", color=TH["ink2"], lw=0.8))
     ax.set_yscale("symlog", linthresh=0.1)
     ax.set_ylim(0, 200)
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _p: "%g" % v))
     ax.set_xlabel("time [s]", color=TH["ink2"], fontsize=9)
     ax.set_ylabel("rotation error [deg, symlog]", color=TH["ink2"], fontsize=9)
     ax.set_title("(b) the excess is one event, not drift: %s, every arm. One step of ~90 deg at "

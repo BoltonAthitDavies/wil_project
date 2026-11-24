@@ -21,31 +21,45 @@ affect localization accuracy, map quality, robustness, and real-time performance
 Do not reduce the work to producing attractive plots: each result must answer a
 defined research question under controlled conditions.
 
-The work is organised as **exactly four experiments**, fixed by the 23 September
-2026 progress update (`docs/MyThesisInfo/WiL Update Progress-1.pdf`), each located
-on a numbered block of the system-architecture diagram and each run in **two
-domains, simulation and the real robot**, giving eight result slots in total:
+The work is organised as **exactly two experiments** (since 20 November 2026),
+each run in **two domains, simulation and the real robot**, giving four result
+slots in total:
 
-| # | Experiment | Architecture block | Question it answers |
+| # | Experiment | Part of the system | Question it answers |
 |---|---|---|---|
-| 1 | Estimator Comparison Against a Non-Visual Baseline | #1 SLAM front end / #4 robot odometry | How well does each estimator localise, does a wheel+IMU baseline match the visual pipelines on the same recordings, which of a pipeline's own switches decides its error, and at what compute cost? |
-| 2 | Offline YOLO Detector Performance | #2 object detection | How reliably does the detector find and name warehouse objects, independent of SLAM? |
-| 3 | Dense Map Reconstruction and Map-Quality Evaluation | #3 SLAM back end / map | Does the reconstructed map reflect the physical environment, including what a dynamic environment leaves in it, and is it usable by a route planner? |
-| 4 | Autonomous Navigation on the Reconstructed Map | whole pipeline driving a planner | Can the robot relocalise against a prior it did not build, plan through it, and reach a goal set without colliding with structure the map got wrong? |
+| 1 | Estimator Comparison Against a Non-Visual Baseline | visual-inertial front end vs the robot's own odometry | How well does each estimator localise, in static scenes and with moving traffic; does a wheel+IMU baseline match the visual pipelines on the same recordings; which of a pipeline's own switches decides its error; at what compute cost? |
+| 2 | Visual-Inertial Odometry on a Prior Map | RTAB-Map back end and the Nav2 hand-off | Part A: does the prior map reflect the warehouse (pose graph vs mapping-run GT; occupancy grid vs true geometry, incl. false obstacles)? Part B: does the robot relocalise in that map accurately and continuously enough to hand Nav2 a usable pose? |
 
-**Restructured 11 November 2026.** Experiments 1 and 3 were merged into the new
-Experiment 1; the dense-map experiment moved from 4 to 3; navigation became the
-new Experiment 4. The dynamic-environment question is now asked of the map, not
-of the estimator: the semantic-masking arm exists in both pipelines, was never
-run, and **is not reported**. Do not reinstate it, do not cite a "filtered run",
-and do not treat `detection_match_rate` or `filter_status` as a reportable
-quantity.
+**Restructure history.** 11 Nov 2026: four experiments (old 1 estimator, 2 YOLO,
+3 dense map, 4 navigation), masking arm never run and not reported.
+**20 Nov 2026 (user decision, final presentation aligned):** the YOLO detector
+experiment is DELETED from the report (not an appendix; note in
+`trash/exp2_yolo_detector_note_20261120/`), YOLO/masking methodology and the
+chapter-2 YOLO and RY-SLAM theory removed, and the dense-map and navigation
+experiments JOINED as Experiment 2 (part A = map, part B = relocalisation). The
+basis, recorded in the chapter-3 deviations table: traffic neither broke
+tracking nor drove the global error (the loop closer did), the one co-moving
+vehicle raised per-second error 2-8x for 4 s and left <0.1 m accumulated, and
+the masking arm was never run. **Do NOT state it as "moving objects don't
+affect localisation"** — slide 65 / fig 4.11 show a 5-10x local rise; the
+claim is "does not drive the global error, at the simulated density (assumed
+realistic, not measured)". Do not reinstate detection, masking, a filtered run,
+`detection_match_rate` or `filter_status` as reportable.
 
-Do not add a fifth experiment, merge two, or rename these. New evidence goes into
-one of the eight slots. The project's stated targets are ATE $\le$ 0.05 m and
-RPE($\Delta t$ = 1 s) $\le$ 1.5 m at a robot speed of 1.5 m/s; the real site is
-the Gensurv building first floor, a 10 m by 7 m scope with test Zones A and B on
-a 5-degree slope and scheduled lighting changes.
+Do not add a third experiment, merge the two, or rename them. New evidence goes
+into one of the four slots. **Targets (chapter 3 table `tab:targets`, adopted
+from the final presentation slide 12):** ATE <= 0.05 m; RPE(1 s) <= **0.1 m**
+(tightened from the proposal's 1.5 m AFTER the results were known — recorded as a
+deviation; ORB-SLAM3 meets it only on jump-free pairs, its all-pairs figure
+carries the gravity-frame step); map precision >= 90 %, completeness >= 85 %,
+false obstacles <= 1 % (fixed in `eval_realistic_maps.py` before scoring);
+availability <= 10 % blind, continuity no jump > 1.0 m (fixed in
+`exp4_protocol.yaml` before the runs). The working speed is 1.5 m/s but the
+real recordings were driven at 0.28 m/s — say so wherever a real result is read
+against a target. **Compute:** every run is on the MSI Katana GF66 11UG laptop;
+the NRU-51V only records. Objectives and scope in chapter 1 are the final
+presentation's slides 11 and 13; the proposal's five objectives survive only in
+`tab:objective-status`.
 
 ### 1.1 Future research direction: integrated localization and mapping
 
@@ -290,19 +304,23 @@ Standing rules from the 6 November 2026 decision:
   `dataset_allsensor_realistic_map` and `_01_map` (18 runs since 7 Nov 2026:
   ORB-SLAM3 CPU and GPU front ends closure-free, and VINS-Fusion, 3 repeats
   each; `mapping_resources.tex`). The per-run resource table of the accuracy
-  runs (`realistic_resources.tex`) is generated but NOT reported. The repeats
+  runs (`realistic_resources.tex`) is reported beside it, one row per run. The repeats
   were run one configuration at a time, so the I-recording front-end
   comparison is confounded with thermal state: say so wherever it is quoted,
   and interleave the configurations when repeating.
-- **Experiment 2:** simulation scored with the FOUR-class checkpoint
-  (`weight/runs_1/detect/train/weights/best.pt`; `yolo_gt.CLASS_OF` maps
-  `PalletJackB_01` to `forklift`, so the moving pallet jacks are truth); the
-  walking people are actors without pose or mesh and outside the classes, so
-  they are unscorable on both sides and the write-up says so. Quote recall on
-  both bases (scored = exemptions applied; all = every projected box) and the
-  moving-object recall as the headline. Real robot: blank/planned (user, 7 Nov).
-- **Experiment 3:** the four realistic maps are two configurations x two
-  layouts, n = 1 each; parameter attributions are signatures, not ablations.
+- **Experiment 1, real robot:** score with the bag mounted (wheel-speed time
+  offset); `UNCERTAIN` alignment is a stop. Real-rig latency/resources are
+  `real_resources_runs.tex` (per run) and `real_resources_repeats.tex`
+  (realv6 x3) from `script/exp1_real_resources.py`. Cross-domain comparisons are
+  PER SECOND, never per metre (`script/exp1_drift_rate.py`).
+- **Experiment 2, part A (map):** the four realistic maps are two
+  configurations x two layouts, n = 1 each; parameter attributions are
+  signatures, not ablations.
+- **Experiment 2, part B (relocalisation):** reports the rep-5 configuration
+  (correction gate 1.5 m); "rep" is a CONFIG index, not a repeat; static worlds
+  only; no goal commanded, so goal-reaching stays planned.
+- **Detector (former Experiment 2): deleted 20 Nov 2026.** Its numbers (P 0.747,
+  moving R 0.288) are not reported anywhere in the volume.
 
 ## 5. Required provenance and quality checks
 
@@ -613,7 +631,7 @@ docs/report/final_report/
 |   |-- chapter_1_introduction.tex   % English rendering of final_report.pdf ch. 1
 |   |-- chapter_2_theory.tex         % English rendering of final_report.pdf ch. 2
 |   |-- chapter_3_methodology.tex    % template hardware/site/procedure + fragments
-|   |-- chapter_4_experiments.tex    % four experiments x two domains, eight slots
+|   |-- chapter_4_experiments.tex    % two experiments x two domains, four slots
 |   |-- chapter_5_conclusion.tex
 |   |-- references.tex               % hand-written thebibliography, faculty format,
 |   |                                % first-citation order (references.bib = record)
@@ -631,7 +649,7 @@ with `soffice --headless` (Norasi 16 pt stands in for AngsanaUPC; pdflatex has
 no Thai font here, LuaLaTeX's font database is broken and `xelatex` is absent),
 (2) runs `latexmk -pdf main.tex` (pdflatex + `mathptmx`), and (3) regenerates
 `docs/report/concerns/concerns.tex` with `script/extract_concerns.py` and
-builds it. `\flag`, `\moved`, `queried` and the eight
+builds it. `\flag`, `\moved`, `queried` and the four
 `\slotstatus{<label>}{...}` boxes are SUPPRESSED in the report and moved into
 the concerns document (fragments expanded in place); keep the markup in the
 source, it is the single record of what is queried. fancyhdr here is 3.x: page
@@ -685,7 +703,7 @@ Write the final report as English LaTeX source beneath
 `/home/ambushee/wil_project/docs/report/final_report/`, following Section 9.1.
 It replaces the minor progress report. It is the document the project is
 examined on, so it must be complete in structure from the first draft, and
-**honest about which of its eight result slots are filled**: the user has not
+**honest about which of its four result slots are filled**: the user has not
 finished collecting results, and an unfilled slot is reported as such, never
 omitted, never padded, and never filled with an expectation of how it will go.
 
@@ -731,24 +749,20 @@ an unimplemented feature in the present tense.
 
 ### Chapter 4: Experiments and results
 
-Exactly four sections, in the fixed order, and inside each **two domain
-subsections** -- eight result slots:
+Exactly two experiment sections, in the fixed order, and inside each **two
+domain subsections** -- four result slots:
 
 ```text
 4.1 Experiment 1: Estimator Comparison Against a Non-Visual Baseline
-    4.1.1 Simulation
-    4.1.2 Real robot
-4.2 Experiment 2: Offline YOLO Detector Performance
+    4.1.1 Simulation                      (generated from insights/experiment_1)
+    4.1.2 Real robot                      (generated from insights/experiment_1)
+4.2 Experiment 2: Visual-Inertial Odometry on a Prior Map
     4.2.1 Simulation
-    4.2.2 Real robot
-4.3 Experiment 3: Dense Map Reconstruction and Map-Quality Evaluation
-    4.3.1 Simulation
-    4.3.2 Real robot
-4.4 Experiment 4: Autonomous Navigation on the Reconstructed Map
-    4.4.1 Simulation
-    4.4.2 Real robot
-4.5 Cross-experiment discussion, simulation-to-real comparison, threats to
-    validity, and limitations
+          Part A: the prior map           (hand-maintained in the chapter)
+          Part B: relocalization          (generated from insights/experiment_4,
+                                           between %% PART-B markers)
+    4.2.2 Real robot                      (hand-maintained; covers both parts)
+4.3 Cross-experiment discussion, simulation-to-real comparison and limitations
 ```
 
 Every slot follows the same internal order, which is the order of the progress
@@ -760,15 +774,13 @@ hardware or calibration), and the exact next action -- and nothing else. Do not
 let an empty slot borrow the other domain's numbers, and do not compare the two
 domains of an experiment until both slots hold valid results.
 
-Status of the eight slots at the 12 November 2026 cutoff, which the report
+Status of the four slots at the 20 November 2026 cutoff, which the report
 states in table 4.1 and the user updates as data arrives:
 
 | Experiment | Simulation | Real robot |
 |---|---|---|
 | 1 Estimator comparison | **completed** -- 4 realistic bags; the non-visual family (EKF at VSLAM-config noise) and 20 visual runs, one per cell; the loop closer decides ORB-SLAM3's error; latency/resources from 18 mapping-bag repeats (VINS back end 44 ms and a quarter of the memory against ORB local mapping 211-406 ms, for 2x the cores) | **partial** -- wheel+gyro dead reckoning (`script/real_wheel_baseline.py`, k=0.325 fitted on realv7_000, gyro y axis) and 16 ORB-SLAM3 runs on 4 tracker-truthed recordings, all with patch 15 and scored raw. The two families are in the SAME ACCURACY CLASS: the baseline leads on realv7_001 (0.259 against ORB 0.434), ties on realv6_000 and narrowly loses realv7_002 (0.219 against ORB 0.192). ORB's four configurations agree to 0.02 m within every recording (0.255-0.267 / 0.434-0.445 / 0.192-0.211). **CROSS-DOMAIN (17 Nov):** the real recordings are NOT visually poorer (169 % of the sim's image gradient, 151 % of its corners/Mpx, 3x corners per frame, VINS never below its 150 ceiling, so the sim's starvation failure mode cannot occur); what differs is motion — 0.28 vs 1.50 m/s, 18 % vs 4 % standing, 5.8x more inertial integration per metre. Drift is 10.5x the sim PER METRE but only 1.9x PER SECOND, and ATE per second is 0.7x. NEVER compare the two domains per distance; quote the per-second figure. Also 59 % vs 30 % of stereo matches beyond ThDepth (no scale). Fisheye: the 9.5 % unprojectable band is BLACK (outside the lens circle, 0 corners) — the operative mechanism is the divide-by-depth blow-up near 90 deg, the non-monotonic polynomial is a separate model defect. Scripts: exp1_dataset_compare.py, exp1_drift_rate.py, exp1_real_patterns.py. The 11 Nov ORB scoring (bags absent, estimator-speed alignment, two realv7_001 runs at 0.575 and 1.278 m) was RETIRED 17 Nov: re-scored with the wheel topic (r 0.93-0.99). With time settled, every estimator sits 0.2-0.4 m AHEAD of the marker along track (diagnostic lever fit 0.31/0.40/0.23 m, consistent within a recording) and the baseline does not -> measure the marker-to-IMU arm; never fit it. **VINS-Fusion now completes all three realv7 recordings** (0.464 / 0.676 / 0.374 m, RPE 1 s 0.055-0.090 m, zero resets) but ONLY with `fov_mask_deg` 70 + `estimate_extrinsic` 0 + `estimate_td` 0 (run dir `rate1_002`, 17 Nov); it is third of the three families on every recording. The fisheye calibration is NOT monotonic past 109.3 deg so the outer ~10 % of every frame cannot be back-projected -- the mask is a workaround, not a fix. Earlier "delivery/configuration" readings (stale g_norm 9.2642, 40-45 % frame loss) are WITHDRAWN: the valid runs receive FEWER frames (24-27 %). No EKF (steering is a command echo) |
-| 2 YOLO detector | **completed** -- 4 realistic bags, 4-class checkpoint `weight/runs_1/detect/train/weights/best.pt` (forklift = pallet jack): P 0.747, R 0.502 scored / 0.288 all, moving R 0.288, class F1 0.994 | **planned** (no annotated frames) |
-| 3 Dense map | **partial** -- tiny map passes; four realistic maps fail (P 77.8-84.8 %, false obstacles 3.8-10.2 %), and their graphs are accurate to 0.10-0.40 m rms, so the failure is grid construction and not the poses; large map failed, no artefact; **no map built with traffic present** | **planned** (no database from real imagery, no site geometry to score against) |
-| 4 Navigation | **partial** -- 6 live runs (15 Nov) in the 2 STATIC worlds, hand-driven 21-148 m, one configuration throughout (`correction_gate.py` at 1.5 m). Median tracking 0.13-0.21 m (0.147 across runs), min clearance 0.68 m, ONE excursion (6.5 s, 1.24 m) which recovered. Error is a constant OFFSET of 0.04-0.34 m against a scatter of 0.03-0.19 m, and matches Experiment 3's 0.10-0.40 m graph rms, so the slot is MAP-limited not estimator-limited; the init transient latches the first fix 73-76 deg wrong until held 5 s. Heading SPLITS BY LAYOUT (U 0.21-0.49 deg, I 1.31-2.83 deg), cause unresolved -- a fit residual would bias all three I runs alike and does not. **No goal was commanded**, so goal-reaching, planning and recovery remain `planned`. **Neither traffic world is measured**, so the slot says nothing about a dynamic warehouse. One run per cell and no repeat of any cell anywhere, so nothing measures run-to-run spread and no comparison inside the table is evidence. Two earlier configurations (ungated; gated at 0.5 m) are RETIRED to `trash/`, and the U-traffic and U-layout ungated recordings were LOST on 15 Nov -- withdrawing the two-excursion/two-mechanism analysis and the tenfold traffic heading claim | **planned** (blocked behind Experiment 3's real-robot slot: no map to navigate on) |
+| 2 Prior map + relocalisation | **partial** -- PART A (map): tiny map passes; four realistic maps fail (P 77.8-84.8 %, false obstacles 3.8-10.2 %), and their graphs are accurate to 0.10-0.40 m rms, so the failure is grid construction and not the poses; large map failed, no artefact; **no map built with traffic present** PART B (relocalisation): 6 live runs (15 Nov) in the 2 STATIC worlds, hand-driven 21-148 m, one configuration throughout (`correction_gate.py` at 1.5 m). Median tracking 0.13-0.21 m (0.147 across runs), min clearance 0.68 m, ONE excursion (6.5 s, 1.24 m) which recovered. Error is a constant OFFSET of 0.04-0.34 m against a scatter of 0.03-0.19 m, and matches Experiment 3's 0.10-0.40 m graph rms, so the slot is MAP-limited not estimator-limited; the init transient latches the first fix 73-76 deg wrong until held 5 s. Heading SPLITS BY LAYOUT (U 0.21-0.49 deg, I 1.31-2.83 deg), cause unresolved -- a fit residual would bias all three I runs alike and does not. **No goal was commanded**, so goal-reaching, planning and recovery remain `planned`. **Neither traffic world is measured**, so the slot says nothing about a dynamic warehouse. One run per cell and no repeat of any cell anywhere, so nothing measures run-to-run spread and no comparison inside the table is evidence. Two earlier configurations (ungated; gated at 0.5 m) are RETIRED to `trash/`, and the U-traffic and U-layout ungated recordings were LOST on 15 Nov -- withdrawing the two-excursion/two-mechanism analysis and the tenfold traffic heading claim | **planned** -- no prior map built from real imagery and no site geometry to score one against; relocalisation therefore unscorable on the rig |
 
 "Untested" and "failed" are reported as findings, with cause where confirmed and
 untested explanations labelled as such. Weak, negative, or disappointing results

@@ -53,7 +53,7 @@
 
 % ---------------------------------------------------------------- VINS-1
 \begin{frame}{1.3.1 \;VINS-1 \;Feature tracker: follow the same points from frame to frame}
-  \hl{VINS1}\res{\R{5}{}, \R{6}{}, \R{7}{}, \R{8}{}}
+  \hl{VINS1}\res{\R{2}{}, \R{4}{}, \R{8}{}, \R{9}{}}
   \compbody{\vinsstrip}{vinsc}{%
   \begin{tikzpicture}[font=\scriptsize]
     \draw[black!60, fill=black!4] (0,0) rectangle (4.6,2.8);
@@ -76,7 +76,7 @@
   {tracked points (ID + position), 25 Hz sim / 20 Hz real}
   {Blank walls leave little to follow. Points near a fisheye's edge are badly modelled.}
   {\repo{frontend.csv}: feature\_count, stereo\_feature\_count, tracking time}
-  \src{Ours: a mask (\texttt{setMask}) can forbid image regions --- used for the real fisheye's outer ring (\texttt{fov\_mask\_deg}) and for YOLO.}
+  \src{Ours: a mask (\texttt{setMask}) can forbid image regions --- used for the real fisheye's outer ring (\texttt{fov\_mask\_deg}).}
 \end{frame}
 
 % ---------------------------------------------------------------- VINS-1 inside
@@ -86,7 +86,7 @@
 % mask (L53); goodFeaturesToTrack(max - current, 0.01, min_dist, mask) (L307);
 % rejectWithF() commented out (L297); first frame skips tracking (L154).
 \begin{frame}{1.3.1 \;VINS-1 \;Inside: where the points come from}
-  \hl{VINS1}\res{\R{5}{}, \R{6}{}, \R{7}{}, \R{8}{}}
+  \hl{VINS1}\res{\R{2}{}, \R{4}{}, \R{8}{}, \R{9}{}}
   \vinsstrip\par\vspace{0.3em}
   \centering
   \adjustbox{max width=\textwidth, max height=0.60\textheight}{%
@@ -127,7 +127,7 @@
         \draw[vinsc, dashed] (\x,\y) circle (0.42);
         \node[pt=vinsc] at (\x,\y) {};}
     \end{scope}
-    \node[capt] at (10.8,0.95) {no new point within \textbf{30 px} of a kept one, nor in masked areas (YOLO, fisheye edge)};
+    \node[capt] at (10.8,0.95) {no new point within \textbf{30 px} of a kept one, nor in masked areas (fisheye edge)};
     % ---- 4: Shi-Tomasi top-up
     \begin{scope}[shift={(13.2,0)}]
       \foreach \c/\lab/\ok/\yy in {0/flat/0/4.15, 1/edge/0/3.3, 2/corner/1/2.45} {
@@ -157,7 +157,7 @@
 
 % ---------------------------------------------------------------- VINS-2
 \begin{frame}{1.3.2 \;VINS-2 \;IMU preintegration: the same idea as ORB-2}
-  \hl{VINS2}\res{\R{8}{}}
+  \hl{VINS2}\res{\R{2}{}}
   \compbody{\vinsstrip}{vinsc}{%
   \begin{tikzpicture}[font=\scriptsize]
     \draw[thick,-{Latex}] (0,0) -- (7.4,0) node[right]{time};
@@ -206,7 +206,7 @@
 
 % ---------------------------------------------------------------- VINS-4
 \begin{frame}{1.3.4 \;VINS-4 \;Sliding window: fit the last 10 keyframes to everything measured}
-  \hl{VINS4}\res{\R{5}{}, \R{6}{}, \R{7}{}}
+  \hl{VINS4}\res{\R{4}{}, \R{8}{}, \R{9}{}}
   \compbody{\vinsstrip}{vinsc}{%
   \begin{tikzpicture}[font=\scriptsize]
     \foreach \k in {0,...,9} \node[draw=black!60, fill=vinsc!25, minimum size=4.4mm, inner sep=0pt] (w\k) at (\k*0.64,0) {};

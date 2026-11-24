@@ -32,6 +32,7 @@ import warnings
 
 warnings.filterwarnings("ignore")
 import numpy as np                                   # noqa: E402
+from plot_ticks import plain_log                     # noqa: E402
 import matplotlib                                    # noqa: E402
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt                      # noqa: E402
@@ -131,7 +132,7 @@ def main():
                 ax.plot([xx - 0.14, xx + 0.14], [np.median(v)] * 2, color=col, lw=2.4, zorder=4)
                 ax.text(xx + 0.17, np.median(v), "%.3f" % np.median(v), ha="left", va="center", fontsize=8, color=col)
         ax.set_xticks([0, 1]); ax.set_xticklabels(["simulation\n(20 runs)", "real rig\n(15 runs)"], fontsize=9)
-        ax.set_xlim(-0.55, 1.75); ax.set_yscale("log"); ax.set_ylabel(unit, fontsize=8.5)
+        ax.set_xlim(-0.55, 1.75); ax.set_yscale("log"); plain_log(ax, subs=(1, 2, 3, 5)); ax.set_ylabel(unit + " (log)", fontsize=8.5)
         r = med("real rig", None, key) / med("simulation", None, key)
         ax.set_title("%s\n    real rig is %.1fx the simulation" % (lbl, r), loc="left", fontsize=9.5, color=TH["ink"])
     from matplotlib.lines import Line2D

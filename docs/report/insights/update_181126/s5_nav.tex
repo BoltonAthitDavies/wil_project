@@ -1,7 +1,7 @@
 % =============================================================================
 % 1.5  NAV2
 % Sources: vslam_navigation/params/nav2_sim.yaml, launch/navigate_sim.launch.py,
-% scripts/pose_gate.py; the Experiment 4 run logs for what was switched on.
+% scripts/pose_gate.py; the Experiment 2B run logs for what was switched on.
 % =============================================================================
 \section{1.5 Nav2}
 
@@ -63,7 +63,7 @@
 
 % ---------------------------------------------------------------- NAV-2
 \begin{frame}{1.5.2 \;NAV-2 \;Pose gate: is the localisation sound enough to drive on?}
-  \hl{NAV2}\res{\R{11}{}}
+  \hl{NAV2}\res{\R{10}{}}
   \compbody{\navstrip}{navc}{%
   \begin{tikzpicture}[font=\scriptsize]
     \node[box, text width=32mm] (c1) at (0,1.0)  {$\ge$8 s since the first fix};
@@ -107,9 +107,9 @@
   {\texttt{/map} + live points + pose}
   {costmap, 15$\times$22 m, 0.05 m cells, 2 Hz}
   {Phantom obstacles in the prior block real aisles. Unknown cells cannot be planned through.}
-  {the published costmap; Experiment 3 map scoring}
+  {the published costmap; Experiment 2A map scoring}
   \src{The live obstacle layer reads RTAB-Map's \texttt{/local\_grid\_obstacle}, published only with \texttt{local\_grid:=true}.
-       Every Experiment 4 run logged it \textbf{off}, so the costmaps held the prior map only.}
+       Every Experiment 2B run logged it \textbf{off}, so the costmaps held the prior map only.}
 \end{frame}
 
 % ---------------------------------------------------------------- NAV-4
@@ -253,7 +253,7 @@
           & \texttt{autostart} & false & the pose gate starts Nav2 \\
     NAV-3 & global costmap & 15$\times$22 m fixed, 0.05 m, 2 Hz & planner's map \\
           & \texttt{inflation\_radius} / \texttt{cost\_scaling\_factor} & 0.80 m / 3.0 & how far, how fast cost fades \\
-          & obstacle layer source & \texttt{/local\_grid\_obstacle} & \textcolor{bad}{off in Exp.~4 runs} \\
+          & obstacle layer source & \texttt{/local\_grid\_obstacle} & \textcolor{bad}{off in Exp.~2B runs} \\
     NAV-4 & local costmap & 10$\times$10 m rolling, 0.05 m, 2 Hz & controller's window \\
     NAV-5 & planner & Smac Hybrid-A*, Dubins, 72 headings & forward-only arcs \\
           & \texttt{minimum\_turning\_radius} / \texttt{allow\_unknown} & 0.75 m / false & tightest turn; no unknown cells \\
@@ -269,5 +269,5 @@
   \end{tabular}}
   \par\vspace{0.4em}
   \scriptsize\color{black!65}\textcolor{ourc}{\textbf{Amber}}: our pose gate's parameters. Simulation values; a real-rig file (\repo{nav2_real.yaml}) exists but has not been driven.
-  \src{\repo{vslam_navigation/params/nav2_sim.yaml}; \repo{scripts/pose_gate.py}; Experiment 4 \repo{launch.log}}
+  \src{\repo{vslam_navigation/params/nav2_sim.yaml}; \repo{scripts/pose_gate.py}; Experiment 2B \repo{launch.log}}
 \end{frame}

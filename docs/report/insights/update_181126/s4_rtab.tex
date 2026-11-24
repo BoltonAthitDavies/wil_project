@@ -106,7 +106,7 @@
 
 % ---------------------------------------------------------------- RTAB-3
 \begin{frame}{1.4.3 \;RTAB-3 \;New node: which places get remembered \;(mapping only)}
-  \hl{RTAB3}\res{\R{11}{}}
+  \hl{RTAB3}\res{\R{10}{}}
   \compbody{\rtabstrip}{rtabc}{%
   \begin{tikzpicture}[font=\scriptsize, g/.style={box, fill=rtabc!12, text width=19mm, minimum height=12mm}]
     \node[g] (g1) at (0,0)   {1. rate\\1 Hz};
@@ -160,7 +160,7 @@
 
 % ---------------------------------------------------------------- RTAB-5
 \begin{frame}{1.4.5 \;RTAB-5 \;Detect (stage 1): which remembered place does this look like?}
-  \hl{RTAB5}\res{\R{10}{}}
+  \hl{RTAB5}\res{\R{11}{}}
   \compbody{\rtabstrip}{rtabc}{%
   \begin{tikzpicture}[font=\scriptsize]
     % ---- top row: where a visual word comes from (quantisation)
@@ -213,7 +213,7 @@
 
 % ---------------------------------------------------------------- RTAB-6
 \begin{frame}{1.4.6 \;RTAB-6 \;Verify (stage 2): is it really the same place?}
-  \hl{RTAB6}\res{\R{10}{}}
+  \hl{RTAB6}\res{\R{11}{}}
   \compbody{\rtabstrip}{rtabc}{%
   \begin{tikzpicture}[font=\scriptsize]
     \draw[black!60, fill=black!4] (0,0) rectangle (2.2,1.8); \node[above] at (1.1,1.8) {now};
@@ -270,7 +270,7 @@
 
 % ---------------------------------------------------------------- RTAB-8
 \begin{frame}{1.4.8 \;RTAB-8 \;Map assembly: from node grids to the planner's map}
-  \hl{RTAB8}\res{\R{11}{}, \R{12}{}, \R{13}{}}
+  \hl{RTAB8}\res{\R{10}{}, \R{12}{}, \R{13}{}}
   \compbody{\rtabstrip}{rtabc}{%
   \begin{tikzpicture}[font=\scriptsize]
     \foreach \x/\y/\r in {0/0/0, 1.0/0.3/20, 1.9/0.9/35} {
@@ -296,28 +296,16 @@
   {each node's grid + its pose}
   {\texttt{/map}, sent once (latched)}
   {A node placed wrong leaves obstacles that nothing later removes.}
-  {exported grid vs ground-truth map (Experiment 3 scoring)}
+  {exported grid vs ground-truth map (Experiment 2A scoring)}
 \end{frame}
 
 % ---------------------------------------------------------------- RTAB-9
 \begin{frame}{1.4.9 \;RTAB-9 \;Output: the correction, and the gate we added}
-  \hl{RTAB9}\res{\R{11}{}, \R{13}{}}
-  \compbody{\rtabstrip}{rtabc}{%
-  \begin{tikzpicture}[font=\scriptsize]
-    \fill[good!15] (0,0) -- (0,0.9) -- (6.0,1.35) -- (6.0,0) -- cycle;
-    \draw[-{Latex}] (0,0) -- (6.4,0);
-    \node[font=\tiny, below] at (3.2,-0.12) {metres driven since the last accepted fix};
-    \draw[-{Latex}] (0,0) -- (0,1.95) node[above, align=center]{step from the\\correction in force};
-    \draw[good, thick] (0,0.9) -- (6.0,1.35);
-    \node[text=good, font=\tiny, rotate=4] at (3.1,1.3) {allowed: 1.5 m $+$ 0.02 m per m driven};
-    \foreach \x/\y in {0.8/0.3,1.7/0.5,2.6/0.2,3.5/0.7,4.6/0.4,5.4/0.6} \node[pt=good] at (\x,\y) {};
-    \foreach \x/\y in {2.2/1.60,4.0/1.70}
-      \draw[bad, very thick] (\x-0.1,\y-0.1) -- (\x+0.1,\y+0.1) (\x-0.1,\y+0.1) -- (\x+0.1,\y-0.1);
-    \node[anchor=west, text=bad, font=\tiny] at (4.2,1.70) {refused};
-  \end{tikzpicture}}%
-  {RTAB-Map offers a correction about once a second; the gate republishes
-   map$\rightarrow$odom at 20 Hz. The allowance is ours: the front end's
-   \emph{measured} accuracy, spent as a budget.}
+  \hl{RTAB9}\res{\R{10}{}, \R{13}{}}
+  \compbody{\rtabstrip}{rtabc}{\includegraphics{rtab9_bound.png}}%
+  {Every correction RTAB-Map proposed in six runs. Accepted only if step
+   \emph{and} turn fit the box. 63 accepted, all right; 5 refused: one
+   wrong-aisle match, a big step with almost no turn.}
   {In localise mode RTAB-Map's output is a correction, map$\rightarrow$odom. A wrong
    one moves the robot to the wrong aisle instantly.}
   {\texttt{/localization\_pose}, $\approx$1 Hz}

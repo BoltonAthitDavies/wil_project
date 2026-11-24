@@ -240,6 +240,46 @@ def load_gt_only(dataset):
     return t - t[0], p[:, :2], path, float(t[0])
 
 
+def load_prop_paths(bag, t0):
+    """Every moving prop's path, on the same zeroed clock as the other modes.
+
+    The mover test is character-for-character the one world_axes applies --
+    more than MOVE_EPS from the FIRST pose in x or y -- so the set that gets a
+    coloured trail here is exactly the set that gets a highlighted footprint
+    underneath it. Two different thresholds would leave a prop moving with no
+    path, or a path under a prop drawn as fixed racking.
+
+    A prop is not guaranteed to appear in every message of the feed, so each
+    one carries its own time vector rather than being indexed into a shared
+    one. `t0` converts the feed's absolute sim time to the zeroed clock the
+    report's timelines quote, the same offset world_axes applies.
+    """
+    feed = _prop_feed(bag)
+    if not feed['has_poses'] or not len(feed['pose_t']):
+        sys.exit('%s carries no /world/default/pose/info, so there are no prop '
+                 'paths to draw. Mode props needs the pose feed; a static '
+                 'dataset has nothing to show.' % os.path.basename(bag))
+    ft = np.asarray(feed['pose_t']) - t0
+    per = {}
+    for i, fr in enumerate(feed['pose_frames']):
+        for n, q in fr.items():
+            ts, xys = per.setdefault(n, ([], []))
+            ts.append(ft[i])
+            xys.append((q[0], q[1]))
+    out = []
+    for n, (ts, xys) in per.items():
+        xy = np.asarray(xys, float)
+        d = np.abs(xy - xy[0]).max(0)
+        if d[0] > MOVE_EPS or d[1] > MOVE_EPS:
+            out.append((n, np.asarray(ts), xy))
+    out.sort(key=lambda r: r[0])
+    if not out:
+        sys.exit('no prop moves more than %.2f m in this recording -- it is a '
+                 'static dataset, so there is no traffic pattern to show'
+                 % MOVE_EPS)
+    return out
+
+
 def load_gt_est(dataset, system):
     """One estimator's aligned series and its co-clocked ground truth."""
     want = [s for s in EXP1_SYSTEMS if s[0] == system]
@@ -311,10 +351,15 @@ def frames(fig, ax, series, times, fps, trail, note, update=None):
     # track that passes under a legend box is a track the viewer cannot check,
     # and these frames exist to be checked against the map.  Only `lines` are
     # passed as handles, so the position markers stay out of the key.
-    ncol = 2 if len(lines) > 1 else 1
-    rows = -(-len(lines) // ncol)          # ceil, so the reserve matches the key
-    fig.legend(handles=lines, loc='upper center', bbox_to_anchor=(0.5, 0.995),
-               ncol=ncol, fontsize=7, frameon=False)
+    # A series named '_' is drawn but kept out of the key. Mode props puts one
+    # series per moving prop on the axes, and a twelve-entry legend would eat
+    # the plan it is there to explain, so the movers share a single entry.
+    named = [l for l in lines if not l.get_label().startswith('_')]
+    ncol = 2 if len(named) > 1 else 1
+    rows = -(-len(named) // ncol)          # ceil, so the reserve matches the key
+    if named:
+        fig.legend(handles=named, loc='upper center', bbox_to_anchor=(0.5, 0.995),
+                   ncol=ncol, fontsize=7, frameon=False)
     fig.subplots_adjust(top=0.88 - 0.045 * rows, bottom=0.14)
     txt = fig.text(0.012, 0.02, '', fontsize=7.5, family='monospace')
 
@@ -462,7 +507,8 @@ def prop_bag(a, world):
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument('--mode', required=True, choices=('gt', 'gt+est', 'nav'))
+    ap.add_argument('--mode', required=True,
+                    choices=('gt', 'gt+est', 'nav', 'props'))
     ap.add_argument('--dataset', help='modes gt/gt+est, e.g. '
                                       'dataset_allsensor_realistic_001')
     ap.add_argument('--run', help='mode nav, WORLD_PATH_REP')
@@ -496,7 +542,7 @@ def main():
                     help='draw only the last N seconds of each track')
     a = ap.parse_args()
 
-    if a.mode in ('gt', 'gt+est') and not a.dataset:
+    if a.mode in ('gt', 'gt+est', 'props') and not a.dataset:
         sys.exit('--dataset is required for --mode %s' % a.mode)
     if a.mode == 'nav' and not a.run:
         sys.exit('--run is required for --mode nav')
@@ -510,6 +556,31 @@ def main():
         render([('ground truth', t, xy, GT_C)],
                lambda ax: world_axes(ax, world, bag, t0),
                a.dataset, 'ground truth at the model origin', a, a.out)
+
+    elif a.mode == 'props':
+        world = a.world or rds.world_for(a.dataset)
+        bag = rdg.bag_for(a.dataset)          # mandatory here, not best-effort
+        t, xy, path, t0 = load_gt_only(a.dataset)
+        paths = load_prop_paths(bag, t0)
+        print('%s\n  ground truth: %s (sim t0 = %.2f s)' % (a.dataset, path, t0))
+        print('  %d moving props, paths span t = %.1f..%.1f s'
+              % (len(paths), min(p[1].min() for p in paths),
+                 max(p[1].max() for p in paths)))
+        # One colour per prop. Twelve trails in a single colour cross each other
+        # into a scribble; distinct hues let a viewer follow ONE box down an
+        # aisle, which is the thing being demonstrated.
+        cmap = plt.get_cmap('tab20')(np.linspace(0.0, 1.0, 20))
+        series = [('robot (ground truth)', t, xy, GT_C, dict(lw=1.8))]
+        for i, (_n, pt, pxy) in enumerate(paths):
+            series.append(('%d moving obstacles, one colour each' % len(paths)
+                           if i == 0 else '_',
+                           pt, pxy, cmap[i % 20], dict(lw=1.2, alpha=0.9)))
+        lay = 'I' if '_01' in os.path.basename(world or '') else 'U'
+        render(series,
+               lambda ax: world_axes(ax, world, bag, t0),
+               '%s\n%d moving obstacles on the %s layout' % (a.dataset,
+                                                             len(paths), lay),
+               'paths accumulate; dots are current positions', a, a.out)
 
     elif a.mode == 'gt+est':
         world = a.world or rds.world_for(a.dataset)

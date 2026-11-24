@@ -142,7 +142,30 @@
 \newcommand{\resref}{{\color{black!40}\emph{no finding yet}}}
 \newcommand{\res}[1]{\renewcommand{\resref}{#1}}
 \newcommand{\R}[2]{\hyperlink{R#1}{\textbf{\color{hlc}R#1}}~#2}
-\graphicspath{{../../final_report/figures/}{../experiment_4/fig/}}
+\graphicspath{{fig/}{../../final_report/figures/}{../experiment_4/fig/}}
+% A data finding: the figure on the left, drawn at the size it is shown, and
+% on the right how to read it, then what it means.  #3 always runs in one
+% order: what the axes and marks are, then where to look.  #4 says what that
+% means, in plain words, and only then names the block.
+\newcommand{\findingdata}[5]{% #1 colour, #2 picture, #3 how to read, #4 meaning, #5 caveat
+  \begin{columns}[T]
+    \column{0.53\textwidth}\centering
+      \adjustbox{max width=\linewidth, max height=0.60\textheight}{#2}\par\vspace{0.2em}
+      {\scriptsize\raggedright\color{black!70}\textbf{\color{bad}Careful:} #5\par}
+    \column{0.46\textwidth}
+      \begin{stagepanel}[HOW TO READ IT]{mapcol}\scriptsize\raggedright #3\end{stagepanel}
+      \vspace{-0.45em}
+      \begin{stagepanel}[WHAT IT MEANS]{#1}\scriptsize\raggedright #4\end{stagepanel}
+  \end{columns}}
+% One rule of a rules slide (R3): the rule, its own small figure, where to
+% look, and why.
+\newcommand{\rulecard}[5]{% #1 title, #2 rule, #3 figure, #4 look, #5 why
+  \begin{stagepanel}[#1]{orbc}\scriptsize\raggedright
+    \textbf{#2}\par\vspace{0.2em}
+    {\centering\includegraphics[width=\linewidth,height=2.0cm,keepaspectratio]{#3}\par}\vspace{0.1em}
+    \textbf{Look:} #4\par\vspace{0.2em}
+    \textbf{Why:} #5
+  \end{stagepanel}}
 % A finding slide body, under its strip(s): picture left, two panels right.
 \newcommand{\finding}[5]{% #1 colour, #2 picture, #3 what we saw, #4 why, #5 caveat
   \begin{columns}[T]

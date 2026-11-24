@@ -38,6 +38,7 @@ import sys
 import tempfile
 
 import numpy as np
+from plot_ticks import plain_log                     # noqa: E402
 import yaml
 
 os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
@@ -205,7 +206,7 @@ def plot_run(spec, world, path, rep, out_dir, grid_cache):
         ax.set_ylim(P[:, 1].min() - pad, P[:, 1].max() + pad)
 
     name = f'{world}_{path}_{rep}'
-    fig.suptitle(f'Experiment 4: {name}', y=0.98)
+    fig.suptitle(f'Experiment 2, part B: {name}', y=0.98)
     fig.tight_layout(rect=(0, 0, 1, 0.96))
     os.makedirs(out_dir, exist_ok=True)
     png = os.path.join(out_dir, f'exp4_path_{name}.png')
@@ -310,18 +311,19 @@ def summary(spec, out_dir, arm='gated'):
         ax.axhline(0.10, color='#7f8c8d', ls=':', lw=1)
         ax.set_yscale('log')
         ax.set_ylim(0.008, top * 2.2)
+        plain_log(ax)
         ax.set_xlabel('distance driven since the first fix (m)')
         ax.set_title(f'{lay} layout')
         ax.grid(alpha=0.2, which='both', lw=0.5)
         ax.legend(fontsize=8, loc='upper right', framealpha=0.95)
-    axes[0].set_ylabel('planar error against ground truth (m)')
+    axes[0].set_ylabel('planar error against ground truth (m) (log)')
     # Labelled on the left panel's left edge, clear of both legends.
-    axes[0].text(0.01, 0.40, "prior graph's own rms, upper end (Exp 3)",
+    axes[0].text(0.01, 0.40, "prior graph's own rms, upper end (part A)",
                  transform=axes[0].get_yaxis_transform(), ha='left', va='bottom',
                  fontsize=8, color='#7f8c8d')
     axes[0].text(0.01, 0.10, "lower end", transform=axes[0].get_yaxis_transform(),
                  ha='left', va='bottom', fontsize=8, color='#7f8c8d')
-    fig.suptitle('Experiment 4: error against distance driven, by layout', y=0.99)
+    fig.suptitle('Experiment 2, part B: error against distance driven, by layout', y=0.99)
     fig.tight_layout(rect=(0, 0, 1, 0.94))
     os.makedirs(out_dir, exist_ok=True)
     png = os.path.join(out_dir, 'exp4_error_vs_distance.png')
@@ -341,7 +343,7 @@ def main():
     ap.add_argument('--out', default=os.path.join(WORKSPACE, 'output', 'exp4_plots'))
     ap.add_argument('--arm', choices=('ungated', 'gated', 'all'),
                     default='gated',
-                    help='which configuration to plot. Experiment 4 reports '
+                    help='which configuration to plot. Experiment 2 part B reports '
                          'the ungated arm (the default)')
     a = ap.parse_args()
     spec = yaml.safe_load(open(os.path.join(WORKSPACE, 'script',

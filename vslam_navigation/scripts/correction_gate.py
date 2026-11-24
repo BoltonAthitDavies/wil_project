@@ -240,9 +240,13 @@ class CorrectionGate(Node):
                  or not cand.close_to(self.last_cand, 1e-3, 1e-4))
         self.last_cand = cand
 
+        # Every row is logged BEFORE accept(), because accept() resets d_odom to 0.
+        # Until 20 Nov 2026 the order was reversed, so gate_verdicts.csv files
+        # written before then carry d_odom = 0 on every accepted row; recover it
+        # from the logged allowance, d_odom = (allow_p - eps0) / eps.
         if self.held is None or now - self.first_t < self.warmup_s:
-            self.accept(cand, 'warm-up', now)
             self.log(now, 'warmup', cand, 0.0, 0.0, 0.0)
+            self.accept(cand, 'warm-up', now)
             return
         if not fresh:
             return
@@ -251,8 +255,8 @@ class CorrectionGate(Node):
         allow_p = self.eps * self.d_odom + self.eps0
         allow_y = self.eps_yaw * self.d_odom + self.yaw0
         if dp <= allow_p and dy <= allow_y:
-            self.accept(cand, f'dp={dp:.2f}<={allow_p:.2f}', now)
             self.log(now, 'accept', cand, dp, dy, allow_p, allow_y)
+            self.accept(cand, f'dp={dp:.2f}<={allow_p:.2f}', now)
             return
 
         self.n_rej += 1
@@ -263,10 +267,21 @@ class CorrectionGate(Node):
             f'dyaw={math.degrees(dy):.1f} deg (allow {math.degrees(allow_y):.1f}), '
             f'd_odom={self.d_odom:.1f} m, rejection {self.streak}/{self.confirm}')
         if self.streak >= self.confirm:
+            # Its own row since 20 Nov 2026: the same candidate as the reject row
+            # just above, now accepted. Before that a concession left no trace in
+            # gate_verdicts.csv beyond the eighth 'reject'.
+            self.log(now, 'concede', cand, dp, dy, allow_p, allow_y)
             self.accept(cand, f'conceded after {self.confirm} consecutive '
                               f'rejections -- sustained disagreement', now)
 
     def log(self, now, verdict, c, dp, dy, allow_p, allow_y=0.0):
+        """One row of gate_verdicts.csv. verdict is one of:
+        warmup   accepted unchecked inside warmup_s (dp, allowances logged as 0)
+        accept   within both allowances
+        reject   outside one of them; the held correction stays
+        concede  the confirm-th consecutive reject, accepted anyway; it repeats
+                 the candidate and numbers of the reject row just before it
+        Always written BEFORE accept(), which resets d_odom."""
         if self.csv:
             self.csv.write(f'{now:.3f},{verdict},{c.x:.3f},{c.y:.3f},'
                            f'{math.degrees(c.yaw):.2f},{dp:.3f},'

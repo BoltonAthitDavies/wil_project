@@ -7,13 +7,11 @@
 \textbf{SYMBOL} & & \textbf{UNIT} \\[4pt]
 $a$, $a_x$ & longitudinal acceleration measured by the IMU & m\,s$^{-2}$ \\
 $B$ & wheel track (lateral wheel separation) & m \\
-$B_k$ & the $k$-th detected bounding box $\{x_k,y_k,w_k,h_k,c_k,P_k\}$ & -- \\
 $b_a$, $b_g$, $b_\omega$ & accelerometer, gyroscope and yaw-rate biases & m\,s$^{-2}$, rad\,s$^{-1}$ \\
 $\Delta$ & relative-pose-error interval & s \\
 $\mathbf{e}$ & estimation error vector $[\Delta x,\Delta y,\Delta\theta]$ & m, m, rad \\
 $E_i$ & relative pose error transform at pose $i$ & -- \\
 $\mathbf{F}$, $\mathbf{G}$ & state-transition and noise-input Jacobians & -- \\
-$\mathcal{F}_{\mathrm{static}}$ & set of image features surviving the dynamic mask & -- \\
 $f_x$, $f_y$, $c_x$, $c_y$ & pinhole intrinsics & pixel \\
 $g$ & gravitational acceleration & m\,s$^{-2}$ \\
 $\mathbf{H}$ & measurement matrix & -- \\
@@ -42,18 +40,17 @@ $\chi$ & VINS sliding-window state vector & -- \\
 \begin{tabular}{@{}p{0.16\textwidth}@{\ =\ }p{0.78\textwidth}@{}}
 AGV & Automated Guided Vehicle \\
 AMR & Autonomous Mobile Robot \\
+AP, mAP & Average Precision, mean Average Precision (in the original work plan) \\
 ANEES & Average Normalised Estimation Error Squared \\
-AP, mAP & Average Precision, mean Average Precision \\
 ATE & Absolute Trajectory Error \\
 BA & Bundle Adjustment \\
 CPU, GPU & Central / Graphics Processing Unit \\
 DoF & Degrees of Freedom \\
 EKF & Extended Kalman Filter \\
 FOV, HFOV & (Horizontal) Field of View \\
-FN, FP, TP & False Negative, False Positive, True Positive \\
 GT & Ground Truth \\
 IMU & Inertial Measurement Unit \\
-IoU & Intersection over Union \\
+IoU & Intersection over Union (in the original work plan) \\
 IQR & Interquartile Range \\
 KLT & Kanade--Lucas--Tomasi optical-flow tracker \\
 LC & Loop Closure \\
@@ -74,6 +71,5 @@ SLAM & Simultaneous Localization and Mapping \\
 TF & ROS transform tree \\
 VIO & Visual-Inertial Odometry \\
 VINS & Visual-Inertial System (VINS-Mono / VINS-Fusion) \\
-YOLO & You Only Look Once object detector \\
 \end{tabular}
 \clearpage

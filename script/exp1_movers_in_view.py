@@ -51,6 +51,7 @@ import warnings
 
 warnings.filterwarnings("ignore")
 import numpy as np                                   # noqa: E402
+from plot_ticks import plain_log                     # noqa: E402
 import pandas as pd                                  # noqa: E402
 from scipy.stats import spearmanr, binomtest         # noqa: E402
 import matplotlib                                    # noqa: E402
@@ -214,7 +215,7 @@ def main():
         tg = h.t.values - gt3["t0"]; m = (tg >= 24) & (tg <= 44)
         s = pd.Series(h.rpe.values[m], index=tg[m]).rolling(15, center=True, min_periods=5).median()
         ax.plot(s.index, s.values, lw=1.3, color=COL[lbl], label=lbl)
-    ax.set_yscale("log"); ax.set_xlabel("time since the recording's start [s]", color=TH["ink2"], fontsize=9)
+    ax.set_yscale("log"); plain_log(ax); ax.set_xlabel("time since the recording's start [s]", color=TH["ink2"], fontsize=9)
     ax.set_ylabel("per-second RPE [m, log], 0.5-s rolling median", color=TH["ink2"], fontsize=8.5)
     ax.legend(fontsize=7.5, frameon=False, ncol=2, labelcolor=TH["ink2"], loc="lower left")
     ax.set_title("(b) every run on realistic_003 across it (shaded)", fontsize=9.5, loc="left", color=TH["ink"])

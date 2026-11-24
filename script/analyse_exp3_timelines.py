@@ -53,6 +53,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
+from plot_ticks import plain_log
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import vio_metrics as vm                 # noqa: E402
@@ -328,11 +329,19 @@ def figure_dataset(testbed, ds, items, gt, thr_by_est, path):
     filtered run, and the route with every onset marked."""
     filt = [it for it in items if it["run"]["filtered"]]
     n_f = len(filt)
+    # Since 20 Nov 2026 the report carries no filtered (masked) runs, so with none
+    # present the mask-activity row, the "(0 filtered)" title and the
+    # "onset, filtered run" legend entry are left out rather than drawn empty.
     fig = plt.figure(figsize=(12, 4.6 + 0.26 * n_f), facecolor=TH["surface"])
-    gs = fig.add_gridspec(2, 2, width_ratios=[1.75, 1], height_ratios=[2.4, max(0.35, 0.22 * n_f)], hspace=0.08, wspace=0.18)
-    ax = fig.add_subplot(gs[0, 0]); ax2 = fig.add_subplot(gs[1, 0], sharex=ax); ax3 = fig.add_subplot(gs[:, 1])
+    if n_f:
+        gs = fig.add_gridspec(2, 2, width_ratios=[1.75, 1], height_ratios=[2.4, max(0.35, 0.22 * n_f)], hspace=0.08, wspace=0.18)
+        ax = fig.add_subplot(gs[0, 0]); ax2 = fig.add_subplot(gs[1, 0], sharex=ax); ax3 = fig.add_subplot(gs[:, 1])
+    else:
+        gs = fig.add_gridspec(1, 2, width_ratios=[1.75, 1], wspace=0.18)
+        ax = fig.add_subplot(gs[0, 0]); ax2 = None; ax3 = fig.add_subplot(gs[0, 1])
     for a in (ax, ax2, ax3):
-        ar.style(a, TH)
+        if a is not None:
+            ar.style(a, TH)
     t0 = gt["t"][0]
     seen = set()
     for it in items:
@@ -347,10 +356,12 @@ def figure_dataset(testbed, ds, items, gt, thr_by_est, path):
     for est, th in thr_by_est.items():
         ax.axhline(th, color=COLORS.get(est, TH["ink2"]), lw=0.9, ls=":", label="threshold %s (%.2f m)" % (est, th))
     ax.set_yscale("log"); ax.set_ylim(0.02, max(60, 1.2 * max((np.nanmax(it["es"]["err"]) for it in items), default=1)))
-    ax.set_ylabel("start-anchored position error [m]")
+    plain_log(ax)
+    ax.set_ylabel("start-anchored position error [m] (log)")
     ax.plot([], [], "o", color=TH["ink2"], ms=6, label="onset (sustained excess)")
     ax.legend(fontsize=7.5, loc="upper left", ncol=2, facecolor=TH["surface"], edgecolor=TH["grid"], framealpha=0.92)
-    plt.setp(ax.get_xticklabels(), visible=False)
+    if n_f:
+        plt.setp(ax.get_xticklabels(), visible=False)
     if n_f:
         for i, it in enumerate(sorted(filt, key=lambda x: (x["run"]["system"], x["run"]["run"]))):
             fs, r, res = it["fs"], it["run"], it["res"]
@@ -369,10 +380,7 @@ def figure_dataset(testbed, ds, items, gt, thr_by_est, path):
                          bbox=dict(facecolor=TH["surface"], edgecolor="none", alpha=0.85, pad=1.0))
         ax2.set_ylim(0, 1); ax2.set_yticks([])
         ax2.set_title("mask present (green), one row per filtered run", fontsize=7.5, color=TH["ink2"], loc="left", pad=2)
-    else:
-        ax2.text(0.5, 0.5, "no filtered runs on this recording", transform=ax2.transAxes, ha="center", color=TH["ink2"], fontsize=9)
-        ax2.set_yticks([])
-    ax2.set_xlabel("time since ground-truth start [s]")
+    (ax2 if n_f else ax).set_xlabel("time since ground-truth start [s]")
     turn = gt["yaw_rate"] > TURN_DEG_S
     draw_map(ax3, ds)
     ax3.plot(gt["p"][:, 0], gt["p"][:, 1], color=TH["ink"], lw=1.2, label="ground truth")
@@ -382,12 +390,16 @@ def figure_dataset(testbed, ds, items, gt, thr_by_est, path):
         if res["onset_s"] is not None:
             gx = np.interp(res["onset_s"] + t0, gt["t"], gt["p"][:, 0]); gy = np.interp(res["onset_s"] + t0, gt["t"], gt["p"][:, 1])
             ax3.plot(gx, gy, "o" if not r["filtered"] else "s", ms=7, mfc=COLORS.get(r["system"], "#999"), mec=TH["surface"], mew=0.8, alpha=0.85, zorder=5)
-    ax3.plot([], [], "o", color=TH["ink2"], ms=7, label="onset, unfiltered run"); ax3.plot([], [], "s", color=TH["ink2"], ms=7, label="onset, filtered run")
+    if n_f:
+        ax3.plot([], [], "o", color=TH["ink2"], ms=7, label="onset, unfiltered run"); ax3.plot([], [], "s", color=TH["ink2"], ms=7, label="onset, filtered run")
+    else:
+        ax3.plot([], [], "o", color=TH["ink2"], ms=7, label="onset (sustained excess)")
     lo, hi = gt["p"][:, :2].min(0), gt["p"][:, :2].max(0); pad = 0.12 * (hi - lo).max()
     ax3.set_xlim(lo[0] - pad, hi[0] + pad); ax3.set_ylim(lo[1] - pad, hi[1] + pad); ax3.set_aspect("equal")
     ax3.set_xlabel("x [m]"); ax3.set_ylabel("y [m]")
     ax3.legend(fontsize=7, loc="best", facecolor=TH["surface"], edgecolor=TH["grid"])
-    fig.suptitle("%s / %s: %d runs (%d filtered)" % (testbed, short(ds), len(items), n_f), color=TH["ink"], fontsize=11, x=0.02, ha="left")
+    fig.suptitle(("%s / %s: %d runs (%d filtered)" % (testbed, short(ds), len(items), n_f)) if n_f
+                 else ("%s / %s: %d runs" % (testbed, short(ds), len(items))), color=TH["ink"], fontsize=11, x=0.02, ha="left")
     fig.savefig(path, dpi=140, facecolor=TH["surface"], bbox_inches="tight"); plt.close(fig)
 
 

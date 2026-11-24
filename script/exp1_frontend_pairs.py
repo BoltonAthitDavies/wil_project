@@ -34,6 +34,7 @@ import warnings
 
 warnings.filterwarnings("ignore")
 import numpy as np                                   # noqa: E402
+from plot_ticks import plain_log                     # noqa: E402
 import matplotlib                                    # noqa: E402
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt                      # noqa: E402
@@ -93,9 +94,9 @@ def main():
         ax.set_xticks([0, 1])
         ax.set_xticklabels(["CPU extractor", "GPU extractor"], fontsize=9)
         ax.set_xlim(-0.25, 1.35)
-        ax.set_ylabel(lbl, color=TH["ink2"], fontsize=9)
+        ax.set_ylabel(lbl + ("" if pct else " (log)"), color=TH["ink2"], fontsize=9)
         if not pct:
-            ax.set_yscale("log")
+            ax.set_yscale("log"); plain_log(ax)
         ax.set_title("(%s) %s\n    GPU higher in %d of %d pairs, lower in %d"
                      % ("ab"[k],
                         "throughput: every pair moves the same way" if pct

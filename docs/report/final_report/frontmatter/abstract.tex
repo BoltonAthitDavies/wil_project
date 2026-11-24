@@ -1,7 +1,8 @@
 % Abstract page (ii), per "3. Abstract": the project record block, the word
 % "Abstract" centred, the text, and keywords sorted A-Z.  The abstract states
 % what was done and what was found at the reporting cutoff; it does not
-% anticipate the four real-robot slots that are still planned.
+% anticipate the real-robot slot that is still planned.  Rewritten 20 Nov 2026
+% for the two-experiment structure.
 \thispagestyle{report}
 \phantomsection\addcontentsline{toc}{chapter}{ABSTRACT}
 \noindent
@@ -22,45 +23,45 @@ Academic Year & 2026 \\
 
 Autonomous mobile robots in warehouses are today navigated with 2-D LiDAR and
 QR-code infrastructure, which is costly to install and inflexible when the
-warehouse changes. This project develops and evaluates a vision-based navigation
-pipeline in which a stereo-inertial visual SLAM front end is combined with a
-YOLO object detector that removes image features belonging to movable warehouse
-objects before they enter pose estimation. Two pipelines are compared:
-ORB-SLAM3 with detector-driven feature rejection, and VINS-Fusion with
-persistent-track culling feeding an RTAB-Map mapping back end. The work is
-organised as four experiments, each defined for both a Gazebo simulation of the
-warehouse and the real robot: a non-visual baseline and estimator comparison, an
-offline evaluation of the detector, a visual-inertial odometry evaluation with
-dynamic-environment filtering, and a dense-map reconstruction and map-quality
-evaluation.
+warehouse changes. This project builds and evaluates a localization and mapping
+pipeline that uses only stereo cameras and an inertial measurement unit: a
+stereo-inertial front end, ORB-SLAM3 or VINS-Fusion, behind an RTAB-Map back end
+that builds a prior map and relocalizes the robot in it, with outputs in the
+form the Nav2 navigation stack consumes. It is evaluated in a Gazebo
+simulation of a warehouse in two layouts, with and without moving traffic, and
+on the real robot, in two experiments: an estimator comparison against
+non-visual baselines, and visual-inertial odometry on a prior map.
 
-At the reporting cutoff the four simulation experiments have been run and the
-four real-robot experiments remain planned; one real recording with an
-independent planar reference, added after the cutoff, is scored provisionally
-and supports no claim yet. On five static recordings a
-five-state wheel-plus-gyroscope extended Kalman filter localises to
-\SIrange{0.19}{0.49}{\metre} aligned ATE, ahead of both visual pipelines as
-configured, but that ordering reverses on every recording once the filter is
-given the visual systems' own inertial noise model; the noise model, not the
-architecture, dominates. All three dead-reckoning estimators are overconfident
-by about two orders of magnitude. The detector reaches a pooled precision of
-0.684 and a moving-object recall of 0.591 against projected simulator ground
-truth, with conditional class accuracy of 0.996. The dynamic-filtering
-hypothesis remains untested: the VINS-Fusion filter never activated, the
-ORB-SLAM3 treatment pairs were not input-matched, and the scripted dynamic
-worlds were found not to constitute a valid testbed; in rebuilt worlds with
-physically simulated traffic neither front end loses tracking, and the
-filtering arms again yield no admissible pair. The RTAB-Map map of the
-small warehouse is geometrically faithful (occupied-cell precision 96.6\%,
-observed-surface recall 89.5\%) and drivable along an independent route; the
-large-warehouse map failed through tracking loss under repetitive structure.
-The report records these outcomes with their validity limits and sets out the
-remaining plan.
+In simulation VINS-Fusion localizes to \SIrange{0.22}{0.66}{\metre} aligned
+ATE and ORB-SLAM3 to \SIrange{0.14}{0.52}{\metre} in eleven runs of sixteen;
+all five of ORB-SLAM3's divergences are its loop closer's, led by a false
+closure between repeated aisles. A wheel-plus-gyroscope extended Kalman filter
+trails VINS-Fusion on the visual systems' own inertial noise model and would
+lead it on three recordings of four with a measured one, so the noise model
+matters more than the estimator. Traffic
+breaks neither front end and drives none of the divergences; the one
+dangerous case, a vehicle leading the robot, raises the local error two- to
+eightfold for four seconds and leaves under \SI{0.1}{\metre} in the
+accumulated error. On the real robot ORB-SLAM3 holds
+\SIrange{0.19}{0.45}{\metre}, in the same accuracy class as wheel-plus-gyroscope
+dead reckoning, and VINS-Fusion \SIrange{0.37}{0.68}{\metre} once its fisheye
+field of view is masked. Measured per second of operation the real rig drifts
+1.9 times as fast as the simulation, against 10.5 times per metre, because it
+was driven at a fifth of the working speed. Every visual run meets the
+\SI{0.1}{\metre} relative-pose target in both domains, on jump-free pairs; the
+\SI{0.05}{\metre} ATE target is met by no run. The tiny-warehouse map passes the map targets, with
+\SI{96.6}{\percent} precision and \SI{0.7}{\percent} false obstacles; the four
+realistic-warehouse maps fail them, with phantom obstacles laid during the
+inertial initialization. Relocalized on those maps the robot tracks ground
+truth to a median of \SIrange{0.13}{0.21}{\metre}, an error set by the map
+rather than the estimator. Real-robot accuracy is provisional until the
+marker-to-IMU lever arm is measured, and the real-robot prior map remains
+planned.
 
 \vspace{6mm}
 \noindent Keywords: Autonomous Mobile Robot / Dynamic Environment /
-Extended Kalman Filter / Object Detection / ORB-SLAM3 / RTAB-Map / Visual SLAM /
-VINS-Fusion / YOLO
+Extended Kalman Filter / ORB-SLAM3 / Relocalization / RTAB-Map / VINS-Fusion /
+Visual SLAM / Visual-Inertial Odometry
 \clearpage
 
 % Thai abstract (iii).  pdflatex has no Thai font on this host, so the page is

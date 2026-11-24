@@ -184,9 +184,7 @@ pose throughout. The script is deterministic, so the pose is instead
 evaluated from the world file and the simulation clock by
 \repo{script/people_script.py}, which the 2-D viewer uses to draw the people
 (linear between the \SI{2}{\metre} waypoints, within \SI{0.2}{\metre} of the
-rendered spline). Projecting a detector ground truth from it is not yet
-implemented, so Experiment~2 cannot yet score the people and Experiment~3
-sees them only as unlabelled motion.
+rendered spline). The estimators see them only as unlabelled motion.
 
 \paragraph{Static twins.} For each layout a static world,
 \repo{worlds/small_warehouse/small_warehouse_static_realistic_nofloortexture.world}
@@ -248,8 +246,8 @@ and a traffic recording in each layout, \SIrange{80}{125}{\second} of
 simulated time over \SIrange{103}{171}{\metre}. Two are longer mapping runs in
 the static twins, \repo{dataset_allsensor_realistic_map} (U) and
 \repo{dataset_allsensor_realistic_01_map} (I), which build the databases of
-Experiment~4 and carry the repeated runs that measure latency and resources in
-Experiment~3.
+Experiment~2 and carry the repeated runs that measure latency and resources in
+Experiment~1.
 
 The mapping runs are the only recordings that reach the speed the project
 targets. Both drive a serpentine that enters every aisle

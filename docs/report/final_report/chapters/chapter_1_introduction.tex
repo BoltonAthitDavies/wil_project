@@ -33,38 +33,57 @@ its pose computation. Cadena et al.~\cite{cadena2016} further stress that the
 greatest challenges facing SLAM today are robustness and lifelong mapping: the
 robot must be able to separate permanent structure from dynamic objects.
 
-To address navigation in a dynamic environment, this project proposes the
-development of a vision-based navigation pipeline centred on integrating the
-YOLO26 deep-learning model to detect and filter dynamic objects out of the
-localization system. The project develops and compares the performance of two
-navigation-system architectures: (1) operation with the ORB-SLAM3 framework, and
-(2) operation with VINS combined with RTAB-Map, in order to find the most robust
-approach for a warehouse.
+To address localization in a dynamic environment without floor
+infrastructure, this project builds a localization and mapping pipeline that
+uses only stereo cameras and an inertial measurement unit, and measures how
+well it works. Two stereo-inertial front ends, ORB-SLAM3 and VINS-Fusion, are
+compared against each other and against estimators that use no camera at all;
+RTAB-Map serves as the back end that builds a prior map and relocalizes the
+robot in it; and the result is delivered in the form the Nav2 navigation stack
+consumes. Each part is evaluated in a Gazebo simulation of a warehouse, with
+and without moving traffic, and on the real robot.
 
-In addition, replacing an active sensor (LiDAR) with a passive one (a camera)
-may make the system sensitive to indoor lighting conditions. The project
-therefore designs an experiment that simulates the environment and the light
-intensity at different times of day, so that data can be collected and it can be
-assessed empirically whether warehouse lighting significantly affects the
-performance of the visual SLAM system. That assessment will be important input
-to the company's long-term development and improvement of its navigation system.
+Replacing an active sensor (LiDAR) with a passive one (a camera) may also make
+the system sensitive to indoor lighting. The original plan designed an
+experiment around scheduled light changes; that experiment was not carried out
+within the reporting period, and the change is recorded with the other
+deviations from the proposal in \cref{sec:deviations}.
 
 \section{Objectives}
 \label{sec:objectives}
 
 \begin{enumerate}[leftmargin=2em]
-  \item Develop a visual-inertial odometry localization system with lifelong
-    mapping, so that the warehouse map is updated in real time.
-  \item Develop image enhancement for low-light environments with the
-    EnlightenGAN model.
-  \item Develop perception of obstacles and moving objects (dynamic objects)
-    through deep-learning object detection.
-  \item Develop lane detection with PolyNET and lane tracking with a PID
-    controller.
-  \item The integrated system must be able to build a 2-D cost map and localize
-    the robot with an error of less than \SI{10}{\centi\metre} under differing
-    light intensities.
+  \item Build a localization and mapping pipeline that uses only cameras and an
+    IMU for a warehouse AMR, with no floor markers. It has three parts:
+    \begin{enumerate}[label=(\alph*)]
+      \item two stereo-inertial front ends, ORB-SLAM3 and VINS-Fusion;
+      \item RTAB-Map as the back end, which builds a prior map and relocalizes
+        the robot in it;
+      \item outputs in the form Nav2 consumes, the
+        \texttt{map}~$\rightarrow$~\texttt{odom} transform and the
+        \texttt{/map} occupancy grid.
+    \end{enumerate}
+  \item Run the pipeline both in a Gazebo warehouse and on the real robot.
+  \item Evaluate localization accuracy: compare the estimated pose of each front
+    end with ground truth, in static warehouses and in warehouses with moving
+    traffic, and compare it against estimators that use no camera (wheel, IMU
+    and an extended Kalman filter in simulation; wheel plus gyroscope on the
+    robot).
+  \item Evaluate the prior map RTAB-Map builds in two ways:
+    \begin{enumerate}[label=(\alph*)]
+      \item the pose graph, by comparing the node poses with the ground truth of
+        the mapping run;
+      \item the occupancy grid, by comparing it with the true warehouse geometry,
+        both for geometry and for false obstacles.
+    \end{enumerate}
+  \item Evaluate relocalization in the prior map: compare the localized pose
+    with ground truth while the robot drives through a mapped warehouse.
 \end{enumerate}
+
+These objectives replace the five of the original proposal, which included
+low-light image enhancement, deep-learning detection and masking of dynamic
+objects, and lane detection with lane tracking. \Cref{sec:deviations} records
+each change and the reason for it.
 
 \section{Expected Benefits}
 \label{sec:benefits}
@@ -81,41 +100,53 @@ to the company's long-term development and improvement of its navigation system.
 \label{sec:scope}
 
 \begin{enumerate}[leftmargin=2em]
-  \item The main tests are carried out only on a small mobile robot computing on
-    an NRU-51V processing unit and using AC-IMX390-H190 cameras.
-  \item Within the AMR navigation system, the author's work is framed only
-    within the visual SLAM, object prediction and lane-tracking controller
-    blocks (red frame) shown in \cref{fig:scope-architecture}.
-  \item The integrated system is tested only in a mock warehouse arena with
-    changing mock goods, a walkway with a \SI{5}{\degree} slope, five stacks of
-    goods of four boxes each, and a starting point at the grey square at the
-    lower right of \cref{fig:test-field}. The positions of the mock warehouse
-    contents are changed between tests to simulate a dynamic environment.
+  \item \textbf{Simulation:}
+    \begin{enumerate}[label=(\alph*)]
+      \item the realistic Gazebo warehouse in two layouts, U and I;
+      \item four localization recordings, a static and a moving-traffic one per
+        layout (\repo{realistic_000} to \repo{realistic_003});
+      \item two long mapping recordings, from which the prior maps are built, and
+        the small tiny-warehouse map;
+      \item six relocalization runs on the prior maps.
+    \end{enumerate}
+  \item \textbf{Real robot:} an Ackermann platform with AC-IMX390-H190 fisheye
+    stereo cameras ($1920\times1080$) and a \SI{200}{\hertz} IMU, recorded at the
+    Gensurv building. Four recordings carry tracker ground truth; three of them
+    pass the validity rules of \cref{sec:method-trajectory}, and the fourth is reported
+    as a diagnostic.
+  \item \textbf{Software}, developed in ROS~2 Humble:
+    \begin{enumerate}[label=(\alph*)]
+      \item ORB-SLAM3 from the project's fork (patches up to 15, optional GPU front
+        end);
+      \item VINS-Fusion from the project's fork (no loop fusion);
+      \item RTAB-Map 0.23 with the project's camera shim, correction gate and start
+        delay.
+    \end{enumerate}
+  \item \textbf{Computing:} every run in this report, in both domains, executes on
+    one development laptop, an MSI Katana GF66 11UG. The NRU-51V on the robot
+    records the data and runs no estimator.
+  \item \textbf{Evaluation:} localization and mapping replay recorded bags at rate
+    1.0. Relocalization runs live in simulation, with the robot driven by hand
+    along its routes.
+  \item \textbf{Excluded:} path planning and motion control. The pipeline
+    delivers a pose and a map to Nav2, which is the consumer, not the subject,
+    of this project.
 \end{enumerate}
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.9\textwidth]{figures/template/control_loop_rates.png}
-  \caption[Scope of the project within the AMR navigation loop.]{Scope of the project within the AMR navigation loop. The red dashed
-  frame encloses the blocks this project develops: the SLAM front end
-  (odometry and loop closure), the SLAM back end (map and robot state) and the
-  object-detection block that supplies bounding boxes. The controller and the
-  robot are existing components. Rates are those of the target system: control
-  input \SI{20}{\hertz}, odometry pose \SI{20}{\hertz}, bounding boxes
-  \SI{10}{\hertz}, IMU \SI{200}{\hertz}, images \SI{20}{\hertz}.}
+  \includegraphics[width=\textwidth]{figures/system_architecture_final.png}
+  \caption[System architecture and the scope of the project.]{System
+  architecture and the scope of the project. The yellow block is this
+  project: the visual-inertial front end (ORB-SLAM3 or VINS-Fusion) and
+  localization on the prior map (RTAB-Map, behind the correction gate and the
+  pose gate). The green block is Nav2's planning and the red block its control
+  chain down to the Ackermann drive; both consume the pose and the map and are
+  outside the scope. Rates are those of the implemented system: images
+  \SI{30}{\hertz}, RTAB-Map input \SI{4}{\hertz} and corrections
+  \SI{1}{\hertz}, gated pose \SI{20}{\hertz}, control \SI{20}{\hertz}.}
   \label{fig:scope-architecture}
-\end{figure}
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.8\textwidth]{figures/template/test_field_topview.png}
-  \caption[Top view of the mock warehouse test field on the first floor of the Gensurv building.]{Top view of the mock warehouse test field on the first floor of the
-  Gensurv building. Zone~A and Zone~B are each \SI{3}{\metre} square and are
-  joined by a walkway; the robot starts at the grey square in Zone~A. Goods are
-  \SI{0.3}{\metre} cubes stacked in piles, a light-control fixture sets the
-  illumination, and motion-capture cameras around the field provide the
-  ground-truth reference.}
-  \label{fig:test-field}
+  \label{fig:system-architecture}
 \end{figure}
 
 \section{Work Plan}

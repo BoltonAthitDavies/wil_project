@@ -55,6 +55,7 @@ import statistics
 import sys
 
 import numpy as np
+from plot_ticks import plain_log
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import vio_metrics as vm  # noqa: E402
@@ -513,7 +514,13 @@ def fig_metrics(rows, theme):
                 ax.plot(i + (k - 2) * 0.11 + 0.05, r.get(key, np.nan), "^", ms=9, mfc="none", mec=COLORS[r["label"]], mew=1.8,
                         label="%s, %s mask (admissible)" % (r["estimator"], r["mode"]), zorder=5)
         ax.set_xticks(x); ax.set_xticklabels(["%s\n%s %s" % (d.replace("dataset_allsensor_", ""), *SCENE[d]) for d in DATASETS], fontsize=8)
-        ax.set_ylabel(name); ax.set_ylim(bottom=0)
+        if key == "ate_rms":
+            # 0.14-6.0 m across the arms (43x): on a linear axis every run that
+            # did not diverge sits in the bottom sixth. Log, as figure
+            # exp1_frontend_pairs plots the same numbers.
+            ax.set_yscale("log"); plain_log(ax); ax.set_ylabel(name + " (log)")
+        else:
+            ax.set_ylabel(name); ax.set_ylim(bottom=0)
     h, l = axes[0].get_legend_handles_labels()
     seen = {}
     for hh, ll in zip(h, l):

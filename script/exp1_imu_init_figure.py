@@ -36,6 +36,7 @@ import warnings
 
 warnings.filterwarnings("ignore")
 import numpy as np                                   # noqa: E402
+from plot_ticks import plain_log                     # noqa: E402
 import matplotlib                                    # noqa: E402
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt                      # noqa: E402
@@ -120,7 +121,7 @@ def main():
             up += s2 > s1
             ax.plot([0, 1], [s1, s2], "-o", ms=4, lw=1.1,
                     color=BAGCOL[ds[-3:]], alpha=0.85)
-    ax.set_yscale("log")
+    ax.set_yscale("log"); plain_log(ax)
     ax.set_xticks([0, 1])
     ax.set_xticklabels(["refinement 1\nprior kept", "refinement 2\nprior dropped"],
                        fontsize=8.5)

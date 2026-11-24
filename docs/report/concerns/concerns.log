@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  17 NOV 2026 19:23
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  24 NOV 2026 13:04
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -953,33 +953,33 @@ Package hyperref Info: Option `colorlinks' set `true' on input line 145.
 (/home/ambushee/wil_project/docs/report/final_report//figures/pipeline_performa
 nce.tex)
 Package translations Info: No language package found. I am going to use `englis
-h' as default language. on input line 271.
+h' as default language. on input line 272.
 LaTeX Font Info:    Trying to load font information for T1+ptm on input line 27
-1.
+2.
  (/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1ptm.fd
 File: t1ptm.fd 2001/06/04 font definitions for T1/ptm.
 )
 (./concerns.aux)
 \openout1 = `concerns.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 271.
-LaTeX Font Info:    ... okay on input line 271.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 271.
-LaTeX Font Info:    ... okay on input line 271.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 271.
-LaTeX Font Info:    ... okay on input line 271.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 271.
-LaTeX Font Info:    ... okay on input line 271.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 271.
-LaTeX Font Info:    ... okay on input line 271.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 271.
-LaTeX Font Info:    ... okay on input line 271.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 271.
-LaTeX Font Info:    ... okay on input line 271.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 271.
-LaTeX Font Info:    ... okay on input line 271.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 271.
-LaTeX Font Info:    ... okay on input line 271.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 272.
+LaTeX Font Info:    ... okay on input line 272.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 272.
+LaTeX Font Info:    ... okay on input line 272.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 272.
+LaTeX Font Info:    ... okay on input line 272.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 272.
+LaTeX Font Info:    ... okay on input line 272.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 272.
+LaTeX Font Info:    ... okay on input line 272.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 272.
+LaTeX Font Info:    ... okay on input line 272.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 272.
+LaTeX Font Info:    ... okay on input line 272.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 272.
+LaTeX Font Info:    ... okay on input line 272.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 272.
+LaTeX Font Info:    ... okay on input line 272.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -1015,18 +1015,18 @@ LaTeX Font Info:    ... okay on input line 271.
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-LaTeX Info: Redefining \microtypecontext on input line 271.
-Package microtype Info: Applying patch `item' on input line 271.
-Package microtype Info: Applying patch `toc' on input line 271.
-Package microtype Info: Applying patch `eqnum' on input line 271.
-Package microtype Info: Applying patch `footnote' on input line 271.
+LaTeX Info: Redefining \microtypecontext on input line 272.
+Package microtype Info: Applying patch `item' on input line 272.
+Package microtype Info: Applying patch `toc' on input line 272.
+Package microtype Info: Applying patch `eqnum' on input line 272.
+Package microtype Info: Applying patch `footnote' on input line 272.
 Package microtype Info: Generating PDF output.
 Package microtype Info: Character protrusion enabled (level 2).
 Package microtype Info: Using default protrusion set `alltext'.
 Package microtype Info: Automatic font expansion enabled (level 2),
 (microtype)             stretch: 20, shrink: 20, step: 1, non-selected.
 Package microtype Info: Using default expansion set `alltext-nott'.
-LaTeX Info: Redefining \showhyphens on input line 271.
+LaTeX Info: Redefining \showhyphens on input line 272.
 Package microtype Info: No adjustment of tracking.
 Package microtype Info: No adjustment of interword spacing.
 Package microtype Info: No adjustment of character kerning.
@@ -1069,7 +1069,7 @@ File: translations-basic-dictionary-english.trsl (english translation file `tra
 nslations-basic-dictionary')
 )
 Package translations Info: loading dictionary `translations-basic-dictionary' f
-or `english'. on input line 271.
+or `english'. on input line 272.
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: hyperref package is loaded.
 Package caption Info: End \AtBeginDocument code.
@@ -1082,7 +1082,7 @@ Package: lscape 2020/05/28 v3.02 Landscape Pages (DPC)
 )
 Package pdflscape Info: Auto-detected driver: pdftex on input line 81.
 )
-Package hyperref Info: Link coloring ON on input line 271.
+Package hyperref Info: Link coloring ON on input line 272.
 
 (/usr/share/texlive/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2021-04-02 v2.47 Cross-referencing by name of section
@@ -1095,16 +1095,16 @@ Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 )
 \c@section@level=\count350
 )
-LaTeX Info: Redefining \ref on input line 271.
-LaTeX Info: Redefining \pageref on input line 271.
-LaTeX Info: Redefining \nameref on input line 271.
+LaTeX Info: Redefining \ref on input line 272.
+LaTeX Info: Redefining \pageref on input line 272.
+LaTeX Info: Redefining \nameref on input line 272.
 
 (./concerns.out) (./concerns.out)
 \@outlinefile=\write4
 \openout4 = `concerns.out'.
 
 LaTeX Font Info:    Trying to load font information for OT1+ztmcm on input line
- 273.
+ 274.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1ztmcm.fd
 File: ot1ztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OT1/ztmcm.
@@ -1114,35 +1114,35 @@ Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 LaTeX Font Info:    Trying to load font information for OML+ztmcm on input line
- 273.
+ 274.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/omlztmcm.fd
 File: omlztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OML/ztmcm.
 )
 LaTeX Font Info:    Trying to load font information for OMS+ztmcm on input line
- 273.
+ 274.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/omsztmcm.fd
 File: omsztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OMS/ztmcm.
 )
 LaTeX Font Info:    Trying to load font information for OMX+ztmcm on input line
- 273.
+ 274.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/omxztmcm.fd
 File: omxztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OMX/ztmcm.
 )
 LaTeX Font Info:    Trying to load font information for OT1+ptm on input line 2
-73.
+74.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1ptm.fd
 File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
 )
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <12> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 273.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 274.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <9> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 273.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 274.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <7> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 273.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 274.
 
 (/usr/share/texlive/texmf-dist/tex/latex/microtype/mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
@@ -1151,7 +1151,7 @@ File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 )
 LaTeX Font Info:    Trying to load font information for T1+pcr on input line 29
-3.
+4.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1pcr.fd
 File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
@@ -1164,68 +1164,52 @@ Package microtype Info: Loading generic protrusion settings for font family
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10.95> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 354.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 316.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <8> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 354.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 316.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <6> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 354.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 316.
  [2
 
 ]
 Overfull \hbox (20.4222pt too wide) in paragraph at lines 390--401
-\T1/ptm/b/n/10.95 (-20) 13. [][Threat to va-lid-ity][] \T1/ptm/m/n/10.95 (-20) 
+\T1/ptm/b/n/10.95 (-20) 12. [][Threat to va-lid-ity][] \T1/ptm/m/n/10.95 (-20) 
 This is a bias with a known di-rec-tion. The EKF base-line of [][\T1/pcr/m/n/10
 .95 sec:results-proprio\T1/ptm/m/n/10.95 (-20) ][]
  []
 
 
-Overfull \hbox (155.60759pt too wide) in paragraph at lines 457--466
-\T1/ptm/b/n/10.95 (-20) 20. [][At-tri-bu-tion of re-pro-duced ven-dor ma-te-ria
+Overfull \hbox (154.78635pt too wide) in paragraph at lines 457--466
+\T1/ptm/b/n/10.95 (-20) 19. [][At-tri-bu-tion of re-pro-duced ven-dor ma-te-ria
 l][] []\T1/ptm/m/n/10.95 (-20) [\T1/pcr/m/n/10.95 fig:camera-dimensions,fig:nru
 51v-photo,fig:nru51v-dimensions\T1/ptm/m/n/10.95 (-20) ][]
  []
 
 [3]
-Overfull \hbox (18.17699pt too wide) in paragraph at lines 504--515
+Overfull \hbox (18.17699pt too wide) in paragraph at lines 518--529
 \T1/ptm/b/n/10.95 (-20) 1. [][][] 
  []
 
 [4] [5]
-Overfull \hbox (23.54248pt too wide) in paragraph at lines 640--664
+Overfull \hbox (23.54248pt too wide) in paragraph at lines 654--678
 \T1/ptm/b/n/10.95 (-20) 18. [][][] 
  []
 
-
-Overfull \hbox (24.36372pt too wide) in paragraph at lines 705--714
-\T1/ptm/b/n/10.95 (-20) 24. [][][] 
- []
-
-[6]
-Overfull \hbox (24.36372pt too wide) in paragraph at lines 718--719
-\T1/ptm/b/n/10.95 (-20) 25. [][][] 
+[6] [7]
+Overfull \hbox (24.36372pt too wide) in paragraph at lines 781--787
+\T1/ptm/b/n/10.95 (-20) 32. [][][] 
  []
 
 
-Overfull \hbox (24.36372pt too wide) in paragraph at lines 723--729
-\T1/ptm/b/n/10.95 (-20) 26. [][][] 
+Overfull \hbox (24.36372pt too wide) in paragraph at lines 822--832
+\T1/ptm/b/n/10.95 (-20) 36. [][][] 
  []
 
-
-Overfull \hbox (24.36372pt too wide) in paragraph at lines 766--768
-\T1/ptm/b/n/10.95 (-20) 30. [][][] 
+[8] [9]
+Overfull \hbox (24.36372pt too wide) in paragraph at lines 974--977
+\T1/ptm/b/n/10.95 (-20) 55. [][][] 
  []
 
-
-Overfull \hbox (24.36372pt too wide) in paragraph at lines 772--782
-\T1/ptm/b/n/10.95 (-20) 31. [][][] 
- []
-
-[7] [8]
-Overfull \hbox (23.98047pt too wide) in paragraph at lines 918--923
-\T1/ptm/b/n/10.95 (-20) 49. [][][] 
- []
-
-[9]
 
 Package caption Warning: Unused \captionsetup[table] on input line 113.
 See the caption package documentation for explanation.
@@ -1239,13 +1223,13 @@ Package rerunfilecheck Info: File `concerns.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
  ) 
 Here is how much of TeX's memory you used:
- 32847 strings out of 480171
- 656338 string characters out of 5894489
- 943237 words of memory out of 5000000
- 49955 multiletter control sequences out of 15000+600000
- 527950 words of font info for 292 fonts, out of 8000000 for 9000
+ 32853 strings out of 480171
+ 656435 string characters out of 5894489
+ 942237 words of memory out of 5000000
+ 49958 multiletter control sequences out of 15000+600000
+ 528080 words of font info for 294 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
- 84i,12n,89p,1005b,773s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 84i,12n,89p,1005b,775s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
 e/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texm
 f-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/
@@ -1255,7 +1239,7 @@ rier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/symbol/usyr.pfb>
 </usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/tex
 live/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist
 /fonts/type1/urw/times/utmri8a.pfb>
-Output written on concerns.pdf (10 pages, 137606 bytes).
+Output written on concerns.pdf (10 pages, 139906 bytes).
 PDF statistics:
  106 PDF objects out of 1000 (max. 8388607)
  75 compressed objects within 1 object stream

@@ -1,29 +1,28 @@
 #!/usr/bin/env python3
-"""Regenerate the Experiment 1, 2 and 4 sections of chapter 4 from the raw write-ups.
+"""Regenerate the generated parts of chapter 4 from the raw write-ups.
 
     python3 script/build_chapter4.py            # rewrite the chapter in place
     python3 script/build_chapter4.py --check    # print what would change, write nothing
 
-Since 6 Nov 2026 the chapter's slots for Experiments 1, 2 and 4 are the insight notes
-docs/report/insights/experiment_N/experiment_N.tex transformed mechanically:
+Since 20 Nov 2026 the report has TWO experiments (the detector experiment was
+deleted and the map and navigation experiments joined):
+  * Experiment 1 (both domain slots) is docs/report/insights/experiment_1/experiment_1.tex;
+  * Experiment 2 is maintained in the chapter itself EXCEPT part B of its simulation
+    slot (relocalization on the prior map), which is the simulation section of
+    docs/report/insights/experiment_4/experiment_4.tex, spliced between the
+    %% PART-B-BEGIN / %% PART-B-END markers. That note's real-robot section is not
+    used: the chapter's Experiment 2 real-robot slot covers both parts.
+Transformations, unchanged from the four-experiment version:
   * \section{Simulation|Real robot} -> \subsection, with alias labels the chapter-3
-    fragments cross-reference (sec:results-proprio, sec:yolo-performance, ...);
-  * the note's own \label{sec:vio-filter-method} is dropped (chapter 3 owns it);
+    text cross-references (sec:results-proprio, sec:exp1-real, ...);
   * \paragraph{Objective./Process./Dataset(s)./Reporting rules./Results./Reason*./
-    Retired result, for the record./Next action.} -> \textbf{...} (the chapter's
-    slot convention); Analysis/Summary/Future plan stay paragraphs;
+    Retired result, for the record./Next action.} -> \textbf{...};
   * \reporttable{x} -> \input{tables/x};  ../../../../output/ -> ../../../output/;
-  * two cross-note sentences are rewritten (see XNOTE).
-Experiment 4 joined them on 14 Nov 2026, after its hand-maintained chapter slot
-had drifted from its note: the slot had lost all eight of the note's figures and
-twelve of its paragraphs, its copy of tab:exp4-tracking reported different
-columns, and a paragraph it carried alone put the localisation offset at
-0.32-0.59 m where the runs give 0.07-0.24. Its figures live in the note's fig/
-and are copied to figures/ (exp4_*.png), so the note's own paths need no rewrite
-beyond the fig/ -> figures/ prefix.
-The chapter head (cutoff paragraph, slot-status table), Experiment 3 and section
-4.5 are kept from the existing chapter file verbatim: edit those in the chapter
-itself.
+  * a few cross-note sentences are rewritten (see XNOTE).
+For part B, note 4's \section{Simulation} becomes \subsubsection{Part B: ...} and its
+further \section{Every run} becomes \subsubsection{Part B: every run}.
+The chapter head, Experiment 2 part A and its real-robot slot, and the
+cross-experiment section are kept verbatim: edit those in the chapter itself.
 Edit a note, then run this; never hand-edit the generated sections.
 """
 import re, sys, os, collections
@@ -33,15 +32,16 @@ CH = os.path.join(ROOT, "docs/report/final_report/chapters/chapter_4_experiments
 BOLD = ("Objective.", "Process.", "Dataset.", "Datasets.", "Reporting rules.", "Reason.",
         "Reason the baselines are absent.", "Retired result, for the record.", "Next action.")
 ALIASES = {1: (["sec:results-proprio", "sec:results-validity", "sec:realistic-ab", "sec:rpe",
-                "sec:trajectory-results"], ["sec:exp1-real"]),
-           2: (["sec:yolo-performance", "fig:yolo-ground-truth-overlay"], ["sec:exp2-real"]),
-           4: ([], ["sec:exp4-real-nav"])}
+                "sec:trajectory-results"], ["sec:exp1-real"])}
 XNOTE = [
     ("The visual results are those of Experiment~3's\nreal-robot section, scored by the same procedure and not repeated here:",
      "The visual results are those of \\cref{sec:exp3-real},\nscored by the same procedure and not repeated here:"),
     ("(the dataset table of the Experiment~1 write-up)", "(\\cref{tab:exp1-datasets})"),
     ("frame and levels each map's fitted plane, both without using the truth.\nIt is kept for the record",
      "frame and levels each map's fitted plane, both without using the truth\n(\\cref{sec:method-realv7-repair}). It is kept for the record"),
+    # Experiment 1 reads its results against chapter 3's target table (20 Nov 2026).
+    ("at\n\\SI{1}{\\second} (the report's target table), every visual run", "at\n\\SI{1}{\\second} (\\cref{tab:targets}), every visual run"),
+    ("the report's requirements state the trajectory targets", "\\cref{sec:problem-scope} states the trajectory targets"),
     ("beside the real robot's much shorter ones,\nand it separates",
      "beside the real robot's much shorter ones\n(\\cref{sec:sim-vs-real}), and it separates"),
     # Experiment 4's note names Experiment 3's real-robot slot in words, because
@@ -49,9 +49,8 @@ XNOTE = [
     ("the real-robot slot of Experiment~3 is itself",
      "the real-robot slot of Experiment~3 (\\cref{sec:exp3-real}) is itself"),
 ]
-HEADS = {1: "\\section{Experiment 1: Estimator Comparison Against a Non-Visual Baseline}\n\\label{sec:exp1}\n",
-         2: "\\section{Experiment 2: Offline YOLO Detector Performance}\n\\label{sec:exp2}\n",
-         4: "\\section{Experiment 4: Autonomous Navigation on the Reconstructed Map}\n\\label{sec:exp4}\n"}
+HEADS = {1: "\\section{Experiment 1: Estimator Comparison Against a Non-Visual Baseline}\n\\label{sec:exp1}\n"}
+PB0, PB1 = "%% PART-B-BEGIN (generated by script/build_chapter4.py from experiment_4.tex; do not edit)\n", "%% PART-B-END\n"
 RULE = "% =====================================================================\n\\FloatBarrier\n"
 
 
@@ -82,28 +81,34 @@ def xf(s, aliases):
     return s.strip() + "\n"
 
 
+def part_b():
+    """note 4's simulation section as part B of Experiment 2's simulation slot"""
+    sim, _ = note(4)
+    sim = sim.replace("\\section{Simulation}\n", "\\subsubsection{Part B: relocalization on the prior map}\n", 1)
+    sim = sim.replace("\\section{Every run}", "\\subsubsection{Part B: every run}")
+    for h in BOLD:
+        sim = sim.replace("\\paragraph{%s}" % h, "\\textbf{%s}" % h)
+    sim = sim.replace("\\reporttable{", "\\input{tables/").replace("../../../../output/", "../../../output/")
+    sim = sim.replace("% =====================================================================\n", "")
+    sim = sim.replace("{fig/", "{figures/")
+    for a, b in XNOTE:
+        sim = sim.replace(a, b)
+    return sim.strip() + "\n"
+
+
 def build():
     old = open(CH).read()
     i1 = old.index(RULE + "\\section{Experiment 1")
-    i3 = old.index(RULE + "\\section{Experiment 3")
-    i4 = old.index(RULE + "\\section{Experiment 4")
-    i5 = old.index(RULE + "\\section{Cross-Experiment Discussion")
+    i2 = old.index(RULE + "\\section{Experiment 2")
+    b0 = old.index(PB0); b1 = old.index(PB1)
     parts = [old[:i1]]
-    for n in (1, 2):
-        sim, real = note(n)
-        sim_a, real_a = ALIASES[n]
-        sim, real = xf(sim, sim_a), xf(real, real_a)
-        for a, b in XNOTE:
-            sim = sim.replace(a, b); real = real.replace(a, b)
-        parts.append(RULE + HEADS[n] + "\n" + sim + "\n" + real + "\n")
-    parts.append(old[i3:i4])                      # Experiment 3, hand-maintained
-    sim, real = note(4)
-    sim_a, real_a = ALIASES[4]
+    sim, real = note(1)
+    sim_a, real_a = ALIASES[1]
     sim, real = xf(sim, sim_a), xf(real, real_a)
     for a, b in XNOTE:
         sim = sim.replace(a, b); real = real.replace(a, b)
-    parts.append(RULE + HEADS[4] + "\n" + sim + "\n" + real + "\n")
-    parts.append(old[i5:])
+    parts.append(RULE + HEADS[1] + "\n" + sim + "\n" + real + "\n")
+    parts.append(old[i2:b0] + PB0 + part_b() + PB1 + old[b1 + len(PB1):])
     new = "".join(parts)
     labs = re.findall(r"\\label\{([^}]*)\}", new)
     dup = [k for k, v in collections.Counter(labs).items() if v > 1]

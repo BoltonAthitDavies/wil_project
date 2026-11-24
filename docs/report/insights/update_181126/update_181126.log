@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  19 NOV 2026 20:23
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  20 NOV 2026 21:45
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1375,12 +1375,18 @@ Overfull \vbox (3.84628pt too high) detected at line 131
 ] [35
 
 ]
-Overfull \vbox (5.98106pt too high) detected at line 328
+<fig//rtab9_bound.png, id=331, 220.6644pt x 118.5228pt>
+File: fig//rtab9_bound.png Graphic file (type png)
+<use fig//rtab9_bound.png>
+Package pdftex.def Info: fig//rtab9_bound.png  used on input line 316.
+(pdftex.def)             Requested size: 220.66385pt x 118.52249pt.
+
+Overfull \vbox (9.0707pt too high) detected at line 316
  []
 
 [36
 
-] [37
+ <./fig//rtab9_bound.png>] [37
 
 ]) (./s5_nav.tex [38
 
@@ -1413,166 +1419,161 @@ Overfull \vbox (1.49553pt too high) detected at line 188
 ]) (./s7_results.tex [48
 
 ]
-<../../final_report/figures//exp1_frontend_pairs.png, id=428, 722.7pt x 332.442
-pt>
-File: ../../final_report/figures//exp1_frontend_pairs.png Graphic file (type pn
-g)
-<use ../../final_report/figures//exp1_frontend_pairs.png>
-Package pdftex.def Info: ../../final_report/figures//exp1_frontend_pairs.png  u
-sed on input line 61.
-(pdftex.def)             Requested size: 722.69823pt x 332.44118pt.
- [49
+<fig//r1_frontend.png, id=431, 178.9887pt x 159.2349pt>
+File: fig//r1_frontend.png Graphic file (type png)
+<use fig//r1_frontend.png>
+Package pdftex.def Info: fig//r1_frontend.png  used on input line 64.
+(pdftex.def)             Requested size: 178.98824pt x 159.2345pt.
 
- <../../final_report/figures//exp1_frontend_pairs.png>]
-<../../final_report/figures//exp1_false_closure.png, id=441, 838.332pt x 281.85
-3pt>
-File: ../../final_report/figures//exp1_false_closure.png Graphic file (type png
-)
-<use ../../final_report/figures//exp1_false_closure.png>
-Package pdftex.def Info: ../../final_report/figures//exp1_false_closure.png  us
-ed on input line 76.
-(pdftex.def)             Requested size: 838.32996pt x 281.85231pt.
-
-Overfull \vbox (1.61324pt too high) detected at line 76
+Overfull \vbox (12.82983pt too high) detected at line 64
  []
 
-[50
+[49
 
- <../../final_report/figures//exp1_false_closure.png>]
-<../../final_report/figures//exp1_imu_init.png, id=450, 838.332pt x 375.804pt>
-File: ../../final_report/figures//exp1_imu_init.png Graphic file (type png)
-<use ../../final_report/figures//exp1_imu_init.png>
-Package pdftex.def Info: ../../final_report/figures//exp1_imu_init.png  used on
- input line 91.
-(pdftex.def)             Requested size: 838.32996pt x 375.80309pt.
+ <./fig//r1_frontend.png>]
+<fig//r2_real_vs_sim.png, id=443, 221.3871pt x 165.9801pt>
+File: fig//r2_real_vs_sim.png Graphic file (type png)
+<use fig//r2_real_vs_sim.png>
+Package pdftex.def Info: fig//r2_real_vs_sim.png  used on input line 79.
+(pdftex.def)             Requested size: 221.38655pt x 165.97968pt.
+ [50
 
-Overfull \vbox (10.05965pt too high) detected at line 91
+ <./fig//r2_real_vs_sim.png>]
+<fig//r3a_repeats.png, id=451, 125.0271pt x 102.8643pt>
+File: fig//r3a_repeats.png Graphic file (type png)
+<use fig//r3a_repeats.png>
+Package pdftex.def Info: fig//r3a_repeats.png  used on input line 104.
+(pdftex.def)             Requested size: 69.16573pt x 56.90514pt.
+<fig//r3b_rotation.png, id=452, 125.7498pt x 84.5559pt>
+File: fig//r3b_rotation.png Graphic file (type png)
+<use fig//r3b_rotation.png>
+Package pdftex.def Info: fig//r3b_rotation.png  used on input line 104.
+(pdftex.def)             Requested size: 84.62799pt x 56.90501pt.
+<fig//r3c_path.png, id=453, 123.8226pt x 86.4831pt>
+File: fig//r3c_path.png Graphic file (type png)
+<use fig//r3c_path.png>
+Package pdftex.def Info: fig//r3c_path.png  used on input line 104.
+(pdftex.def)             Requested size: 81.47565pt x 56.90613pt.
+
+Overfull \vbox (11.7243pt too high) detected at line 104
  []
 
 [51
 
- <../../final_report/figures//exp1_imu_init.png>]
-Overfull \vbox (1.88531pt too high) detected at line 120
- []
+ <./fig//r3a_repeats.png> <./fig//r3b_rotation.png> <./fig//r3c_path.png>]
+<fig//r4_jack_ahead.png, id=466, 199.947pt x 165.9801pt>
+File: fig//r4_jack_ahead.png Graphic file (type png)
+<use fig//r4_jack_ahead.png>
+Package pdftex.def Info: fig//r4_jack_ahead.png  used on input line 119.
+(pdftex.def)             Requested size: 199.9465pt x 165.97968pt.
 
 [52
 
-]
-<../../final_report/figures//exp1_vins_starvation.png, id=465, 794.97pt x 404.7
-12pt>
-File: ../../final_report/figures//exp1_vins_starvation.png Graphic file (type p
-ng)
-<use ../../final_report/figures//exp1_vins_starvation.png>
-Package pdftex.def Info: ../../final_report/figures//exp1_vins_starvation.png  
-used on input line 135.
-(pdftex.def)             Requested size: 794.96806pt x 404.71101pt.
+ <./fig//r4_jack_ahead.png>]
+<fig//r5_gravity.png, id=474, 178.9887pt x 165.9801pt>
+File: fig//r5_gravity.png Graphic file (type png)
+<use fig//r5_gravity.png>
+Package pdftex.def Info: fig//r5_gravity.png  used on input line 135.
+(pdftex.def)             Requested size: 178.98824pt x 165.97968pt.
 
-Overfull \vbox (14.25313pt too high) detected at line 135
+Overfull \vbox (0.25383pt too high) detected at line 135
  []
 
 [53
 
- <../../final_report/figures//exp1_vins_starvation.png>]
-Overfull \vbox (4.11824pt too high) detected at line 162
+ <./fig//r5_gravity.png>]
+<fig//r6_patch15.png, id=482, 195.129pt x 163.0893pt>
+File: fig//r6_patch15.png Graphic file (type png)
+<use fig//r6_patch15.png>
+Package pdftex.def Info: fig//r6_patch15.png  used on input line 154.
+(pdftex.def)             Requested size: 195.12851pt x 163.08888pt.
+
+Overfull \vbox (9.3577pt too high) detected at line 154
  []
 
 [54
 
-]
-<../../final_report/figures//exp1_jack_ahead.png, id=480, 838.332pt x 332.442pt
->
-File: ../../final_report/figures//exp1_jack_ahead.png Graphic file (type png)
-<use ../../final_report/figures//exp1_jack_ahead.png>
-Package pdftex.def Info: ../../final_report/figures//exp1_jack_ahead.png  used 
-on input line 177.
-(pdftex.def)             Requested size: 838.32996pt x 332.44118pt.
+ <./fig//r6_patch15.png>]
+<fig//r7_false_closure.png, id=490, 180.9159pt x 165.9801pt>
+File: fig//r7_false_closure.png Graphic file (type png)
+<use fig//r7_false_closure.png>
+Package pdftex.def Info: fig//r7_false_closure.png  used on input line 171.
+(pdftex.def)             Requested size: 180.91544pt x 165.97968pt.
 
-Overfull \vbox (2.62415pt too high) detected at line 177
+Overfull \vbox (9.50699pt too high) detected at line 171
  []
 
 [55
 
- <../../final_report/figures//exp1_jack_ahead.png>]
-<../../final_report/figures//exp1_dataset_compare.png, id=489, 830.886pt x 578.
-16pt>
-File: ../../final_report/figures//exp1_dataset_compare.png Graphic file (type p
-ng)
-<use ../../final_report/figures//exp1_dataset_compare.png>
-Package pdftex.def Info: ../../final_report/figures//exp1_dataset_compare.png  
-used on input line 193.
-(pdftex.def)             Requested size: 830.88397pt x 578.15858pt.
+ <./fig//r7_false_closure.png>]
+<fig//r8_blank_wall.png, id=500, 182.8431pt x 165.9801pt>
+File: fig//r8_blank_wall.png Graphic file (type png)
+<use fig//r8_blank_wall.png>
+Package pdftex.def Info: fig//r8_blank_wall.png  used on input line 186.
+(pdftex.def)             Requested size: 182.84264pt x 165.97968pt.
+ [56
 
-Overfull \vbox (11.06068pt too high) detected at line 193
- []
+ <./fig//r8_blank_wall.png>]
+<fig//r9_fisheye_rim.png, id=508, 199.2243pt x 181.6386pt>
+File: fig//r9_fisheye_rim.png Graphic file (type png)
+<use fig//r9_fisheye_rim.png>
+Package pdftex.def Info: fig//r9_fisheye_rim.png  used on input line 203.
+(pdftex.def)             Requested size: 199.22382pt x 181.63814pt.
 
-[56
-
- <../../final_report/figures//exp1_dataset_compare.png>]
-Underfull \hbox (badness 4108) in paragraph at lines 217--217
-[]|\T1/cmss/m/n/10 1. Dif-fer-ences un-der
- []
-
-
-Underfull \hbox (badness 6859) in paragraph at lines 217--217
-[]|\T1/cmss/m/n/10 3 iden-ti-cal re-peats: ORB
- []
-
-
-Underfull \hbox (badness 1102) in paragraph at lines 217--217
-[]|\T1/cmss/m/n/10 after init: 0.997--0.999 lo-cal
+Overfull \vbox (8.69072pt too high) detected at line 203
  []
 
 [57
 
-]
-<../../final_report/figures//exp4_rtabmap_gating.png, id=504, 903.375pt x 332.4
-42pt>
-File: ../../final_report/figures//exp4_rtabmap_gating.png Graphic file (type pn
-g)
-<use ../../final_report/figures//exp4_rtabmap_gating.png>
-Package pdftex.def Info: ../../final_report/figures//exp4_rtabmap_gating.png  u
-sed on input line 232.
-(pdftex.def)             Requested size: 903.3728pt x 332.44118pt.
+ <./fig//r9_fisheye_rim.png>]
+<fig//r10_first_second.png, id=516, 190.7928pt x 159.2349pt>
+File: fig//r10_first_second.png Graphic file (type png)
+<use fig//r10_first_second.png>
+Package pdftex.def Info: fig//r10_first_second.png  used on input line 221.
+(pdftex.def)             Requested size: 190.79231pt x 159.2345pt.
 
-Overfull \vbox (7.10692pt too high) detected at line 232
+Overfull \vbox (15.2978pt too high) detected at line 221
  []
 
 [58
 
- <../../final_report/figures//exp4_rtabmap_gating.png>] [59
+ <./fig//r10_first_second.png>]
+<fig//r11_words_geometry.png, id=525, 187.6611pt x 163.812pt>
+File: fig//r11_words_geometry.png Graphic file (type png)
+<use fig//r11_words_geometry.png>
+Package pdftex.def Info: fig//r11_words_geometry.png  used on input line 236.
+(pdftex.def)             Requested size: 187.66064pt x 163.81158pt.
+ [59
 
-]
-<../../final_report/figures//map_realistic_validate.png, id=519, 1156.32pt x 79
-4.97pt>
-File: ../../final_report/figures//map_realistic_validate.png Graphic file (type
- png)
-<use ../../final_report/figures//map_realistic_validate.png>
-Package pdftex.def Info: ../../final_report/figures//map_realistic_validate.png
-  used on input line 275.
-(pdftex.def)             Requested size: 1156.31718pt x 794.96806pt.
+ <./fig//r11_words_geometry.png>]
+<fig//r12_poses_vs_grid.png, id=534, 201.6333pt x 159.2349pt>
+File: fig//r12_poses_vs_grid.png Graphic file (type png)
+<use fig//r12_poses_vs_grid.png>
+Package pdftex.def Info: fig//r12_poses_vs_grid.png  used on input line 252.
+(pdftex.def)             Requested size: 201.6328pt x 159.2345pt.
 
-Overfull \vbox (8.17296pt too high) detected at line 275
+Overfull \vbox (0.87582pt too high) detected at line 252
  []
 
 [60
 
- <../../final_report/figures//map_realistic_validate.png>]
-<../../final_report/figures//exp4_error_vs_distance.png, id=527, 903.375pt x 34
-6.896pt>
-File: ../../final_report/figures//exp4_error_vs_distance.png Graphic file (type
- png)
-<use ../../final_report/figures//exp4_error_vs_distance.png>
-Package pdftex.def Info: ../../final_report/figures//exp4_error_vs_distance.png
-  used on input line 289.
-(pdftex.def)             Requested size: 903.3728pt x 346.89514pt.
- [61
+ <./fig//r12_poses_vs_grid.png>]
+<fig//r13_pose_vs_map.png, id=542, 186.6975pt x 165.9801pt>
+File: fig//r13_pose_vs_map.png Graphic file (type png)
+<use fig//r13_pose_vs_map.png>
+Package pdftex.def Info: fig//r13_pose_vs_map.png  used on input line 268.
+(pdftex.def)             Requested size: 186.69704pt x 165.97968pt.
 
- <../../final_report/figures//exp4_error_vs_distance.png>] [62
+Overfull \vbox (5.28992pt too high) detected at line 268
+ []
+
+[61
+
+ <./fig//r13_pose_vs_map.png>] [62
 
 ]) (./s6_index.tex [63
 
-]
-[64
+] [64
 
 ])
 \tf@nav=\write6
@@ -1584,59 +1585,60 @@ Package pdftex.def Info: ../../final_report/figures//exp4_error_vs_distance.png
 \tf@snm=\write8
 \openout8 = `update_181126.snm'.
 
- (./update_181126.aux)
+
+(./update_181126.aux)
 Package rerunfilecheck Info: File `update_181126.out' has not changed.
 (rerunfilecheck)             Checksum: 6CECB5BC6E3095935FB934382111D655;823.
  ) 
 Here is how much of TeX's memory you used:
- 40406 strings out of 480171
- 873068 string characters out of 5894489
- 1219500 words of memory out of 5000000
- 57427 multiletter control sequences out of 15000+600000
- 506881 words of font info for 108 fonts, out of 8000000 for 9000
+ 40337 strings out of 480171
+ 870401 string characters out of 5894489
+ 1219892 words of memory out of 5000000
+ 57350 multiletter control sequences out of 15000+600000
+ 507226 words of font info for 109 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
  99i,18n,104p,409b,1501s stack positions out of 5000i,500n,10000p,200000b,80000s
- </home/ambushee/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecss0500.
-600pk> </home/ambushee/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsx1
-095.600pk> </home/ambushee/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/e
-csi0900.600pk> </home/ambushee/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/
-ec/ecsi0500.600pk> </home/ambushee/.texlive2021/texmf-var/fonts/pk/ljfour/jknap
-pen/ec/ectt1095.600pk> </home/ambushee/.texlive2021/texmf-var/fonts/pk/ljfour/j
-knappen/ec/ectt0800.450pk> </home/ambushee/.texlive2021/texmf-var/fonts/pk/ljfo
-ur/jknappen/ec/ecsi0600.600pk> </home/ambushee/.texlive2021/texmf-var/fonts/pk/
-ljfour/jknappen/ec/ecrm0800.600pk> </home/ambushee/.texlive2021/texmf-var/fonts
-/pk/ljfour/jknappen/ec/ecss0900.600pk> </home/ambushee/.texlive2021/texmf-var/f
-onts/pk/ljfour/jknappen/ec/ectt1000.600pk> </home/ambushee/.texlive2021/texmf-v
-ar/fonts/pk/ljfour/jknappen/ec/tcss0800.600pk> </home/ambushee/.texlive2021/tex
-mf-var/fonts/pk/ljfour/jknappen/ec/ecsx0600.600pk> </home/ambushee/.texlive2021
-/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt0800.600pk> </home/ambushee/.texlive
-2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsi0800.600pk> </home/ambushee/.tex
-live2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsx0800.600pk> </home/ambushee/
-.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecss0800.600pk> </home/ambus
-hee/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsi1000.600pk> </home/a
-mbushee/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecss1000.600pk> </ho
-me/ambushee/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsx1000.600pk> 
-</home/ambushee/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsx1200.600
-pk> </home/ambushee/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecss0600
-.600pk> </home/ambushee/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/tcss
-1095.600pk> </home/ambushee/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/
-ecss1095.600pk> </home/ambushee/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen
-/ec/ecss1440.600pk></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/c
-m/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi
-6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb><
-/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmss10.pfb></usr/s
-hare/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmss8.pfb></usr/share/te
-xlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/
-texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/share/texlive/texmf-d
-ist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/share/texlive/texmf-dist/fon
-ts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf-dist/fonts/type
-1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/type1/publi
-c/amsfonts/cm/cmsy9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfo
-nts/symbols/msam10.pfb>
-Output written on update_181126.pdf (64 pages, 2900956 bytes).
+ </home/ambushee/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/tcsx0800.
+600pk> </home/ambushee/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecss0
+500.600pk> </home/ambushee/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/e
+csx1095.600pk> </home/ambushee/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/
+ec/ecsi0900.600pk> </home/ambushee/.texlive2021/texmf-var/fonts/pk/ljfour/jknap
+pen/ec/ecsi0500.600pk> </home/ambushee/.texlive2021/texmf-var/fonts/pk/ljfour/j
+knappen/ec/ectt1095.600pk> </home/ambushee/.texlive2021/texmf-var/fonts/pk/ljfo
+ur/jknappen/ec/ectt0800.450pk> </home/ambushee/.texlive2021/texmf-var/fonts/pk/
+ljfour/jknappen/ec/ecsi0600.600pk> </home/ambushee/.texlive2021/texmf-var/fonts
+/pk/ljfour/jknappen/ec/ecrm0800.600pk> </home/ambushee/.texlive2021/texmf-var/f
+onts/pk/ljfour/jknappen/ec/ecss0900.600pk> </home/ambushee/.texlive2021/texmf-v
+ar/fonts/pk/ljfour/jknappen/ec/ectt1000.600pk> </home/ambushee/.texlive2021/tex
+mf-var/fonts/pk/ljfour/jknappen/ec/tcss0800.600pk> </home/ambushee/.texlive2021
+/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsx0600.600pk> </home/ambushee/.texlive
+2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt0800.600pk> </home/ambushee/.tex
+live2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsi0800.600pk> </home/ambushee/
+.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsx0800.600pk> </home/ambus
+hee/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecss0800.600pk> </home/a
+mbushee/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsi1000.600pk> </ho
+me/ambushee/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecss1000.600pk> 
+</home/ambushee/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsx1000.600
+pk> </home/ambushee/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsx1200
+.600pk> </home/ambushee/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecss
+0600.600pk> </home/ambushee/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/
+tcss1095.600pk> </home/ambushee/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen
+/ec/ecss1095.600pk> </home/ambushee/.texlive2021/texmf-var/fonts/pk/ljfour/jkna
+ppen/ec/ecss1440.600pk></usr/share/texlive/texmf-dist/fonts/type1/public/amsfon
+ts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/
+cmmi6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.p
+fb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmss10.pfb></u
+sr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmss8.pfb></usr/shar
+e/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texl
+ive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/share/texlive/tex
+mf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/share/texlive/texmf-dist
+/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/
+type1/public/amsfonts/cm/cmsy9.pfb></usr/share/texlive/texmf-dist/fonts/type1/p
+ublic/amsfonts/symbols/msam10.pfb>
+Output written on update_181126.pdf (64 pages, 1796624 bytes).
 PDF statistics:
- 1600 PDF objects out of 1728 (max. 8388607)
- 611 compressed objects within 7 object streams
+ 1598 PDF objects out of 1728 (max. 8388607)
+ 613 compressed objects within 7 object streams
  164 named destinations out of 1000 (max. 500000)
- 288 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 323 words of extra memory for PDF output out of 10000 (max. 10000000)
 

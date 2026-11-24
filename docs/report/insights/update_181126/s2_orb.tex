@@ -61,7 +61,7 @@
 
 % ---------------------------------------------------------------- ORB-1
 \begin{frame}{1.2.1 \;ORB-1 \;Features: turn an image into points you can find again}
-  \hl{ORB1}\res{\R{1}{}, \R{8}{}, \R{9}{}}
+  \hl{ORB1}\res{\R{1}{}, \R{2}{}, \R{3}{}}
   \compbody{\orbstrip}{orbc}{%
   \begin{tikzpicture}[font=\scriptsize]
     \foreach \ox/\lbl/\sh in {0/left camera/0, 3.5/right camera/-0.3} {
@@ -99,7 +99,7 @@
 % IC_Angle over HALF_PATCH_SIZE 15 (31 px patch), ORBmatcher TH_LOW 50 /
 % TH_HIGH 100, cells W = 35 px.  The Hamming example is computed, not copied.
 \begin{frame}{1.2.1 \;ORB-1 \;Inside: how ORB turns pixels into a point you can match}
-  \hl{ORB1}\res{\R{1}{}, \R{8}{}, \R{9}{}}
+  \hl{ORB1}\res{\R{1}{}, \R{2}{}, \R{3}{}}
   \orbstrip\par\vspace{0.3em}
   \centering
   \adjustbox{max width=\textwidth, max height=0.66\textheight}{%
@@ -183,7 +183,7 @@
 
 % ---------------------------------------------------------------- ORB-2
 \begin{frame}{1.2.2 \;ORB-2 \;IMU preintegration: summarise the readings between two frames}
-  \hl{ORB2}\res{\R{5}{}, \R{8}{}}
+  \hl{ORB2}\res{\R{2}{}, \R{8}{}}
   \compbody{\orbstrip}{orbc}{%
   \begin{tikzpicture}[font=\scriptsize]
     \draw[thick,-{Latex}] (0,0) -- (7.4,0) node[right]{time};
@@ -209,7 +209,7 @@
 
 % ---------------------------------------------------------------- ORB-3
 \begin{frame}{1.2.3 \;ORB-3 \;Tracking: where is the camera, right now?}
-  \hl{ORB3}\res{\R{5}{}, \R{7}{}}
+  \hl{ORB3}\res{\R{4}{}, \R{8}{}}
   \compbody{\orbstrip}{orbc}{%
   \begin{tikzpicture}[font=\scriptsize]
     \draw[black!60, fill=black!4] (0,0) rectangle (4.6,2.8);
@@ -256,7 +256,7 @@
 
 % ---------------------------------------------------------------- ORB-5
 \begin{frame}{1.2.5 \;ORB-5 \;Local mapping: refine the recent part of the map}
-  \hl{ORB5}\res{\R{9}{}}
+  \hl{ORB5}\res{\R{3}{}}
   \compbody{\orbstrip}{orbc}{%
   \begin{tikzpicture}[font=\scriptsize]
     \foreach \i/\x in {1/0.5,2/2.2,3/3.9} \node[cam=90, fill=orbc!25] (k\i) at (\x,0) {};
@@ -280,7 +280,7 @@
 
 % ---------------------------------------------------------------- ORB-6
 \begin{frame}{1.2.6 \;ORB-6 \;IMU initialisation: learn which way is down}
-  \hl{ORB6}\res{\R{3}{}, \R{4}{}, \R{9}{}, \R{11}{}}
+  \hl{ORB6}\res{\R{3}{}, \R{5}{}, \R{6}{}, \R{10}{}}
   \compbody{\orbstrip}{orbc}{%
   \begin{tikzpicture}[font=\scriptsize]
     \begin{scope}[rotate=-14]
@@ -312,7 +312,7 @@
 
 % ---------------------------------------------------------------- ORB-7
 \begin{frame}{1.2.7 \;ORB-7 \;Place recognition: have I been here before?}
-  \hl{ORB7}\res{\R{2}{}}
+  \hl{ORB7}\res{\R{7}{}}
   \compbody{\orbstrip}{orbc}{%
   \begin{tikzpicture}[font=\scriptsize]
     \draw[fill=black!5] (0,0) rectangle (1.3,1.0); \node[below, align=center] at (0.65,0) {new\\keyframe};
@@ -339,7 +339,7 @@
 
 % ---------------------------------------------------------------- ORB-8
 \begin{frame}{1.2.8 \;ORB-8 \;Loop correction, map merging and the Atlas}
-  \hl{ORB8}\res{\R{2}{}, \R{3}{}}
+  \hl{ORB8}\res{\R{5}{}, \R{7}{}}
   \compbody{\orbstrip}{orbc}{%
   \begin{tikzpicture}[font=\scriptsize]
     \draw[thick, orbc] (0,0) .. controls (0,1.6) and (2,1.8) .. (2.2,0.8)

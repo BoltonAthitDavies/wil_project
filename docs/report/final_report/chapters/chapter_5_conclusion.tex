@@ -6,14 +6,14 @@
 \label{chap:conclusion}
 
 This project set out to replace infrastructure-based navigation with a
-vision-based pipeline that stays accurate when the warehouse changes, and to
-decide between two ways of building it. At the reporting cutoff the pipeline
-exists in both forms, the four experiments that judge it are defined for both
+vision-based pipeline that stays accurate when the warehouse changes. At the
+reporting cutoff the pipeline exists with either of two front ends behind one
+RTAB-Map back end, the two experiments that judge it are defined for both
 domains, and the evidence is drawn from one simulated warehouse in two layouts,
 recorded with and without traffic, and from four real recordings with an
-optical-tracker reference. All four simulation slots and two real-robot slots hold
-data; the two hypotheses the project is named for, dynamic-object filtering and
-dense mapping on the real robot, hold none. The conclusions below are bounded
+optical-tracker reference. Both simulation slots and the real-robot slot of
+Experiment~1 hold data; the real-robot slot of Experiment~2, the prior map and
+relocalization on it, holds none. The conclusions below are bounded
 by the validity limits recorded beside each slot in \cref{chap:results} and
 collected in \cref{tab:limitations}.
 
@@ -38,7 +38,9 @@ the reverse, and the filter is better than either in both quantities because it
 observes the gyroscope bias rather than the heading. And every dead-reckoning
 covariance is overconfident, by one to three orders of magnitude. Against the
 project's target of \SI{0.05}{\metre} ATE, no estimator qualifies; against the
-\SI{1.5}{\metre} RPE target at \SI{1}{\second}, all but the IMU do. The
+\SI{0.1}{\metre} RPE target at \SI{1}{\second}, every visual run does on
+jump-free pairs, as do wheel odometry and the measured-noise filter, while the
+IMU and the filter on the visual systems' noise model do not. The
 comparison is from one run per cell, on simulated encoders that barely slip,
 and with traffic present as a condition rather than a factor.
 
@@ -58,22 +60,6 @@ the three families on every recording. Neither result is the one a
 \SI{20}{\metre} route can settle. The baseline carries one tuned constant and no yaw-rate observation,
 so no EKF could be formed, and both sides are scored with the marker lever arm
 unmeasured.
-
-\subsection{Experiment 2: how good is the detector?}
-
-The four-class detector is reliable at naming and unreliable at finding
-(\cref{sec:yolo-performance}): over 12\,698 frames of the four realistic
-recordings, pooled precision 0.747, class F1 0.994 given a match, recall
-0.502 over the truth boxes the exemptions keep and 0.288 over everything in
-view, and moving-object recall 0.288 on the pallet jacks. The miss is a size
-effect, recall rising from 0.02 to 0.64 with the truth box's side, and
-three quarters of the false positives are boxes a little off the right
-object. That moving-object recall is the ceiling of any filtering benefit
-downstream: a mask built on this detector covers under a third of the moving
-pallet jacks' frames and none of the walking people, which are simulator
-actors outside its classes and outside the score. The real recordings have no
-annotated frames, so the real-robot slot stays planned.
-
 
 The visual half of the same experiment is scored on the same four recordings
 (\cref{sec:results-validity}). With physically simulated traffic
@@ -149,59 +135,91 @@ operation, \num{1.9} times, and the ratio between those two readings is the
 integration factor itself. The real rig is about twice as hard per second, not
 twelve times, and the way to improve its numbers is the terms that accumulate
 with time --- the lever arm, the inertial calibration, the standing periods ---
-rather than a better detector, which already supplies more corners than the
-pipelines use.
+rather than richer image features, of which the real camera already supplies
+more than the pipelines use.
 
-\subsection{Experiment 3: is the map usable?}
+\subsection{Experiment 2: does the robot localize on the map it built?}
 
-Where tracking is sound, the mapping pipeline is: the tiny-warehouse map is
-\SI{96.6}{\percent} precise in what it marks occupied, recovers
-\SI{89.5}{\percent} of the surfaces it observed, and contains no blind cells
-and \SI{0.7}{\percent} proven false obstacles along an independently driven
-route (\cref{tab:map-geometry,tab:map-drivability}); the drivability half of
-that result is dated, because its independent route is lost. The four
-closure-free maps of the realistic warehouse all fail the quality criterion
-fixed before scoring: precision \SIrange{77.8}{84.8}{\percent}, observed
-recall \SIrange{74.9}{82.5}{\percent}, false obstacles
-\SIrange{3.8}{10.2}{\percent} against the static-twin probes
-(\cref{sec:map-realistic}). The false obstacles are not thickened shelving:
-they are phantoms laid during the inertial initialisation transient at the
-spawn and wall bands displaced from their true lines, and the current
-configuration makes the maps worse than the October one through three
-parameters with separable signatures, the lower detection rate costing views,
-the longer range laying wall phantoms, and the higher ground-height cut laying
-aisle obstacles on the I layout. On the large warehouse the attempt failed
-through tracking loss in repeated structure and its artefacts were not retained
-(\cref{sec:map-large}).
+\textbf{The map.} Where tracking is sound, the mapping pipeline is: the
+tiny-warehouse map is \SI{96.6}{\percent} precise in what it marks occupied,
+recovers \SI{89.5}{\percent} of the surfaces it observed, and contains no blind
+cells and \SI{0.7}{\percent} proven false obstacles along an independently
+driven route (\cref{tab:map-geometry,tab:map-drivability}), passing all three
+map targets of \cref{tab:targets}; the drivability half of that result is
+dated, because its independent route is lost. The four closure-free maps of
+the realistic warehouse all fail the same targets, fixed before scoring:
+precision \SIrange{77.8}{84.8}{\percent}, observed recall
+\SIrange{74.9}{82.5}{\percent}, false obstacles \SIrange{3.8}{10.2}{\percent}
+against the static-twin probes (\cref{sec:map-realistic}). The false obstacles
+are not thickened shelving: they are phantoms laid during the inertial
+initialisation transient at the spawn and wall bands displaced from their true
+lines, and the current configuration makes the maps worse than the October one
+through three parameters with separable signatures, the lower detection rate
+costing views, the longer range laying wall phantoms, and the higher
+ground-height cut laying aisle obstacles on the I layout. On the large
+warehouse the attempt failed through tracking loss in repeated structure and
+its artefacts were not retained (\cref{sec:map-large}).
 
-
-\subsection{Experiment 4: can the robot navigate on it?}
-
-Half answered. Six live runs in the two static realistic worlds track ground
-truth to a median of \SIrange{0.13}{0.21}{\metre} per run over hand-driven
-routes of \SIrange{21}{148}{\metre}, with a minimum clearance of
-\SI{0.58}{\metre} and no collision (\cref{sec:exp4-sim}). One run crossed a
+\textbf{Relocalization on it.} Six live runs in the two static realistic
+worlds track ground truth to a median of \SIrange{0.13}{0.21}{\metre} per run
+over hand-driven routes of \SIrange{21}{148}{\metre}, with a minimum clearance
+of \SI{0.68}{\metre} and no collision (\cref{sec:exp4-sim}). Five of the six
+meet the availability target and four the continuity target. One run crossed a
 metre, for \SI{6.5}{\second}, and recovered. The error is a constant offset
 rather than scatter, and its magnitude matches the accuracy of the prior's own
-graph, which Experiment~3 measures at \SIrange{0.10}{0.40}{\metre} over the
-build routes. The slot's accuracy is therefore \emph{map-limited, not
-estimator-limited}, which says that the improvement to chase is a better map. The same initialisation transient that lays
-Experiment~3's blocking phantoms also latches the back end's first fix
-\SIrange{73}{76}{\degree} wrong until it is held back for \SI{5}{\second}:
-one transient, two symptoms, one prescription.
+graph, which part~A measures at \SIrange{0.10}{0.40}{\metre} over the build
+routes. Relocalization is therefore \emph{map-limited, not estimator-limited},
+which says that the improvement to chase is a better map. The same
+initialisation transient that lays the map's blocking phantoms also latches the
+back end's first fix \SIrange{73}{76}{\degree} wrong until it is held back for
+\SI{5}{\second}: one transient, two symptoms, one prescription.
 
-What remains planned is the half the experiment is named for. No goal was
-commanded in any run, so nothing yet speaks to planning, to recovery, or to the
-question the map scores raise but cannot settle --- whether a
-\SIrange{3.8}{10.2}{\percent} false-obstacle rate blocks a route or merely
-lengthens it. Neither traffic world is measured, so this slot says nothing
-about navigating a dynamic warehouse, which is the condition the project is
-named for. Every cell is a single run of one configuration, and no two runs in
-the campaign share a configuration, so nothing here measures run-to-run spread
-and no comparison within \cref{tab:exp4-tracking} is evidence. Three
+What remains planned is goal-reaching. No goal was commanded in any run, so
+nothing yet speaks to planning, to recovery, or to the question the map scores
+raise but cannot settle --- whether a \SIrange{3.8}{10.2}{\percent}
+false-obstacle rate blocks a route or merely lengthens it. Neither traffic
+world is measured, so relocalization in a dynamic warehouse is untested. Every
+cell is a single run of one configuration, so nothing here measures run-to-run
+spread and no comparison within \cref{tab:exp4-tracking} is evidence. Three
 configurations were recorded in all; the two earlier ones are retired, and part
-of their data was lost rather than retired, which cost the slot an analysis of
-excursion mechanisms and its only measurement under traffic.
+of their data was lost rather than retired, which cost the experiment an
+analysis of excursion mechanisms and its only measurement under traffic.
+
+\textbf{Against the targets.} \Cref{tab:targets-status} reads every result
+against the targets of \cref{tab:targets}.
+
+\begin{table}[htbp]
+\centering
+\caption[Results against the numeric targets.]{Results against the numeric
+targets of \cref{tab:targets}. Real-robot RPE is measured at
+\SI{0.28}{\metre\per\second}, a fifth of the working speed the target assumes.}
+\label{tab:targets-status}
+\small
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.15\textwidth}>{\raggedright\arraybackslash}p{0.12\textwidth}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{0.20\textwidth}>{\raggedright\arraybackslash}p{0.09\textwidth}}
+\toprule
+Metric & Target & Simulation & Real robot & Status \\
+\midrule
+ATE & $\le\SI{0.05}{\metre}$ & best run \SI{0.14}{\metre}; VINS-Fusion
+  \SIrange{0.22}{0.66}{}, ORB-SLAM3 \SIrange{0.14}{0.52}{\metre} in 11 of 16
+  runs & ORB-SLAM3 \SIrange{0.19}{0.45}{}, VINS-Fusion
+  \SIrange{0.37}{0.68}{\metre} & not met \\
+RPE, \SI{1}{\second} & $\le\SI{0.1}{\metre}$ & \SIrange{0.016}{0.070}{\metre}
+  on jump-free pairs, every visual run; ORB-SLAM3 over all pairs
+  \SIrange{0.27}{1.58}{\metre} & \SIrange{0.052}{0.090}{\metre}, every run &
+  met, jump-free \\
+Map precision & $\ge\SI{90}{\percent}$ & tiny \SI{96.6}{\percent}; realistic
+  \SIrange{77.8}{84.8}{\percent} & --- & tiny only \\
+Map completeness & $\ge\SI{85}{\percent}$ & tiny \SI{89.5}{\percent}; realistic
+  \SIrange{74.9}{82.5}{\percent} & --- & tiny only \\
+False obstacles & $\le\SI{1}{\percent}$ & tiny \SI{0.7}{\percent}; realistic
+  \SIrange{3.8}{10.2}{\percent} & --- & tiny only \\
+Availability & $\le\SI{10}{\percent}$ blind & \SIrange{1.3}{12.5}{\percent}; 5
+  of 6 runs & --- & 5 of 6 \\
+Continuity & no jump $>\SI{1.0}{\metre}$ & 4 of 6 runs without a jump & --- &
+  4 of 6 \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
 \section{Limitations and Threats to Validity}
 \label{sec:limitations}
@@ -222,8 +240,9 @@ of them bound the conclusions above most tightly.
 \item The non-visual baseline rests on idealised encoders in simulation and on
       a speed scale fitted against the truth on one recording on the real
       robot.
-\item The detector is scored against projected geometry with exemptions, and
-      its moving-object truth excludes the walking people.
+\item The real recordings were driven at \SI{0.28}{\metre\per\second}, a
+      fifth of the working speed, so the trajectory targets are not exercised
+      at the design condition on the robot.
 \item The simulated worlds' perimeter walls and floor carry no texture, and
       the visual estimators' excursions sit where the camera faces them
       (\cref{fig:exp1-vins-starvation}); a textured world, or real footage,
@@ -241,18 +260,18 @@ of them bound the conclusions above most tightly.
       calibration that cannot describe a tenth of every frame.
 \end{itemize}
 
-The two hypotheses the project is named for, dynamic-object filtering and
-dense mapping, have no real-robot evidence at all.
+The prior map has no real-robot evidence at all, and the finding that traffic
+does not drive the global error rests on simulated traffic alone.
 
 \section{Recommendations and Next Steps}
 \label{sec:recommendations}
 
-\textbf{Give Experiment~4 its first run.} Fix a goal set in each realistic
+\textbf{Command goals on the prior map.} Fix a goal set in each realistic
 world, write the scorer that reads the Nav2 action results and the
-ground-truth pose into the measures of \cref{sec:nav-eval-method}, and run each
-world against each of its two map configurations. That is the one experiment
-whose system exists, is launchable and has never been scored, and it is the
-test the project's own title implies.
+ground-truth pose into the goal-reaching measures of
+\cref{sec:nav-eval-method}, and run each world against each of its two map
+configurations. The system exists and is launchable; goal-reaching is the half
+of Experiment~2 that has never been scored.
 
 \textbf{Bound the loop closer.} Add a maximum correction against the inertial
 drift bound, or a covisibility-consistency window, and test it on
@@ -260,10 +279,11 @@ drift bound, or a covisibility-consistency window, and test it on
 in both front ends.
 
 \textbf{Follow a vehicle.} Record a route on which a pallet jack leads the
-robot down an aisle for tens of seconds rather than four, with and without the
-detector active, so that the one configuration shown to degrade both
-estimators is tested at the length a warehouse would impose and the filtered
-arm has something to filter.
+robot down an aisle for tens of seconds rather than four, so that the one
+configuration shown to degrade both estimators is tested at the length a
+warehouse would impose. If the inertial prior stops absorbing it at that
+length, dynamic-object handling, dropped from this project
+(\cref{sec:deviations}), becomes worth reconsidering.
 
 \textbf{Excite the gravity estimate, and separate it from the layout.} Record
 the I layout with an opening manoeuvre that turns inside the first fifteen
@@ -274,13 +294,12 @@ that would decide whether the residual gravity error is the cause of the
 vertical drift or a companion of it.
 
 \textbf{Fill the real-robot slots in the order the simulation results
-suggest.} Exercise the fork's initialisation switches on a \repo{realv7}
-recording and re-run VINS-Fusion with the corrected gravity norm; measure the
-marker-to-IMU lever arm; replace the fitted wheel-speed scale by a measured one and record the
-steering angle as a measurement so that the EKF can be formed with the
-\SI{0.60}{\metre} wheelbase; annotate
-a frame subset of the real recordings for the detector; and build a first
-real-imagery database for Experiment~4.
+suggest.} Measure the marker-to-IMU lever arm, which every real accuracy
+figure waits on; recalibrate the fisheye so that VINS-Fusion no longer needs
+its field of view masked; replace the fitted wheel-speed scale by a measured
+one and record the steering angle as a measurement so that the EKF can be
+formed with the \SI{0.60}{\metre} wheelbase; drive a recording at the working
+speed; and build a first real-imagery prior for Experiment~2.
 
 \textbf{Tune the visual systems to the platform.} The cheapest remaining
 improvement is a measured inertial noise model for the visual estimators:

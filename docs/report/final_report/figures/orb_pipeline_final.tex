@@ -1,0 +1,38 @@
+% ORB-SLAM3 pipeline as reported: the wrapper built here around the pinned core.
+% Derived from orb_pipeline.tex (which also draws the semantic-mask path) on
+% 20 Nov 2026, when dynamic-object masking was removed from the report.
+% Green is built here, grey is upstream ORB-SLAM3.
+\begin{tikzpicture}[
+  font=\footnotesize,
+  node distance=6mm,
+  box/.style={draw, rounded corners, align=center, minimum height=8mm,
+    text width=26mm, inner sep=1.6mm, fill=implemented},
+  up/.style={box, fill=gray!12},
+  io/.style={box, fill=gray!5, draw=gray!60},
+  flow/.style={-{Latex[length=2mm]}, thick},
+  lbl/.style={font=\scriptsize, inner sep=1pt}
+]
+  % --- inputs
+  \node[io]  at (0,   1.5) (stereo) {stereo pair\\\SI{30}{\hertz}};
+  \node[io]  at (0,  -1.5) (imu)    {IMU\\\SI{200}{\hertz}};
+
+  % --- wrapper, built here
+  \node[box] at (4.2, 1.5) (sync)  {approx-time sync\\\SI{0.02}{\second} slop};
+  \node[box] at (8.2, 1.5) (queue) {one-frame queue\\older frame dropped};
+
+  % --- upstream core
+  \node[up]  at (12.4, 1.5) (track) {\texttt{TrackStereo()}\\worker thread};
+  \node[up]  at (12.4, 4.2) (extr)  {ORB extractor\\CPU or GPU};
+  \node[up]  at (16.6, 4.2) (octree){octree\\distribution};
+  \node[up]  at (16.6, 1.5) (ba)    {local mapping,\\loop closing};
+  \node[io]  at (16.6,-1.5) (out)   {\repo{vio.csv}, TF,\\\repo{/orbslam3/pose}};
+
+  \draw[flow] (stereo) -- (sync);
+  \draw[flow] (sync)   -- (queue);
+  \draw[flow] (queue)  -- (track);
+  \draw[flow] (imu)    -| (track.south);
+  \draw[flow] (track)  -- (extr);
+  \draw[flow] (extr)   -- (octree);
+  \draw[flow] (octree) -- (ba);
+  \draw[flow] (ba)     -- (out);
+\end{tikzpicture}

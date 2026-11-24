@@ -65,7 +65,7 @@ $\sigma$ have no visual counterpart and stay measured. The measured-noise
 filter is run beside it as a diagnostic row and is not the baseline.
 
 \emph{Visual.} Every run replayed at rate 1.0 from the bag with the
-node live on the laptop, the deployment condition; no detector ran. VINS-Fusion
+node live on the laptop, the deployment condition. VINS-Fusion
 ran once per recording (run \repo{cpu}). ORB-SLAM3 ran four times per
 recording: the CPU or the GPU feature extractor (fork patches 10/10b, runs
 \repo{*_cpu} and \repo{*_gpu}), each with the loop closer active
@@ -170,7 +170,7 @@ recordings; the measured-noise diagnostic holds \SIrange{0.21}{0.58}{\metre}.
 comparison on the four realistic recordings. The closer state of each
 ORB-SLAM3 run is read from its artefact. ANEES is reported for the
 proprioceptive estimators, which carry a covariance; a consistent filter
-gives 3.0, and every value here is above it. Aligned rotation is measured from the instant each estimator's published poses enter the gravity-aligned world frame, which for every arm but ORB-SLAM3 is the whole run; ORB-SLAM3 publishes in the camera optical frame until inertial initialisation at \SIrange{2.47}{2.64}{\second}, and \cref{tab:exp1-rotation-pattern} gives both figures per run. \textbf{Bold} marks the lowest aligned ATE of a recording; the measured-noise filter is a diagnostic row, not the baseline, so it is shown bold where it is lowest but is not the slot's result.}
+gives 3.0, and every value here is above it. Aligned rotation is measured from the instant each estimator's published poses enter the gravity-aligned world frame, which for every arm but ORB-SLAM3 is the whole run; ORB-SLAM3 publishes in the camera optical frame until inertial initialisation at \SIrange{2.47}{2.64}{\second}, and \cref{tab:exp1-rotation-pattern} gives both figures per run. For IMU dead reckoning the aligned rotation describes the rigid fit, not the orientation estimate: the fit is chosen to overlay a position track that has diverged by \SIrange{11.6}{23.0}{\metre}, and whatever rotation does that is applied to every orientation as well. The anchored yaw of the same rows, \SIrange{0.55}{1.91}{\degree}, and their rotational RPE, at most \SI{0.056}{\degree} over \SI{1}{\second} (\cref{tab:exp1-rpe}), show the heading itself is accurate. \textbf{Bold} marks the lowest aligned ATE of a recording; the measured-noise filter is a diagnostic row, not the baseline, so it is shown bold where it is lowest but is not the slot's result.}
 \label{tab:exp1-accuracy}
 \scriptsize
 \setlength{\tabcolsep}{3pt}
@@ -251,12 +251,14 @@ of the bias, and yaw RMS rises from \SIrange{0.4}{5.7}{\degree} to
 \SIrange{4.5}{28.0}{\degree}. On routes of 100 to \SI{170}{\metre} with
 repeated turns that heading error is what the aligned ATE measures.
 
-ORB-SLAM3's divergences are not a loop-closure effect. With the GPU front end
-six of eight runs hold \SIrange{0.17}{0.52}{\metre} and two diverge, to
-\SI{4.78}{\metre} with the closer active on \repo{realistic_001} and to
-\SI{1.91}{\metre} with it disabled on \repo{realistic_003}, while the other
-closer state on each of those recordings holds \SI{0.40}{} and
-\SI{0.50}{\metre}. Each divergent run carries three or seven jumps
+Which ORB-SLAM3 runs diverge is not set by the closer's on/off state. With the
+GPU front end six of eight runs hold \SIrange{0.17}{0.52}{\metre} and two
+diverge, to \SI{4.78}{\metre} with the closer active on \repo{realistic_001}
+and to \SI{1.91}{\metre} with it disabled on \repo{realistic_003}, while the
+other closer state on each of those recordings holds \SI{0.40}{} and
+\SI{0.50}{\metre}. The first divergence is the false closure at
+\SI{73.2}{\second} described below (\cref{fig:exp1-false-closure}); the second
+occurs with no closer running. Each divergent run carries three or seven jumps
 (\cref{tab:exp1-rpe}) and its clean relative error is a small fraction of its
 all-pairs value --- \SI{0.037}{} against \SI{1.577}{\metre} on
 \repo{realistic_001}, \SI{0.052}{} against \SI{0.263}{\metre} on
@@ -347,7 +349,7 @@ sub-sequence drift rate, and it is not comparable to one.
   \centering
   \includegraphics[width=\textwidth]{figures/realistic_metrics.png}
   \caption[Aligned ATE and jump-free RPE of the visual arms.]{Aligned ATE
-  (left) and jump-free translational RPE at
+  (left, logarithmic axis, as in \cref{fig:exp1-frontend-pairs}) and jump-free translational RPE at
   \SI{1}{\second} (right) of every visual run, one marker per run; filled
   markers are the CPU front end, open markers the GPU front end of the same
   configuration. The relative error is \SIrange{0.016}{0.070}{\metre}, and it
@@ -767,8 +769,9 @@ tilt has not been separated, and it is reported as an observation.}
   \caption[The orientation error, with the published frame separated from the
   estimate.]{The orientation error, with the published frame separated from
   the estimate. (a) yaw, pitch and roll RMS per run on a logarithmic axis,
-  faded when scored over the whole run and opaque when scored after the
-  published world frame begins; the faded excess moves all three axes equally
+  as an open marker when scored over the whole run and a filled marker when
+  scored after the published world frame begins; the gap between the two
+  moves all three axes equally
   and VINS-Fusion, which publishes in one frame throughout, has none of it.
   (b) that excess as a single event: \repo{realistic_000}, every arm, one step
   of about \SI{90}{\degree} at initialisation and sub-degree error for the
@@ -907,7 +910,7 @@ on the two mapping recordings, each configuration run three times:
 \repo{dataset_allsensor_realistic_map} (U layout, \SI{286}{\second}, 8\,725
 stereo pairs) and \repo{dataset_allsensor_realistic_01_map} (I layout,
 \SI{315}{\second}, 9\,552 pairs). Eighteen runs exist, six configurations of
-three repeats each at replay rate 1.0 with no detector: ORB-SLAM3 with the
+three repeats each at replay rate 1.0: ORB-SLAM3 with the
 CPU and with the GPU front end, loop closer disabled, and VINS-Fusion
 (\cref{tab:mapping-resources}). The repeats are tight, front-end medians
 within \SIrange{0.3}{4.4}{\milli\second} of their mean and peak memory within
@@ -1109,8 +1112,13 @@ and not accuracy. Across the families the EKF at the shared handicap loses to
 VINS-Fusion on every recording and the measured-noise diagnostic beats it on
 three of four, so on these routes the noise model is worth more than the
 choice of estimator. Against the project's target of \SI{0.05}{\metre} ATE no
-estimator qualifies; against the \SI{1.5}{\metre} RPE bound at
-\SI{1}{\second}, all but the IMU do. On cost, VINS-Fusion optimises five to
+estimator qualifies. Against the \SI{0.1}{\metre} RPE target at
+\SI{1}{\second} (the report's target table), every visual run qualifies on
+jump-free pairs, \SIrange{0.016}{0.070}{\metre}, as do wheel odometry and the
+measured-noise filter; the IMU and the filter on the visual systems' noise
+model do not (\cref{tab:exp1-rpe}). ORB-SLAM3 qualifies only on jump-free
+pairs: over all pairs its figure carries the step into the gravity-aligned
+frame at initialization and reads \SIrange{0.27}{1.58}{\metre}. On cost, VINS-Fusion optimises five to
 nine times faster than ORB-SLAM3's local mapping and in a quarter of the
 memory, for more than twice the processor time.
 
@@ -1194,7 +1202,7 @@ bias state does not exist, and that filter would reduce to this integration.
 
 
 \emph{Visual.} The bag was replayed into each node at real time on the
-afternoon of 3 November 2026; no detector ran. ORB-SLAM3 used
+afternoon of 3 November 2026. ORB-SLAM3 used
 \repo{config/wil/stereo_imu.yaml} with the repaired library (fork patches
 11--14b, node and library built alike), the 3 November stereo extrinsic and
 \texttt{IMU.NoiseGyro} 0.1 with \texttt{IMU.NoiseAcc} 1.0, ten times the values
@@ -1278,10 +1286,12 @@ bias of \SIrange{0.003}{0.006}{\radian\per\second} accumulates
 \SI{0.1}{\radian} after the rest-window removal, and on a longer route that
 term grows while the visual error need not. And the lever arm is zero for
 both sides. Against the project's targets no run approaches \SI{0.05}{\metre}
-except the calibration itself; every run is inside the \SI{1.5}{\metre} RPE
-bound, by a wide margin --- \SIrange{0.055}{0.208}{\metre} across the sixteen
-ORB-SLAM3 runs of \cref{tab:realv7-patch15} and \SIrange{0.048}{0.090}{\metre}
-for VINS-Fusion in \cref{tab:realv7-vins}. Rotational RPE does not exist on
+except the calibration itself; every visual run is inside the
+\SI{0.1}{\metre} RPE target --- \SIrange{0.052}{0.078}{\metre} across the
+sixteen ORB-SLAM3 runs of \cref{tab:realv7-patch15} and
+\SIrange{0.048}{0.090}{\metre} for VINS-Fusion in \cref{tab:realv7-vins} ---
+although at \SI{0.28}{\metre\per\second} rather than the working speed the
+target assumes. Rotational RPE does not exist on
 this rig: the tracker exports position only, so the figure is translational,
 computed on relative displacements in the aligned frame, and the same
 definition is used for both estimators.
@@ -1297,13 +1307,16 @@ path length is not decided, and the \repo{realv6} row is a diagnostic.
 
 \subsubsection{Visual estimators}
 
-\paragraph{Results.} ORB-SLAM3 follows the whole \SI{218}{\second} route in
-every configuration: \SI{0.52}{} and \SI{0.46}{\metre} with the GPU extractor
-(loop closing on and off), \SI{0.62}{} and \SI{1.03}{\metre} with the CPU
-extractor, which drops two thirds of the frames at real time
-(\cref{tab:realv6-final}, \cref{fig:realv6-paths}). VINS-Fusion tracked
-\SI{18}{\second} before 217 IMU-gap resets took over (\cref{tab:realv6-vins})
-and has no entry in the accuracy table.
+\paragraph{Results.} With fork patch 15, ORB-SLAM3 follows the whole
+\SI{219}{\second} route in every configuration at
+\SIrange{0.40}{0.48}{\metre}: \SI{0.48}{} and \SI{0.40}{\metre} with the GPU
+extractor (loop closing on and off), \SI{0.48}{} and \SI{0.46}{\metre} with the
+CPU extractor (\cref{tab:realv6-final}, \cref{fig:realv6-paths}). These are the
+\repo{realv6_000} rows of \cref{tab:realv7-patch15}, drawn out here. VINS-Fusion
+in its reported configuration also completes the route, at \SI{0.79}{\metre}
+(\cref{fig:realv6-paths}); in the configuration before the field-of-view mask
+it tracked \SI{18}{\second} before 217 IMU-gap resets took over
+(\cref{tab:realv6-vins}).
 
 \input{../../../../output/compare/real/realv6-insights/final_table.tex}
 
@@ -1312,37 +1325,46 @@ and has no entry in the accuracy table.
   \includegraphics[width=\textwidth]{../../../../output/compare/real/realv6-insights/fig_paths_light.png}
   \caption[Real runs against the cleaned tracker truth.]{Every run against the
   cleaned tracker truth after rigid SE(2)
-  alignment, one panel per run: ORB-SLAM3 with GPU or CPU extractor and loop
-  closing on or off, and VINS-Fusion's \SI{18}{\second}.}
+  alignment, one panel per run: ORB-SLAM3 with fork patch 15, GPU or CPU
+  extractor and loop closing on or off, and VINS-Fusion in its reported
+  configuration.}
   \label{fig:realv6-paths}
 \end{figure}
 
 \input{../../../../output/compare/real/realv6-insights/gt_cleaning.tex}
 
-\paragraph{Analysis.} The front end is what separates the runs. The GPU
-extractor drops a third to a half of the frames and holds \SI{0.5}{\metre}; the
-CPU extractor drops two thirds and loses a factor of two, one of its runs with a
-\SI{2}{\metre} vertical excursion the tool flags as implausible and the other
-with three resets and a half-second of lost tracking. Loop closing changes
-nothing that the front end does not change more. The remaining resets are an
-initialisation effect, two or three \repo{local_mapping_bad_imu} map resets
-inside the first \SI{13}{\second} and none after (zero in the GPU run without
-loop closing); after them the error is a slow wave between \SI{0.05}{} and
-\SI{1}{\metre}, not an accumulating drift (\cref{fig:realv6-orb}), and it does
-not rise while turning in any run (\cref{tab:realv6-turning}). The estimates are
-a uniform \SIrange{12}{15}{\percent} smaller than the tracker's path, which the
-unmeasured lever arm, a stereo-baseline error or a tracker scale error could
-each explain. One tracker sample decides the headline: scored against the
-export as delivered, the GPU run reads \SI{1.17}{\metre} with a path ratio of
-0.65, because that sample adds \SI{10}{\metre} of false path and dominates the
-time alignment (\cref{tab:realv6-cleaning}).
+\paragraph{Analysis.} The front end does not separate the runs. The CPU
+extractor still drops two thirds of the frames (4\,338 and 4\,431 of about
+6\,480) against the GPU extractor's \SIrange{42}{50}{\percent} (2\,712 and
+3\,212), yet the four ATEs lie within \SI{0.08}{\metre} of one another and the
+CPU pair is not the worse one; with one run per configuration and ORB-SLAM3's
+run-to-run spread, a difference that size is not resolved. Loop closing changes
+nothing measurable either. One \repo{local_mapping_bad_imu} map reset remains
+across the four runs, in the GPU run without loop closing, and no run leaves
+the tracking-OK state once it has reached it. Each run starts about
+\SI{0.45}{\metre} off and settles within the first \SI{3}{\second}; after that
+the error is a slow wave between \SI{0.01}{} and \SI{1.1}{\metre}, not an
+accumulating drift, and the four configurations trace it with the same shape
+and timing (\cref{fig:realv6-orb}), which points to a source they share, such
+as the sparse truth or the unmeasured lever arm, rather than to any one of
+them. The error rises while turning in one run of the four, the CPU run with
+loop closing, at \SI{3.3}{\milli\metre\per\second} against \SI{-1.3}{} on
+straights, and falls while turning in the other three
+(\cref{tab:realv6-turning}). The estimates are a uniform
+\SIrange{9}{14}{\percent} smaller than the tracker's path, which the unmeasured
+lever arm, a stereo-baseline error or a tracker scale error could each explain.
+One tracker sample still decides the headline: scored against the export as
+delivered, the GPU run with loop closing reads \SI{1.17}{\metre} with a path
+ratio of 0.63, because that sample adds \SI{10}{\metre} of false path and
+dominates the time alignment (\cref{tab:realv6-cleaning}).
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{../../../../output/compare/real/realv6-insights/fig_orb_timeline_light.png}
   \caption[ORB-SLAM3 planar error over the run.]{ORB-SLAM3 planar error over
-  the run, one panel per configuration;
-  grey bands are turns, dotted red the initialisation resets.}
+  the run with fork patch 15, one panel per configuration on one shared axis;
+  grey bands are turns. No run left the tracking-OK state once it had reached
+  it, so no tracking-loss marker appears.}
   \label{fig:realv6-orb}
 \end{figure}
 
@@ -1438,19 +1460,26 @@ VINS-Fusion now completes all three \repo{realv7} recordings
 \SI{0.374}{\metre}, no reset of any kind, and estimates that end
 \SIrange{1.6}{3.9}{\metre} from the origin on routes of
 \SIrange{21.6}{31.7}{\metre}. Translational RPE over \SI{1}{\second} is
-\SIrange{0.055}{0.090}{\metre}, well inside the project's \SI{1.5}{\metre}
-bound.
+\SIrange{0.055}{0.090}{\metre}, inside the project's \SI{0.1}{\metre}
+target.
 
 Reaching that took two changes, and naming them matters more than the numbers.
-The camera is a fisheye, and VINS-Fusion places every feature on the normalised
-image plane by dividing the lifted ray by its depth component. That division has
-no bound as the incidence angle approaches \SI{90}{\degree}, which on this lens
-falls \SI{853}{\pixel} from the principal point, well inside a \SI{1920}{\pixel} frame:
-a corner on the bright-to-black lens rim lifts to a normalised coordinate of
-thousands, and on \repo{realv7_001} that produced an average parallax of
-\num{6740} ``px'' at the first keyframe after motion onset and divergence to
-\SI{1e8}{\metre}. Masking the field of view at \SI{70}{\degree} removes the
-band in which it happens. The calibration carries a second, model-level defect
+The camera is a fisheye, and VINS-Fusion reads it through the fisheye model but
+scores every feature on a virtual pinhole camera: it lifts each pixel to a ray
+and divides the ray by its forward ($z$) component, which places the feature on
+the normalised image plane. That division has no bound as the incidence angle
+approaches \SI{90}{\degree}, which on this lens falls \SI{853}{\pixel} from the
+principal point, well inside a \SI{1920}{\pixel} frame: a corner near the lens
+rim lifts to a normalised coordinate of thousands however far away it is, and
+on \repo{realv7_001} that produced an average parallax of \num{6740} ``px'' (in
+pixels of the virtual camera, whose focal length is fixed at 460) at the first
+keyframe after motion onset and divergence to \SI{1e8}{\metre}. Masking the
+field of view at \SI{70}{\degree} removes the band in which it happens.
+ORB-SLAM3 reads the same calibration and never forms this quotient: it measures
+reprojection error in image pixels through the Kannala--Brandt forward model,
+whose incidence angle is taken with \texttt{atan2} and stays bounded through
+and beyond \SI{90}{\degree}, and where it lifts a pixel to a ray, for
+triangulation, it normalises the ray to unit length before using it. The calibration carries a second, model-level defect
 that points the same way: the Kannala--Brandt radial polynomial is not
 monotonic, peaking at \SI{109.3}{\degree} and \SI{924}{\pixel}, so the frame
 beyond that radius --- \SI{9.5}{\percent} of its area --- has no valid
@@ -1459,8 +1488,9 @@ back-projection at all. \flag{Measured on the recordings, that
 \numrange{103}{120} elsewhere, because it lies outside the lens image circle,
 and no corner is ever detected in it. The polynomial's failure is therefore real
 but inert, and what the mask actually discards is the
-\SI{26}{\percent} of detected corners between \SI{70}{\degree} and the edge
-of the image circle, which do carry image. The divide-by-depth growth is the
+\SI{26}{\percent} of the corners an ORB detector finds in the image, those
+between \SI{70}{\degree} and the edge of the image circle, which do carry
+image. The divide-by-depth growth is the
 operative mechanism; the non-monotonic polynomial is a calibration defect to fix,
 not the cause of the divergence.} Second,
 \texttt{estimate\_extrinsic} was left at 1, which lets the optimiser refine
@@ -1682,7 +1712,7 @@ one this report does not answer.}
 \SIrange{21.6}{31.7}{\metre} in \SIrange{97}{134}{\second} where the simulation
 covers \SIrange{103}{172}{\metre} in \SIrange{80}{125}{\second}. That is
 \SI{19}{\percent} of the \SI{1.5}{\metre\per\second} working speed at which
-\cref{sec:problem-scope} states the trajectory targets, so no real-robot
+the report's requirements state the trajectory targets, so no real-robot
 recording in this report exercises those targets at the design condition. Per metre of
 route the real estimator therefore integrates \num{120} to \num{126} frames and
 \num{796} to \num{840} inertial samples, against \num{22} and \num{150} in
@@ -1723,7 +1753,7 @@ are immune to it, since a constant offset cancels in a displacement.}
 simulation per second of operation, not twelve times, and the remaining factor
 is the pace of the robot. Two consequences for this report. The first is that
 per-distance comparisons across the two domains are not like for like and are
-not made here. The second is a direction. A better detector will not
+not made here. The second is a direction. Richer image features will not
 improve the real-robot numbers, because the pipelines already discard corners
 they cannot use; the terms that will are the ones that accumulate with time ---
 the lever arm, the inertial calibration and the standing periods --- together

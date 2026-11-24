@@ -1,21 +1,24 @@
 #!/usr/bin/env python3
 """Real-robot figures and tables for dataset_realv6_000 (Experiment 3, slot 4.3.2).
 
-Only runs whose run directories still exist are included (3 November 2026
-afternoon series, IMU noise x10, repaired library, replay rate 1.0): ORB-SLAM3
-stereo-inertial with GPU or CPU front end and loop closing on or off, and one
-VINS-Fusion run.  The 2 November and the 3 November morning runs were overwritten
-and are deliberately absent.
+The ORB-SLAM3 runs are the reported configuration, fork patch 15 (IMU noise x10,
+repaired library, replay rate 1.0): stereo-inertial with GPU or CPU front end and
+loop closing on or off.  They replaced the earlier series in the same run
+directories, so the earlier series cannot be redrawn and is not.  VINS-Fusion
+appears twice: the reported configuration (rate1_002: 70 deg field-of-view mask,
+stereo extrinsic held) in the paths figure, and the earlier configuration
+(rate1) in the reset figure and table, kept as the evidence of the defect.
 
 Reads the scorer's outputs (script/eval_real_gt.py; cleaned truth = the tracker
 export with the one spurious sample at 184.9 s removed, offset pinned to
 -4.141 s; "raw" = export as delivered, offset pinned to +4.377 s):
-  output/compare/real/realv6_1103pm_lc_gpu_clean/     ORB GPU, LC on
-  output/compare/real/realv6_1103pm_lc_gpu_raw/       the same run on the raw export
-  output/compare/real/realv6_1103pm_lc_cpu_clean/     ORB CPU, LC on
-  output/compare/real/realv6_1103pm_nolc_gpu_clean/   ORB GPU, LC off
-  output/compare/real/realv6_1103pm_nolc_cpu_clean/   ORB CPU, LC off
-  output/compare/real/realv6_1103pm_vins_clean/       VINS-Fusion
+  output/compare/real/realv6_000_lc_gpu_p15/          ORB GPU, LC on
+  output/compare/real/realv6_000_lc_gpu_p15_raw/      the same run on the raw export
+  output/compare/real/realv6_000_lc_cpu_p15/          ORB CPU, LC on
+  output/compare/real/realv6_000_nolc_gpu_p15/        ORB GPU, LC off
+  output/compare/real/realv6_000_nolc_cpu_p15/        ORB CPU, LC off
+  output/compare/real/realv6_000_vins_rate1_002/      VINS-Fusion, reported configuration
+  output/compare/real/realv6_1103pm_vins_clean/       VINS-Fusion, earlier configuration (defect evidence)
 and writes to output/compare/real/realv6-insights/:
   final_table.tex           every surviving run: ATE, median, max, RPE1, path ratio, resets, dropped
   gt_cleaning.tex           raw vs cleaned truth on the GPU/LC-on run
@@ -53,13 +56,14 @@ DS = "dataset_realv6_000"
 ORB_DIR = ROOT / "output" / "output_orb" / "real" / DS
 VINS_DIR = ROOT / "output" / "output_vins" / "real" / DS
 RUNS = {  # label -> (clean scoring dir, run dir)
-    "ORB-SLAM3, GPU, LC on":  (R / "realv6_1103pm_lc_gpu_clean" / DS,   ORB_DIR / "loopclosing_rate1"),
-    "ORB-SLAM3, CPU, LC on":  (R / "realv6_1103pm_lc_cpu_clean" / DS,   ORB_DIR / "loopclosing_rate1_cpu"),
-    "ORB-SLAM3, GPU, LC off": (R / "realv6_1103pm_nolc_gpu_clean" / DS, ORB_DIR / "noloopclosing_rate1"),
-    "ORB-SLAM3, CPU, LC off": (R / "realv6_1103pm_nolc_cpu_clean" / DS, ORB_DIR / "noloopclosing_rate1_cpu"),
+    "ORB-SLAM3, GPU, LC on":  (R / "realv6_000_lc_gpu_p15" / DS,   ORB_DIR / "loopclosing_rate1"),
+    "ORB-SLAM3, CPU, LC on":  (R / "realv6_000_lc_cpu_p15" / DS,   ORB_DIR / "loopclosing_rate1_cpu"),
+    "ORB-SLAM3, GPU, LC off": (R / "realv6_000_nolc_gpu_p15" / DS, ORB_DIR / "noloopclosing_rate1"),
+    "ORB-SLAM3, CPU, LC off": (R / "realv6_000_nolc_cpu_p15" / DS, ORB_DIR / "noloopclosing_rate1_cpu"),
 }
-RAW_RUN = ("ORB-SLAM3, GPU, LC on", R / "realv6_1103pm_lc_gpu_raw" / DS)
-VINS = ("VINS-Fusion", R / "realv6_1103pm_vins_clean" / DS, VINS_DIR / "rate1")
+RAW_RUN = ("ORB-SLAM3, GPU, LC on", R / "realv6_000_lc_gpu_p15_raw" / DS)
+VINS = ("VINS-Fusion", R / "realv6_000_vins_rate1_002" / DS, VINS_DIR / "rate1_002")
+VINS_OLD = ("VINS-Fusion", R / "realv6_1103pm_vins_clean" / DS, VINS_DIR / "rate1")
 GT_RAW = ROOT / "dataset" / "gt" / DS
 TURN_DEG_S = 10.0
 COL = {"ORB-SLAM3, GPU, LC on": "#2a78d6", "ORB-SLAM3, CPU, LC on": "#0097a7",
@@ -129,14 +133,14 @@ def fmt(v, p=2):
 def final_table():
     L = [r"\begin{table}[htbp]", r"\centering", r"\scriptsize\setlength{\tabcolsep}{3pt}",
          r"\caption[Realv6: every surviving run against the cleaned tracker truth.]{ORB-SLAM3 on "
-         r"\repo{dataset_realv6_000} against the cleaned tracker truth, 3 November 2026 afternoon series: repaired "
-         r"library, replay rate 1.0, 3 November stereo extrinsic, \texttt{IMU.NoiseGyro} 0.1 and "
+         r"\repo{dataset_realv6_000} against the cleaned tracker truth, fork patch 15 (the configuration of "
+         r"\cref{tab:realv7-patch15}): repaired library, replay rate 1.0, 3 November stereo extrinsic, \texttt{IMU.NoiseGyro} 0.1 and "
          r"\texttt{IMU.NoiseAcc} 1.0, GPU or CPU feature extractor, loop closing (LC) on or off. Aligned planar ATE "
          r"after a rigid SE(2) fit with scale fixed; RPE at \SI{1}{\second} translational; path ratio = estimate / "
          r"truth; resets = \repo{local_mapping_bad_imu} map resets; dropped = camera frames the node's queue discarded "
          r"of about 6\,480 received. Lever arm tracker-marker to IMU unmeasured (zero applied); time offset pinned to "
-         r"\SI{-4.14}{\second}; all values provisional under the scorer's validity rules. \\textbf{Bold} marks the "
-         r"lowest ATE of the five runs; with one run per configuration that records which run came lowest, not "
+         r"\SI{-4.14}{\second}; all values provisional under the scorer's validity rules. \textbf{Bold} marks the "
+         r"lowest ATE of the four runs; with one run per configuration that records which run came lowest, not "
          r"that the configuration is better.}",
          r"\label{tab:realv6-final}",
          r"\begin{tabular}{lrrrrrrr}", r"\toprule",
@@ -197,30 +201,34 @@ def gt_cleaning():
 def paths_figure():
     """Every surviving run, one panel each, against the cleaned tracker truth."""
     gtr = np.loadtxt(RUNS["ORB-SLAM3, GPU, LC on"][0] / "ground_truth_robotclock.csv", delimiter=",")
-    items = [(label, dclean, "orb") for label, (dclean, _) in RUNS.items()] + [(VINS[0], VINS[1], "vins")]
+    items = [(label, dclean, "orb") for label, (dclean, _) in RUNS.items()] + [(VINS[0] + " (reported configuration)", VINS[1], "vins")]
     fig, axes = plt.subplots(2, 3, figsize=(13, 8.6))
     for ax, (label, d, sysk) in zip(axes.ravel(), items):
         a = load_aligned(d, sysk); m = metrics(d, "ORB" if sysk == "orb" else "VINS")
         ax.plot(gtr[:, 1], gtr[:, 2], color="#2a2a2a", lw=2.0, label="tracker truth (cleaned)")
-        ax.plot(a["est"][:, 0], a["est"][:, 1], color=COL[label], lw=1.3, label="estimate, SE(2) aligned")
-        ax.plot(a["est"][0, 0], a["est"][0, 1], "o", color=COL[label], ms=6); ax.plot(a["est"][-1, 0], a["est"][-1, 1], "s", color=COL[label], ms=6)
+        c = COL[label.split(" (")[0]]
+        ax.plot(a["est"][:, 0], a["est"][:, 1], color=c, lw=1.3, label="estimate, SE(2) aligned")
+        ax.plot(a["est"][0, 0], a["est"][0, 1], "o", color=c, ms=6); ax.plot(a["est"][-1, 0], a["est"][-1, 1], "s", color=c, ms=6)
         span = a["t"][-1] - a["t"][0]
         ax.set_title(f"{label}: ATE {m['ate_rmse']:.2f} m over {span:.0f} s, {m.get('matched', '?')} samples", fontsize=9, loc="left")
         ax.set_aspect("equal"); ax.grid(True, alpha=0.3); ax.set_xlabel("x [m]"); ax.set_ylabel("y [m]")
         ax.set_xlim(gtr[:, 1].min() - 0.8, gtr[:, 1].max() + 0.8); ax.set_ylim(gtr[:, 2].min() - 0.8, gtr[:, 2].max() + 0.8)
         ax.legend(fontsize=7, loc="lower right")
     axes.ravel()[-1].axis("off")
-    fig.suptitle("dataset_realv6_000: every surviving run against the cleaned tracker truth (circle = start, square = end)", fontsize=12, x=0.01, ha="left")
+    fig.suptitle("dataset_realv6_000, fork patch 15: every run against the cleaned tracker truth (circle = start, square = end)", fontsize=12, x=0.01, ha="left")
     fig.tight_layout(rect=(0, 0, 1, 0.95)); fig.savefig(OUT / "fig_paths_light.png", dpi=160); plt.close(fig)
 
 
 def orb_timeline():
     fig, axes = plt.subplots(len(RUNS), 1, figsize=(10, 2.4 * len(RUNS) + 0.6), sharex=True)
     rows = []
+    # One y range for every panel: the four runs are the same metric on the same
+    # recording, and per-panel limits made equal heights mean different errors.
+    loaded = {label: load_aligned(dclean) for label, (dclean, _) in RUNS.items()}
+    ymax = max(1.0, max(float(a["err"].max()) for a in loaded.values()) * 1.15)
     for ax, (label, (dclean, rdir)) in zip(axes, RUNS.items()):
-        a = load_aligned(dclean); t0 = a["t"][0]
+        a = loaded[label]; t0 = a["t"][0]
         turning = heading_rate(a["t"], a["est"]) > TURN_DEG_S
-        ymax = max(1.0, float(a["err"].max()) * 1.15)
         ax.fill_between(a["t"] - t0, 0, ymax, where=turning, color="#888", alpha=0.2, lw=0, label="turning (estimate heading > 10 deg/s)")
         ax.plot(a["t"] - t0, a["err"], color=COL[label], lw=1.3, label="planar error vs tracker")
         fr = list(csv.DictReader(open(rdir / "tracking_frontend.csv")))
@@ -232,7 +240,7 @@ def orb_timeline():
         h, l = ax.get_legend_handles_labels(); ax.legend(dict(zip(l, h)).values(), dict(zip(l, h)).keys(), fontsize=7, loc="upper right")
         c = rate_contrast(a["t"], a["err"], turning); rows.append((label, c))
     axes[-1].set_xlabel("time from first matched sample [s]")
-    fig.suptitle("ORB-SLAM3 on dataset_realv6_000 (cleaned truth): error over time", fontsize=12, x=0.01, ha="left")
+    fig.suptitle("ORB-SLAM3 on dataset_realv6_000, fork patch 15 (cleaned truth): error over time", fontsize=12, x=0.01, ha="left")
     fig.tight_layout(rect=(0, 0, 1, 0.96)); fig.savefig(OUT / "fig_orb_timeline_light.png", dpi=160); plt.close(fig)
     L = [r"\begin{table}[htbp]", r"\centering", r"\small",
          r"\caption[Realv6: ORB-SLAM3 drift while turning versus on straights.]{ORB-SLAM3 on "
@@ -251,7 +259,7 @@ def orb_timeline():
 
 
 def vins_outputs():
-    label, dclean, rdir = VINS
+    label, dclean, rdir = VINS_OLD
     a = np.loadtxt(rdir / "vio.csv", delimiter=","); t = (a[:, 0] - a[0, 0]) * 1e-9; r = np.hypot(a[:, 1], a[:, 2])
     ev = list(csv.DictReader(open(rdir / "events.csv")))
     resets = [(int(e["timestamp_ns"]) - a[0, 0]) * 1e-9 for e in ev if e["event"] == "reset"]
@@ -267,11 +275,11 @@ def vins_outputs():
     axes[1].plot(pt, imu_rx, color="#555", lw=1.0, label="IMU messages received (cumulative)")
     axes[1].plot(pt, imu_used, color=COL[label], lw=1.3, label="IMU samples used (cumulative)")
     axes[1].set_ylabel("count"); axes[1].set_xlabel("time from first pose [s]"); axes[1].legend(fontsize=8, loc="upper left"); axes[1].grid(True, alpha=0.3)
-    fig.suptitle("VINS-Fusion on dataset_realv6_000, 3 November: %d imu_gap resets, poses stop at %.0f s" % (len(resets), t[-1]), fontsize=12, x=0.01, ha="left")
+    fig.suptitle("VINS-Fusion on dataset_realv6_000, before the field-of-view mask: %d imu_gap resets, poses stop at %.0f s" % (len(resets), t[-1]), fontsize=12, x=0.01, ha="left")
     fig.tight_layout(rect=(0, 0, 1, 0.94)); fig.savefig(OUT / "fig_vins_light.png", dpi=160); plt.close(fig)
     L = [r"\begin{table}[htbp]", r"\centering", r"\small",
-         r"\caption[Realv6: the VINS-Fusion run.]{VINS-Fusion on \repo{dataset_realv6_000}, 3 November 2026 "
-         r"(\repo{config/wil/stereo_imu.yaml}, IMU noise $\times 10$, gravity norm still \num{9.2642} against the "
+         r"\caption[Realv6: the earlier VINS-Fusion run.]{VINS-Fusion on \repo{dataset_realv6_000} in the configuration "
+         r"before the field-of-view mask (\repo{config/wil/stereo_imu.yaml}, IMU noise $\times 10$, gravity norm still \num{9.2642} against the "
          r"\SI{9.878}{\metre\per\second\squared} this IMU reads at rest). The scored span is the \SI{18}{\second} it "
          r"tracked before its last reset and is not a result.}",
          r"\label{tab:realv6-vins}",

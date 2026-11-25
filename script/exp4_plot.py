@@ -225,7 +225,7 @@ def plot_run(spec, world, path, rep, out_dir, grid_cache):
     return png
 
 
-def summary(spec, out_dir, arm='gated'):
+def summary(spec, out_dir, arm='gated', linear=False):
     """Error against distance driven, split by layout as fig_heading is.
 
     The per-run path figures show WHERE the pose went; this shows whether the
@@ -309,14 +309,19 @@ def summary(spec, out_dir, arm='gated'):
                     label=shape + (f' (over 1 m for {longest:.0f} s)' if bad else ''))
         ax.axhline(0.40, color='#7f8c8d', ls='--', lw=1)
         ax.axhline(0.10, color='#7f8c8d', ls=':', lw=1)
-        ax.set_yscale('log')
-        ax.set_ylim(0.008, top * 2.2)
-        plain_log(ax)
+        if linear:
+            # The log axis stretches the sub-0.1 m dips (one sample of 0.008 m
+            # reads as a deep trough); the linear one shows the error as metres.
+            ax.set_ylim(0, top * 1.08)
+        else:
+            ax.set_yscale('log')
+            ax.set_ylim(0.008, top * 2.2)
+            plain_log(ax)
         ax.set_xlabel('distance driven since the first fix (m)')
         ax.set_title(f'{lay} layout')
         ax.grid(alpha=0.2, which='both', lw=0.5)
         ax.legend(fontsize=8, loc='upper right', framealpha=0.95)
-    axes[0].set_ylabel('planar error against ground truth (m) (log)')
+    axes[0].set_ylabel('planar error against ground truth (m)' + ('' if linear else ' (log)'))
     # Labelled on the left panel's left edge, clear of both legends.
     axes[0].text(0.01, 0.40, "prior graph's own rms, upper end (part A)",
                  transform=axes[0].get_yaxis_transform(), ha='left', va='bottom',
@@ -326,7 +331,7 @@ def summary(spec, out_dir, arm='gated'):
     fig.suptitle('Experiment 2, part B: error against distance driven, by layout', y=0.99)
     fig.tight_layout(rect=(0, 0, 1, 0.94))
     os.makedirs(out_dir, exist_ok=True)
-    png = os.path.join(out_dir, 'exp4_error_vs_distance.png')
+    png = os.path.join(out_dir, 'exp4_error_vs_distance' + ('_linear' if linear else '') + '.png')
     fig.savefig(png, dpi=150)
     plt.close(fig)
     print(f'  {n} run(s) -> {png}')
@@ -345,11 +350,13 @@ def main():
                     default='gated',
                     help='which configuration to plot. Experiment 2 part B reports '
                          'the ungated arm (the default)')
+    ap.add_argument('--linear', action='store_true',
+                    help='--summary on a linear y-axis (writes *_linear.png)')
     a = ap.parse_args()
     spec = yaml.safe_load(open(os.path.join(WORKSPACE, 'script',
                                             'exp4_protocol.yaml')))
     if a.summary:
-        summary(spec, a.out, arm=a.arm)
+        summary(spec, a.out, arm=a.arm, linear=a.linear)
         if not a.all and not a.run:
             return
     cache = {}

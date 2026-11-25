@@ -1463,9 +1463,9 @@ at \SI{50}{\hertz} as \texttt{std\_msgs/Float64}: the velocity is in a firmware
 unit whose scale is not documented, and the steering is a command echo that
 takes two values on every recording, so it carries no steering angle. The
 consequence for the non-visual baseline is worked out in
-\cref{sec:proprio-method}. The inertial stream is a WitMotion HWT101CT at
+\cref{sec:proprio-method}. The inertial stream is a RealSense IMU at
 \SI{200}{\hertz} on the inherited topic name \repo{/hwt101ct_yaw_publisher};
-its orientation field is an identity quaternion and must never be consumed as
+despite the name, the device is not a WitMotion HWT101CT. Its orientation field is an identity quaternion and must never be consumed as
 an attitude measurement.
 
 \paragraph{Ground truth and clocks.} The simulation recordings carry
@@ -1643,8 +1643,9 @@ Stereo resolution & $1920\times1080$ fisheye & measured \\
 Stereo baseline & \SI{0.0916}{\metre} & measured 3 November 2026 \\
 Camera order & \repo{cam1} is the left camera & since the 19 October 2026
   remount; encoded in the launch defaults \\
-IMU stream & \repo{/hwt101ct_yaw_publisher}, \SI{200}{\hertz} & WitMotion
-  HWT101CT; orientation field is identity and is never consumed \\
+IMU stream & \repo{/hwt101ct_yaw_publisher}, \SI{200}{\hertz} & RealSense
+  IMU on an inherited topic name; orientation field is identity and is never
+  consumed \\
 Camera model (ORB-SLAM3) & \texttt{KannalaBrandt8} & configured \\
 Camera model (VINS) & project fisheye files & configured \\
 Second-camera intrinsics & reuse of the first camera & \flag{approximation} \\
@@ -1662,8 +1663,11 @@ Inertial initialisation (ORB-SLAM3) & \texttt{LocalMapping.resetOnLowMotion}
   initialisation only with an empty keyframe queue. A robot that stands still
   before it is driven meets the first condition, which is why the switches
   exist (\cref{sec:exp1-real}) \\
-Extrinsic estimation (VINS) & \repo{estimate_extrinsic: 1} & online \\
-Time-offset estimation (VINS) & \repo{estimate_td: 1} & online \\
+Extrinsic estimation (VINS) & \repo{estimate_extrinsic: 0} & held at the
+  calibrated value; online estimation consumed the stereo baseline on this rig
+  (\cref{sec:exp1-real}) \\
+Time-offset estimation (VINS) & \repo{estimate_td: 0} & held at
+  \SI{0}{\second}, set in the same change \\
 Marker-to-IMU lever arm & not measured & \flag{placeholder; bounds every real
   accuracy figure} \\
 \bottomrule

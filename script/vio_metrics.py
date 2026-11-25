@@ -318,9 +318,30 @@ def euler_zyx(R):
     return np.degrees(np.stack([yaw, pitch, roll], axis=1))
 
 
+# An estimate whose z never moves by more than this is planar (the wheel, IMU
+# dead-reckoning and EKF baselines write z = 0; the real-rig SE(2) scoring pads
+# with z = 0).
+PLANAR_Z_M = 1e-6
+
+
 def umeyama(src, dst):
-    """Rigid SE(3) fit mapping src onto dst, scale fixed at 1. Returns (R, t)."""
+    """Rigid SE(3) fit mapping src onto dst, scale fixed at 1. Returns (R, t).
+
+    A planar src is fitted by a turn about z only. Unconstrained, a planar track
+    has a free axis: the fit can turn it upside down at no cost in position,
+    which is a mirror image in the floor plane, and it does so whenever the
+    mirror overlays the reference better (IMU dead reckoning on realistic_003:
+    11.60 m mirrored vs 11.97 m proper). Every orientation the same R carries
+    then reads 180 degrees off.
+    """
     cs, cd = src.mean(0), dst.mean(0)
+    if np.ptp(src[:, 2]) < PLANAR_Z_M:
+        a, b = src[:, :2] - cs[:2], dst[:, :2] - cd[:2]
+        th = np.arctan2((a[:, 0] * b[:, 1] - a[:, 1] * b[:, 0]).sum(),
+                        (a * b).sum())
+        c, s = np.cos(th), np.sin(th)
+        R = np.array([[c, -s, 0.0], [s, c, 0.0], [0.0, 0.0, 1.0]])
+        return R, cd - R @ cs
     U, _, Vt = np.linalg.svd((src - cs).T @ (dst - cd))
     D = np.diag([1.0, 1.0, np.sign(np.linalg.det(Vt.T @ U.T))])
     R = Vt.T @ D @ U.T

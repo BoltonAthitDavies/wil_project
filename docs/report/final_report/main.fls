@@ -1816,6 +1816,13 @@ INPUT tables/realistic_baseline_table.tex
 INPUT ./tables/realistic_baseline_table.tex
 INPUT ./tables/realistic_baseline_table.tex
 INPUT tables/realistic_baseline_table.tex
+INPUT ./tables/exp1_planar_ate.tex
+INPUT ./tables/exp1_planar_ate.tex
+INPUT ./tables/exp1_planar_ate.tex
+INPUT tables/exp1_planar_ate.tex
+INPUT ./tables/exp1_planar_ate.tex
+INPUT ./tables/exp1_planar_ate.tex
+INPUT tables/exp1_planar_ate.tex
 INPUT ./figures/realistic_trajectories.png
 INPUT ./figures/realistic_trajectories.png
 INPUT figures/realistic_trajectories.png
@@ -2100,6 +2107,13 @@ INPUT ./figures/exp4_heading.png
 INPUT figures/exp4_heading.png
 INPUT ./figures/exp4_heading.png
 INPUT ./figures/exp4_heading.png
+INPUT ./tables/exp2_map_bound.tex
+INPUT ./tables/exp2_map_bound.tex
+INPUT ./tables/exp2_map_bound.tex
+INPUT tables/exp2_map_bound.tex
+INPUT ./tables/exp2_map_bound.tex
+INPUT ./tables/exp2_map_bound.tex
+INPUT tables/exp2_map_bound.tex
 INPUT ./figures/exp4_rtabmap_gating.png
 INPUT ./figures/exp4_rtabmap_gating.png
 INPUT figures/exp4_rtabmap_gating.png

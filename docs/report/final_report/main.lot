@@ -36,31 +36,33 @@
 \contentsline {table}{\numberline {4.2}{\ignorespaces Recordings of Experiment 1.}}{63}{table.caption.110}%
 \contentsline {table}{\numberline {4.3}{\ignorespaces Estimator comparison on the four realistic recordings.}}{65}{table.caption.114}%
 \contentsline {table}{\numberline {4.4}{\ignorespaces Relative pose error at $\Delta t=\SI {1}{\second }$ on the four realistic recordings.}}{66}{table.caption.115}%
-\contentsline {table}{\numberline {4.5}{\ignorespaces Visual estimators on the four realistic-warehouse recordings.}}{69}{table.caption.120}%
-\contentsline {table}{\numberline {4.6}{\ignorespaces Realistic world: onset of sustained error, unfiltered runs.}}{72}{table.caption.124}%
-\contentsline {table}{\numberline {4.7}{\ignorespaces Translation error of the visual arms, split by direction.}}{79}{table.caption.138}%
-\contentsline {table}{\numberline {4.8}{\ignorespaces Orientation error of the visual arms, by axis and by turn rate.}}{82}{table.caption.142}%
-\contentsline {table}{\numberline {4.9}{\ignorespaces Real-time and resource measurements on the mapping recordings.}}{85}{table.caption.152}%
-\contentsline {table}{\numberline {4.10}{\ignorespaces Real-time and resource measurements of the twenty realistic-world runs.}}{86}{table.caption.154}%
-\contentsline {table}{\numberline {4.11}{\ignorespaces Run-to-run spread over the three repeats of each mapping-recording configuration.}}{87}{table.caption.156}%
-\contentsline {table}{\numberline {4.12}{\ignorespaces Wheel+gyro dead reckoning against the optical tracker.}}{90}{table.caption.163}%
-\contentsline {table}{\numberline {4.13}{\ignorespaces Realv6: every surviving run against the cleaned tracker truth.}}{91}{table.caption.168}%
-\contentsline {table}{\numberline {4.14}{\ignorespaces Realv6: raw versus cleaned tracker export.}}{91}{table.caption.170}%
-\contentsline {table}{\numberline {4.15}{\ignorespaces Realv6: ORB-SLAM3 drift while turning versus on straights.}}{92}{table.caption.173}%
-\contentsline {table}{\numberline {4.16}{\ignorespaces Realv6: the earlier VINS-Fusion run.}}{92}{table.caption.174}%
-\contentsline {table}{\numberline {4.17}{\ignorespaces Every real-robot run, with the upstream initialisation defect patched out.}}{94}{table.caption.178}%
-\contentsline {table}{\numberline {4.18}{\ignorespaces Realv7: the VINS-Fusion runs after the field-of-view repair.}}{95}{table.caption.180}%
-\contentsline {table}{\numberline {4.19}{\ignorespaces Real-time and resource measurements of the fifteen reported real-robot runs.}}{100}{table.caption.185}%
-\contentsline {table}{\numberline {4.20}{\ignorespaces Real-time and resource measurements repeated on the real robot.}}{101}{table.caption.186}%
-\contentsline {table}{\numberline {4.21}{\ignorespaces Conditions for the dense-map evaluation.}}{105}{table.caption.199}%
-\contentsline {table}{\numberline {4.22}{\ignorespaces Stored contents of \repo {map/map_tiny.db}.}}{106}{table.caption.202}%
-\contentsline {table}{\numberline {4.23}{\ignorespaces Occupied-cell geometry of \repo {map/map_tiny.db} against \repo {small_warehouse_static_tinymap.world} at \SI {0.25}{\metre } tolerance.\relax }}{106}{table.caption.204}%
-\contentsline {table}{\numberline {4.24}{\ignorespaces Drivability of \repo {map/map_tiny.db} under the true $0.83\times 0.50$\nobreakspace {}m nav2 footprint, evaluated against two different routes.}}{107}{table.caption.206}%
-\contentsline {table}{\numberline {4.25}{\ignorespaces Occupied-cell geometry of the four realistic databases.}}{111}{table.caption.213}%
-\contentsline {table}{\numberline {4.26}{\ignorespaces Drivability of the realistic-warehouse databases.}}{112}{table.caption.214}%
-\contentsline {table}{\numberline {4.27}{\ignorespaces Stored contents and build parameters of the realistic-warehouse databases.}}{112}{table.caption.215}%
-\contentsline {table}{\numberline {4.28}{\ignorespaces Pose accuracy of the graph each realistic map was built from.}}{118}{table.caption.223}%
-\contentsline {table}{\numberline {4.29}{\ignorespaces Pose tracking against ground truth, 15 November 2026, correction gate at \SI {1.5}{\metre }. Route shapes were driven by hand: straight, approximately square, approximately a figure-of-eight. ``Over 1\,m'' is the longest unbroken stretch with the error above a metre and ``ended'' the median over the last tenth of the run, i.e. whether it came back. Offset and scatter, reported in the text, are \SIrange {0.04}{0.34}{\metre } and \SIrange {0.03}{0.19}{\metre } respectively. Blind is the share of localisation poses carrying RTAB-Map's no-information covariance. Ground truth is compared without a lever arm, for the reason given under Frames.\relax }}{124}{table.caption.232}%
-\contentsline {table}{\numberline {4.30}{\ignorespaces Limitations of the results reported in this chapter, and what each one prevents.}}{137}{table.4.30}%
+\contentsline {table}{\numberline {4.5}{\ignorespaces Visual estimators on the four realistic-warehouse recordings.}}{70}{table.caption.120}%
+\contentsline {table}{\numberline {4.6}{\ignorespaces Visual estimators split into floor-plane and height error (post-hoc).}}{72}{table.caption.121}%
+\contentsline {table}{\numberline {4.7}{\ignorespaces Realistic world: onset of sustained error, unfiltered runs.}}{73}{table.caption.125}%
+\contentsline {table}{\numberline {4.8}{\ignorespaces Translation error of the visual arms, split by direction.}}{80}{table.caption.139}%
+\contentsline {table}{\numberline {4.9}{\ignorespaces Orientation error of the visual arms, by axis and by turn rate.}}{83}{table.caption.143}%
+\contentsline {table}{\numberline {4.10}{\ignorespaces Real-time and resource measurements on the mapping recordings.}}{86}{table.caption.153}%
+\contentsline {table}{\numberline {4.11}{\ignorespaces Real-time and resource measurements of the twenty realistic-world runs.}}{87}{table.caption.155}%
+\contentsline {table}{\numberline {4.12}{\ignorespaces Run-to-run spread over the three repeats of each mapping-recording configuration.}}{88}{table.caption.157}%
+\contentsline {table}{\numberline {4.13}{\ignorespaces Wheel+gyro dead reckoning against the optical tracker.}}{91}{table.caption.164}%
+\contentsline {table}{\numberline {4.14}{\ignorespaces Realv6: every surviving run against the cleaned tracker truth.}}{92}{table.caption.169}%
+\contentsline {table}{\numberline {4.15}{\ignorespaces Realv6: raw versus cleaned tracker export.}}{92}{table.caption.171}%
+\contentsline {table}{\numberline {4.16}{\ignorespaces Realv6: ORB-SLAM3 drift while turning versus on straights.}}{93}{table.caption.174}%
+\contentsline {table}{\numberline {4.17}{\ignorespaces Realv6: the earlier VINS-Fusion run.}}{93}{table.caption.175}%
+\contentsline {table}{\numberline {4.18}{\ignorespaces Every real-robot run, with the upstream initialisation defect patched out.}}{96}{table.caption.179}%
+\contentsline {table}{\numberline {4.19}{\ignorespaces Realv7: the VINS-Fusion runs after the field-of-view repair.}}{96}{table.caption.181}%
+\contentsline {table}{\numberline {4.20}{\ignorespaces Real-time and resource measurements of the fifteen reported real-robot runs.}}{98}{table.caption.186}%
+\contentsline {table}{\numberline {4.21}{\ignorespaces Real-time and resource measurements repeated on the real robot.}}{99}{table.caption.187}%
+\contentsline {table}{\numberline {4.22}{\ignorespaces Conditions for the dense-map evaluation.}}{106}{table.caption.200}%
+\contentsline {table}{\numberline {4.23}{\ignorespaces Stored contents of \repo {map/map_tiny.db}.}}{107}{table.caption.203}%
+\contentsline {table}{\numberline {4.24}{\ignorespaces Occupied-cell geometry of \repo {map/map_tiny.db} against \repo {small_warehouse_static_tinymap.world} at \SI {0.25}{\metre } tolerance.\relax }}{107}{table.caption.205}%
+\contentsline {table}{\numberline {4.25}{\ignorespaces Drivability of \repo {map/map_tiny.db} under the true $0.83\times 0.50$\nobreakspace {}m nav2 footprint, evaluated against two different routes.}}{108}{table.caption.207}%
+\contentsline {table}{\numberline {4.26}{\ignorespaces Occupied-cell geometry of the four realistic databases.}}{112}{table.caption.214}%
+\contentsline {table}{\numberline {4.27}{\ignorespaces Drivability of the realistic-warehouse databases.}}{113}{table.caption.215}%
+\contentsline {table}{\numberline {4.28}{\ignorespaces Stored contents and build parameters of the realistic-warehouse databases.}}{113}{table.caption.216}%
+\contentsline {table}{\numberline {4.29}{\ignorespaces Pose accuracy of the graph each realistic map was built from.}}{119}{table.caption.224}%
+\contentsline {table}{\numberline {4.30}{\ignorespaces Pose tracking against ground truth, 15 November 2026, correction gate at \SI {1.5}{\metre }. Route shapes were driven by hand: straight, approximately square, approximately a figure-of-eight. ``Over 1\,m'' is the longest unbroken stretch with the error above a metre and ``ended'' the median over the last tenth of the run, i.e. whether it came back. Offset and scatter, reported in the text, are \SIrange {0.04}{0.34}{\metre } and \SIrange {0.03}{0.19}{\metre } respectively. Blind is the share of localisation poses carrying RTAB-Map's no-information covariance. Ground truth is compared without a lever arm, for the reason given under Frames.\relax }}{125}{table.caption.233}%
+\contentsline {table}{\numberline {4.31}{\ignorespaces Localisation error against the prior's node error along each route, in position and heading.}}{130}{table.caption.241}%
+\contentsline {table}{\numberline {4.32}{\ignorespaces Limitations of the results reported in this chapter, and what each one prevents.}}{139}{table.4.32}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {5.1}{\ignorespaces Results against the numeric targets.}}{142}{table.caption.252}%
+\contentsline {table}{\numberline {5.1}{\ignorespaces Results against the numeric targets.}}{144}{table.caption.255}%

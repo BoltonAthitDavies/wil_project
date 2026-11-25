@@ -214,8 +214,9 @@ I static  & figure-8 &  69.5 &  66 & 0.133 & 1.152 & 1.238 &  6.5 & 0.166 & 0.04
   split by layout and coloured by route shape so that it reads against
   \cref{fig:exp4-heading}, which asks the same question of orientation.
   Distance rather than time, so that runs driven at different speeds compare.
-  The two grey lines are the rms accuracy part~A measures for these
-  priors' own graphs, \SIrange{0.10}{0.40}{\metre}: \SI{70}{\percent} of all
+  The two grey lines are the range of graph rms part~A measures over its four
+  maps, \SIrange{0.10}{0.40}{\metre} (\SI{0.12}{\metre} and
+  \SI{0.32}{\metre} for the U and I priors used here): \SI{70}{\percent} of all
   samples lie between them, and between \SI{50}{} and \SI{92}{\percent} of each
   run's.
 
@@ -312,15 +313,26 @@ square, the figure-of-eight and the straight respectively.
 The mean error is within \SI{0.2}{\degree} of zero on all three U-layout runs
 and \SIrange{-0.89}{-2.17}{\degree} on the three I-layout ones.
 
-\flag{That bias is not uniform, which matters for what can be concluded from
-it.} Only the I-layout straight is genuinely one-signed, with every sample
-negative; the figure-of-eight is negative in \SI{75}{\percent} of its samples
-and the square in \SI{56}{\percent}, crossing zero repeatedly. A constant
-residual in the I prior's own \texttt{map}~$\rightarrow$~world fit would
-displace all three I-layout runs alike, and it does not, so that explanation
-does not cover the square and is not the single cause the per-run means suggest.
-What the slot can say is that heading is worse on the I layout and that the
-cause is unresolved.
+\flag{That bias is not uniform, and the reason is where it enters.} Only the
+I-layout straight is genuinely one-signed, with every sample negative; the
+figure-of-eight is negative in \SI{75}{\percent} of its samples and the square
+in \SI{56}{\percent}, crossing zero repeatedly. Splitting each run's heading
+error into its value at the first fix, the corrections that followed and the
+odometry between them settles where it enters. Odometry contributes at most
+\SI{0.34}{\degree} on any run. On the I layout all three runs start from the
+same offset, between \SI{-2.4}{\degree} and \SI{-3.4}{\degree}, set by the first fix while the
+robot is still standing at the spawn; later corrections remove part of it, by
+\SIlist[retain-explicit-plus]{+0.3;+1.1;+2.2}{\degree} on average for the
+straight, figure-of-eight and square, which is why only the square crosses
+zero. The U-layout runs start within \SI{0.25}{\degree}. The seed itself is
+within \SI{0.3}{\degree} on both layouts, and the prior's nodes are within
+\SI{0.2}{\degree} along the routes (\cref{tab:exp4-map-bound}), so the offset
+is not inherited from the map: the I-layout localised heading is 7 to 14 times
+the nodes' and biased the other way, while on the U layout it is about twice
+the nodes', as position is. Only on the I layout does the front end's heading
+swing by \SIrange{144}{178}{\degree} between the seed and the first fix;
+whether the fix inherits that unsettled orientation or the spawn view
+registers poorly is unresolved.
 
 Turn rate does not explain it either, though not because turning is harmless.
 Turning costs \numrange{4.1}{8.4} times the straight-driving heading error on
@@ -341,8 +353,8 @@ side it is not a measurement of the layout either.
   I-layout runs on the same scale, lower and wider --- the straight run never
   crosses zero, the figure-of-eight reaches \SI{-6.4}{\degree} near the
   position excursion of \cref{tab:exp4-tracking}, and the square crosses
-  zero repeatedly, which is why the negative mean is not evidence of one
-  constant offset. The first sample after the first fix is excluded: it carries
+  zero repeatedly as later corrections remove the offset all three runs
+  start from. The first sample after the first fix is excluded: it carries
   the correction still settling.}
   \label{fig:exp4-heading}
 \end{figure}
@@ -358,16 +370,27 @@ whose cross-track mean reaches \SI{0.37}{\metre} --- the largest single
 component in the set, in the direction that matters most in a corridor, and on
 the run that also carries the worst heading bias.
 
-The magnitude is the reading. Part~A measures the graph of these same
-priors as accurate to \SIrange{0.10}{0.40}{\metre} rms over the
-\SIrange{365}{381}{\metre} build routes. The pose tracking that prior is
-accurate to \SIrange{0.13}{0.21}{\metre}. The localiser is therefore
-reproducing its map to within the map's own accuracy, and nothing in these runs
-shows it doing worse than the artefact it is given. That is a bound, not a
-coincidence: an estimate cannot be closer to the world than the map it is
-matched against, so this slot's accuracy is \emph{map-limited rather than
-estimator-limited}, and the improvement to chase is a better prior rather than a
-better filter.
+The magnitude is the reading, as a bound. Along the driven routes the prior's
+own nodes within \SI{3}{\metre} of the robot are off by
+\SIrange{0.09}{0.14}{\metre} (per-run median, after the body-to-body fit),
+and the localised pose is \numrange{1.0}{1.7} times that, median against
+median (\cref{tab:exp4-map-bound}). The localiser therefore works at the accuracy of its map, slightly
+below it, and this slot's accuracy is \emph{map-bounded in magnitude}. Whether
+a more accurate prior would lower the error is the next thing to test, not a
+finding of this slot.
+
+\reporttable{exp2_map_bound}
+
+\paragraph{Insight: within a run, a worse map does not carry a larger error.}
+Places where the nearby nodes are worse do not carry larger localisation error
+(within-run Spearman $\rho = -0.11$, circular-shift permutation $p = 0.51$),
+and neither do places where the occupancy grid is worse ($p \geq 0.06$ for
+local precision, recall and false-obstacle share at 2, 3 and
+\SI{5}{\metre}). The routes rarely crossed a
+poor grid --- local precision was at least 0.975 for \SI{95}{\percent} of
+samples --- so this tests the quality the robot met, not a poor map; and the
+localiser matches images against nodes, never the grid. The bound above is
+therefore one of magnitude, not a demonstrated mechanism.
 
 \flag{The previous revision drew a stronger conclusion from the same data ---
 that the offset was route-dependent, \SIrange{0.32}{0.59}{\metre} on a single

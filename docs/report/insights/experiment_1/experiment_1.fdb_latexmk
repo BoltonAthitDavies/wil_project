@@ -1,7 +1,7 @@
 # Fdb version 3
-["pdflatex"] 1795503622 "experiment_1.tex" "experiment_1.pdf" "experiment_1" 1795503642
-  "../../../../output/compare/real/exp1-wheel/wheel_paths_light.png" 1794031071 195130 bf9e862ae18d618568363e449513adc7 ""
-  "../../../../output/compare/real/exp1-wheel/wheel_table.tex" 1794031070 1228 964bfcf66374e997a8a636a829bffefe ""
+["pdflatex"] 1795586380 "experiment_1.tex" "experiment_1.pdf" "experiment_1" 1795586420
+  "../../../../output/compare/real/exp1-wheel/wheel_paths_light.png" 1795585941 195130 bf9e862ae18d618568363e449513adc7 ""
+  "../../../../output/compare/real/exp1-wheel/wheel_table.tex" 1795585941 1228 964bfcf66374e997a8a636a829bffefe ""
   "../../../../output/compare/real/realv6-insights/fig_orb_timeline_light.png" 1795503518 253957 3ed8598a4fdc0f2734a7a759072639eb ""
   "../../../../output/compare/real/realv6-insights/fig_paths_light.png" 1795503517 290637 c9b7cb109b1e763cc0a71f8ca416cb58 ""
   "../../../../output/compare/real/realv6-insights/fig_vins_light.png" 1795503518 93584 432fc300b73c262fa6f0736900fd33f0 ""
@@ -31,6 +31,7 @@
   "../../final_report//figures/timeline_realistic__realistic_001.png" 1795502751 164897 c4c19112fed27401d3056aa78c4541a9 ""
   "../../final_report//figures/timeline_realistic__realistic_002.png" 1795502751 145790 4a54a841b0a097554a6f3504cc733c5a ""
   "../../final_report//figures/timeline_realistic__realistic_003.png" 1795502751 178093 fb77d3b63f59148feb1ee71f7c28bb95 ""
+  "../../final_report/tables/exp1_planar_ate.tex" 1795578983 3152 acf2a7825605318baacd3d5e43d33e4c ""
   "../../final_report/tables/exp1_rotation_pattern.tex" 1794558351 3356 6aaf18b57923ddb6fce6e67ad6154c21 ""
   "../../final_report/tables/exp1_rpe_table.tex" 1794573511 2915 13dfce6d2e19801a479f857c79d808ad ""
   "../../final_report/tables/exp1_translation_pattern.tex" 1794477773 2904 f16d8a626bf5ad3e71ea525d9c5051c3 ""
@@ -188,9 +189,9 @@
   "/usr/share/texmf/web2c/texmf.cnf" 1644012257 39432 7155514e09a3d69036fac785183a21c2 ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1789525526 165012 f177baa1c39a3ebd62c3096a43521a0d ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1789525528 1435854 f4f5f67aa9d1ba2a312ed1460dac1994 ""
-  "experiment_1.aux" 1795503642 23168 0aef7ac01b1d5a62cd844fe748f8c7df "pdflatex"
-  "experiment_1.out" 1795503642 193 15d077211a6091f6ec564d80ff2672a6 "pdflatex"
-  "experiment_1.tex" 1795503360 113255 d437ed974a69f2ddf7b7b54e8a8a5f4b ""
+  "experiment_1.aux" 1795586420 23568 48e02eb3517449b47e4c51de0806c9d6 "pdflatex"
+  "experiment_1.out" 1795586420 193 15d077211a6091f6ec564d80ff2672a6 "pdflatex"
+  "experiment_1.tex" 1795586294 114522 5e117bcb0a5e65c96dc2666245746316 ""
   (generated)
   "experiment_1.aux"
   "experiment_1.log"

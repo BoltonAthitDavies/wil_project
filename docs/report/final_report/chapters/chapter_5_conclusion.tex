@@ -37,7 +37,11 @@ sensors fail in complementary ways, the IMU holding heading to under
 the reverse, and the filter is better than either in both quantities because it
 observes the gyroscope bias rather than the heading. And every dead-reckoning
 covariance is overconfident, by one to three orders of magnitude. Against the
-project's target of \SI{0.05}{\metre} ATE, no estimator qualifies; against the
+project's target of \SI{0.05}{\metre} ATE, no estimator qualifies --- on the I
+layout what keeps ORB-SLAM3 above it is height drift, one run reaching
+\SI{0.044}{\metre} in the floor plane, while on the U layout the planar error
+itself is \SIrange{0.10}{0.33}{\metre} (a post-hoc split,
+\cref{tab:exp1-planar-ate}); against the
 \SI{0.1}{\metre} RPE target at \SI{1}{\second}, every visual run does on
 jump-free pairs, as do wheel odometry and the measured-noise filter, while the
 IMU and the filter on the visual systems' noise model do not. The
@@ -166,10 +170,11 @@ over hand-driven routes of \SIrange{21}{148}{\metre}, with a minimum clearance
 of \SI{0.68}{\metre} and no collision (\cref{sec:exp4-sim}). Five of the six
 meet the availability target and four the continuity target. One run crossed a
 metre, for \SI{6.5}{\second}, and recovered. The error is a constant offset
-rather than scatter, and its magnitude matches the accuracy of the prior's own
-graph, which part~A measures at \SIrange{0.10}{0.40}{\metre} over the build
-routes. Relocalization is therefore \emph{map-limited, not estimator-limited},
-which says that the improvement to chase is a better map. The same
+rather than scatter, and its magnitude is that of the prior's own nodes along
+the route (\SIrange{0.09}{0.14}{\metre}; the pose is \numrange{1.0}{1.7} times
+that). Relocalization is therefore \emph{map-bounded in magnitude}; inside a
+run, places with worse nodes or a worse grid carry no larger error, so whether
+a better map would lower it remains untested. The same
 initialisation transient that lays the map's blocking phantoms also latches the
 back end's first fix \SIrange{73}{76}{\degree} wrong until it is held back for
 \SI{5}{\second}: one transient, two symptoms, one prescription.

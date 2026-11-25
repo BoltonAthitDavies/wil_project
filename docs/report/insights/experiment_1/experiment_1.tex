@@ -170,7 +170,7 @@ recordings; the measured-noise diagnostic holds \SIrange{0.21}{0.58}{\metre}.
 comparison on the four realistic recordings. The closer state of each
 ORB-SLAM3 run is read from its artefact. ANEES is reported for the
 proprioceptive estimators, which carry a covariance; a consistent filter
-gives 3.0, and every value here is above it. Aligned rotation is measured from the instant each estimator's published poses enter the gravity-aligned world frame, which for every arm but ORB-SLAM3 is the whole run; ORB-SLAM3 publishes in the camera optical frame until inertial initialisation at \SIrange{2.47}{2.64}{\second}, and \cref{tab:exp1-rotation-pattern} gives both figures per run. For IMU dead reckoning the aligned rotation describes the rigid fit, not the orientation estimate: the fit is chosen to overlay a position track that has diverged by \SIrange{11.6}{23.0}{\metre}, and whatever rotation does that is applied to every orientation as well. The anchored yaw of the same rows, \SIrange{0.55}{1.91}{\degree}, and their rotational RPE, at most \SI{0.056}{\degree} over \SI{1}{\second} (\cref{tab:exp1-rpe}), show the heading itself is accurate. \textbf{Bold} marks the lowest aligned ATE of a recording; the measured-noise filter is a diagnostic row, not the baseline, so it is shown bold where it is lowest but is not the slot's result.}
+gives 3.0, and every value here is above it. Aligned rotation is measured from the instant each estimator's published poses enter the gravity-aligned world frame, which for every arm but ORB-SLAM3 is the whole run; ORB-SLAM3 publishes in the camera optical frame until inertial initialisation at \SIrange{2.47}{2.64}{\second}, and \cref{tab:exp1-rotation-pattern} gives both figures per run. For IMU dead reckoning the aligned rotation describes the rigid fit, not the orientation estimate: the fit is chosen to overlay a position track that has diverged by \SIrange{12.0}{23.0}{\metre}, and whatever rotation does that is applied to every orientation as well. The proprioceptive estimators publish a planar track, so their fit turns about the vertical only; an unconstrained fit could also turn a flat track upside down, a mirror image in the floor plane, at no cost in position. The anchored yaw of the same rows, \SIrange{0.55}{1.91}{\degree}, and their rotational RPE, at most \SI{0.056}{\degree} over \SI{1}{\second} (\cref{tab:exp1-rpe}), show the heading itself is accurate. \textbf{Bold} marks the lowest aligned ATE of a recording; the measured-noise filter is a diagnostic row, not the baseline, so it is shown bold where it is lowest but is not the slot's result.}
 \label{tab:exp1-accuracy}
 \scriptsize
 \setlength{\tabcolsep}{3pt}
@@ -205,7 +205,7 @@ Recording & Estimator & Closer & Anch.\ RMS & Anch.\ final & Aligned ATE & Align
  & ORB-SLAM3 GPU, no-LC run & disabled & -- & -- & \textbf{0.17} & 0.39 & -- & -- \\
 \midrule
 \repo{realistic_003} & Wheel odometry & -- & 6.71 & 7.19 & 4.30 & 19.24 & 35.82 & 3399 \\
- & IMU dead reckoning & -- & 13.72 & 35.47 & 11.60 & 180.00 & 1.68 & 140 \\
+ & IMU dead reckoning & -- & 13.72 & 35.47 & 11.97 & 85.27 & 1.68 & 140 \\
  & EKF, VSLAM-config noise & -- & 4.44 & 6.23 & 2.80 & 15.92 & 28.01 & 158 \\
  & EKF, measured noise (diag.) & -- & 0.79 & 1.49 & 0.58 & 3.90 & 5.72 & 106 \\
  & VINS-Fusion & -- & -- & -- & \textbf{0.27} & 1.51 & -- & -- \\
@@ -326,7 +326,19 @@ that held against \SIrange{1.11}{4.51}{\percent} for the five that diverged.
 It is a ratio of two quantities already in the table, not a KITTI-style
 sub-sequence drift rate, and it is not comparable to one.
 
+A post-hoc split of each run into floor-plane and height error, added after the
+results were known, locates the miss of the \SI{0.05}{\metre} target without
+changing it (\cref{tab:exp1-planar-ate}). On the I layout the miss is height:
+after initialisation four ORB-SLAM3 runs hold \SIrange{0.044}{0.062}{\metre}
+in the plane, one of them inside the target, while their height error is
+\SIrange{0.11}{1.72}{\metre}. On the U layout the ORB-SLAM3 runs that did not
+diverge miss it in the plane itself, \SIrange{0.10}{0.33}{\metre} against at
+most \SI{0.12}{\metre} of height, and VINS-Fusion holds
+\SIrange{0.13}{0.26}{\metre} in the plane on every recording.
+
 \reporttable{realistic_baseline_table}
+
+\reporttable{exp1_planar_ate}
 
 \begin{figure}[p]
   \centering
@@ -656,8 +668,8 @@ estimate" as a general statement is not what these recordings show.}
   \SI{3.4}{\metre} ahead, driving the same way at \SI{1.3}{\metre\per\second}.
   (b) the per-second relative pose error of every run on that recording from
   \SI{24}{} to \SI{44}{\second}, half-second rolling median on a logarithmic
-  axis, with the episode shaded: all five rise five- to tenfold inside it and
-  fall back after. The jack had been in view, moving, for the nine seconds
+  axis, with the episode shaded: all five rise inside it, two- to eightfold
+  over the four seconds as measured in the text, and fall back after. The jack had been in view, moving, for the nine seconds
   before the band --- \SIrange{6}{20}{\metre} away and small in the image ---
   with no effect; the cost begins when it is close enough to fill the view.
   \flag{One episode on one recording: it shows what happens when a
@@ -1065,7 +1077,8 @@ with slip under \SI{1}{\percent}, the proprioceptive estimators' best case.
 \emph{Route and traffic confounded:} no two recordings share a route, so
 traffic is a condition of a recording and not a tested factor.
 \emph{Three-dimensional ATE:} the metric charges vertical drift to a floor
-robot; the planar onset table is the complement, not a replacement.
+robot; the planar onset table and the post-hoc planar ATE
+(\cref{tab:exp1-planar-ate}) are the complement, not a replacement.
 \emph{Deployment rate on one laptop:} frame retention and every latency
 figure are properties of this machine at rate 1.0, and the mapping-bag
 repeats were not interleaved between front ends. \emph{Run bookkeeping:} one
@@ -1112,7 +1125,10 @@ and not accuracy. Across the families the EKF at the shared handicap loses to
 VINS-Fusion on every recording and the measured-noise diagnostic beats it on
 three of four, so on these routes the noise model is worth more than the
 choice of estimator. Against the project's target of \SI{0.05}{\metre} ATE no
-estimator qualifies. Against the \SI{0.1}{\metre} RPE target at
+estimator qualifies; in the floor plane one ORB-SLAM3 run does
+(\SI{0.044}{\metre}) and three more come within \SI{0.012}{\metre} of it,
+all on the I layout, where height drift holds the three-dimensional figure
+above the target (\cref{tab:exp1-planar-ate}). Against the \SI{0.1}{\metre} RPE target at
 \SI{1}{\second} (the report's target table), every visual run qualifies on
 jump-free pairs, \SIrange{0.016}{0.070}{\metre}, as do wheel odometry and the
 measured-noise filter; the IMU and the filter on the visual systems' noise
@@ -1171,7 +1187,7 @@ non-visual estimator match them on the same recordings.
 
 \emph{Non-visual.} The bags carry \repo{/feedback/velocity} and
 \repo{/feedback/steering} (\SI{50}{\hertz}, \texttt{std\_msgs/Float64}) and
-the WitMotion yaw sensor on \repo{/hwt101ct_yaw_publisher} (\SI{200}{\hertz}).
+the RealSense IMU on the inherited topic \repo{/hwt101ct_yaw_publisher} (\SI{200}{\hertz}).
 The velocity is in a firmware unit, not metres per second; the steering is a
 command echo that takes two values (0 and $-30$) on every recording and so
 carries no yaw rate; the yaw sensor's orientation field is identity and its

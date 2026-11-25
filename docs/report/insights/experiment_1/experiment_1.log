@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  24 NOV 2026 14:00
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  25 NOV 2026 12:59
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -828,115 +828,117 @@ realistic.png  used on input line 222.
  [3] [4] [5 <../../final_report//figures/proprio_trajectories_grid_realistic.pn
 g>] [6]
 (../../final_report/tables/realistic_baseline_table.tex)
-<../../final_report//figures/realistic_trajectories.png, id=86, 794.97pt x 758.
+(../../final_report/tables/exp1_planar_ate.tex)
+<../../final_report//figures/realistic_trajectories.png, id=91, 794.97pt x 758.
 835pt>
 File: ../../final_report//figures/realistic_trajectories.png Graphic file (type
  png)
 <use ../../final_report//figures/realistic_trajectories.png>
 Package pdftex.def Info: ../../final_report//figures/realistic_trajectories.png
-  used on input line 333.
+  used on input line 345.
 (pdftex.def)             Requested size: 418.82375pt x 399.7954pt.
-<../../final_report//figures/realistic_metrics.png, id=87, 794.97pt x 303.534pt
+<../../final_report//figures/realistic_metrics.png, id=92, 794.97pt x 303.534pt
 >
 File: ../../final_report//figures/realistic_metrics.png Graphic file (type png)
 
 <use ../../final_report//figures/realistic_metrics.png>
 Package pdftex.def Info: ../../final_report//figures/realistic_metrics.png  use
-d on input line 350.
+d on input line 362.
 (pdftex.def)             Requested size: 455.24411pt x 173.82669pt.
- [7] [8 <../../final_report//figures/realistic_trajectories.png>]
-(../../final_report/tables/realistic_baseline_timeline.tex)
-<../../final_report//figures/timeline_realistic__realistic_000.png, id=107, 772
+ [7] [8 <../../final_report//figures/realistic_trajectories.png>] [9 <../../fin
+al_report//figures/realistic_metrics.png>] (../../final_report/tables/realistic
+_baseline_timeline.tex)
+<../../final_report//figures/timeline_realistic__realistic_000.png, id=121, 772
 .77278pt x 331.92578pt>
 File: ../../final_report//figures/timeline_realistic__realistic_000.png Graphic
  file (type png)
 <use ../../final_report//figures/timeline_realistic__realistic_000.png>
 Package pdftex.def Info: ../../final_report//figures/timeline_realistic__realis
-tic_000.png  used on input line 411.
+tic_000.png  used on input line 423.
 (pdftex.def)             Requested size: 446.13727pt x 191.63075pt.
-<../../final_report//figures/timeline_realistic__realistic_001.png, id=108, 761
+<../../final_report//figures/timeline_realistic__realistic_001.png, id=122, 761
 .93228pt x 331.92578pt>
 File: ../../final_report//figures/timeline_realistic__realistic_001.png Graphic
  file (type png)
 <use ../../final_report//figures/timeline_realistic__realistic_001.png>
 Package pdftex.def Info: ../../final_report//figures/timeline_realistic__realis
-tic_001.png  used on input line 425.
+tic_001.png  used on input line 437.
 (pdftex.def)             Requested size: 446.13727pt x 194.35559pt.
-<../../final_report//figures/timeline_realistic__realistic_002.png, id=111, 740
+<../../final_report//figures/timeline_realistic__realistic_002.png, id=125, 740
 .7675pt x 331.92578pt>
 File: ../../final_report//figures/timeline_realistic__realistic_002.png Graphic
  file (type png)
 <use ../../final_report//figures/timeline_realistic__realistic_002.png>
 Package pdftex.def Info: ../../final_report//figures/timeline_realistic__realis
-tic_002.png  used on input line 436.
+tic_002.png  used on input line 448.
 (pdftex.def)             Requested size: 446.13727pt x 199.90659pt.
-<../../final_report//figures/timeline_realistic__realistic_003.png, id=114, 750
+<../../final_report//figures/timeline_realistic__realistic_003.png, id=128, 750
 .05936pt x 331.92578pt>
 File: ../../final_report//figures/timeline_realistic__realistic_003.png Graphic
  file (type png)
 <use ../../final_report//figures/timeline_realistic__realistic_003.png>
 Package pdftex.def Info: ../../final_report//figures/timeline_realistic__realis
-tic_003.png  used on input line 447.
+tic_003.png  used on input line 459.
 (pdftex.def)             Requested size: 446.13727pt x 197.43498pt.
-<../../final_report//figures/exp1_false_closure.png, id=117, 838.332pt x 281.85
+<../../final_report//figures/exp1_false_closure.png, id=131, 838.332pt x 281.85
 3pt>
 File: ../../final_report//figures/exp1_false_closure.png Graphic file (type png
 )
 <use ../../final_report//figures/exp1_false_closure.png>
 Package pdftex.def Info: ../../final_report//figures/exp1_false_closure.png  us
-ed on input line 460.
+ed on input line 472.
 (pdftex.def)             Requested size: 455.24411pt x 153.05849pt.
- [9 <../../final_report//figures/realistic_metrics.png> <../../final_report//fi
-gures/timeline_realistic__realistic_000.png>] [10 <../../final_report//figures/
-timeline_realistic__realistic_001.png>] [11 <../../final_report//figures/timeli
-ne_realistic__realistic_002.png> <../../final_report//figures/timeline_realisti
-c__realistic_003.png>]
-<../../final_report//figures/exp1_frontend_pairs.png, id=142, 722.7pt x 332.442
+ [10]
+[11 <../../final_report//figures/timeline_realistic__realistic_000.png> <../../
+final_report//figures/timeline_realistic__realistic_001.png>] [12 <../../final_
+report//figures/timeline_realistic__realistic_002.png> <../../final_report//fig
+ures/timeline_realistic__realistic_003.png>]
+<../../final_report//figures/exp1_frontend_pairs.png, id=155, 722.7pt x 332.442
 pt>
 File: ../../final_report//figures/exp1_frontend_pairs.png Graphic file (type pn
 g)
 <use ../../final_report//figures/exp1_frontend_pairs.png>
 Package pdftex.def Info: ../../final_report//figures/exp1_frontend_pairs.png  u
-sed on input line 501.
+sed on input line 513.
 (pdftex.def)             Requested size: 418.82375pt x 192.65923pt.
- [12 <../../final_report//figures/exp1_false_closure.png>] [13 <../../final_rep
-ort//figures/exp1_frontend_pairs.png>]
-<../../final_report//figures/exp1_vins_starvation.png, id=165, 794.97pt x 404.7
+ [13 <../../final_report//figures/exp1_false_closure.png> <../../final_report//
+figures/exp1_frontend_pairs.png>]
+<../../final_report//figures/exp1_vins_starvation.png, id=168, 794.97pt x 404.7
 12pt>
 File: ../../final_report//figures/exp1_vins_starvation.png Graphic file (type p
 ng)
 <use ../../final_report//figures/exp1_vins_starvation.png>
 Package pdftex.def Info: ../../final_report//figures/exp1_vins_starvation.png  
-used on input line 599.
+used on input line 611.
 (pdftex.def)             Requested size: 455.24411pt x 231.76894pt.
 
-Overfull \hbox (45.75717pt too wide) in paragraph at lines 613--649
+Overfull \hbox (45.75717pt too wide) in paragraph at lines 625--661
 \T1/ptm/m/n/10.95 (-20) mov-ing can be read for ev-ery win-dow from the truth, 
 with-out a de-tec-tor (\T1/pcr/m/n/10.95 script/exp1_movers_in_view.py\T1/ptm/m
 /n/10.95 (-20) ).
  []
 
-[14 <../../final_report//figures/exp1_vins_starvation.png>]
-<../../final_report//figures/exp1_jack_ahead.png, id=174, 838.332pt x 332.442pt
+[14]
+<../../final_report//figures/exp1_jack_ahead.png, id=177, 838.332pt x 332.442pt
 >
 File: ../../final_report//figures/exp1_jack_ahead.png Graphic file (type png)
 <use ../../final_report//figures/exp1_jack_ahead.png>
 Package pdftex.def Info: ../../final_report//figures/exp1_jack_ahead.png  used 
-on input line 652.
+on input line 664.
 (pdftex.def)             Requested size: 455.24411pt x 180.53053pt.
-
+ [15 <../../final_report//figures/exp1_vins_starvation.png>]
 (../../final_report/tables/exp1_translation_pattern.tex)
-<../../final_report//figures/exp1_translation_pattern.png, id=177, 975.645pt x 
+<../../final_report//figures/exp1_translation_pattern.png, id=187, 975.645pt x 
 527.571pt>
 File: ../../final_report//figures/exp1_translation_pattern.png Graphic file (ty
 pe png)
 <use ../../final_report//figures/exp1_translation_pattern.png>
 Package pdftex.def Info: ../../final_report//figures/exp1_translation_pattern.p
-ng  used on input line 699.
+ng  used on input line 711.
 (pdftex.def)             Requested size: 455.24411pt x 246.17128pt.
- [15 <../../final_report//figures/exp1_jack_ahead.png>] [16 <../../final_report
+ [16 <../../final_report//figures/exp1_jack_ahead.png>] [17 <../../final_report
 //figures/exp1_translation_pattern.png>]
-Overfull \hbox (17.96475pt too wide) in paragraph at lines 738--763
+Overfull \hbox (17.96475pt too wide) in paragraph at lines 750--775
 \T1/ptm/m/n/10.95 (-20) SLAM3's ro-ta-tional RMSE is []--[][][] on \T1/pcr/m/n/
 10.95 realistic_000\T1/ptm/m/n/10.95 (-20) , \T1/pcr/m/n/10.95 realistic_002 \T
 1/ptm/m/n/10.95 (-20) and \T1/pcr/m/n/10.95 realistic_003\T1/ptm/m/n/10.95 (-20
@@ -944,43 +946,44 @@ Overfull \hbox (17.96475pt too wide) in paragraph at lines 738--763
  []
 
 (../../final_report/tables/exp1_rotation_pattern.tex)
-<../../final_report//figures/exp1_rotation_pattern.png, id=194, 975.645pt x 766
+<../../final_report//figures/exp1_rotation_pattern.png, id=204, 975.645pt x 766
 .062pt>
 File: ../../final_report//figures/exp1_rotation_pattern.png Graphic file (type 
 png)
 <use ../../final_report//figures/exp1_rotation_pattern.png>
 Package pdftex.def Info: ../../final_report//figures/exp1_rotation_pattern.png 
- used on input line 768.
+ used on input line 780.
 (pdftex.def)             Requested size: 455.24411pt x 357.4542pt.
- [17] [18 <../../final_report//figures/exp1_rotation_pattern.png>]
-<../../final_report//figures/exp1_imu_init.png, id=209, 838.332pt x 375.804pt>
+ [18] [19 <../../final_report//figures/exp1_rotation_pattern.png>]
+<../../final_report//figures/exp1_imu_init.png, id=220, 838.332pt x 375.804pt>
 File: ../../final_report//figures/exp1_imu_init.png Graphic file (type png)
 <use ../../final_report//figures/exp1_imu_init.png>
 Package pdftex.def Info: ../../final_report//figures/exp1_imu_init.png  used on
- input line 850.
+ input line 862.
 (pdftex.def)             Requested size: 446.13727pt x 199.99518pt.
- [19] [20 <../../final_report//figures/exp1_imu_init.png>]
-<../../final_report//figures/exp1_cost_profile.png, id=229, 549.252pt x 361.35p
+ [20]
+<../../final_report//figures/exp1_cost_profile.png, id=231, 549.252pt x 361.35p
 t>
 File: ../../final_report//figures/exp1_cost_profile.png Graphic file (type png)
 
 <use ../../final_report//figures/exp1_cost_profile.png>
 Package pdftex.def Info: ../../final_report//figures/exp1_cost_profile.png  use
-d on input line 933.
+d on input line 945.
 (pdftex.def)             Requested size: 364.19667pt x 239.6pt.
- (../../final_report/tables/mapping_resources.tex) [21 <../../final_report//fig
-ures/exp1_cost_profile.png>]
-(../../final_report/tables/realistic_resources.tex) [22]
-(../../final_report/tables/mapping_repeats.tex) [23] [24]
-Overfull \hbox (79.5783pt too wide) in paragraph at lines 1172--1182
+ [21 <../../final_report//figures/exp1_imu_init.png>] (../../final_report/table
+s/mapping_resources.tex) [22 <../../final_report//figures/exp1_cost_profile.png
+>]
+(../../final_report/tables/realistic_resources.tex) [23]
+(../../final_report/tables/mapping_repeats.tex) [24] [25]
+Overfull \hbox (79.5783pt too wide) in paragraph at lines 1188--1198
 []\T1/ptm/m/it/10.95 (-20) Non-visual. \T1/ptm/m/n/10.95 (-20) The bags carry \
 T1/pcr/m/n/10.95 /feedback/velocity \T1/ptm/m/n/10.95 (-20) and \T1/pcr/m/n/10.
 95 /feedback/steering \T1/ptm/m/n/10.95 (-20) ([][], \T1/pcr/m/n/10.95 std_msgs
 /Float64\T1/ptm/m/n/10.95 (-20) )
  []
 
-[25]
-Overfull \hbox (29.85236pt too wide) in paragraph at lines 1225--1230
+[26]
+Overfull \hbox (29.85236pt too wide) in paragraph at lines 1241--1246
 [][][]\T1/ptm/m/n/10.95 (-20) . Sources: $\T1/pcr/m/n/10.95 output / compare / 
 real / exp1 -[] wheel/$ \T1/ptm/m/n/10.95 (-20) (\T1/pcr/m/n/10.95 wheel_metric
 s.csv\T1/ptm/m/n/10.95 (-20) , \T1/pcr/m/n/10.95 manifest.json\T1/ptm/m/n/10.95
@@ -988,65 +991,65 @@ s.csv\T1/ptm/m/n/10.95 (-20) , \T1/pcr/m/n/10.95 manifest.json\T1/ptm/m/n/10.95
  []
 
 (../../../../output/compare/real/exp1-wheel/wheel_table.tex)
-<../../../../output/compare/real/exp1-wheel/wheel_paths_light.png, id=286, 1214
+<../../../../output/compare/real/exp1-wheel/wheel_paths_light.png, id=299, 1214
 .136pt x 317.988pt>
 File: ../../../../output/compare/real/exp1-wheel/wheel_paths_light.png Graphic 
 file (type png)
 <use ../../../../output/compare/real/exp1-wheel/wheel_paths_light.png>
 Package pdftex.def Info: ../../../../output/compare/real/exp1-wheel/wheel_paths
-_light.png  used on input line 1258.
+_light.png  used on input line 1274.
 (pdftex.def)             Requested size: 455.24411pt x 119.23064pt.
- [26 <../../../../output/compare/real/exp1-wheel/wheel_paths_light.png>]
+ [27 <../../../../output/compare/real/exp1-wheel/wheel_paths_light.png>]
 (../../../../output/compare/real/realv6-insights/final_table.tex)
-<../../../../output/compare/real/realv6-insights/fig_paths_light.png, id=310, 9
+<../../../../output/compare/real/realv6-insights/fig_paths_light.png, id=322, 9
 39.51pt x 621.522pt>
 File: ../../../../output/compare/real/realv6-insights/fig_paths_light.png Graph
 ic file (type png)
 <use ../../../../output/compare/real/realv6-insights/fig_paths_light.png>
 Package pdftex.def Info: ../../../../output/compare/real/realv6-insights/fig_pa
-ths_light.png  used on input line 1325.
+ths_light.png  used on input line 1341.
 (pdftex.def)             Requested size: 455.24411pt x 301.16278pt.
 
-(../../../../output/compare/real/realv6-insights/gt_cleaning.tex) [27] [28 <../
+(../../../../output/compare/real/realv6-insights/gt_cleaning.tex) [28] [29 <../
 ../../../output/compare/real/realv6-insights/fig_paths_light.png>]
 <../../../../output/compare/real/realv6-insights/fig_orb_timeline_light.png, id
-=332, 722.7pt x 737.154pt>
+=344, 722.7pt x 737.154pt>
 File: ../../../../output/compare/real/realv6-insights/fig_orb_timeline_light.pn
 g Graphic file (type png)
 <use ../../../../output/compare/real/realv6-insights/fig_orb_timeline_light.png
 >
 Package pdftex.def Info: ../../../../output/compare/real/realv6-insights/fig_or
-b_timeline_light.png  used on input line 1363.
+b_timeline_light.png  used on input line 1379.
 (pdftex.def)             Requested size: 455.24411pt x 464.35324pt.
 
 (../../../../output/compare/real/realv6-insights/turning.tex)
 (../../../../output/compare/real/realv6-insights/vins_table.tex)
-<../../../../output/compare/real/realv6-insights/fig_vins_light.png, id=333, 72
+<../../../../output/compare/real/realv6-insights/fig_vins_light.png, id=345, 72
 2.7pt x 375.804pt>
 File: ../../../../output/compare/real/realv6-insights/fig_vins_light.png Graphi
 c file (type png)
 <use ../../../../output/compare/real/realv6-insights/fig_vins_light.png>
 Package pdftex.def Info: ../../../../output/compare/real/realv6-insights/fig_vi
-ns_light.png  used on input line 1394.
+ns_light.png  used on input line 1410.
 (pdftex.def)             Requested size: 455.24411pt x 236.7291pt.
 
-Overfull \hbox (3.63155pt too wide) in paragraph at lines 1401--1407
+Overfull \hbox (3.63155pt too wide) in paragraph at lines 1417--1423
  []\T1/ptm/b/n/10.95 (-20) Second record-ing set, re-alv7.[] \T1/ptm/m/n/10.95 
 (-20) Three fur-ther record-ings of 3 Novem-ber 2026 (\T1/pcr/m/n/10.95 dataset
 _realv7_000\T1/ptm/m/n/10.95 (-20) ,
  []
 
-[29] [30 <../../../../output/compare/real/realv6-insights/fig_orb_timeline_ligh
-t.png>] [31 <../../../../output/compare/real/realv6-insights/fig_vins_light.png
+[30] [31 <../../../../output/compare/real/realv6-insights/fig_orb_timeline_ligh
+t.png>] [32 <../../../../output/compare/real/realv6-insights/fig_vins_light.png
 >] (../../../../output/compare/real/realv7-insights/patch15_table.tex)
 <../../../../output/compare/real/realv7-insights/fig_paths_patch15_light.png, i
-d=355, 1264.725pt x 1011.78pt>
+d=367, 1264.725pt x 1011.78pt>
 File: ../../../../output/compare/real/realv7-insights/fig_paths_patch15_light.p
 ng Graphic file (type png)
 <use ../../../../output/compare/real/realv7-insights/fig_paths_patch15_light.pn
 g>
 Package pdftex.def Info: ../../../../output/compare/real/realv7-insights/fig_pa
-ths_patch15_light.png  used on input line 1519.
+ths_patch15_light.png  used on input line 1535.
 (pdftex.def)             Requested size: 455.24411pt x 364.1942pt.
 
 (../../../../output/compare/real/realv7-insights/vins_table.tex
@@ -1056,45 +1059,45 @@ LaTeX Warning: Reference `tab:real-rig' on page 1 undefined on input line 4.
 
 LaTeX Warning: Reference `tab:real-rig' on page 1 undefined on input line 4.
 
-) [32] [33] [34 <../../../../output/compare/real/realv7-insights/fig_paths_patc
+) [33] [34] [35 <../../../../output/compare/real/realv7-insights/fig_paths_patc
 h15_light.png>]
-<../../final_report//figures/exp1_real_frontend_pairs.png, id=385, 722.7pt x 33
+<../../final_report//figures/exp1_real_frontend_pairs.png, id=397, 722.7pt x 33
 2.442pt>
 File: ../../final_report//figures/exp1_real_frontend_pairs.png Graphic file (ty
 pe png)
 <use ../../final_report//figures/exp1_real_frontend_pairs.png>
 Package pdftex.def Info: ../../final_report//figures/exp1_real_frontend_pairs.p
-ng  used on input line 1620.
+ng  used on input line 1636.
 (pdftex.def)             Requested size: 418.82375pt x 192.65923pt.
-<../../final_report//figures/exp1_real_translation_pattern.png, id=388, 903.375
+<../../final_report//figures/exp1_real_translation_pattern.png, id=400, 903.375
 pt x 462.528pt>
 File: ../../final_report//figures/exp1_real_translation_pattern.png Graphic fil
 e (type png)
 <use ../../final_report//figures/exp1_real_translation_pattern.png>
 Package pdftex.def Info: ../../final_report//figures/exp1_real_translation_patt
-ern.png  used on input line 1634.
+ern.png  used on input line 1650.
 (pdftex.def)             Requested size: 455.24411pt x 233.09134pt.
  (../../final_report/tables/real_resources_runs.tex)
 (../../final_report/tables/real_resources_repeats.tex)
-<../../final_report//figures/exp1_dataset_compare.png, id=398, 830.886pt x 578.
+<../../final_report//figures/exp1_dataset_compare.png, id=410, 830.886pt x 578.
 16pt>
 File: ../../final_report//figures/exp1_dataset_compare.png Graphic file (type p
 ng)
 <use ../../final_report//figures/exp1_dataset_compare.png>
 Package pdftex.def Info: ../../final_report//figures/exp1_dataset_compare.png  
-used on input line 1675.
+used on input line 1691.
 (pdftex.def)             Requested size: 455.24411pt x 316.77155pt.
- [35] [36 <../../final_report//figures/exp1_real_frontend_pairs.png> <../../fin
-al_report//figures/exp1_real_translation_pattern.png>] [37] [38 <../../final_re
+ [36] [37 <../../final_report//figures/exp1_real_frontend_pairs.png> <../../fin
+al_report//figures/exp1_real_translation_pattern.png>] [38] [39 <../../final_re
 port//figures/exp1_dataset_compare.png>]
-<../../final_report//figures/exp1_drift_rate.png, id=429, 751.608pt x 324.996pt
+<../../final_report//figures/exp1_drift_rate.png, id=442, 751.608pt x 324.996pt
 >
 File: ../../final_report//figures/exp1_drift_rate.png Graphic file (type png)
 <use ../../final_report//figures/exp1_drift_rate.png>
 Package pdftex.def Info: ../../final_report//figures/exp1_drift_rate.png  used 
-on input line 1766.
+on input line 1782.
 (pdftex.def)             Requested size: 418.82375pt x 181.09892pt.
- [39 <../../final_report//figures/exp1_drift_rate.png>] [40]
+ [40 <../../final_report//figures/exp1_drift_rate.png>] [41]
 (./experiment_1.aux)
 
 LaTeX Warning: There were undefined references.
@@ -1103,11 +1106,11 @@ Package rerunfilecheck Info: File `experiment_1.out' has not changed.
 (rerunfilecheck)             Checksum: 15D077211A6091F6EC564D80FF2672A6;193.
  ) 
 Here is how much of TeX's memory you used:
- 21201 strings out of 480171
- 409539 string characters out of 5894489
- 723728 words of memory out of 5000000
- 38083 multiletter control sequences out of 15000+600000
- 570396 words of font info for 513 fonts, out of 8000000 for 9000
+ 21220 strings out of 480171
+ 409950 string characters out of 5894489
+ 725728 words of memory out of 5000000
+ 38088 multiletter control sequences out of 15000+600000
+ 570878 words of font info for 519 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
  76i,13n,115p,1785b,932s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
@@ -1120,10 +1123,10 @@ rier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/symbol/usyr.pfb>
 ive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/
 fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw
 /times/utmri8a.pfb>
-Output written on experiment_1.pdf (40 pages, 5078223 bytes).
+Output written on experiment_1.pdf (41 pages, 5081752 bytes).
 PDF statistics:
- 521 PDF objects out of 1000 (max. 8388607)
- 385 compressed objects within 4 object streams
- 138 named destinations out of 1000 (max. 500000)
+ 534 PDF objects out of 1000 (max. 8388607)
+ 395 compressed objects within 4 object streams
+ 140 named destinations out of 1000 (max. 500000)
  103049 words of extra memory for PDF output out of 106986 (max. 10000000)
 

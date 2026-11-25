@@ -27,44 +27,44 @@
 \contentsline {figure}{\numberline {3.16}{\ignorespaces Dimensions of the Neousys NRU-51V in millimetres.\relax }}{46}{figure.caption.85}%
 \addvspace {10\p@ }
 \contentsline {figure}{\numberline {4.1}{\ignorespaces Estimator comparison on every realistic recording, world frame.}}{67}{figure.caption.116}%
-\contentsline {figure}{\numberline {4.2}{\ignorespaces Visual estimates on the four realistic recordings.}}{70}{figure.caption.121}%
-\contentsline {figure}{\numberline {4.3}{\ignorespaces Aligned ATE and jump-free RPE of the visual arms.}}{71}{figure.caption.122}%
-\contentsline {figure}{\numberline {4.4}{\ignorespaces Timelines, static U-layout recording.}}{72}{figure.caption.125}%
-\contentsline {figure}{\numberline {4.5}{\ignorespaces Timelines, static I-layout recording.}}{73}{figure.caption.126}%
-\contentsline {figure}{\numberline {4.6}{\ignorespaces Timelines, U-layout recording with traffic.}}{73}{figure.caption.127}%
-\contentsline {figure}{\numberline {4.7}{\ignorespaces Timelines, I-layout recording with traffic.}}{74}{figure.caption.128}%
-\contentsline {figure}{\numberline {4.8}{\ignorespaces The two views the false loop closure joined.}}{74}{figure.caption.129}%
-\contentsline {figure}{\numberline {4.9}{\ignorespaces The front end paired within recording and loop-closer state.}}{75}{figure.caption.131}%
-\contentsline {figure}{\numberline {4.10}{\ignorespaces VINS-Fusion's excursion on the U traffic recording is feature starvation, and it repeats.}}{77}{figure.caption.134}%
-\contentsline {figure}{\numberline {4.11}{\ignorespaces The one co-moving object in the traffic recordings, and what it costs.}}{78}{figure.caption.136}%
-\contentsline {figure}{\numberline {4.12}{\ignorespaces What the visual estimators' translation error is made of.}}{79}{figure.caption.139}%
-\contentsline {figure}{\numberline {4.13}{\ignorespaces The orientation error, with the published frame separated from the estimate.}}{81}{figure.caption.143}%
-\contentsline {figure}{\numberline {4.14}{\ignorespaces The inertial initialisation the method specifies.}}{83}{figure.caption.147}%
-\contentsline {figure}{\numberline {4.15}{\ignorespaces What each pipeline costs on the mapping recordings.}}{85}{figure.caption.151}%
-\contentsline {figure}{\numberline {4.16}{\ignorespaces Wheel+gyro dead reckoning against the tracker.}}{90}{figure.caption.164}%
-\contentsline {figure}{\numberline {4.17}{\ignorespaces Real runs against the cleaned tracker truth.}}{95}{figure.caption.169}%
-\contentsline {figure}{\numberline {4.18}{\ignorespaces ORB-SLAM3 planar error over the run.}}{96}{figure.caption.172}%
-\contentsline {figure}{\numberline {4.19}{\ignorespaces VINS-Fusion resets and IMU sample use.}}{97}{figure.caption.175}%
-\contentsline {figure}{\numberline {4.20}{\ignorespaces Every real-robot run with patch 15, scored raw, with VINS-Fusion beside them.}}{98}{figure.caption.179}%
-\contentsline {figure}{\numberline {4.21}{\ignorespaces The front end paired within recording and loop-closer state, real robot.}}{99}{figure.caption.183}%
-\contentsline {figure}{\numberline {4.22}{\ignorespaces What the real-robot translation error is made of.}}{100}{figure.caption.184}%
-\contentsline {figure}{\numberline {4.23}{\ignorespaces What the two datasets give the estimators.}}{102}{figure.caption.189}%
-\contentsline {figure}{\numberline {4.24}{\ignorespaces The real rig's drift charged by time and by distance.}}{103}{figure.caption.195}%
-\contentsline {figure}{\numberline {4.25}{\ignorespaces Dense-map evaluation of \repo {map/map_tiny.db}.}}{108}{figure.caption.207}%
-\contentsline {figure}{\numberline {4.26}{\ignorespaces The same database scored against the run that built it, \repo {dataset/dataset_map_tiny}.}}{109}{figure.caption.208}%
-\contentsline {figure}{\numberline {4.27}{\ignorespaces Placement overlay of \repo {map/map_realistic} (U-A).}}{113}{figure.caption.216}%
-\contentsline {figure}{\numberline {4.28}{\ignorespaces Placement overlay of the U-Bember database.}}{114}{figure.caption.217}%
-\contentsline {figure}{\numberline {4.29}{\ignorespaces Dense-map evaluation of \repo {map/map_realistic} (U-A) against the independent probe.}}{115}{figure.caption.218}%
-\contentsline {figure}{\numberline {4.30}{\ignorespaces Dense-map evaluation of the U-Bember database.}}{116}{figure.caption.219}%
-\contentsline {figure}{\numberline {4.31}{\ignorespaces Dense-map evaluation of \repo {map/map_realistic_01} (I-A) against the independent probe.}}{120}{figure.caption.220}%
-\contentsline {figure}{\numberline {4.32}{\ignorespaces Dense-map evaluation of the I-Bember database.}}{121}{figure.caption.221}%
-\contentsline {figure}{\numberline {4.33}{\ignorespaces Every navigation run, planar error against distance driven, by layout.}}{125}{figure.caption.233}%
-\contentsline {figure}{\numberline {4.34}{\ignorespaces U layout, figure-of-eight: the published pose against the truth and the prior.}}{126}{figure.caption.234}%
-\contentsline {figure}{\numberline {4.35}{\ignorespaces I layout, figure-of-eight: the only run to cross a metre.}}{126}{figure.caption.235}%
-\contentsline {figure}{\numberline {4.36}{\ignorespaces U layout, square: the run that ends displaced.}}{127}{figure.caption.236}%
-\contentsline {figure}{\numberline {4.37}{\ignorespaces Heading error against ground truth, by layout.}}{128}{figure.caption.238}%
-\contentsline {figure}{\numberline {4.38}{\ignorespaces What RTAB-Map's place recognition proposes, and what its geometry does with it.}}{131}{figure.caption.243}%
-\contentsline {figure}{\numberline {4.39}{\ignorespaces U layout, straight: the shortest U route.}}{134}{figure.caption.249}%
-\contentsline {figure}{\numberline {4.40}{\ignorespaces I layout, straight: the weakest run of the six.}}{134}{figure.caption.250}%
-\contentsline {figure}{\numberline {4.41}{\ignorespaces I layout, square: a displaced but stable pose.}}{135}{figure.caption.251}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Visual estimates on the four realistic recordings.}}{71}{figure.caption.122}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Aligned ATE and jump-free RPE of the visual arms.}}{72}{figure.caption.123}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Timelines, static U-layout recording.}}{74}{figure.caption.126}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Timelines, static I-layout recording.}}{74}{figure.caption.127}%
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Timelines, U-layout recording with traffic.}}{75}{figure.caption.128}%
+\contentsline {figure}{\numberline {4.7}{\ignorespaces Timelines, I-layout recording with traffic.}}{75}{figure.caption.129}%
+\contentsline {figure}{\numberline {4.8}{\ignorespaces The two views the false loop closure joined.}}{76}{figure.caption.130}%
+\contentsline {figure}{\numberline {4.9}{\ignorespaces The front end paired within recording and loop-closer state.}}{76}{figure.caption.132}%
+\contentsline {figure}{\numberline {4.10}{\ignorespaces VINS-Fusion's excursion on the U traffic recording is feature starvation, and it repeats.}}{78}{figure.caption.135}%
+\contentsline {figure}{\numberline {4.11}{\ignorespaces The one co-moving object in the traffic recordings, and what it costs.}}{79}{figure.caption.137}%
+\contentsline {figure}{\numberline {4.12}{\ignorespaces What the visual estimators' translation error is made of.}}{81}{figure.caption.140}%
+\contentsline {figure}{\numberline {4.13}{\ignorespaces The orientation error, with the published frame separated from the estimate.}}{82}{figure.caption.144}%
+\contentsline {figure}{\numberline {4.14}{\ignorespaces The inertial initialisation the method specifies.}}{84}{figure.caption.148}%
+\contentsline {figure}{\numberline {4.15}{\ignorespaces What each pipeline costs on the mapping recordings.}}{86}{figure.caption.152}%
+\contentsline {figure}{\numberline {4.16}{\ignorespaces Wheel+gyro dead reckoning against the tracker.}}{91}{figure.caption.165}%
+\contentsline {figure}{\numberline {4.17}{\ignorespaces Real runs against the cleaned tracker truth.}}{98}{figure.caption.170}%
+\contentsline {figure}{\numberline {4.18}{\ignorespaces ORB-SLAM3 planar error over the run.}}{99}{figure.caption.173}%
+\contentsline {figure}{\numberline {4.19}{\ignorespaces VINS-Fusion resets and IMU sample use.}}{100}{figure.caption.176}%
+\contentsline {figure}{\numberline {4.20}{\ignorespaces Every real-robot run with patch 15, scored raw, with VINS-Fusion beside them.}}{101}{figure.caption.180}%
+\contentsline {figure}{\numberline {4.21}{\ignorespaces The front end paired within recording and loop-closer state, real robot.}}{102}{figure.caption.184}%
+\contentsline {figure}{\numberline {4.22}{\ignorespaces What the real-robot translation error is made of.}}{102}{figure.caption.185}%
+\contentsline {figure}{\numberline {4.23}{\ignorespaces What the two datasets give the estimators.}}{103}{figure.caption.190}%
+\contentsline {figure}{\numberline {4.24}{\ignorespaces The real rig's drift charged by time and by distance.}}{104}{figure.caption.196}%
+\contentsline {figure}{\numberline {4.25}{\ignorespaces Dense-map evaluation of \repo {map/map_tiny.db}.}}{109}{figure.caption.208}%
+\contentsline {figure}{\numberline {4.26}{\ignorespaces The same database scored against the run that built it, \repo {dataset/dataset_map_tiny}.}}{110}{figure.caption.209}%
+\contentsline {figure}{\numberline {4.27}{\ignorespaces Placement overlay of \repo {map/map_realistic} (U-A).}}{114}{figure.caption.217}%
+\contentsline {figure}{\numberline {4.28}{\ignorespaces Placement overlay of the U-Bember database.}}{115}{figure.caption.218}%
+\contentsline {figure}{\numberline {4.29}{\ignorespaces Dense-map evaluation of \repo {map/map_realistic} (U-A) against the independent probe.}}{116}{figure.caption.219}%
+\contentsline {figure}{\numberline {4.30}{\ignorespaces Dense-map evaluation of the U-Bember database.}}{117}{figure.caption.220}%
+\contentsline {figure}{\numberline {4.31}{\ignorespaces Dense-map evaluation of \repo {map/map_realistic_01} (I-A) against the independent probe.}}{121}{figure.caption.221}%
+\contentsline {figure}{\numberline {4.32}{\ignorespaces Dense-map evaluation of the I-Bember database.}}{122}{figure.caption.222}%
+\contentsline {figure}{\numberline {4.33}{\ignorespaces Every navigation run, planar error against distance driven, by layout.}}{126}{figure.caption.234}%
+\contentsline {figure}{\numberline {4.34}{\ignorespaces U layout, figure-of-eight: the published pose against the truth and the prior.}}{127}{figure.caption.235}%
+\contentsline {figure}{\numberline {4.35}{\ignorespaces I layout, figure-of-eight: the only run to cross a metre.}}{127}{figure.caption.236}%
+\contentsline {figure}{\numberline {4.36}{\ignorespaces U layout, square: the run that ends displaced.}}{128}{figure.caption.237}%
+\contentsline {figure}{\numberline {4.37}{\ignorespaces Heading error against ground truth, by layout.}}{130}{figure.caption.239}%
+\contentsline {figure}{\numberline {4.38}{\ignorespaces What RTAB-Map's place recognition proposes, and what its geometry does with it.}}{133}{figure.caption.246}%
+\contentsline {figure}{\numberline {4.39}{\ignorespaces U layout, straight: the shortest U route.}}{136}{figure.caption.252}%
+\contentsline {figure}{\numberline {4.40}{\ignorespaces I layout, straight: the weakest run of the six.}}{136}{figure.caption.253}%
+\contentsline {figure}{\numberline {4.41}{\ignorespaces I layout, square: a displaced but stable pose.}}{137}{figure.caption.254}%
 \addvspace {10\p@ }

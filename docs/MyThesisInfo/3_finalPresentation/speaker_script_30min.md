@@ -1,6 +1,6 @@
 # WiL final presentation — 30-minute speaker script
 
-Deck: `WiL final presentation compressed.pdf` (version of 25 Nov 2026), main slides 1–54; appendix from 55 is for questions only.
+Deck: `WiL final presentation compressed.pdf` (version of 25 Nov 2026), main slides 1–53; slide 54 opens the appendix, which is for questions only (the hardware table is now appendix slide 76).
 Pace: the spoken text is about 3,000 words, which is about 110 words a minute once you pause to point at the figures. Times in brackets are per slide; the **clock** line is where you should be at the end of each part.
 Numbers match the final report as rebuilt on 25 Nov 2026.
 
@@ -10,12 +10,12 @@ Numbers match the final report as rebuilt on 25 Nov 2026.
 | Requirements and scope | 9–10 | 1:45 | 5:25 |
 | Literature review | 11–15 | 2:45 | 8:10 |
 | Methodology | 16–20 | 2:25 | 10:35 |
-| Experimental setup | 21–24 | 1:50 | 12:25 |
-| Experiment 1 | 25–40 | 8:00 | 20:25 |
-| Experiment 2 | 41–50 | 5:50 | 26:15 |
-| Summary, limitations, plan | 51–54 | 1:50 | 28:05 |
+| Experimental setup | 21–23 | 1:20 | 11:55 |
+| Experiment 1 | 24–39 | 8:00 | 19:55 |
+| Experiment 2 | 40–49 | 5:50 | 25:45 |
+| Summary, limitations, plan | 50–53 | 1:50 | 27:35 |
 
-Spare: about two minutes, for slide changes and for slowing down on slides 29, 38, 48 and 49, which carry the findings. If you run late, shorten slides 5–7, 26, 31 and 43 first: they are context, not findings.
+Spare: about two and a half minutes, for slide changes and for slowing down on slides 28, 37, 47 and 48, which carry the findings. If you run late, shorten slides 5–7, 25, 30 and 42 first: they are context, not findings.
 
 ---
 
@@ -107,139 +107,138 @@ And the gate is my addition. In localisation mode RTAB-Map's output is a correct
 
 ---
 
-## Part 5 — Experimental setup (1:50)
+## Part 5 — Experimental setup (1:20)
 
 **Slides 21–22 — U and I layouts** [0:35]
 To test this I built two warehouse layouts from a forwarding-industry guideline. The U shape has receiving and dispatch on the same side, with storage around the back. The I shape is a straight flow, receiving at one end and dispatch at the other. Both are generated from the same script, with pallet racks, pallet jacks driving on jobs, and walking people.
 
-**Slide 23 — Hardware** [0:40]
-The two domains. In simulation, a pinhole stereo pair at 30 hertz with exact calibration and a perfect ground truth. On the robot, two Sony IMX390 fisheye cameras, a RealSense IMU at 200 hertz, extrinsics measured by tape, and an optical tracker for ground truth, which is planar and has a marker offset we have not yet measured. Keep that last point in mind for the real-robot numbers.
-
-**Slide 24 — The two experiments** [0:35]
+**Slide 23 — The two experiments** [0:45]
 That gives two experiments. Experiment 1 asks how well each estimator localises, in static scenes and with traffic, against non-visual baselines. Experiment 2 is the SLAM part: build a prior map, judge whether it reflects the warehouse, and judge whether the robot can relocalise in it well enough to hand Nav2 a usable pose.
 
-**Clock: 12:25**
+Both run in two domains. Simulation has exact calibration and perfect ground truth. The real robot has fisheye cameras, tape-measured extrinsics, and an optical tracker whose marker offset is not yet measured; keep that in mind for the real-robot numbers. The hardware table is in the appendix.
+
+**Clock: 11:55**
 
 ---
 
 ## Part 6 — Experiment 1 (8:00)
 
-**Slide 25 — Process** [0:30]
+**Slide 24 — Process** [0:30]
 Experiment 1 has three steps. Collect the datasets. Measure the sensor noise against ground truth, so every estimator gets honest noise values. Then reconstruct the route five ways: wheels only, IMU only, wheels and IMU fused in a Kalman filter, VINS-Fusion, and ORB-SLAM3. The main metric is aligned ATE, the RMS error after the best rigid fit.
 
-**Slide 26 — Simulation datasets** [0:10]
+**Slide 25 — Simulation datasets** [0:10]
 Four recordings, 100 to 170 metres each: U static, I static, and the same two layouts with traffic.
 
-**Slide 27 — Non-visual estimators** [0:25]
+**Slide 26 — Non-visual estimators** [0:25]
 The three baselines. Wheel odometry integrates wheel speeds and steering. IMU dead reckoning integrates the gyro and accelerometer. The EKF predicts with the IMU and corrects the speed with the wheels.
 
-**Slide 28 — Noise** [0:20]
+**Slide 27 — Noise** [0:20]
 Our simulated IMU is twice as noisy as the EuRoC benchmark in the gyroscope and nine times in the accelerometer. So this is a harder IMU than the one most published results are tuned on.
 
-**Slide 29 — ATE** [0:50]
+**Slide 28 — ATE** [0:50]
 Here is the main result. Each panel is one recording. The IMU alone drifts 12 to 23 metres; wheels 1 to 5 metres; the filter 0.7 to 2.8. The visual estimators sit far below: VINS-Fusion 0.22 to 0.66 metres, and ORB-SLAM3 0.14 to 0.52 metres in 11 of its 16 runs.
 
 The other five ORB-SLAM3 runs diverge, and you can see two of them here: ORB with loop closure on the I-static recording reaches almost 5 metres, and ORB without it on the I-traffic recording almost 2. I will come back to both.
 
-**Slide 30 — RPE** [0:40]
+**Slide 29 — RPE** [0:40]
 Relative error over one second tells a different story. Every visual run is between 1.6 and 7 centimetres per second, inside the 10-centimetre target. Wheels pass too. The IMU alone and the filter on the visual systems' noise model do not. So locally, frame to frame, the cameras are good. What fails the 5-centimetre ATE target is accumulation over the route, and the occasional large event.
 
-**Slide 31 — Real datasets** [0:10]
+**Slide 30 — Real datasets** [0:10]
 On the real robot, four recordings at Gensurv, 22 to 37 metres each.
 
-**Slide 32 — Real ATE** [0:40]
+**Slide 31 — Real ATE** [0:40]
 ORB-SLAM3, in its four configurations, holds 0.19 to 0.48 metres, and on the three later recordings its configurations agree within about 2 centimetres. VINS-Fusion completes all of them at 0.37 to 0.79 metres. One caution: the robot was driven at 0.28 metres per second, not the design speed of 1.5, and the tracker's marker offset is not measured, so read these as the same accuracy class as simulation, not as a target test.
 
-**Slide 33 — Real RPE** [0:15]
+**Slide 32 — Real RPE** [0:15]
 Per second, both stay under the 10-centimetre target: about 5 to 9 centimetres.
 
-**Slide 34 — Simulation versus real** [0:35]
+**Slide 33 — Simulation versus real** [0:35]
 Is the real camera worse? No. The real images have 1.7 times the gradient and three times the corners per frame. What differs is motion. Per metre, the real robot drifts ten times more than simulation; per second, only twice. Because the real robot drives slowly, the IMU integrates far longer for every metre travelled. So we compare the domains per second, never per metre.
 
-**Slide 35 — Front end paired** [0:30]
+**Slide 34 — Front end paired** [0:30]
 Does the GPU front end help? It keeps 97 to 99 percent of frames against 72 to 74 for the CPU, but the ATE does not follow. On I-static both loop-closing runs are metres off, CPU and GPU alike. What decides the error is the loop closer and the recording, not the front end.
 
-**Slide 36 — Dynamic scene** [0:35]
+**Slide 35 — Dynamic scene** [0:35]
 Now traffic. Here a pallet jack drives just ahead of the camera, from 24 to 44 seconds, shown on the left. On the right, the error each run makes per second. Inside the shaded window all five runs rise two- to eightfold, then fall back. Over the four seconds that is less than 10 centimetres in total, and no run loses tracking. So traffic raises the local error, but at this density it does not drive the global error.
 
-**Slide 37 — VINS-Fusion feature tracking** [0:30]
+**Slide 36 — VINS-Fusion feature tracking** [0:30]
 VINS-Fusion's weak spot is different. On the U-traffic recording, when the camera faces a blank wall, its tracked features fall below the 120 line, and its position error climbs to half a metre. Two runs of the same recording behave the same way, so this is the scene, not chance.
 
-**Slide 38 — The false closure** [0:35]
+**Slide 37 — The false closure** [0:35]
 And this is the biggest failure in the experiment. On the I-static recording, both loop-closing ORB-SLAM3 runs accept one loop closure at 73.2 seconds, and in that single step the error goes to 14 metres. The two aisles look alike, the closure is self-consistent, and nothing asks whether a 14-metre jump is plausible after half a metre of drift. That question is exactly what my correction gate asks in Experiment 2.
 
-**Slide 39 — Computation** [0:25]
+**Slide 38 — Computation** [0:25]
 On cost, the two pipelines sit in opposite corners. ORB-SLAM3 needs about four times the memory but under half the processor time; VINS-Fusion about eight cores' worth. The two ORB-SLAM3 front ends sit together, so the feature extractor is not what separates the pipelines.
 
-**Slide 40 — Summary of Experiment 1** [0:50]
+**Slide 39 — Summary of Experiment 1** [0:50]
 Three messages. One: the visual estimators are about ten times better than any non-visual one, but none reaches the 5-centimetre target. Why not? On the I layout it is height: the robot drives on a flat floor, yet the estimate drifts up and down. In the floor plane alone, one ORB-SLAM3 run reaches 4.4 centimetres and three more about 6. On the U layout the error is in the plane itself, 10 to 33 centimetres.
 
 Two: the big failures come from the loop closer on look-alike aisles, not from traffic.
 
 Three: on the real robot both pipelines work, after two fixes to VINS-Fusion: masking the fisheye rim beyond 70 degrees, and holding the stereo extrinsics fixed.
 
-**Clock: 20:25**
+**Clock: 19:55**
 
 ---
 
 ## Part 7 — Experiment 2 (5:50)
 
-**Slide 41 — Objective** [0:25]
+**Slide 40 — Objective** [0:25]
 Experiment 2 asks two things. Does the prior map reflect the real warehouse, well enough for a planner? And does the robot relocalise in it accurately and continuously enough to hand Nav2 a usable pose? Metrics: precision, recall and false obstacles for the map; tracking error, availability and continuity for the pose.
 
-**Slide 42 — Which front end, and why** [0:30]
+**Slide 41 — Which front end, and why** [0:30]
 For this experiment the front end is ORB-SLAM3. The reason is the robot's computer. On the laptop, VINS-Fusion used about eight cores' worth of processor time and ORB-SLAM3 about four. The robot's Carmel CPU has six cores, so ORB-SLAM3 is the one that fits; and streaming two cameras to a laptop over the network was not an option on the real robot.
 
-**Slide 43 — Map datasets** [0:15]
+**Slide 42 — Map datasets** [0:15]
 Three mapping recordings: the tiny warehouse, and one long drive of about 375 metres through each realistic layout.
 
-**Slide 44 — Map result** [0:40]
+**Slide 43 — Map result** [0:40]
 The tiny map passes every target: 96.6 percent precision, 89.5 percent completeness, 0.7 percent false obstacles. The realistic maps fail: precision 78 and 82 percent, and false obstacles up to 10 percent. But their pose graphs are accurate, within tens of centimetres over the whole route. So the failure is in building the grid, not in the poses. Most of the obstacles that block the route are laid in the first seconds, during the inertial start-up.
 
-**Slide 45 — Relocalisation runs** [0:15]
+**Slide 44 — Relocalisation runs** [0:15]
 Then six relocalisation runs, three route shapes per layout, straight, square and figure-eight, from 21 to 148 metres.
 
-**Slide 46 — Tracking result** [0:35]
+**Slide 45 — Tracking result** [0:35]
 The localised pose holds a median of 13 to 21 centimetres in every run. Five of six meet the availability target; only the I straight is blind 12.5 percent of the time. Four have no pose jump. One run, the I figure-eight, went over a metre for 6.5 seconds, and recovered.
 
-**Slide 47 — Planar error** [0:50]
+**Slide 46 — Planar error** [0:50]
 Here is the error against distance. On the U layout it stays between about 10 and 25 centimetres for 150 metres. On the I layout it grows over the first 20 to 40 metres and then drops back; the straight run never drops back. How does this compare with the map? Along the route, the map's own nodes are off by 9 to 14 centimetres, and the localised pose is 1 to 1.7 times that. So the map bounds the error. But inside a run, places where the map is worse do not show larger error, so whether a better map would lower it is still to be tested.
 
-**Slide 48 — Place recognition** [0:40]
+**Slide 47 — Place recognition** [0:40]
 Now the safety side. Over six runs, place recognition made 346 proposals, and 251 were accepted. On the right are the 95 rejected ones. The horizontal axis is how many visual words matched; the vertical axis is how many features agreed in 3-D. Some proposals share 150 to 190 words and have zero geometric agreement. That is the look-alike aisle: it looks the same and it is not the same place. Words alone would have accepted them.
 
-**Slide 49 — The correction gate** [0:55]
+**Slide 48 — The correction gate** [0:55]
 And the gate catches what geometry lets through. It accepted 63 of 68 corrections and refused 5, all on the U square. On the left you can see they are separate: the accepted corrections are small and inside the box, and the refused ones are steps of four to six metres. Replaying the run without the gate, those five would have put the robot 2.7 to 4.7 metres off. That figure comes from a replay, because the ungated runs were lost. With the gate, all six runs hold 13 to 21 centimetres. Panel b compares the prior with ORB-SLAM3 alone; treat it as a trend only, because the two are on slightly different time bases.
 
-**Slide 50 — Summary of Experiment 2** [0:45]
+**Slide 49 — Summary of Experiment 2** [0:45]
 Three messages. One: the poses are right, the grid is not. The tiny map passes, the realistic maps fail on false obstacles, though their poses are accurate. Two: two filters stop a look-alike aisle from moving the robot. Geometry rejected 95 proposals, and the gate refused the 5 corrections that would have moved it metres. Three: the relocalised pose holds 13 to 21 centimetres, bounded by the map.
 
-**Clock: 26:15**
+**Clock: 25:45**
 
 ---
 
 ## Part 8 — Summary, limitations, plan (1:50)
 
-**Slide 51 — Requirements** [0:45]
+**Slide 50 — Requirements** [0:45]
 Against the requirements. ATE: not met. The best run is 0.14 metres, about three times the target. RPE: met, in both domains. Map precision, completeness and false obstacles: met on the tiny map, not on the realistic maps. Availability: met in 5 of 6 runs. Continuity: met in 4 of 6. The real-robot map cells are empty because no prior map was built from real imagery.
 
-**Slide 52 — Limitations** [0:35]
+**Slide 51 — Limitations** [0:35]
 Three limitations. Building a map with a non-holonomic robot and two forward cameras is hard: it cannot turn on the spot to look around. The real site changed between recording days, so recordings are not repeats. And the laptop heats up over consecutive runs, which changes latency and frame rate. That is why I report compute per run and flag the thermal confound.
 
-**Slide 53 — Plan** [0:20]
+**Slide 52 — Plan** [0:20]
 On the plan, the study, design, integration and data collection are done. What remains is the integrated live test at the design speed of 1.5 metres per second in both domains, and completing the report.
 
-**Slide 54 — Thank you** [0:10]
+**Slide 53 — Thank you** [0:10]
 Thank you. I am happy to take your questions.
 
-**Clock: 28:05**
+**Clock: 27:35**
 
 ---
 
 ## Likely questions (one-line answers)
 
 - **Why not just use ORB-SLAM3's own map?** It has no occupancy grid for Nav2 and no way to gate a wrong relocalisation; RTAB-Map takes external odometry and provides both (slides 15, 17).
-- **Does traffic affect localisation?** It raises the per-second error two- to eightfold while a vehicle fills the view, under 10 cm in total; it did not drive the global error at the simulated density. Not "no effect" (slide 36).
+- **Does traffic affect localisation?** It raises the per-second error two- to eightfold while a vehicle fills the view, under 10 cm in total; it did not drive the global error at the simulated density. Not "no effect" (slide 35).
 - **Why does 3-D ATE miss 5 cm if RPE passes?** Accumulation and height: on the I layout one ORB run is 4.4 cm in the floor plane; on the U layout the planar error itself is 10–33 cm. Post-hoc split, report table 4.6.
 - **Is the gate too strict, could it refuse a correct fix?** Yes, that is its cost: while corrections are refused the robot runs on odometry. The one 6.5 s excursion was such a stretch. The trade is short coasting for no multi-metre jump.
 - **Why are the real ATEs not a target test?** 0.28 m/s instead of 1.5, and the tracker marker offset (0.2–0.4 m along track) is unmeasured.

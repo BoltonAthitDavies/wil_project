@@ -236,7 +236,7 @@ def tex_mapping_resources(rows, path):
           "on the two mapping recordings, replay rate 1.0: "
           "mean $\\pm$ SD over $n$ repeats of each configuration. \\textbf{Bold} marks the best mean in each column "
           "within a recording. Front-end and back-end are each run's median module "
-          "latency (ORB-SLAM3: tracking and local mapping; VINS-Fusion: feature tracking and back-end optimisation); "
+          "latency (ORB-SLAM3: tracking and local mapping; VINS-Fusion: feature tracking and back-end optimization); "
           "throughput is processed frames per second of sensor time; "
           "``Kept'' is the processed fraction of the bag's stereo pairs; CPU is process time over wall time, in percent "
           "of one core; RSS the peak resident set. The loop-closer state is read from each run\'s own log.}\n")
@@ -355,17 +355,17 @@ def tex_resources(per_run, path, caption, label, group_keys=("dataset", "system"
         if realistic:
             # The Mask column was dropped on 20 Nov 2026 with dynamic-object masking: it read
             # "off" on every row, and the report no longer describes a mask.
-            w("\\begin{tabular}{lllc rr rrrr}\n\\toprule\n")
-            w("Recording & Estimator & LC & Atlas & Front-end [\\si{\\milli\\second}] & Back-end [\\si{\\milli\\second}] & "
-              "Throughput [\\si{\\hertz}] & Kept & CPU [\\si{\\percent}] & Peak RSS [\\si{\\mebi\\byte}] \\\\\n\\midrule\n")
+            w("\\begin{tabular}{lll rr rrrr}\n\\toprule\n")
+            w("Recording & Estimator & LC & Front-end [\\si{\\milli\\second}] & Back-end [\\si{\\milli\\second}] & "
+              "Throughput [\\si{\\hertz}] & Kept [\\si{\\percent}] & CPU [\\si{\\percent}] & Peak RSS [\\si{\\mebi\\byte}] \\\\\n\\midrule\n")
             last = None
             for r in per_run:
                 first = r["dataset"] != last; last = r["dataset"]
-                w("%s & %s & %s & %s & %s & %s & %s & %s & %s & %s \\\\\n" % (
+                w("%s & %s & %s & %s & %s & %s & %s & %s & %s \\\\\n" % (
                     "\\repo{%s}" % short(r["dataset"]) if first else "", r["system"],
-                    r["lc_state"] if r["lc_state"] != "n/a" else "---", "yes" if r["atlas"] else "no",
+                    r["lc_state"] if r["lc_state"] != "n/a" else "---",
                     f(r["front_ms"], 1), f(r["back_ms"], 1), f(r["throughput_hz"], 1),
-                    f(100 * r["of_bag"], 0) + "\\,\\%" if r.get("of_bag") is not None else "---",
+                    f(100 * r["of_bag"], 0) if r.get("of_bag") is not None else "---",
                     f(r["cpu_pct"], 0), f(r["rss_peak_mb"], 0)))
         else:
             w("\\begin{tabular}{ll r rr rrrr}\n\\toprule\n")
@@ -561,12 +561,12 @@ def main():
         write_csv(OUT / "realistic_resources.csv", real)
         # plain wording, not a \cref: this caption is also read by the analysis
         # companion, which inputs the table without carrying its sibling.
-        acc_ref = "the accuracy table of \\cref{sec:exp1-sim}"
+        acc_ref = "\\cref{tab:realistic-baseline}"
         tex_resources(real, OUT / "realistic_resources.tex",
                       "Realistic world, real-time and resource measurements, one row per run. Every run is the "
-                      "deployment condition of \\cref{sec:exp1-sim}: replay rate 1.0, node live on the laptop. "
+                      "deployment condition: replay rate 1.0, node live on the laptop. "
                       "Front-end and back-end are each run's median module latency (ORB-SLAM3: tracking and "
-                      "local mapping; VINS-Fusion: feature tracking and back-end optimisation); throughput is processed "
+                      "local mapping; VINS-Fusion: feature tracking and back-end optimization); throughput is processed "
                       "frames per second of sensor time; ``Kept'' is the processed fraction of the bag's frames, so frames "
                       "lost before the node's own queue count as lost; CPU is process time over wall time, in percent of "
                       "one core, so a value above 100 is more than one core; RSS the peak resident set. Accuracy for "
@@ -588,7 +588,7 @@ def main():
                   "Extreme world, real-time and resource measurements: mean $\\pm$ SD over the three September repeats "
                   "per recording ($n$), with a pooled row per scene. Front-end and back-end are each run's median "
                   "module latency (ORB-SLAM3: tracking and local mapping; VINS-Fusion: feature tracking and back-end "
-                  "optimisation); throughput is processed frames per second of sensor time; ``Kept'' the processed "
+                  "optimization); throughput is processed frames per second of sensor time; ``Kept'' the processed "
                   "fraction of received frames; CPU is process time over wall time, in percent of one core; RSS the "
                   "peak resident set. Replay rate $0.5\\times$. The VINS-Fusion+YOLO rows are the September runs, in "
                   "which the filter did not activate except on \\repo{dynamic_00_000} repeat~1 (re-run 15 October).",

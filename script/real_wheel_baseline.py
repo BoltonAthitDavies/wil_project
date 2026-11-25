@@ -22,7 +22,7 @@ estimator the signals support is
     position x,y  += k * v_feedback * [cos psi, sin psi] dt,
 
 with the speed scale k the unknown.  k is fitted on ONE recording (--fit) by
-minimising the planar ATE after rigid SE(2) alignment (scale fixed, so k is
+minimizing the planar ATE after rigid SE(2) alignment (scale fixed, so k is
 identifiable through path length) and then HELD on the others (--hold); the fit
 recording's own score is a calibration, the held recordings' scores are the
 result.  The gyro AXIS and sign are chosen on the fit recording too (the sensor's mounting

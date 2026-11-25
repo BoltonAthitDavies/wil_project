@@ -34,25 +34,26 @@ non-visual baselines, and visual-inertial odometry on a prior map.
 
 In simulation VINS-Fusion localizes to \SIrange{0.22}{0.66}{\metre} aligned
 ATE and ORB-SLAM3 to \SIrange{0.14}{0.52}{\metre} in eleven runs of sixteen;
-all five of ORB-SLAM3's divergences are its loop closer's, led by a false
-closure between repeated aisles. A wheel-plus-gyroscope extended Kalman filter
+four of ORB-SLAM3's five divergences follow from its loop-closer state, led
+by a false closure between repeated aisles. A wheel-plus-gyroscope extended Kalman filter
 trails VINS-Fusion on the visual systems' own inertial noise model and would
 lead it on three recordings of four with a measured one, so the noise model
 matters more than the estimator. Traffic
 breaks neither front end and drives none of the divergences; the one
 dangerous case, a vehicle leading the robot, raises the local error two- to
 eightfold for four seconds and leaves under \SI{0.1}{\metre} in the
-accumulated error. On the real robot ORB-SLAM3 holds
+accumulated error. On four real-robot recordings, one of them a diagnostic, ORB-SLAM3 holds
 \SIrange{0.19}{0.48}{\metre}, in the same accuracy class as wheel-plus-gyroscope
 dead reckoning, and VINS-Fusion \SIrange{0.37}{0.79}{\metre} once its fisheye
 field of view is masked. Measured per second of operation the real rig drifts
 1.9 times as fast as the simulation, against 10.5 times per metre, because it
-was driven at a fifth of the working speed. Every visual run meets the
-\SI{0.1}{\metre} relative-pose target in both domains, on jump-free pairs; the
+moved at a fifth of the working speed and often stood still. Every visual run meets the
+\SI{0.1}{\metre} relative-pose target in both domains, on jump-free pairs and, on the robot, at
+that slower speed; the
 \SI{0.05}{\metre} ATE target is met by no run. The tiny-warehouse map passes the map targets, with
 \SI{96.6}{\percent} precision and \SI{0.7}{\percent} false obstacles; the two
 realistic-warehouse priors fail them, with phantom obstacles laid during the
-inertial initialization. Relocalized on those maps the robot tracks ground
+inertial initialization and wall bands displaced by drift. Relocalized on those maps the robot tracks ground
 truth to a median of \SIrange{0.13}{0.21}{\metre}, an error bounded in magnitude by
 the map's own nodes. Real-robot accuracy is provisional until the
 marker-to-IMU lever arm is measured, and the real-robot prior map remains

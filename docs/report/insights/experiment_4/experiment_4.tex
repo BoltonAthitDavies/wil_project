@@ -26,7 +26,7 @@ exactly as they were fixed before any run existed.
 \label{sec:exp4-sim}
 
 \slotstatus{partial}{Six live runs of 15 November 2026, in the two static
-worlds, measure the localisation against ground truth over hand-driven routes
+worlds, measure the localization against ground truth over hand-driven routes
 of \SIrange{21}{148}{\metre}. Neither traffic world is measured, so
 nothing here speaks to a dynamic warehouse. No goal was commanded in any of the
 six either, so the goal-reaching measures of the reporting rules below are
@@ -34,19 +34,21 @@ still unused and that half of the experiment remains \status{planned}. The proto
 success criteria are fixed before the first run.}
 
 \paragraph{Objective.} Establish whether the map of part~A is good enough to
-navigate on: whether the robot can relocalise against a prior it did not build,
+navigate on: whether the robot can relocalize against a prior it did not build,
 hold that pose while driving, plan a path through the map, and reach a sequence
 of goals without colliding with structure the map got wrong. Part~A scores the
 map as geometry; part~B scores it as something a planner consumes. The two are
 not the same question, and the false obstacles part~A reports are the reason: a
 map can be
-\SI{80}{\percent} precise and still block the one aisle the robot needs.
+\SI{80}{\percent} precise and still block the one aisle the robot needs. The
+relocalization half is reported here; the goal-reaching half remains
+\status{planned}.
 
 \paragraph{Process.} \repo{vslam_navigation} exposes the three stages as
 separate entry points, so the experiment follows them in order:
 \texttt{mapping\_sim} builds the prior, \texttt{localize\_sim} gives a
 read-only fix against it, and \texttt{navigate\_sim} adds the planner, the
-localisation gate and the command interface. The prior is one of the databases
+localization gate and the command interface. The prior is one of the databases
 already scored in part~A, so that map quality and
 navigation outcome are measured on the same artefact. The runs reported here
 were driven by the operator rather than by the planner; the same data are
@@ -58,10 +60,11 @@ recordings: \repo{dataset_allsensor_realistic_map} (U, 148 nodes) and
 \repo{dataset_allsensor_realistic_01_map} (I, 127 nodes). No bag is replayed:
 the simulator is driven live, because a navigation outcome depends on the
 control loop and cannot be reconstructed from a recording. Every run used the
-configuration frozen in the protocol file: \repo{Vis/EstimationType}~0, which
+configuration of \cref{tab:reloc-config}: \repo{Vis/EstimationType}~0, which
 requires matched feature positions to agree in metres rather than merely to
-reproject, and a \SI{5}{\second} hold on the back end so that no correction can
-be latched from the front end's unstable first second. Both settings come from
+reproject, \repo{RGBD/OptimizeMaxError} loosened to 10.0, and a
+\SI{5}{\second} hold on the back end so that no correction can be latched from
+the front end's unstable first second. All three come from
 the acceptance sweep and are recorded with each run.
 
 \paragraph{Frames.} Ground truth is the Gazebo world frame; the prior, the
@@ -84,15 +87,15 @@ goal counts as reached when the base frame is within \SI{1.0}{\metre} and
 are: the share of goals reached, the path length against the shortest
 collision-free path in the ground-truth occupancy grid, the number of
 collisions with true structure, the number of Nav2 recovery behaviours
-triggered, the share of the run with a valid localisation fix, and the wall
-time to complete the goal set. A run that loses localisation and does not
+triggered, the share of the run with a valid localization fix, and the wall
+time to complete the goal set. A run that loses localization and does not
 recover is reported as failed, not excluded.
 
 \paragraph{Reporting rules, pose tracking.} \flag{Defined after these data
 existed, and reported as the weaker claim it is.} Error is the planar distance
 between the published \texttt{map}~$\rightarrow$~\texttt{base\_link} transform,
-sampled at \SI{2}{\hertz}, and the lever-arm-corrected ground truth
-interpolated to the same instants. That transform is used rather than
+sampled at \SI{2}{\hertz}, and the ground truth interpolated to the same
+instants, with no lever arm (see Frames). That transform is used rather than
 \texttt{/localization\_pose} because it is what RViz draws and Nav2 consumes,
 and it includes the front end's dead reckoning between accepted fixes. The
 error is reported as a median, a 95th percentile, a maximum, the median over
@@ -127,7 +130,7 @@ another and nothing here measures run-to-run spread.}
 ground truth, correction gate at \SI{1.5}{\metre}; routes driven by hand.
 ``Over 1\,m'' is the longest unbroken stretch with the error above a metre and
 ``ended'' the median over the last tenth of the run, i.e.\ whether it came
-back. Blind is the share of localisation poses carrying RTAB-Map's
+back. Blind is the share of localization poses carrying RTAB-Map's
 no-information covariance. Ground truth is compared without a lever arm
 (see Frames).}
 \label{tab:exp4-tracking}
@@ -160,32 +163,33 @@ I static  & figure-8 &  69.5 &  66 & 0.133 & 1.152 & 1.238 &  6.5 & 0.166 & 0.04
   \SIrange{0.09}{0.14}{\metre} (\cref{tab:exp4-map-bound}):
   \SI{54}{\percent} of U-layout samples and \SI{47}{\percent} of I-layout
   samples lie at or below its upper edge, and \SI{93}{\percent} and
-  \SI{65}{\percent} within twice it.
-
-  Two runs leave the band upwards, in different shapes. The I-layout
-  figure-of-eight \emph{ramps}, from \SI{0.109}{\metre} at the first fix to
-  \SI{1.238}{\metre} over \SI{25}{\metre} of driving, then drops abruptly when
-  a fix is finally accepted: that is the one excursion of
-  \cref{tab:exp4-tracking}, and its shape is the pose coasting on odometry
-  while corrections are refused rather than the pose being placed anywhere
-  wrong. The U-layout square instead \emph{steps} up near \SI{79}{\metre} and
-  holds, peaking at \SI{0.685}{\metre}; it never crosses a metre, so it is not
-  an excursion by the table's measure, and unlike the other it does not come
-  back --- the run ends at \SI{0.549}{\metre}.
-
-  \flag{Splitting the panels exposes a pattern the single axis hid.} All six
-  runs begin within \SIrange{0.108}{0.137}{\metre} of truth, but every
-  I-layout run then climbs to five to eleven times that before a fix pulls it
-  back --- \SI{0.519}{}, \SI{0.765}{} and \SI{1.229}{\metre}, each peaking
-  between \SI{19.5}{} and \SI{23.0}{\metre} driven --- where no U-layout run
-  exceeds twice its starting error. The split is as clean as the heading split
-  reported above and, with three runs on each side and route confounded with
-  layout, is an observation of the same standing: worth recording, not yet
-  evidence about layouts. The I prior's own graph is the less accurate of the
-  two (\SI{0.319}{} against \SI{0.121}{\metre} rms), which is the first thing
-  to check against.}
+  \SI{65}{\percent} within twice it.}
   \label{fig:exp4-summary}
 \end{figure}
+
+Two runs leave the band upwards, in different shapes. The I-layout
+figure-of-eight \emph{ramps}, from \SI{0.109}{\metre} at the first fix to
+\SI{1.238}{\metre} over \SI{25}{\metre} of driving, then drops abruptly when
+a fix is finally accepted: that is the one excursion of
+\cref{tab:exp4-tracking}, and its shape is the pose coasting on odometry
+while corrections are refused rather than the pose being placed anywhere
+wrong. The U-layout square instead \emph{steps} up near \SI{79}{\metre} and
+holds, peaking at \SI{0.685}{\metre}; it never crosses a metre, so it is not
+an excursion by the table's measure, and unlike the other it does not come
+back: its last sample is \SI{0.549}{\metre} from truth, \SI{0.613}{\metre} as
+the median of its last tenth in \cref{tab:exp4-tracking}.
+
+\flag{Splitting the panels exposes a pattern the single axis hid.} All six
+runs begin within \SIrange{0.108}{0.137}{\metre} of truth, but every
+I-layout run then climbs to five to eleven times that before a fix pulls it
+back --- \SI{0.519}{}, \SI{0.765}{} and \SI{1.229}{\metre}, each peaking
+between \SI{19.5}{} and \SI{23.0}{\metre} driven --- where no U-layout run
+exceeds twice its starting error. The split is as clean as the heading split
+reported below and, with three runs on each side and route confounded with
+layout, is an observation of the same standing: worth recording, not yet
+evidence about layouts. The I prior's own graph is the less accurate of the
+two (\SI{0.319}{} against \SI{0.121}{\metre} aligned rms in \cref{tab:map-graph-accuracy}), which is the first thing
+to check against.
 
 \begin{figure}[p]
   \centering
@@ -252,7 +256,7 @@ U-layout medians are \SIrange{0.21}{0.49}{\degree} against
 I-layout run is worse by \num{3.6}, \num{5.8} and \num{11.5} times on the
 square, the figure-of-eight and the straight respectively.
 The mean error is within \SI{0.2}{\degree} of zero on all three U-layout runs
-and \SIrange{-0.89}{-2.17}{\degree} on the three I-layout ones.
+and between \SI{-0.89}{\degree} and \SI{-2.17}{\degree} on the three I-layout ones.
 
 \flag{That bias is not uniform, and the reason is where it enters.} Only the
 I-layout straight is genuinely one-signed, with every sample negative; the
@@ -268,7 +272,7 @@ straight, figure-of-eight and square, which is why only the square crosses
 zero. The U-layout runs start within \SI{0.25}{\degree}. The seed itself is
 within \SI{0.3}{\degree} on both layouts, and the prior's nodes are within
 \SI{0.2}{\degree} along the routes (\cref{tab:exp4-map-bound}), so the offset
-is not inherited from the map: the I-layout localised heading is 7 to 14 times
+is not inherited from the map: the I-layout localized heading is 7 to 14 times
 the nodes' and biased the other way, while on the U layout it is about twice
 the nodes', as position is. Only on the I layout does the front end's heading
 swing by \SIrange{144}{178}{\degree} between the seed and the first fix;
@@ -300,12 +304,12 @@ side it is not a measurement of the layout either.
   \label{fig:exp4-heading}
 \end{figure}
 
-\paragraph{Insight: the pose is as good as the map it is localising against.}
+\paragraph{Insight: the pose is bounded by the map's own accuracy.}
 The error decomposes into a constant offset of \SIrange{0.04}{0.34}{\metre} and
 scatter of \SIrange{0.03}{0.19}{\metre} about it. What is left after the frame
 error above is removed lies along the direction of travel in four of the six
 runs and across it in two, the along-track mean staying within
-\SI{0.19}{\metre} of zero and changing sign between runs
+\SI{0.19}{\metre} of zero and changing sign between runs.
 The exception is the I-layout straight,
 whose cross-track mean reaches \SI{0.37}{\metre} --- the largest single
 component in the set, in the direction that matters most in a corridor, and on
@@ -314,8 +318,8 @@ the run that also carries the worst heading bias.
 The magnitude is the reading, as a bound. Along the driven routes the prior's
 own nodes within \SI{3}{\metre} of the robot are off by
 \SIrange{0.09}{0.14}{\metre} (per-run median, after the body-to-body fit),
-and the localised pose is \numrange{1.0}{1.7} times that, median against
-median (\cref{tab:exp4-map-bound}). The localiser therefore works at the accuracy of its map, slightly
+and the localized pose is \numrange{1.0}{1.7} times that, median against
+median (\cref{tab:exp4-map-bound}). The localizer therefore works at the accuracy of its map, slightly
 below it, and this slot's accuracy is \emph{map-bounded in magnitude}. Whether
 a more accurate prior would lower the error is the next thing to test, not a
 finding of this slot.
@@ -323,22 +327,22 @@ finding of this slot.
 \reporttable{exp2_map_bound}
 
 \paragraph{Insight: within a run, a worse map does not carry a larger error.}
-Places where the nearby nodes are worse do not carry larger localisation error
+Places where the nearby nodes are worse do not carry larger localization error
 (within-run Spearman $\rho = -0.11$, circular-shift permutation $p = 0.51$),
 and neither do places where the occupancy grid is worse ($p \geq 0.06$ for
 local precision, recall and false-obstacle share at 2, 3 and
 \SI{5}{\metre}). The routes rarely crossed a
 poor grid --- local precision was at least 0.975 for \SI{95}{\percent} of
 samples --- so this tests the quality the robot met, not a poor map; and the
-localiser matches images against nodes, never the grid. The bound above is
+localizer matches images against nodes, never the grid. The bound above is
 therefore one of magnitude, not a demonstrated mechanism.
 
 
 
-\paragraph{Insight: the initialisation transient damages both layers.}
-Part~A attributes the blocking false obstacles of three of the four
-realistic maps to phantom cells laid by the first five graph nodes
-(\SIrange{63}{96}{\percent} of them), and names discarding those cells, or
+\paragraph{Insight: the initialization transient damages both layers.}
+Part~A attributes the largest blocked stretch of the U-layout prior to phantom
+cells laid by the first five graph nodes (\SI{88}{\percent} of the blocking
+cells), and names discarding those cells, or
 starting the map after the inertial transient has settled, as the one
 correction its data predict would help. The same transient was found
 independently in this slot, one layer up: the front end's orientation is
@@ -353,7 +357,7 @@ the unstable window, and the second only withholds the pose from Nav2 after the
 correction has been formed. One transient, two symptoms, and the same
 prescription in both places --- do not consume the first second.
 
-\paragraph{Excursions, and that the one of them ended.} One run left the map,
+\paragraph{Excursions: one, and it ended.} One run left the map,
 briefly. The I-layout figure-of-eight was over a metre from ground truth for
 \SI{6.5}{\second}, peaking at \SI{1.24}{\metre}, and the last tenth of that
 run sits at \SI{0.166}{\metre}. The other five never crossed a metre at all.
@@ -361,7 +365,7 @@ run sits at \SI{0.166}{\metre}. The other five never crossed a metre at all.
 
 
 
-The single excursion is not enough to anatomise. Its correction neither
+The single excursion is not enough to anatomize. Its correction neither
 translates nor turns across the stretch --- yaw and $x$ hold at
 \SI{-3.40}{\degree} and \SI{-10.17}{\metre} throughout --- which is what a
 \emph{refused} correction looks like rather than a wrong one: the gate declined
@@ -379,8 +383,8 @@ RTAB-Map accepts a fix in two stages. A bag-of-words layer proposes a candidate
 place from word co-occurrence, and a geometric check then counts how many
 matched features agree in metres, with \texttt{Vis/MinInliers} --- 20 here ---
 the threshold between them. Both stages record every verdict, so the ledger can
-be read directly rather than inferred from the output
-Over the six runs the localiser
+be read directly rather than inferred from the output.
+Over the six runs the localizer
 considered \num{346} proposals and accepted \num{251}, a survival rate of
 \SI{73}{\percent}.
 
@@ -407,8 +411,8 @@ off its output, and it is exactly what the building does to the method:
 repeated rack faces give two different aisles a hundred words in common. It
 also prices the threshold. Raising it rejects more aliases, but the acceptance
 sweep of 11--12 November found that the settings which stop the warping also
-stop localisation --- at \texttt{Vis/MinInliers} \num{35} with a distribution
-test added, one recording localised on none of its \num{81} poses. The two
+stop localization --- at \texttt{Vis/MinInliers} \num{35} with a distribution
+test added, one recording localized on none of its \num{81} poses. The two
 stages fail in opposite directions and no setting of this threshold separates
 them.
 
@@ -460,8 +464,7 @@ truth; no accepted correction would have left it more than
 \SI{0.65}{\metre} off.
 
 \flag{This is a replay of logged corrections, not a run with the gate switched
-off.} The ungated configuration's own recordings were lost (above), and a robot
-steered by Nav2 on a wrong pose would have driven differently; these routes were
+off.} A robot steered by Nav2 on a wrong pose would have driven differently; these routes were
 hand-driven, so the path is the same either way. One run carries all five
 refusals, so the result shows that the gate stopped one aliasing episode in six
 runs, not how often such episodes occur. The \num{251} proposals RTAB-Map
@@ -481,7 +484,7 @@ the dead reckoning between fixes is not the dominant term. It does \emph{not}
 rise with distance to the nearest node of the prior (three of six,
 $p = \num{1.00}$), which sits at \SIrange{0.7}{0.8}{\metre} for most of every
 run, so the density of the graph is not the limit either. And turning does
-\emph{not} starve the localiser of fixes ($\rho$ between \num{-0.16} and
+\emph{not} starve the localizer of fixes ($\rho$ between \num{-0.16} and
 \num{-0.02}), which rules out the natural story that viewpoint change breaks
 the word matching: the proposals keep coming through the turns, and
 \cref{fig:exp4-gating} is what happens to them.
@@ -497,7 +500,7 @@ the robot moves fastest, for reasons this slot does not resolve.
 \flag{Some of the reported error is timebase, and the slot cannot say how
 much.} Fitting a constant time offset between each estimate and the ground
 truth returns offsets of \emph{opposite sign}: the published pose matches best
-when shifted \SIrange{-0.04}{-0.12}{\second}, the front end's own trajectory
+when shifted by between \SI{-0.04}{\second} and \SI{-0.12}{\second}, the front end's own trajectory
 when shifted \SIrange{+0.20}{+0.26}{\second}, on the same runs against the same
 truth. A single error in the ground-truth clock would displace both the same
 way, so at least one of the two publication paths mishandles time by of order
@@ -516,7 +519,7 @@ data support.} Unaided ORB-SLAM3, rigidly aligned onto ground truth, drifts by a
 median of \SIrange{0.013}{0.307}{\metre} over these \SIrange{21}{148}{\metre}
 routes, never exceeds \SI{0.64}{\metre} at any instant, and ends each run
 between \SI{0.02}{\metre} and \SI{0.42}{\metre} from truth. Run by run the
-localised pose has the lower median on four of the six, and the two it loses
+localized pose has the lower median on four of the six, and the two it loses
 are the two shortest routes in the set, at \SI{29.1}{} and \SI{21.4}{\metre};
 on all four routes of \SI{56.8}{\metre} and longer the prior wins. That
 ordering is what the premise would predict --- drift has to accumulate before a
@@ -526,8 +529,7 @@ fix is worth its cost --- and it puts the crossover somewhere between
 \flag{The ordering is suggestive and is not a measurement.} Six runs, one per
 cell, on hand-driven routes that differ in shape as well as length, so route
 length is confounded with layout and with everything else that differs between
-cells; and a previous configuration of this same slot produced the opposite
-split. The claim the data support is the weaker one: over these distances the
+cells. The claim the data support is the weaker one: over these distances the
 prior's contribution is an absolute, repeatable datum in a frame that outlives
 the run --- what lets a goal in map coordinates mean the same place twice, and
 what the rigid alignment hands the front end for free in this comparison and
@@ -552,7 +554,7 @@ run and the configuration is now settled, so repeats would for the first time
 measure this stack's run-to-run spread and tell whether the differences between
 cells in \cref{tab:exp4-tracking} mean anything. Collect both traffic worlds in
 the same configuration, which would restore the condition the project is named
-for. Then run the goal set with \texttt{--run} so the goal-reaching rules above
+for. Then run the goal set with the planner driving, so the goal-reaching rules above
 can be applied. The narrow question still outstanding is part~A's: does
 the \SIrange{5.0}{10.2}{\percent} false-obstacle rate block a route, or does the
 planner drive around it.
@@ -570,11 +572,7 @@ The three runs not drawn above, for completeness; conventions as
   \includegraphics[width=0.92\textwidth]{fig/exp4_path_U_static_P1_transit_5.png}
   \caption[U layout, straight: the shortest U route.]{\texttt{U\_static}, straight, \SI{29.1}{\metre}. The two tracks are
   indistinguishable at this scale, which is the point: the median error is
-  \SI{0.128}{\metre} and the run never crossed a metre. A run of this shape is
-  also what exposed the lever-arm error of the Frames paragraph --- an offset
-  of about a third of a metre was once reported for tracks that visibly
-  coincide, which is only possible if the offset lies along the direction of
-  travel, where a path plot cannot show it.}
+  \SI{0.128}{\metre} and the run never crossed a metre.}
   \label{fig:exp4-u-straight}
 \end{figure}
 

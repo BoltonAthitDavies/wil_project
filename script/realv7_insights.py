@@ -11,13 +11,13 @@ speed offset, labelled uncertain) is retired to trash/exp1_real_p15_nobag_scorin
 Adds one diagnostic the scorer does not have: the TILT of each estimate.  A
 stereo-inertial estimate of a floor robot should lie in a horizontal plane; the
 angle between the plane fitted to the estimate's 3-D positions and the horizontal
-measures how far the gravity direction found at initialisation is from vertical.
+measures how far the gravity direction found at initialization is from vertical.
 This needs no time alignment and no ground truth.
 
 Writes to output/compare/real/realv7-insights/:
   tilt_table.tex        every ORB run as written in the live log: plane tilt, rms off-plane, z range, resets
                         (the 3 Nov wrong-frame scores were dropped from it on 4 Nov; scores live in results_table.tex)
-  results_table.tex     (--levelled, 4 Nov) every ORB run after the frame repair: IMU-initialised share,
+  results_table.tex     (--levelled, 4 Nov) every ORB run after the frame repair: IMU-initialized share,
                         reset times, raw tilt, ATE, median, RPE, path ratio, status (from realv7_<ds>_<key>_lvl)
   fig_paths_lvl_light.png  (--levelled) the repaired ORB estimates against the truth
   vins_table.tex        the three VINS runs
@@ -123,7 +123,7 @@ def main():
          r"each estimate as written in the live log, before any repair. ``Tilt'' is the angle between the plane fitted "
          r"to the estimate's 3-D positions and the horizontal; ``off-plane'' the rms distance of the positions from "
          r"that plane. A floor robot's estimate should be horizontal: a tilt near \SI{90}{\degree} means the poses "
-         r"were written while the map was not gravity-aligned (IMU not initialised; the vertical is then the camera's "
+         r"were written while the map was not gravity-aligned (IMU not initialized; the vertical is then the camera's "
          r"$y$ axis). The scores are in \cref{tab:realv7-results}, after the repair.}",
          r"\label{tab:realv7-tilt}",
          r"\begin{tabular}{llrrrr}", r"\toprule",
@@ -149,7 +149,7 @@ def main():
     # evidence, never reported beside its replacement.
     L = [r"\begin{table}[htbp]", r"\centering", r"\small",
          r"\caption[Realv7: the VINS-Fusion runs after the field-of-view repair.]{VINS-Fusion on the three "
-         r"\repo{dataset_realv7} recordings with the configuration the real-rig diagnosis settled on: "
+         r"\repo{dataset_realv7} recordings and the \repo{realv6_000} diagnostic, in "
          r"the real-rig configuration with \texttt{fov\_mask\_deg}~70, \texttt{estimate\_extrinsic}~0 "
          r"and \texttt{estimate\_td}~0. ATE is planar after SE(2) alignment and RPE is translational over "
          r"\SI{1}{\second}, with the number of admissible pairs in parentheses --- \repo{realv6_000} has far "
@@ -157,8 +157,8 @@ def main():
          r"the others do and is not comparable with them. ``Frames'' is what the node received against the "
          r"bag's count at \SI{30}{\hertz}. "
          r"\repo{realv6_000} is a diagnostic row, as in \cref{tab:real-rig}: the scorer rejects it because that "
-         r"recording's tracker export is \SI{1.7}{\hertz} and fails the validity rules written for the "
-         r"\SI{7}{\hertz} one, not because of anything the estimator did. The lever arm is still unmeasured, "
+         r"recording's tracker export is \SI{1.7}{\hertz} and fails the validity rules that the "
+         r"\SIrange{5}{6}{\hertz} \repo{realv7} exports pass, not because of anything the estimator did. The lever arm is still unmeasured, "
          r"so every value is provisional.}",
          r"\label{tab:realv7-vins}",
          r"\resizebox{\textwidth}{!}{%",
@@ -241,15 +241,15 @@ def levelled():
     def num(v, p=2):
         return "---" if v is None or (isinstance(v, float) and not np.isfinite(v)) else f"{v:.{p}f}"
     L = [r"\begin{table}[htbp]", r"\centering", r"\scriptsize\setlength{\tabcolsep}{3pt}",
-         r"\caption[Realv7: every run after the frame repair, with its initialisation history.]{ORB-SLAM3 on the "
+         r"\caption[Realv7: every run after the frame repair, with its initialization history.]{ORB-SLAM3 on the "
          r"three \repo{dataset_realv7} recordings (3 November 2026, same setting as realv6), scored on 4 November "
          r"with the bags on the dataset drive (wheel-speed time offsets) and the two frame repairs of "
-         r"\repo{script/eval_real_gt.py}: the poses written before each IMU initialisation rotated into the frame "
+         r"\repo{script/eval_real_gt.py}: the poses written before each IMU initialization rotated into the frame "
          r"used after it (\texttt{--join-imu-init}), and each map's fitted plane levelled (\texttt{--level-plane}). "
-         r"These are the runs made under \emph{stock} initialisation on 3 November 2026; the re-runs with fork "
+         r"These are the runs made under \emph{stock} initialization on 3 November 2026; the re-runs with fork "
          r"patch 15 of the patched real-robot results table need neither repair, and this table is the comparison they are "
          r"set against. "
-         r"``IMU'' is the share of tracked frames with the IMU initialised; ``resets'' the active-map resets after "
+         r"``IMU'' is the share of tracked frames with the IMU initialized; ``resets'' the active-map resets after "
          r"the first pose, in seconds (a reset restarts the position at the origin and is not stitched; those "
          r"inside the route are tracking losses); ``tilt'' the plane tilt of the raw log, zero after the repair in "
          r"every run. ATE is planar after SE(2) alignment, RPE over \SI{1}{\second}. Status from the scorer's "

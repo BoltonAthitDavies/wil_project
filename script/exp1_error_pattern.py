@@ -114,7 +114,7 @@ def anchored(e, run_dir):
     """Rotation error measured only after the published world frame exists.
 
     ORB-SLAM3 publishes in the camera OPTICAL frame until inertial
-    initialisation gives it a gravity-aligned world frame, and the switch
+    initialization gives it a gravity-aligned world frame, and the switch
     between the two is a ~90 deg step in the published orientation. Those
     earlier poses are accurate but expressed in a different frame, so scoring
     them against a world-frame reference measures the frame, not the estimate:
@@ -316,7 +316,7 @@ def fig_rotation(rows, ser, path):
     ORB-SLAM3 bar at 13-19 deg and so read against the text beside it: the
     chapter reports 0.27-3.14 deg once the published world frame exists.  Both
     are now drawn -- the unanchored bar ghosted behind, the anchored bar solid
-    in front -- so the tall part is visibly the pre-initialisation frame and
+    in front -- so the tall part is visibly the pre-initialization frame and
     the solid part is the tracking.  VINS-Fusion publishes in one frame
     throughout, so its two coincide and only the solid bar shows, which is the
     comparison the reader needs.
@@ -373,7 +373,7 @@ def fig_rotation(rows, ser, path):
     ax.set_ylabel("RMS [deg, log]", color=TH["ink2"], fontsize=9)
     ax.set_title("(a) orientation error by axis: circle = yaw, triangle = pitch, square = roll; "
                  "open = scored over the whole run, filled = after the published world frame exists.\n"
-                 "    The gap between them is the pre-initialisation frame, not drift: all three axes move together "
+                 "    The gap between them is the pre-initialization frame, not drift: all three axes move together "
                  "and VINS-Fusion has none of it. Shaded, $\\dagger$: the five diverged runs.",
                  fontsize=9.5, loc="left", color=TH["ink"])
 
@@ -401,7 +401,7 @@ def fig_rotation(rows, ser, path):
     ax.set_xlabel("time [s]", color=TH["ink2"], fontsize=9)
     ax.set_ylabel("rotation error [deg, symlog]", color=TH["ink2"], fontsize=9)
     ax.set_title("(b) the excess is one event, not drift: %s, every arm. One step of ~90 deg at "
-                 "initialisation,\n    then sub-degree for the remaining two minutes; "
+                 "initialization,\n    then sub-degree for the remaining two minutes; "
                  "VINS-Fusion publishes in one frame throughout and has no such step."
                  % ds0.replace("dataset_allsensor_", ""),
                  fontsize=9.5, loc="left", color=TH["ink"])
@@ -484,11 +484,11 @@ def tex_rotation(rows, path):
          "aligned estimate and the truth; for a robot on a flat floor a sustained pitch or roll error "
          "is a gravity-alignment defect rather than drift. ``Anch.'' is the same RMS measured only "
          "after the instant each run\'s published poses enter the gravity-aligned world frame: until "
-         "inertial initialisation ORB-SLAM3 publishes in the camera optical frame, and the "
+         "inertial initialization ORB-SLAM3 publishes in the camera optical frame, and the "
          "\\SIrange{89.8}{90.2}{\\degree} step between the two is located in the pose stream alone, "
          "without reference to the truth. The unanchored RMS is therefore a measure of that frame "
-         "switch rather than of tracking, and the anchored column is the one to read; the median is "
-         "kept beside it because it was the previous way of saying the same thing. ``Turning'' is a "
+         "switch rather than of tracking, and the anchored column is the one to read; the median "
+         "beside it is less sensitive to single spikes. ``Turning'' is a "
          "ground-truth turn rate above \\SI{10}{\\degree\\per\\second}, the threshold the onset "
          "analysis uses; the two medians are paired within a run. One run per cell.}",
          "\\label{tab:exp1-rotation-pattern}", "\\small", "\\resizebox{\\textwidth}{!}{%",

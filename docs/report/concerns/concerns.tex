@@ -51,6 +51,8 @@
 \usepackage[nottoc,notbib]{tocbibind}
 \usepackage{pdfpages}
 \PassOptionsToPackage{hyphens}{url}\usepackage{url}
+\usepackage{xurl}% a URL may break after any character, so it never stretches a line
+\urlstyle{same}% URLs in the text font: narrower than typewriter, and as the manual sets them
 \usepackage{hyperref}
 \def\UrlBreaks{\do\-\do\/\do\.\do\_\do\?\do\=}
 \usepackage[nameinlink,noabbrev]{cleveref}
@@ -89,13 +91,13 @@
 % CHAPTER n TITLE, centred, 15 pt bold; sections 14 pt bold; subsections 13 pt.
 
 \titleformat{\section}
-  {\bfseries\fontsize{14}{17}\selectfont}{\thesection}{0.8em}{}
+  {\bfseries\fontsize{14}{17}\selectfont\raggedright\hyphenpenalty=10000}{\thesection}{0.8em}{}
 \titlespacing*{\section}{0pt}{14pt}{6pt}
 \titleformat{\subsection}
-  {\bfseries\fontsize{13}{16}\selectfont}{\thesubsection}{0.8em}{}
+  {\bfseries\fontsize{13}{16}\selectfont\raggedright\hyphenpenalty=10000}{\thesubsection}{0.8em}{}
 \titlespacing*{\subsection}{0pt}{10pt}{4pt}
 \titleformat{\subsubsection}
-  {\bfseries\fontsize{12}{15}\selectfont}{\thesubsubsection}{0.8em}{}
+  {\bfseries\fontsize{12}{15}\selectfont\raggedright\hyphenpenalty=10000}{\thesubsubsection}{0.8em}{}
 \titlespacing*{\subsubsection}{0pt}{8pt}{3pt}
 \titleformat{\paragraph}[runin]{\bfseries}{}{0pt}{}
 \titlespacing*{\paragraph}{0pt}{6pt}{0.6em}
@@ -217,7 +219,7 @@
 %   \figsource{Campos et al., 2021}  ->  (Source : Campos et al., 2021)
 % The manual requires a reproduced item to carry BOTH a citation number and
 % this line; the citation stays in the caption, the attribution goes here.
-\newcommand{\figsource}[1]{\par\vspace{-0.4em}{\centering\small (Source : #1)\par}}
+\newcommand{\figsource}[1]{\par\vspace{3pt}{\centering\small (Source : #1)\par}}
 
 % ---------------------------------------------------------------- \repo
 % Repository paths, identifiers and commit hashes in typewriter, breakable at
@@ -275,7 +277,7 @@
 
 \noindent
 Every passage the final report marks as \flag{queried}, and the status of each
-of its eight result slots, collected into one list. 56 items, from
+of its eight result slots, collected into one list. 55 items, from
 the final report.
 
 \medskip
@@ -317,7 +319,7 @@ measured under an easier condition than the target assumes
 
 \medskip
 
-\subsection*{The Pipelines as Implemented: Navigation and relocalisation integration: the
+\subsection*{The Pipelines as Implemented: Navigation and relocalization integration: the
 \repo{vslam_navigation} package}
 \noindent\textbf{2.}\quad \emph{table row:} Forward collision check \textbar{} off \textbar{} \flag{on} \textbar{} \flag{asymmetric; see below}
 
@@ -347,7 +349,7 @@ metres per second and whose scale is known only at a single operating point
 \noindent\textbf{8.\ \flag{[Threat to validity]}}\quad This is a bias with a known direction. The non-visual baselines of
 \reportref{sec:results-proprio} run on a floor where the wheels effectively cannot
 slip and with an encoder of unlimited resolution, which is dead reckoning's
-best case. Both idealisations favour the proprioceptive estimators over the
+best case. Both idealizations favour the proprioceptive estimators over the
 visual ones, and neither has been relaxed, so any conclusion that a
 wheel-plus-IMU filter matches the visual pipelines holds \emph{under these
 conditions}, not in general.
@@ -362,20 +364,8 @@ recorded environment and is the source of these counts.}
 
 \medskip
 
-\subsection*{Real Platform: AMR mobile robot testbed}
-\noindent\textbf{10.}\quad The
-drivetrain is a rear brushless motor (Flipsky 6384) through a BLDC drive with
-a Dynamixel RX-64 steering servo, a GigaDevice GD32407V microcontroller on a CAN
-link to the NRU-51V, an LM2596 regulator from a lithium-polymer pack, and a
-Wi-Fi router for tele-operation from a smartphone. \flag{The faculty template describes the base as a differential-drive robot;
-the hardware diagram (a single traction motor with a steering servo) and the
-simulated model of \reportref{fig:ackermann-robot} are Ackermann. The description
-here follows the hardware and should be confirmed by the author.}
-
-\medskip
-
 \subsection*{Real Platform: Sensors and computing unit}
-\noindent\textbf{11.\ \flag{[Attribution of reproduced vendor material]}}\quad \reportref{fig:camera-dimensions,fig:nru51v-photo,fig:nru51v-dimensions} and
+\noindent\textbf{10.\ \flag{[Attribution of reproduced vendor material]}}\quad \reportref{fig:camera-dimensions,fig:nru51v-photo,fig:nru51v-dimensions} and
 \reportref{tab:camera-spec,tab:hardware-spec} reproduce manufacturer drawings,
 photographs and specifications for the AC-IMX390-H190 camera and the Neousys
 NRU-51V. The faculty manual requires every reproduced table and figure to carry
@@ -388,30 +378,30 @@ taken from these items; they are descriptive.
 \medskip
 
 \subsection*{Real Platform: Real sensor rig and calibration limits}
-\noindent\textbf{12.}\quad \emph{table row:} Second-camera intrinsics \textbar{} reuse of the first camera \textbar{} \flag{approximation}
+\noindent\textbf{11.}\quad \emph{table row:} Second-camera intrinsics \textbar{} reuse of the first camera \textbar{} \flag{approximation}
 
 \medskip
-\noindent\textbf{13.}\quad \emph{table row:} Marker-to-IMU lever arm \textbar{} not measured \textbar{} \flag{placeholder; bounds every real
+\noindent\textbf{12.}\quad \emph{table row:} Marker-to-IMU lever arm \textbar{} not measured \textbar{} \flag{placeholder; bounds every real
   accuracy figure}
 
 \medskip
 
 \subsection*{The Two Experiments: Experiment 1: Estimator comparison against a non-visual baseline}
-\noindent\textbf{14.}\quad \emph{table row:} accelerometer $x$ scale \textbar{} 1.0321 \textbar{} \flag{1.0954} \textbar{} 1.0172 \textbar{} 1.0339 \textbar{} --
+\noindent\textbf{13.}\quad \emph{table row:} accelerometer $x$ scale \textbar{} 1.0321 \textbar{} \flag{1.0954} \textbar{} 1.0172 \textbar{} 1.0339 \textbar{} --
 
 \medskip
-\noindent\textbf{15.}\quad \emph{table row:} accelerometer $x$ bias \textbar{} 0.038 \textbar{} 0.013 \textbar{} 0.013 \textbar{} \flag{0.079} \textbar{} \si{\metre\per\second\squared}
+\noindent\textbf{14.}\quad \emph{table row:} accelerometer $x$ bias \textbar{} 0.038 \textbar{} 0.013 \textbar{} 0.013 \textbar{} \flag{0.079} \textbar{} \si{\metre\per\second\squared}
 
 \medskip
-\noindent\textbf{16.}\quad \emph{table row:} yaw-rate scale, bicycle \textbar{} 1.0245 \textbar{} \flag{0.9321} \textbar{} 1.0070 \textbar{} 1.0171 \textbar{} --
+\noindent\textbf{15.}\quad \emph{table row:} yaw-rate scale, bicycle \textbar{} 1.0245 \textbar{} \flag{0.9321} \textbar{} 1.0070 \textbar{} 1.0171 \textbar{} --
 
 \medskip
-\noindent\textbf{17.}\quad \moved{$\sigma_b$, the bias random walk, is
+\noindent\textbf{16.}\quad \moved{$\sigma_b$, the bias random walk, is
 assumed rather than measured: the longest stationary window in any recording is
 \SI{2.16}{\second} and an Allan-variance estimate needs minutes.}
 
 \medskip
-\noindent\textbf{18.\ \flag{[One tuned constant]}}\quad The real baseline has a parameter fitted against the same tracker it is scored
+\noindent\textbf{17.\ \flag{[One tuned constant]}}\quad The real baseline has a parameter fitted against the same tracker it is scored
 on, albeit on a different recording. A measured scale, from the wheel
 circumference and the gear ratio or from a tape-measured straight run, would
 remove the objection; until then the real-domain comparison between this
@@ -451,8 +441,9 @@ the same recordings are scored below, where the same pattern recurs.
 its one excursion on \repo{realistic_002} (\SI{0.05}{} to \SI{0.61}{\metre}
 between \SI{17}{} and \SI{24}{\second}) is one of them, reproduced by a second
 run to within \SI{6}{\milli\metre} (\reportref{fig:exp1-vins-starvation}). \flag{The low-feature seconds are \SIrange{8}{20}{\percent} of each run and
-carry about that share of its error growth, so they cause VINS-Fusion's
-excursions and not its ATE.} ORB-SLAM3 passes the same wall in under a second
+carry \SIrange{10}{20}{\percent} of its positive error growth: their median
+rate is higher, but most of the growth accrues over the many seconds at the
+ceiling, so they cause VINS-Fusion's excursions and not its ATE.} ORB-SLAM3 passes the same wall in under a second
 on its inertial prediction, with no step.
 
 \medskip
@@ -479,7 +470,7 @@ general statement is not what these recordings show.}
 against two routes, and on \repo{realistic_001} a comparable tilt does not
 convert into drift ($r = \num{-0.49}$), so the mechanism is shown on one
 recording, not established.} Scale is not a factor: ORB-SLAM3's
-\SIrange{1.7}{5.4}{\percent} path excess is the pre-initialisation spike and
+\SIrange{1.7}{5.4}{\percent} path excess is the pre-initialization spike and
 frame jitter, and its local scale over each second is
 \numrange{0.997}{0.999}.
 
@@ -509,8 +500,8 @@ drift bound, are untested.
 \noindent\textbf{12.}\quad \slotstatus{partial}{Four real recordings with an independent planar reference
 (\repo{dataset_realv6_000}, \repo{dataset_realv7_000} to \repo{_002}).
 ORB-SLAM3 tracks every recording in four configurations at
-\SIrange{0.19}{0.48}{\metre} planar ATE, the configurations of a recording
-agreeing to \SI{0.02}{\metre}. Wheel+gyro dead reckoning, with one speed
+\SIrange{0.19}{0.48}{\metre} planar ATE, the configurations of a \repo{realv7}
+recording agreeing to \SI{0.02}{\metre}. Wheel+gyro dead reckoning, with one speed
 constant fitted on \repo{realv7_000} and held, is in the same accuracy class.
 VINS-Fusion completes every recording at \SIrange{0.37}{0.79}{\metre} once the
 fisheye field of view is masked at \SI{70}{\degree} and the stereo extrinsic
@@ -529,8 +520,8 @@ the largest remaining correction to every real-robot figure.}
 \medskip
 \noindent\textbf{14.}\quad The simulation's
 memory trade does not transfer: on the robot VINS-Fusion holds
-\SIrange{1.08}{1.11}{\gibi\byte} against ORB-SLAM3's
-\SIrange{1.16}{1.48}{\gibi\byte} while still using more cores. \flag{One of six loop-closing repeats on \repo{realv6} accepted a single
+\SIrange{1.05}{1.09}{\gibi\byte} against ORB-SLAM3's
+\SIrange{1.13}{1.44}{\gibi\byte} while still using more cores. \flag{One of six loop-closing repeats on \repo{realv6} accepted a single
 closure with a \SI{36.4}{\metre} correction and finished \SI{10.7}{\metre}
 off: no loop-closing figure on the robot is safe from the closer.}
 
@@ -540,7 +531,8 @@ off: no loop-closing figure on the robot is safe from the closer.}
 
 \medskip
 \noindent\textbf{16.}\quad \flag{The real ATE carries the unmeasured lever arm;
-the RPE does not, since a constant offset cancels in a displacement.}
+the RPE carries it only through turns, since a body-fixed offset cancels in a
+displacement along a straight segment.}
 
 \medskip
 \noindent\textbf{17.}\quad \flag{One run per
@@ -552,7 +544,7 @@ the RPE does not, since a constant offset cancels in a displacement.}
 
 \subsection*{Experiment 2: Visual-Inertial Odometry on a Prior Map: Simulation}
 \noindent\textbf{18.}\quad \slotstatus{partial}{The tiny-warehouse map passes every map target. The two
-realistic-warehouse maps that part~B relocalises on fail them, although their
+realistic-warehouse maps that part~B relocalizes on fail them, although their
 poses are accurate: the failure is in how the occupancy grid is built. The
 tiny map's independent drivability reference is lost, and the large-warehouse
 attempt is unauditable.}
@@ -575,7 +567,7 @@ is corrected between two nodes is not seen here.}
 
 \medskip
 \noindent\textbf{21.}\quad \slotstatus{partial}{Six live runs of 15 November 2026, in the two static
-worlds, measure the localisation against ground truth over hand-driven routes
+worlds, measure the localization against ground truth over hand-driven routes
 of \SIrange{21}{148}{\metre}. Neither traffic world is measured, so
 nothing here speaks to a dynamic warehouse. No goal was commanded in any of the
 six either, so the goal-reaching measures of the reporting rules below are
@@ -592,8 +584,8 @@ goal counts as reached when the base frame is within \SI{1.0}{\metre} and
 \noindent\textbf{23.}\quad \paragraph{Reporting rules, pose tracking.} \flag{Defined after these data
 existed, and reported as the weaker claim it is.} Error is the planar distance
 between the published \texttt{map}~$\rightarrow$~\texttt{base\_link} transform,
-sampled at \SI{2}{\hertz}, and the lever-arm-corrected ground truth
-interpolated to the same instants.
+sampled at \SI{2}{\hertz}, and the ground truth interpolated to the same
+instants, with no lever arm (see Frames).
 
 \medskip
 \noindent\textbf{24.}\quad \flag{One configuration throughout.} The slot reports the correction gate
@@ -609,11 +601,11 @@ another and nothing here measures run-to-run spread.}
 
 \medskip
 \noindent\textbf{26.}\quad \flag{Splitting the panels exposes a pattern the single axis hid.} All six
-  runs begin within \SIrange{0.108}{0.137}{\metre} of truth, but every
-  I-layout run then climbs to five to eleven times that before a fix pulls it
-  back --- \SI{0.519}{}, \SI{0.765}{} and \SI{1.229}{\metre}, each peaking
-  between \SI{19.5}{} and \SI{23.0}{\metre} driven --- where no U-layout run
-  exceeds twice its starting error.
+runs begin within \SIrange{0.108}{0.137}{\metre} of truth, but every
+I-layout run then climbs to five to eleven times that before a fix pulls it
+back --- \SI{0.519}{}, \SI{0.765}{} and \SI{1.229}{\metre}, each peaking
+between \SI{19.5}{} and \SI{23.0}{\metre} driven --- where no U-layout run
+exceeds twice its starting error.
 
 \medskip
 \noindent\textbf{27.}\quad \flag{That bias is not uniform, and the reason is where it enters.} Only the
@@ -631,8 +623,7 @@ ranges overlap across \numrange{24}{165}, and the rank correlation of
 
 \medskip
 \noindent\textbf{29.}\quad \flag{This is a replay of logged corrections, not a run with the gate switched
-off.} The ungated configuration's own recordings were lost (above), and a robot
-steered by Nav2 on a wrong pose would have driven differently; these routes were
+off.} A robot steered by Nav2 on a wrong pose would have driven differently; these routes were
 hand-driven, so the path is the same either way.
 
 \medskip
@@ -646,7 +637,7 @@ below.
 \noindent\textbf{31.}\quad \flag{Some of the reported error is timebase, and the slot cannot say how
 much.} Fitting a constant time offset between each estimate and the ground
 truth returns offsets of \emph{opposite sign}: the published pose matches best
-when shifted \SIrange{-0.04}{-0.12}{\second}, the front end's own trajectory
+when shifted by between \SI{-0.04}{\second} and \SI{-0.12}{\second}, the front end's own trajectory
 when shifted \SIrange{+0.20}{+0.26}{\second}, on the same runs against the same
 truth.
 
@@ -662,8 +653,7 @@ between \SI{0.02}{\metre} and \SI{0.42}{\metre} from truth.
 \noindent\textbf{33.}\quad \flag{The ordering is suggestive and is not a measurement.} Six runs, one per
 cell, on hand-driven routes that differ in shape as well as length, so route
 length is confounded with layout and with everything else that differs between
-cells; and a previous configuration of this same slot produced the opposite
-split.
+cells.
 
 \medskip
 

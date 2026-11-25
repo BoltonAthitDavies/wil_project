@@ -7,11 +7,11 @@ ORB-SLAM3 arms and VINS-Fusion `cpu`). For each run:
   z_rms    RMS of the vertical component of that same residual
   ate2d    SE(2) fit of x-y only, RMS of planar error
   med2d / p95_2d / under5cm   distribution of the planar error
-  best_dt  time offset (+-0.4 s) that minimises ate3d -- rules timing in or out
+  best_dt  time offset (+-0.4 s) that minimizes ate3d -- rules timing in or out
 
   ate_full whole-run 3-D ATE, no cut -- must reproduce tab:realistic-baseline
 
-Everything except ate_full is computed AFTER the initialisation transient, cut
+Everything except ate_full is computed AFTER the initialization transient, cut
 exactly where analyse_realistic_runs.post_init_max cuts it (after the last jump
 inside the first 15 s, plus 0.5 s), with the rigid fit redone on that segment.
 
@@ -49,7 +49,7 @@ def se2(src, dst):
 
 
 def init_cut(t, p):
-    """Start of the post-initialisation segment, as post_init_max defines it."""
+    """Start of the post-initialization segment, as post_init_max defines it."""
     jumps = vm.find_jumps(t, p)[0]
     early = [j for j in jumps if t[j + 1] <= t[0] + INIT_SEARCH_S]
     return (t[early[-1] + 1] + INIT_PAD_S) if early else t[0]
@@ -90,7 +90,7 @@ def write_table(rows):
          r"""the results were known; it explains the miss of the \SI{0.05}{\metre} target and does not re-score it. """
          r"""``Whole run'' reproduces the ATE column of \cref{tab:realistic-baseline} (to within \SI{0.03}{\metre} on """
          r"""the five diverged runs and \SI{0.003}{\metre} on the rest; the resampling differs). Every other column """
-         r"""starts after the initialisation transient, cut where that table cuts its ``Max'' (after the last jump """
+         r"""starts after the initialization transient, cut where that table cuts its ``Max'' (after the last jump """
          r"""inside the first \SI{15}{\second}, plus \SI{0.5}{\second}), with the rigid fit redone on that segment: """
          r"""``3-D'' is its ATE, ``Height'' the RMS of the vertical component of the same residual, ``Planar'' the ATE """
          r"""after an $SE(2)$ fit of $x$--$y$ alone, ``Median'' the median planar error and """

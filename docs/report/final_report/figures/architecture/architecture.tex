@@ -90,7 +90,7 @@
     \fill[sensorcol] (0,-4.4) rectangle (3.4,4.2);
     \node[hdr] at (1.7,3.75) {SENSORS};
     \fill[perccol] (4.3,-4.4) rectangle (11.1,4.2);
-    \node[hdr] at (7.7,3.75) {PERCEPTION \& LOCALISATION};
+    \node[hdr] at (7.7,3.75) {PERCEPTION \& LOCALIZATION};
     \fill[plancol] (12.0,-4.4) rectangle (15.0,4.2);
     \node[hdr] at (13.5,3.75) {PLANNING};
     \fill[ctrlcol] (16.0,-4.4) rectangle (19.0,4.2);
@@ -101,7 +101,7 @@
       {VISUAL-INERTIAL ODOMETRY};
     \fill[black!25!perccol] (4.65,-4.1) rectangle (10.75,0.45);
     \node[font=\scriptsize\bfseries, text=white, anchor=north west] at (4.75,0.4)
-      {LOCALISATION ON THE PRIOR MAP};
+      {LOCALIZATION ON THE PRIOR MAP};
     % ---------------- boxes
     \node[ib] at (1.7, 2.45) (cam) {STEREO CAMERA\\[1pt]\mdseries 2 $\times$ 1280$\times$720};
     \node[ib] at (1.7, 0.80) (imu) {IMU\\[1pt]\mdseries gyro + accel};
@@ -110,7 +110,7 @@
     \node[ib, text width=50mm] at (7.7, 1.95) (fe)
       {FRONT END\\[1pt]\mdseries ORB-SLAM3 \emph{or} VINS-Fusion (one per run)};
     \node[ib, ours] at (6.3,-0.75) (shim) {CAMERA SHIM\\[1pt]\mdseries ours};
-    \node[ib]       at (9.15,-0.75) (rtab) {RTAB-MAP\\[1pt]\mdseries localise, read-only};
+    \node[ib]       at (9.15,-0.75) (rtab) {RTAB-MAP\\[1pt]\mdseries localize, read-only};
     \node[ib, ours] at (6.3,-2.95) (cg) {CORRECTION GATE\\[1pt]\mdseries ours};
     \node[ib, ours] at (9.15,-2.95) (pg) {POSE GATE\\[1pt]\mdseries ours};
     \node[ib, text width=22mm] at (13.5, 2.45) (bt)  {BEHAVIOUR TREE\\[1pt]\mdseries runs the rest};
@@ -178,7 +178,7 @@
     \node[cb, ORB3] (o3) at (6.7,-0.25) {\textbf{ORB-3}\\tracking};
     \node[cb, ORB4] (o4) at (9.9,-0.25) {\textbf{ORB-4}\\keyframe?};
     \node[cb, ORB5] (o5) at (6.7,-3.1)  {\textbf{ORB-5}\\local mapping, local BA};
-    \node[cb, ORB6] (o6) at (9.9,-3.1)  {\textbf{ORB-6}\\IMU initialisation};
+    \node[cb, ORB6] (o6) at (9.9,-3.1)  {\textbf{ORB-6}\\IMU initialization};
     \node[cb, ORB7] (o7) at (6.7,-5.2)  {\textbf{ORB-7}\\place recognition};
     \node[cb, ORB8] (o8) at (9.9,-5.2)  {\textbf{ORB-8}\\loop correction, merge};
     % outputs and the map store
@@ -212,11 +212,11 @@
     \node[box, text width=17mm] (st) at (0,0.6)  {stereo pair\\30 Hz};
     \node[box, text width=17mm] (im) at (0,-1.9) {IMU\\200 Hz};
     \node[cb, VINS1] (v1) at (3.0,0.6)  {\textbf{VINS-1}\\feature tracker (KLT)};
-    \node[cb, VINS3] (v3) at (6.5,0.6)  {\textbf{VINS-3}\\initialisation\\(once, at start)};
+    \node[cb, VINS3] (v3) at (6.5,0.6)  {\textbf{VINS-3}\\initialization\\(once, at start)};
     \node[cb, VINS2] (v2) at (6.5,-1.9) {\textbf{VINS-2}\\IMU preintegration};
     \node[cb, VINS4, text width=29mm, minimum height=14mm] (v4) at (9.9,-0.2)
-      {\textbf{VINS-4}\\sliding-window optimisation\\10 keyframes};
-    \node[cb, VINS5] (v5) at (9.9,1.95) {\textbf{VINS-5}\\marginalisation};
+      {\textbf{VINS-4}\\sliding-window optimization\\10 keyframes};
+    \node[cb, VINS5] (v5) at (9.9,1.95) {\textbf{VINS-5}\\marginalization};
     \node[cb, VINS6] (v6) at (12.2,-2.3) {\textbf{VINS-6}\\time offset $t_d$};
     \node[box, text width=22mm, fill=dpose!10] (out) at (15.6,-0.2)
       {pose every frame\\TF, odometry, \repo{vio.csv}};
@@ -249,10 +249,10 @@
     \node[cb, off, RTAB4] (r4) at (12.4,0.3) {\textbf{RTAB-4}\\memory STM / WM / LTM};
     \node[cb, RTAB5] (r5) at (6.2,-1.65) {\textbf{RTAB-5}\\detect: visual words};
     \node[cb, RTAB6] (r6) at (9.3,-1.65) {\textbf{RTAB-6}\\verify: geometry};
-    \node[cb, RTAB7] (r7) at (12.4,-1.65) {\textbf{RTAB-7}\\graph optimisation};
+    \node[cb, RTAB7] (r7) at (12.4,-1.65) {\textbf{RTAB-7}\\graph optimization};
     \node[cb, RTAB8] (r8) at (9.3,-3.6) {\textbf{RTAB-8}\\map assembly};
     \node[cb, ours, RTAB9] (r9) at (12.4,-3.6) {\textbf{RTAB-9}\\output + correction gate};
-    \node[box, text width=22mm, fill=mapcol!12] (db) at (15.9,0.3) {\textbf{PRIOR DATABASE}\\written in mapping,\\read in localise};
+    \node[box, text width=22mm, fill=mapcol!12] (db) at (15.9,0.3) {\textbf{PRIOR DATABASE}\\written in mapping,\\read in localize};
     \node[box, text width=22mm, fill=dmap!10] (om) at (15.9,-2.6) {\texttt{/map} grid\\to Nav2, once};
     \node[box, text width=22mm, fill=dpose!10] (ot) at (15.9,-4.0) {TF map$\rightarrow$odom\\to Nav2, 20 Hz};
     \draw[arr, dpose] (fe) -- node[rate, pos=0.4]{pose} (r2);

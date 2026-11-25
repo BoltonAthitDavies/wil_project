@@ -19,7 +19,7 @@ WHAT IS MEASURED, AND IN WHICH FRAME
 
   placed    node poses pushed through the map's own fitted placement
             (the .mappose file) and compared to ground truth where they stand.
-            This is the frame the occupancy grid was rasterised and scored in,
+            This is the frame the occupancy grid was rasterized and scored in,
             so it is the error that bears on map quality.
   aligned   the same poses after a best-fit rigid SE(2) transform of their own.
             A placement error is absorbed, so what is left is the shape of the

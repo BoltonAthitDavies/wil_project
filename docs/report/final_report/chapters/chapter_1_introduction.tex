@@ -38,11 +38,12 @@ well it works. Two stereo-inertial front ends, ORB-SLAM3 and VINS-Fusion, are
 compared against each other and against estimators that use no camera at all;
 RTAB-Map serves as the back end that builds a prior map and relocalizes the
 robot in it; and the result is delivered in the form the Nav2 navigation stack
-consumes. Each part is evaluated in a Gazebo simulation of a warehouse, with
-and without moving traffic, and on the real robot.
+consumes. Localization is evaluated in a Gazebo simulation of a warehouse, with
+and without moving traffic, and on the real robot; the prior map and
+relocalization are evaluated in simulation.
 
 Replacing an active sensor (LiDAR) with a passive one (a camera) may also make
-the system sensitive to indoor lighting; lighting is held constant in every
+the system sensitive to indoor lighting; lighting was not varied in any
 recording of this project.
 
 \section{Objectives}
@@ -76,6 +77,11 @@ recording of this project.
     with ground truth while the robot drives through a mapped warehouse.
 \end{enumerate}
 
+Each evaluation is judged against the numeric targets of \cref{tab:targets}:
+an absolute trajectory error of at most \SI{0.05}{\metre}, a relative pose
+error of at most \SI{0.1}{\metre} over \SI{1}{\second}, and limits on map
+precision, completeness and false obstacles.
+
 \section{Expected Benefits}
 \label{sec:benefits}
 
@@ -107,11 +113,10 @@ recording of this project.
     as a diagnostic.
   \item \textbf{Software}, developed in ROS~2 Humble:
     \begin{enumerate}[label=(\alph*)]
-      \item ORB-SLAM3 from the project's fork (patches up to 15, optional GPU front
-        end);
+      \item ORB-SLAM3 from the project's fork, with an optional GPU front end;
       \item VINS-Fusion from the project's fork (no loop fusion);
       \item RTAB-Map 0.23 with the project's camera shim, correction gate and start
-        delay.
+        delay, and the pose gate between localization and Nav2.
     \end{enumerate}
   \item \textbf{Computing:} every run in this report, in both domains, executes on
     one development laptop, an MSI Katana GF66 11UG. The NRU-51V on the robot
@@ -129,8 +134,8 @@ recording of this project.
   \includegraphics[page=1,width=\textwidth]{figures/architecture/architecture.pdf}
   \caption[System architecture and the scope of the project.]{System
   architecture and the scope of the project, from camera pixels to wheel
-  commands. Perception and localisation is this project: the visual-inertial
-  front end (ORB-SLAM3 or VINS-Fusion, one per run) and localisation on the
+  commands. Perception and localization is this project: the visual-inertial
+  front end (ORB-SLAM3 or VINS-Fusion, one per run) and localization on the
   prior map (RTAB-Map behind the camera shim, the correction gate and the pose
   gate). Planning and control are Nav2's and consume the pose and the map; they
   are outside the scope. Line colour is the kind of data: red images, amber
@@ -172,13 +177,12 @@ Task & Jun & Jul & Aug & Sep & Oct & Nov & Dec \\
   & & & \gc & \gc & & & \\
 6. Prepare the real test area in the Gensurv building
   & & & & \gc & \gc & & \\
-7. Run the integrated system experiment (live test) with the robot moving at
-  \SI{1.5}{\metre\per\second}, in simulation and in the real world
+7. Run the integrated system experiment (live test), in simulation and in the real world
   & & & & \gc & \gc & & \\
 8. Collect the test data and evaluate system performance on the defined
   metrics: trajectory error (ATE, RPE) and system latency
   & & & & & \gc & \gc & \\
-9. Summarise the work, discuss the results and produce the complete
+9. Summarize the work, discuss the results and produce the complete
   engineering project report
   & & & & & & \gc & \gc \\
 \bottomrule

@@ -155,14 +155,14 @@ def main():
          "recordings, the only repeated runs in the simulation campaign; the same eighteen runs as "
          "\\cref{tab:mapping-resources}, scored for accuracy. Every run has its loop closer disabled, read from "
          "its own log. ``ATE'' is mean $\\pm$ SD over the three repeats and ``spread'' the largest "
-         "difference between two of them; ``Max'' is the largest error after the initialisation transient, on the "
-         "convention of the accuracy table of \\cref{sec:exp1-sim}. The three repeats of a configuration were run back to back "
-         "rather than interleaved, so a drift across them is confounded with the laptop's thermal state "
-         "(\\cref{sec:exp1-sim}); the Kept column is where that would show.}",
+         "difference between two of them; ``Max'' is the largest error after the initialization transient, on the "
+         "convention of \\cref{tab:realistic-baseline}. The three repeats of a configuration were run back to back "
+         "rather than interleaved, so a drift across them is confounded with the laptop's thermal state; "
+         "the Kept column is where that would show.}",
          "\\label{tab:mapping-repeats}", "\\small", "\\resizebox{\\textwidth}{!}{%",
          "\\begin{tabular}{llr rrrrr}", "\\toprule",
          "Recording & Estimator & $n$ & ATE [\\si{\\metre}] & spread [\\si{\\metre}] & "
-         "Max [\\si{\\metre}] & ATE/path [\\si{\\percent}] & Kept \\\\", "\\midrule"]
+         "Max [\\si{\\metre}] & ATE/path [\\si{\\percent}] & Kept [\\si{\\percent}] \\\\", "\\midrule"]
     last = None
     summary = []
     for (ds, label) in sorted(groups, key=lambda k: (DSS.index(k[0]), [c[2] for c in CONF].index(k[1]))):
@@ -178,7 +178,7 @@ def main():
         L.append("%s & %s & %d & %s & %.3f & %s & %s & %s \\\\" % (
             "\\repo{%s}" % ds.replace("dataset_allsensor_", "") if first else "", label, len(g),
             pm(ates), spread, pm([r["ate_max_post"] for r in g if r["ate_max_post"] is not None]),
-            pm([r["ate_pct_path"] for r in g], 2), pm([r["kept"] for r in g], 2)))
+            pm([r["ate_pct_path"] for r in g], 2), pm([100 * r["kept"] for r in g], 0)))
         summary.append((ds, label, len(g), statistics.mean(ates), spread))
     L += ["\\bottomrule", "\\end{tabular}}", "\\end{table}"]
     (OUT / "mapping_repeats.tex").write_text("\n".join(L) + "\n")

@@ -12,82 +12,82 @@
 \contentsline {section}{\numberline {1.2}Objectives}{1}{section.1.2}%
 \contentsline {section}{\numberline {1.3}Expected Benefits}{2}{section.1.3}%
 \contentsline {section}{\numberline {1.4}Scope}{2}{section.1.4}%
-\contentsline {section}{\numberline {1.5}Work Plan}{2}{section.1.5}%
-\contentsline {chapter}{\numberline {2}THEORY AND RELATED WORK}{4}{chapter.2}%
-\contentsline {section}{\numberline {2.1}AMR Navigation Systems}{4}{section.2.1}%
-\contentsline {subsection}{\numberline {2.1.1}Logistics management and the historical bottleneck}{4}{subsection.2.1.1}%
+\contentsline {section}{\numberline {1.5}Work Plan}{3}{section.1.5}%
+\contentsline {chapter}{\numberline {2}THEORY}{5}{chapter.2}%
+\contentsline {section}{\numberline {2.1}AMR Navigation Systems}{5}{section.2.1}%
+\contentsline {subsection}{\numberline {2.1.1}Logistics management and the historical bottleneck}{5}{subsection.2.1.1}%
 \contentsline {subsection}{\numberline {2.1.2}The era of automated guided vehicles (AGVs)}{5}{subsection.2.1.2}%
-\contentsline {subsection}{\numberline {2.1.3}The transition to autonomous mobile robots (AMRs)}{5}{subsection.2.1.3}%
-\contentsline {section}{\numberline {2.2}Visual Simultaneous Localization and Mapping (Visual SLAM)}{5}{section.2.2}%
-\contentsline {subsection}{\numberline {2.2.1}Components of a visual SLAM system}{6}{subsection.2.2.1}%
+\contentsline {subsection}{\numberline {2.1.3}The transition to autonomous mobile robots (AMRs)}{6}{subsection.2.1.3}%
+\contentsline {section}{\numberline {2.2}Visual Simultaneous Localization and Mapping (Visual SLAM)}{6}{section.2.2}%
+\contentsline {subsection}{\numberline {2.2.1}Components of a visual SLAM system}{7}{subsection.2.2.1}%
 \contentsline {subsection}{\numberline {2.2.2}ORB-SLAM3}{7}{subsection.2.2.2}%
-\contentsline {subsubsection}{Tightly-coupled visual-inertial SLAM}{7}{subsubsection*.15}%
-\contentsline {subsubsection}{Atlas: multi-map system and place recognition}{8}{subsubsection*.16}%
-\contentsline {subsubsection}{Abstract camera representation for wide-angle lenses}{8}{subsubsection*.17}%
-\contentsline {subsection}{\numberline {2.2.3}VINS (Visual-Inertial System)}{8}{subsection.2.2.3}%
-\contentsline {subsubsection}{IMU pre-integration}{8}{subsubsection*.19}%
-\contentsline {subsubsection}{Robust estimator initialisation}{8}{subsubsection*.20}%
-\contentsline {subsubsection}{Tightly-coupled sliding-window optimisation}{9}{subsubsection*.21}%
-\contentsline {subsubsection}{Marginalisation for real-time load control}{9}{subsubsection*.22}%
-\contentsline {subsubsection}{Online temporal calibration}{10}{subsubsection*.23}%
-\contentsline {subsection}{\numberline {2.2.4}RTAB-Map back end and memory management}{10}{subsection.2.2.4}%
-\contentsline {subsubsection}{Memory partitioning modelled on human memory}{10}{subsubsection*.25}%
-\contentsline {subsubsection}{Memory transfer and weighting heuristics}{11}{subsubsection*.26}%
-\contentsline {subsubsection}{Memory-constrained graph optimisation}{11}{subsubsection*.27}%
-\contentsline {chapter}{\numberline {3}METHODOLOGY}{12}{chapter.3}%
-\contentsline {section}{\numberline {3.1}Problem, Requirements and Scope}{12}{section.3.1}%
-\contentsline {section}{\numberline {3.2}System Architecture}{13}{section.3.2}%
-\contentsline {subsection}{\numberline {3.2.1}Data flow and rates}{13}{subsection.3.2.1}%
-\contentsline {section}{\numberline {3.3}The Pipelines as Implemented}{15}{section.3.3}%
-\contentsline {subsection}{\numberline {3.3.1}ORB-SLAM3 front end}{15}{subsection.3.3.1}%
-\contentsline {subsection}{\numberline {3.3.2}VINS-Fusion front end}{16}{subsection.3.3.2}%
-\contentsline {subsection}{\numberline {3.3.3}RTAB-Map mapping and localization back end}{16}{subsection.3.3.3}%
-\contentsline {subsection}{\numberline {3.3.4}Navigation and relocalisation integration: the \repo {vslam_navigation} package}{19}{subsection.3.3.4}%
-\contentsline {subsubsection}{Pose by transform rather than by topic}{19}{subsubsection*.35}%
+\contentsline {subsubsection}{Tightly-coupled visual-inertial SLAM}{8}{subsubsection*.15}%
+\contentsline {subsubsection}{Atlas: multi-map system and place recognition}{9}{subsubsection*.16}%
+\contentsline {subsubsection}{Abstract camera representation for wide-angle lenses}{9}{subsubsection*.17}%
+\contentsline {subsection}{\numberline {2.2.3}VINS (Visual-Inertial System)}{9}{subsection.2.2.3}%
+\contentsline {subsubsection}{IMU pre-integration}{9}{subsubsection*.19}%
+\contentsline {subsubsection}{Robust estimator initialization}{10}{subsubsection*.20}%
+\contentsline {subsubsection}{Tightly-coupled sliding-window optimization}{10}{subsubsection*.21}%
+\contentsline {subsubsection}{Marginalization for real-time load control}{11}{subsubsection*.22}%
+\contentsline {subsubsection}{Online temporal calibration}{11}{subsubsection*.23}%
+\contentsline {subsection}{\numberline {2.2.4}RTAB-Map back end and memory management}{11}{subsection.2.2.4}%
+\contentsline {subsubsection}{Memory partitioning modelled on human memory}{11}{subsubsection*.25}%
+\contentsline {subsubsection}{Memory transfer and weighting heuristics}{12}{subsubsection*.26}%
+\contentsline {subsubsection}{Memory-constrained graph optimization}{12}{subsubsection*.27}%
+\contentsline {chapter}{\numberline {3}METHODOLOGY}{13}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Problem, Requirements and Scope}{13}{section.3.1}%
+\contentsline {section}{\numberline {3.2}System Architecture}{14}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Data flow and rates}{14}{subsection.3.2.1}%
+\contentsline {section}{\numberline {3.3}The Pipelines as Implemented}{16}{section.3.3}%
+\contentsline {subsection}{\numberline {3.3.1}ORB-SLAM3 front end}{16}{subsection.3.3.1}%
+\contentsline {subsection}{\numberline {3.3.2}VINS-Fusion front end}{18}{subsection.3.3.2}%
+\contentsline {subsection}{\numberline {3.3.3}RTAB-Map mapping and localization back end}{19}{subsection.3.3.3}%
+\contentsline {subsection}{\numberline {3.3.4}Navigation and relocalization integration: the \repo {vslam_navigation} package}{20}{subsection.3.3.4}%
+\contentsline {subsubsection}{Pose by transform rather than by topic}{20}{subsubsection*.35}%
 \contentsline {subsubsection}{Manufacturing the stereo input}{20}{subsubsection*.36}%
-\contentsline {subsubsection}{Three memory modes, and why a prior must be built without closures}{20}{subsubsection*.37}%
-\contentsline {subsubsection}{Gating the planner on the localisation}{20}{subsubsection*.38}%
+\contentsline {subsubsection}{Three memory modes, and why a prior must be built without closures}{21}{subsubsection*.37}%
+\contentsline {subsubsection}{Gating the planner on the localization}{21}{subsubsection*.38}%
 \contentsline {subsubsection}{Planner, controller and vehicle model}{21}{subsubsection*.39}%
 \contentsline {subsubsection}{Command interface}{22}{subsubsection*.41}%
 \contentsline {subsubsection}{Status at the cutoff}{23}{subsubsection*.43}%
-\contentsline {subsubsection}{What relocalisation does, and what it does not}{23}{subsubsection*.44}%
-\contentsline {section}{\numberline {3.4}Simulation Platform}{24}{section.3.4}%
-\contentsline {subsection}{\numberline {3.4.1}Computing and software environment}{24}{subsection.3.4.1}%
+\contentsline {subsubsection}{What relocalization does, and what it does not}{24}{subsubsection*.44}%
+\contentsline {section}{\numberline {3.4}Simulation Platform}{26}{section.3.4}%
+\contentsline {subsection}{\numberline {3.4.1}Computing and software environment}{26}{subsection.3.4.1}%
 \contentsline {subsection}{\numberline {3.4.2}Simulated sensor rig and platform}{26}{subsection.3.4.2}%
 \contentsline {subsection}{\numberline {3.4.3}Simulation fidelity and its limits}{26}{subsection.3.4.3}%
-\contentsline {paragraph}{Inertial noise.}{27}{paragraph*.50}%
-\contentsline {paragraph}{Camera, chassis and physics.}{27}{paragraph*.52}%
-\contentsline {subsection}{\numberline {3.4.4}Coordinate-frame contract}{27}{subsection.3.4.4}%
-\contentsline {subsection}{\numberline {3.4.5}Simulation environments and controlled factors}{28}{subsection.3.4.5}%
-\contentsline {subsection}{\numberline {3.4.6}Realistic logistics layouts}{30}{subsection.3.4.6}%
-\contentsline {paragraph}{Traffic and people.}{30}{paragraph*.59}%
-\contentsline {paragraph}{Static twins.}{33}{paragraph*.60}%
-\contentsline {paragraph}{Recordings.}{33}{paragraph*.61}%
-\contentsline {subsection}{\numberline {3.4.7}Dataset registry}{33}{subsection.3.4.7}%
-\contentsline {paragraph}{What the real recordings carry.}{33}{paragraph*.63}%
+\contentsline {paragraph}{Inertial noise.}{26}{paragraph*.50}%
+\contentsline {paragraph}{Camera, chassis and physics.}{28}{paragraph*.52}%
+\contentsline {subsection}{\numberline {3.4.4}Coordinate-frame contract}{28}{subsection.3.4.4}%
+\contentsline {subsection}{\numberline {3.4.5}Simulation environments and controlled factors}{29}{subsection.3.4.5}%
+\contentsline {subsection}{\numberline {3.4.6}Realistic logistics layouts}{29}{subsection.3.4.6}%
+\contentsline {paragraph}{Traffic and people.}{31}{paragraph*.59}%
+\contentsline {paragraph}{Static twins.}{31}{paragraph*.60}%
+\contentsline {paragraph}{Recordings.}{34}{paragraph*.61}%
+\contentsline {subsection}{\numberline {3.4.7}Dataset registry}{34}{subsection.3.4.7}%
+\contentsline {paragraph}{What the real recordings carry.}{34}{paragraph*.63}%
 \contentsline {section}{\numberline {3.5}Real Platform}{34}{section.3.5}%
 \contentsline {subsection}{\numberline {3.5.1}AMR mobile robot testbed}{34}{subsection.3.5.1}%
-\contentsline {subsection}{\numberline {3.5.2}Sensors and computing unit}{34}{subsection.3.5.2}%
-\contentsline {subsection}{\numberline {3.5.3}Real sensor rig and calibration limits}{36}{subsection.3.5.3}%
-\contentsline {subsection}{\numberline {3.5.4}Test site and experimental variables}{37}{subsection.3.5.4}%
-\contentsline {section}{\numberline {3.6}The Two Experiments}{37}{section.3.6}%
-\contentsline {subsection}{\numberline {3.6.1}Experiment 1: Estimator comparison against a non-visual baseline}{37}{subsection.3.6.1}%
-\contentsline {subsubsection}{Sensor model derived from data}{39}{subsubsection*.72}%
+\contentsline {subsection}{\numberline {3.5.2}Sensors and computing unit}{35}{subsection.3.5.2}%
+\contentsline {subsection}{\numberline {3.5.3}Real sensor rig and calibration limits}{37}{subsection.3.5.3}%
+\contentsline {subsection}{\numberline {3.5.4}Test site and experimental variables}{39}{subsection.3.5.4}%
+\contentsline {section}{\numberline {3.6}The Two Experiments}{39}{section.3.6}%
+\contentsline {subsection}{\numberline {3.6.1}Experiment 1: Estimator comparison against a non-visual baseline}{39}{subsection.3.6.1}%
+\contentsline {subsubsection}{Sensor model derived from data}{40}{subsubsection*.72}%
 \contentsline {subsubsection}{Estimator definitions}{40}{subsubsection*.74}%
 \contentsline {paragraph}{Which noise model the baseline runs on.}{40}{paragraph*.76}%
-\contentsline {subsubsection}{EKF formulation}{40}{subsubsection*.77}%
-\contentsline {paragraph}{State and inputs.}{40}{paragraph*.78}%
+\contentsline {subsubsection}{EKF formulation}{41}{subsubsection*.77}%
+\contentsline {paragraph}{State and inputs.}{41}{paragraph*.78}%
 \contentsline {paragraph}{Covariance and process noise.}{41}{paragraph*.79}%
-\contentsline {paragraph}{Measurement.}{41}{paragraph*.80}%
-\contentsline {paragraph}{Where the numbers come from.}{41}{paragraph*.81}%
-\contentsline {subsubsection}{Why the bias, and not the heading, is observed}{41}{subsubsection*.82}%
-\contentsline {subsubsection}{The real robot: a different baseline}{41}{subsubsection*.83}%
-\contentsline {subsection}{\numberline {3.6.2}Experiment 2: Visual-inertial odometry on a prior map}{42}{subsection.3.6.2}%
-\contentsline {subsubsection}{Part A: the prior map}{42}{subsubsection*.84}%
+\contentsline {paragraph}{Measurement.}{42}{paragraph*.80}%
+\contentsline {paragraph}{Where the numbers come from.}{42}{paragraph*.81}%
+\contentsline {subsubsection}{Why the bias, and not the heading, is observed}{42}{subsubsection*.82}%
+\contentsline {subsubsection}{The real robot: a different baseline}{42}{subsubsection*.83}%
+\contentsline {subsection}{\numberline {3.6.2}Experiment 2: Visual-inertial odometry on a prior map}{43}{subsection.3.6.2}%
+\contentsline {subsubsection}{Part A: the prior map}{43}{subsubsection*.84}%
 \contentsline {subsubsection}{Part B: relocalization on the prior map}{43}{subsubsection*.85}%
-\contentsline {section}{\numberline {3.7}Evaluation Metrics and Analysis}{43}{section.3.7}%
-\contentsline {subsection}{\numberline {3.7.1}Trajectory evaluation}{43}{subsection.3.7.1}%
-\contentsline {paragraph}{Planar reference.}{43}{paragraph*.86}%
+\contentsline {section}{\numberline {3.7}Evaluation Metrics and Analysis}{44}{section.3.7}%
+\contentsline {subsection}{\numberline {3.7.1}Trajectory evaluation}{44}{subsection.3.7.1}%
+\contentsline {paragraph}{Planar reference.}{44}{paragraph*.86}%
 \contentsline {subsection}{\numberline {3.7.2}Computational performance and provenance}{44}{subsection.3.7.2}%
 \contentsline {chapter}{\numberline {4}EXPERIMENTS AND RESULTS}{45}{chapter.4}%
 \contentsline {section}{\numberline {4.1}Experiment 1: Estimator Comparison Against a Non-Visual Baseline}{46}{section.4.1}%
@@ -99,36 +99,36 @@
 \contentsline {paragraph}{Results.}{50}{paragraph*.96}%
 \contentsline {paragraph}{Analysis: the loop closer decides, in both directions.}{51}{paragraph*.101}%
 \contentsline {paragraph}{Analysis: the front end changes throughput, not accuracy.}{54}{paragraph*.105}%
-\contentsline {paragraph}{Analysis: traffic as a condition.}{57}{paragraph*.107}%
-\contentsline {paragraph}{Analysis: what raises the local error.}{57}{paragraph*.108}%
+\contentsline {paragraph}{Analysis: traffic as a condition.}{56}{paragraph*.107}%
+\contentsline {paragraph}{Analysis: what raises the local error.}{56}{paragraph*.108}%
 \contentsline {paragraph}{Analysis: what the traffic actually did.}{57}{paragraph*.110}%
-\contentsline {paragraph}{Analysis: the two estimators err in perpendicular directions.}{58}{paragraph*.112}%
-\contentsline {paragraph}{Analysis: the rotation column.}{60}{paragraph*.115}%
-\contentsline {paragraph}{Analysis: why the I layout drifts in height.}{60}{paragraph*.117}%
+\contentsline {paragraph}{Analysis: the two estimators err in perpendicular directions.}{57}{paragraph*.112}%
+\contentsline {paragraph}{Analysis: the rotation column.}{59}{paragraph*.115}%
+\contentsline {paragraph}{Analysis: why the I layout drifts in height.}{59}{paragraph*.117}%
 \contentsline {paragraph}{Latency and resources.}{61}{paragraph*.118}%
 \contentsline {paragraph}{Repeatability.}{61}{paragraph*.122}%
-\contentsline {paragraph}{Limitations.}{62}{paragraph*.124}%
+\contentsline {paragraph}{Limitations.}{63}{paragraph*.124}%
 \contentsline {paragraph}{Summary.}{63}{paragraph*.125}%
 \contentsline {paragraph}{Future plan.}{63}{paragraph*.126}%
-\contentsline {subsection}{\numberline {4.1.2}Real robot}{63}{subsection.4.1.2}%
+\contentsline {subsection}{\numberline {4.1.2}Real robot}{64}{subsection.4.1.2}%
 \contentsline {subsubsection}{Non-visual baseline}{64}{subsubsection*.127}%
 \contentsline {paragraph}{Results.}{64}{paragraph*.128}%
 \contentsline {paragraph}{Analysis.}{64}{paragraph*.131}%
-\contentsline {subsubsection}{Visual estimators}{64}{subsubsection*.132}%
-\contentsline {paragraph}{Results.}{64}{paragraph*.133}%
+\contentsline {subsubsection}{Visual estimators}{65}{subsubsection*.132}%
+\contentsline {paragraph}{Results.}{65}{paragraph*.133}%
 \contentsline {paragraph}{Why VINS-Fusion needed two changes.}{65}{paragraph*.134}%
-\contentsline {paragraph}{Latency and resources.}{65}{paragraph*.138}%
-\contentsline {paragraph}{The error direction belongs to the recording.}{65}{paragraph*.139}%
-\contentsline {subsubsection}{The two datasets compared}{65}{subsubsection*.144}%
-\contentsline {paragraph}{The images are better; the motion is what differs.}{65}{paragraph*.145}%
-\contentsline {paragraph}{Charged by time, the rig is twice as hard, not ten times.}{70}{paragraph*.146}%
-\contentsline {paragraph}{Summary.}{70}{paragraph*.148}%
+\contentsline {paragraph}{Latency and resources.}{66}{paragraph*.138}%
+\contentsline {paragraph}{The error direction belongs to the recording.}{66}{paragraph*.139}%
+\contentsline {subsubsection}{The two datasets compared}{68}{subsubsection*.144}%
+\contentsline {paragraph}{The images are better; the motion is what differs.}{68}{paragraph*.145}%
+\contentsline {paragraph}{Charged by time, the rig is twice as hard, not ten times.}{68}{paragraph*.146}%
+\contentsline {paragraph}{Summary.}{68}{paragraph*.148}%
 \contentsline {section}{\numberline {4.2}Experiment 2: Visual-Inertial Odometry on a Prior Map}{71}{section.4.2}%
 \contentsline {subsection}{\numberline {4.2.1}Simulation}{71}{subsection.4.2.1}%
 \contentsline {subsubsection}{Part A: the prior map}{71}{subsubsection*.149}%
 \contentsline {paragraph}{The tiny warehouse.}{71}{paragraph*.150}%
-\contentsline {paragraph}{The large warehouse.}{71}{paragraph*.154}%
-\contentsline {paragraph}{The realistic warehouse.}{71}{paragraph*.155}%
+\contentsline {paragraph}{The large warehouse.}{73}{paragraph*.154}%
+\contentsline {paragraph}{The realistic warehouse.}{73}{paragraph*.155}%
 \contentsline {paragraph}{Were the poses the problem?}{73}{paragraph*.159}%
 \contentsline {paragraph}{Summary.}{75}{paragraph*.161}%
 \contentsline {paragraph}{Future plan.}{75}{paragraph*.162}%
@@ -137,27 +137,27 @@
 \contentsline {paragraph}{Frames.}{76}{paragraph*.165}%
 \contentsline {paragraph}{Reporting rules, goal-reaching.}{76}{paragraph*.166}%
 \contentsline {paragraph}{Reporting rules, pose tracking.}{76}{paragraph*.167}%
-\contentsline {paragraph}{Results.}{76}{paragraph*.168}%
-\contentsline {paragraph}{Heading.}{81}{paragraph*.174}%
-\contentsline {paragraph}{Insight: the pose is as good as the map it is localising against.}{81}{paragraph*.176}%
-\contentsline {paragraph}{Insight: within a run, a worse map does not carry a larger error.}{83}{paragraph*.178}%
-\contentsline {paragraph}{Insight: the initialisation transient damages both layers.}{83}{paragraph*.179}%
-\contentsline {paragraph}{Excursions, and that the one of them ended.}{83}{paragraph*.180}%
-\contentsline {paragraph}{Insight: the vocabulary proposes and the geometry disposes.}{83}{paragraph*.181}%
-\contentsline {paragraph}{Insight: the gate refused only corrections that would have moved the robot metres.}{84}{paragraph*.183}%
-\contentsline {paragraph}{Analysis: what does not explain the error.}{85}{paragraph*.184}%
-\contentsline {paragraph}{Insight: over these distances the prior supplies a datum, not accuracy.}{86}{paragraph*.185}%
-\contentsline {paragraph}{What these data cannot answer.}{86}{paragraph*.186}%
-\contentsline {subsubsection}{Part B: every run}{86}{subsubsection*.187}%
-\contentsline {subsection}{\numberline {4.2.2}Real robot}{89}{subsection.4.2.2}%
-\contentsline {section}{\numberline {4.3}Cross-Experiment Discussion, Simulation-to-Real Comparison and Limitations}{89}{section.4.3}%
-\contentsline {subsection}{\numberline {4.3.1}Simulation against the real robot}{89}{subsection.4.3.1}%
-\contentsline {subsection}{\numberline {4.3.2}Limitations}{90}{subsection.4.3.2}%
-\contentsline {chapter}{\numberline {5}CONCLUSION AND RECOMMENDATIONS}{92}{chapter.5}%
-\contentsline {section}{\numberline {5.1}Conclusions by Experiment}{92}{section.5.1}%
-\contentsline {subsection}{\numberline {5.1.1}Experiment 1: is vision earning its place?}{92}{subsection.5.1.1}%
-\contentsline {subsection}{\numberline {5.1.2}Experiment 2: does the robot localize on the map it built?}{94}{subsection.5.1.2}%
-\contentsline {section}{\numberline {5.2}Limitations and Threats to Validity}{95}{section.5.2}%
-\contentsline {section}{\numberline {5.3}Recommendations and Next Steps}{96}{section.5.3}%
-\contentsline {chapter}{REFERENCES}{97}{section*.192}%
-\contentsline {chapter}{CURRICULUM VITAE}{99}{chapter*.194}%
+\contentsline {paragraph}{Results.}{77}{paragraph*.168}%
+\contentsline {paragraph}{Heading.}{80}{paragraph*.174}%
+\contentsline {paragraph}{Insight: the pose is bounded by the map's own accuracy.}{80}{paragraph*.176}%
+\contentsline {paragraph}{Insight: within a run, a worse map does not carry a larger error.}{82}{paragraph*.178}%
+\contentsline {paragraph}{Insight: the initialization transient damages both layers.}{82}{paragraph*.179}%
+\contentsline {paragraph}{Excursions: one, and it ended.}{82}{paragraph*.180}%
+\contentsline {paragraph}{Insight: the vocabulary proposes and the geometry disposes.}{82}{paragraph*.181}%
+\contentsline {paragraph}{Insight: the gate refused only corrections that would have moved the robot metres.}{83}{paragraph*.183}%
+\contentsline {paragraph}{Analysis: what does not explain the error.}{84}{paragraph*.184}%
+\contentsline {paragraph}{Insight: over these distances the prior supplies a datum, not accuracy.}{84}{paragraph*.185}%
+\contentsline {paragraph}{What these data cannot answer.}{85}{paragraph*.186}%
+\contentsline {subsubsection}{Part B: every run}{85}{subsubsection*.187}%
+\contentsline {subsection}{\numberline {4.2.2}Real robot}{88}{subsection.4.2.2}%
+\contentsline {section}{\numberline {4.3}Cross-Experiment Discussion, Simulation-to-Real Comparison and Limitations}{88}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}Simulation against the real robot}{88}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.3.2}Limitations}{89}{subsection.4.3.2}%
+\contentsline {chapter}{\numberline {5}CONCLUSION AND RECOMMENDATIONS}{91}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Conclusions by Experiment}{91}{section.5.1}%
+\contentsline {subsection}{\numberline {5.1.1}Experiment 1: is vision earning its place?}{91}{subsection.5.1.1}%
+\contentsline {subsection}{\numberline {5.1.2}Experiment 2: does the robot localize on the map it built?}{93}{subsection.5.1.2}%
+\contentsline {section}{\numberline {5.2}Limitations and Threats to Validity}{94}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Recommendations and Next Steps}{95}{section.5.3}%
+\contentsline {chapter}{REFERENCES}{96}{section*.192}%
+\contentsline {chapter}{CURRICULUM VITAE}{98}{chapter*.194}%

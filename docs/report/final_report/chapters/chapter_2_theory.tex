@@ -2,26 +2,20 @@
 % faculty template (docs/MyThesisInfo/final_report.pdf, pp. 4-18).  The
 % science is the template's; only the language changed.  Figure sources are
 % carried over verbatim.
-\chapter[THEORY AND RELATED WORK]{Theory and Related Work}
+\chapter[THEORY]{Theory}
 \label{chap:theory}
 
-In carrying out the project ``Vision-Based Navigation Pipeline for AMRs in
-Dynamic Warehouse'', the author's aim is to develop and evaluate only the
-navigation pipeline, within the scope defined in \cref{sec:scope}. The project
-does not set out to build a complete autonomous robot from scratch; it
-integrates navigation software into the existing architecture of an autonomous
-mobile robot (AMR). To make that development effective, the author studied and
-collected theory, documents and research on the following principal topics.
+The project ``Vision-Based Navigation Pipeline for AMRs in a Dynamic
+Warehouse'' develops and evaluates only the navigation pipeline, within the
+scope of \cref{sec:scope}, and integrates it into an existing autonomous mobile
+robot (AMR). This chapter reviews the theory that pipeline rests on.
 
 \section{AMR Navigation Systems}
 \label{sec:amr-navigation}
 
-Autonomous mobile robots are among the technologies transforming industry in the
-digital era, particularly in manufacturing, warehousing and materials handling.
-With their capacity to learn, their flexibility and their high precision, AMRs
-reduce cost and raise efficiency by a large step. This section reviews the
-properties, technology and use cases of AMRs to make the potential of the
-innovation clear.
+Autonomous mobile robots are increasingly used in manufacturing, warehousing
+and materials handling. This section reviews the problem they address, the
+guided vehicles that preceded them and an industrial example of their use.
 
 \subsection{Logistics management and the historical bottleneck}
 
@@ -44,8 +38,8 @@ and reduce that time and waste.
 
 \subsection{The era of automated guided vehicles (AGVs)}
 
-Research and development of autonomous mobile robots began in the 1950s with
-automated guided vehicles. AGV systems have an important limitation: the vehicle
+Autonomous mobile robots grew out of automated guided vehicles (AGVs). AGV
+systems have an important limitation: the vehicle
 depends on infrastructure installed in the warehouse beforehand for navigation,
 such as magnetic tape, QR codes or artificial landmarks
 (\cref{fig:agv-navigation}). AGVs can also only follow fixed, pre-planned
@@ -79,8 +73,8 @@ With this capacity for independent decision-making and navigation, large
 industrial users have moved to AMRs widely. One example is the deployment of
 autonomous driverless transport vehicles in the press plant of the BMW Group at
 Regensburg~\cite{bmw2024}, whose vehicles navigate and manoeuvre precisely
-through busy, complex areas of a real factory (\cref{fig:bmw-agv}), showing that
-AMRs have fully overcome the limits of the older navigation systems.
+through busy, complex areas of a real factory (\cref{fig:bmw-agv}), an example
+of AMR navigation in a busy industrial setting.
 
 \begin{figure}[htbp]
   \centering
@@ -104,8 +98,8 @@ probability distribution and predict the robot's most likely position.
 \subsection{Components of a visual SLAM system}
 
 This project concentrates on visual SLAM, mapping and localization with image
-sensors, to reduce the cost of LiDAR sensors. Following the project's own
-data-flow diagram, a visual SLAM architecture has three main parts
+sensors, to reduce the cost of LiDAR sensors. Following Cadena et
+al.~\cite{cadena2016}, a visual SLAM architecture has three main parts
 (\cref{fig:slam-indirect}):
 
 \begin{enumerate}[leftmargin=2em]
@@ -113,9 +107,9 @@ data-flow diagram, a visual SLAM architecture has three main parts
     extracts features to estimate the robot's relative motion and pose over
     short intervals.
   \item \textbf{SLAM back end}: refines and corrects the accumulated drift of
-    the front-end estimate using graph optimisation, to obtain the most accurate
+    the front-end estimate using graph optimization, to obtain the most accurate
     map and pose.
-  \item \textbf{Loop closure}: the process by which the system recognises a
+  \item \textbf{Loop closure}: the process by which the system recognizes a
     place the robot has visited before; when the robot returns, the current
     image is matched to a past one and the whole map is corrected to reduce
     accumulated error.
@@ -126,7 +120,7 @@ data-flow diagram, a visual SLAM architecture has three main parts
   \includegraphics[width=0.85\textwidth]{figures/template/slam_indirect.png}
   \caption[The indirect, feature-based SLAM method.]{The indirect (feature-based) method common to SLAM systems: a front
   end producing pseudo-measurements and loop-closure constraints, and a back end
-  performing geometric SLAM by factor-graph optimisation~\cite{cadena2016}.}
+  performing geometric SLAM by factor-graph optimization~\cite{cadena2016}.}
   \figsource{Cadena et al., 2016}
   \label{fig:slam-indirect}
 \end{figure}
@@ -155,16 +149,17 @@ relevant to this project are as follows.
 
 One of the most important advances of ORB-SLAM3 is its visual-inertial SLAM
 (VI-SLAM), which fuses data tightly by maximum-a-posteriori (MAP) estimation
-both during initialisation and in normal operation, unlike earlier systems that
+both during initialization and in normal operation, unlike earlier systems that
 separated the computations. Its mechanisms are:
 
 \begin{itemize}[leftmargin=2em]
-  \item \textbf{Fast IMU initialisation.} The main problem of typical VI-SLAM
+  \item \textbf{Fast IMU initialization.} The main problem of typical VI-SLAM
     systems is the delay in computing the IMU's initial parameters. ORB-SLAM3
     proposes a MAP uncertainty computation that recovers the map scale, the
     gravity direction and the gyroscope and accelerometer biases within about
-    two seconds of start-up, so the robot obtains a correct pose with a
-    physically true distance scale immediately.
+    two seconds of start-up in the authors' evaluation~\cite{campos2021}; the
+    initialization events seen in this project are reported in
+    \cref{chap:results}.
   \item \textbf{Joint local bundle adjustment.} While moving, the system solves
     for the robot pose together with the 3-D landmarks and the IMU states
     (velocity and biases) simultaneously within a local window, compensating
@@ -191,8 +186,9 @@ tracking into the non-active set and immediately starts a new active map to
 continue localizing. When the robot later returns to a previously mapped area,
 the place-recognition algorithm, with its improved recall, detects the overlap
 and triggers map merging of the current active map with the earlier non-active
-map, correcting the error by loop closure. This mechanism permanently reduces
-the risk of the robot becoming lost in the warehouse.
+map, correcting the error by loop closure. The mechanism is designed to reduce
+the risk of the robot becoming lost; a false closure, which it can also
+produce, is examined in \cref{chap:results}.
 
 \subsubsection{Abstract camera representation for wide-angle lenses}
 
@@ -200,9 +196,9 @@ Because this project selects the AC-IMX390-H190 camera with an ultra-wide
 \SI{186}{\degree} field of view (fisheye lens), ORB-SLAM3 is technically well
 suited: its architecture places an abstract representation layer between the
 feature extractor and the camera projection model, so the system can switch to
-the Kannala--Brandt fisheye model directly without affecting the back-end SLAM
-algorithms. The robot can therefore process wide-angle images correctly and
-without distortion in the localization result.
+the Kannala--Brandt fisheye model without changing the back-end SLAM
+algorithms. The limits this model showed on the real lens, and the field-of-view
+mask they required, are reported in \cref{sec:exp1-real}.
 
 \subsection{VINS (Visual-Inertial System)}
 \label{sec:theory-vins}
@@ -211,14 +207,16 @@ VINS (VINS-Mono, VINS-Fusion)~\cite{qin2018vins} is a high-performance
 open-source state estimator developed by the Aerial Robotics Group (HKUST). Its
 extended versions can fuse GPS, but for this project's indoor dynamic warehouse
 VINS is used as a local 6-DoF visual-inertial odometry (VIO) estimator
-(\cref{fig:vins-components}). Its main mechanisms are as follows.
+(\cref{fig:vins-components}); the project's fork runs without the
+global pose-graph stage shown in the figure. Its main mechanisms are as
+follows.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.95\textwidth]{figures/template/vins_components.png}
   \caption[Main components of monocular VINS.]{Main components of monocular VINS: measurement preprocessing,
-  initialisation, sliding-window visual-inertial odometry with relocalization,
-  and global pose-graph optimisation and reuse~\cite{qin2018vins}.}
+  initialization, sliding-window visual-inertial odometry with relocalization,
+  and global pose-graph optimization and reuse~\cite{qin2018vins}.}
   \figsource{Qin et al., 2018}
   \label{fig:vins-components}
 \end{figure}
@@ -234,14 +232,13 @@ between two consecutive image frames are integrated in the robot's local body
 frame rather than the global frame, so the pre-integrated measurements do not
 depend on the initial state and need not be recomputed when the back end
 corrects the robot's pose. The system also propagates covariance and corrects
-gyroscope and accelerometer bias through a first-order Taylor expansion, giving
-a physically accurate pose estimate.
+gyroscope and accelerometer bias through a first-order Taylor expansion.
 
-\subsubsection{Robust estimator initialisation}
+\subsubsection{Robust estimator initialization}
 
-A central challenge of visual-inertial SLAM is initialisation, because
+A central challenge of visual-inertial SLAM is initialization, because
 monocular or stereo images carry no true metric scale at the outset and the IMU
-carries accumulated bias. VINS establishes a tightly-coupled initialisation in
+carries accumulated bias. VINS establishes a tightly-coupled initialization in
 two steps:
 
 \begin{itemize}[leftmargin=2em]
@@ -251,11 +248,11 @@ two steps:
   \item \textbf{Visual-inertial alignment.} The SfM trajectory is set against
     the IMU pre-integration results to recover three initial quantities: the
     metric scale, the gravity direction relative to the robot, and the initial
-    gyroscope bias. The AMR thereby perceives true metric distances in the
-    warehouse immediately after it begins to move.
+    gyroscope bias, which gives the estimate a metric scale once the robot has
+    moved enough to excite the IMU.
 \end{itemize}
 
-\subsubsection{Tightly-coupled sliding-window optimisation}
+\subsubsection{Tightly-coupled sliding-window optimization}
 
 At the heart of the VINS pipeline is a sliding window that limits the number of
 image frames and robot states that must be solved for. VINS forms a nonlinear
@@ -269,25 +266,25 @@ are tightly coupled:
 \end{equation}
 where
 \begin{itemize}[leftmargin=2em]
-  \item the \textbf{marginalisation residual} $r_p$ is the prior obtained from
+  \item the \textbf{marginalization residual} $r_p$ is the prior obtained from
     past frames removed from the sliding window;
   \item the \textbf{IMU residual} $r_{\mathcal{B}}$ is the error between the
-    robot's true state and the IMU pre-integration; and
+    estimated state and the IMU pre-integration; and
   \item the \textbf{visual re-projection residual} $r_{\mathcal{C}}$ is the
     re-projection error of feature points on the stereo image plane.
 \end{itemize}
 
-\subsubsection{Marginalisation for real-time load control}
+\subsubsection{Marginalization for real-time load control}
 
-To keep the edge processor (NRU-51V) on the robot running in real time, VINS
-removes frames from the sliding window under two conditions:
+To bound the computation per frame, VINS removes frames from the sliding
+window under two conditions:
 
 \begin{itemize}[leftmargin=2em]
-  \item \textbf{Marginalise old (\texttt{MARGIN\_OLD}).} If the newest frame is
+  \item \textbf{Marginalize old (\texttt{MARGIN\_OLD}).} If the newest frame is
     judged a keyframe, the oldest frame in the window is removed, and its
     visual and inertial information is converted into a prior factor by the
     Schur complement so that important past parameters are not lost.
-  \item \textbf{Marginalise second newest (\texttt{MARGIN\_SECOND\_NEW}).} If
+  \item \textbf{Marginalize second newest (\texttt{MARGIN\_SECOND\_NEW}).} If
     the newest frame is judged a non-keyframe (insufficient parallax), the
     second-newest frame is discarded outright without forming a prior. This
     bounds the density of the matrices and saves a great deal of computation
@@ -301,9 +298,9 @@ misalignment between the camera and the IMU. In practice the camera trigger and
 the IMU signals suffer transmission and triggering delays, so the two sensors'
 timestamps disagree, an important cause of VIO failure when the robot moves fast
 or turns. VINS adds the time offset as a state variable estimated jointly in the
-back-end optimisation, computing the temporal shift of the image frames against
-the IMU angular rate. The pipeline can thereby compensate the latency of the
-AC-IMX390-H190 image stream on the processing board.
+back-end optimization, computing the temporal shift of the image frames against
+the IMU angular rate. This project runs with the estimation off and the
+offset held at \SI{0}{\second} (\cref{tab:vins-params}).
 
 \subsection{RTAB-Map back end and memory management}
 \label{sec:theory-rtab}
@@ -311,42 +308,41 @@ AC-IMX390-H190 image stream on the processing board.
 Following Labbé and Michaud~\cite{labbe2019}, RTAB-Map is an open-source SLAM
 library designed to avoid failure through computational and memory explosion
 when a robot operates over a large area or for a long time (lifelong mapping).
-RTAB-Map receives odometry and point-cloud data from VINS and performs graph
-SLAM in the back end through three main mechanisms
+RTAB-Map receives stereo images and the front end's odometry and performs
+graph SLAM in the back end through three main mechanisms
 (\cref{fig:rtabmap-components}).
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.95\textwidth]{figures/template/rtabmap_components.png}
-  \caption[Main components of RTAB-Map.]{Main components of RTAB-Map: sensor synchronisation, short-term and
+  \caption[Main components of RTAB-Map.]{Main components of RTAB-Map: sensor synchronization, short-term and
   working memory, long-term memory, loop-closure and proximity detection, graph
-  optimisation and global map assembly~\cite{labbe2019}.}
+  optimization and global map assembly~\cite{labbe2019}.}
   \figsource{Labb\'e and Michaud, 2019}
   \label{fig:rtabmap-components}
 \end{figure}
 
 \subsubsection{Memory partitioning modelled on human memory}
 
-RTAB-Map does not keep and compute over every map node in RAM; it organises the
+RTAB-Map does not keep and compute over every map node in RAM; it organizes the
 data on three levels:
 
 \begin{itemize}[leftmargin=2em]
   \item \textbf{Short-term memory (STM)} receives the latest image and odometry
-    from VINS, extracts features and creates a new node. Nodes in STM are not
+    from the front end, extracts features and creates a new node. Nodes in STM are not
     yet used for loop-closure computation.
   \item \textbf{Working memory (WM)} is the main RAM area in which the
-    algorithm detects loop closures and performs graph optimisation. The WM size
-    is held constant by a time threshold so that the computation time never
-    exceeds the real-time limit (for example \SI{<30}{\milli\second}).
+    algorithm detects loop closures and performs graph optimization. The WM size
+    is held constant by a time threshold so that the computation time stays
+    within the real-time limit (for example \SI{<30}{\milli\second}).
   \item \textbf{Long-term memory (LTM)} is the database written to permanent
     storage (SSD or hard disk). Its contents do not enter the ordinary graph
-    optimisation, conserving RAM and CPU.
+    optimization, conserving RAM and CPU.
 \end{itemize}
 
 \subsubsection{Memory transfer and weighting heuristics}
 
-To lock the processing time at a constant ($O(1)$ time complexity) regardless
-of how large the warehouse map becomes, RTAB-Map moves data between WM and LTM
+To keep the processing time bounded as the warehouse map grows, RTAB-Map moves data between WM and LTM
 as follows:
 
 \begin{itemize}[leftmargin=2em]
@@ -362,10 +358,10 @@ as follows:
     structure and correct accumulated drift.
 \end{itemize}
 
-\subsubsection{Memory-constrained graph optimisation}
+\subsubsection{Memory-constrained graph optimization}
 
-Unlike ordinary SLAM systems, which must optimise the graph over the whole map
-and stall when run for a long time, RTAB-Map optimises the graph (through g2o or
-GTSAM) only over the nodes remaining in working memory. The NRU-51V edge
-processor can therefore run the navigation system and update the warehouse map
-smoothly over its whole service life without loss of speed.
+RTAB-Map optimizes the graph (through g2o or GTSAM) only over the nodes
+remaining in working memory, so the cost of optimization is bounded by the size
+of working memory rather than of the whole map. This project runs with memory
+management off (\cref{fig:rtab-pipeline}), so every node of a prior map stays
+in working memory.

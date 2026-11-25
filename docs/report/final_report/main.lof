@@ -1,53 +1,53 @@
 \addvspace {10\p@ }
 \contentsline {figure}{\numberline {1.1}{\ignorespaces System architecture and the scope of the project.}}{3}{figure.caption.8}%
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {2.1}{\ignorespaces The eight principal wastes of lean manufacturing.}}{4}{figure.caption.10}%
-\contentsline {figure}{\numberline {2.2}{\ignorespaces Three warehouse robots with different navigation technologies.}}{5}{figure.caption.11}%
-\contentsline {figure}{\numberline {2.3}{\ignorespaces An autonomous transport vehicle at the BMW Regensburg plant.}}{6}{figure.caption.12}%
-\contentsline {figure}{\numberline {2.4}{\ignorespaces The indirect, feature-based SLAM method.}}{6}{figure.caption.13}%
-\contentsline {figure}{\numberline {2.5}{\ignorespaces Main components of ORB-SLAM3.}}{7}{figure.caption.14}%
-\contentsline {figure}{\numberline {2.6}{\ignorespaces Main components of monocular VINS.}}{9}{figure.caption.18}%
-\contentsline {figure}{\numberline {2.7}{\ignorespaces Main components of RTAB-Map.}}{10}{figure.caption.24}%
+\contentsline {figure}{\numberline {2.1}{\ignorespaces The eight principal wastes of lean manufacturing.}}{5}{figure.caption.10}%
+\contentsline {figure}{\numberline {2.2}{\ignorespaces Three warehouse robots with different navigation technologies.}}{6}{figure.caption.11}%
+\contentsline {figure}{\numberline {2.3}{\ignorespaces An autonomous transport vehicle at the BMW Regensburg plant.}}{7}{figure.caption.12}%
+\contentsline {figure}{\numberline {2.4}{\ignorespaces The indirect, feature-based SLAM method.}}{7}{figure.caption.13}%
+\contentsline {figure}{\numberline {2.5}{\ignorespaces Main components of ORB-SLAM3.}}{8}{figure.caption.14}%
+\contentsline {figure}{\numberline {2.6}{\ignorespaces Main components of monocular VINS.}}{10}{figure.caption.18}%
+\contentsline {figure}{\numberline {2.7}{\ignorespaces Main components of RTAB-Map.}}{11}{figure.caption.24}%
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {3.1}{\ignorespaces ORB-SLAM3: three threads share one map.}}{16}{figure.caption.30}%
-\contentsline {figure}{\numberline {3.2}{\ignorespaces VINS-Fusion: a sliding window over the last ten keyframes.}}{17}{figure.caption.32}%
-\contentsline {figure}{\numberline {3.3}{\ignorespaces RTAB-Map: a memory of places, and the map Nav2 plans on.}}{18}{figure.caption.34}%
-\contentsline {figure}{\numberline {3.4}{\ignorespaces Simulated Ackermann platform, drawn to scale from the model definition.}}{26}{figure.caption.48}%
-\contentsline {figure}{\numberline {3.5}{\ignorespaces Coordinate-frame contract used by the composed RTAB-Map pipeline.}}{27}{figure.caption.53}%
-\contentsline {figure}{\numberline {3.6}{\ignorespaces The four realistic recordings as scenes.}}{29}{figure.caption.55}%
-\contentsline {figure}{\numberline {3.7}{\ignorespaces Plan of the U-shape realistic world.}}{31}{figure.caption.56}%
-\contentsline {figure}{\numberline {3.8}{\ignorespaces Plan of the I-shape realistic world.}}{32}{figure.caption.57}%
-\contentsline {figure}{\numberline {3.9}{\ignorespaces Dimensions of the mock AMR.}}{34}{figure.caption.64}%
-\contentsline {figure}{\numberline {3.10}{\ignorespaces Hardware components of the mock AMR.}}{35}{figure.caption.65}%
-\contentsline {figure}{\numberline {3.11}{\ignorespaces Dimensions of the AC-IMX390 camera family.}}{35}{figure.caption.66}%
-\contentsline {figure}{\numberline {3.12}{\ignorespaces The Neousys NRU-51V computing unit.}}{36}{figure.caption.68}%
-\contentsline {figure}{\numberline {3.13}{\ignorespaces Dimensions of the Neousys NRU-51V in millimetres.\relax }}{36}{figure.caption.69}%
+\contentsline {figure}{\numberline {3.1}{\ignorespaces ORB-SLAM3: three threads share one map.}}{17}{figure.caption.30}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces VINS-Fusion: a sliding window over the last ten keyframes.}}{18}{figure.caption.32}%
+\contentsline {figure}{\numberline {3.3}{\ignorespaces RTAB-Map: a memory of places, and the map Nav2 plans on.}}{19}{figure.caption.34}%
+\contentsline {figure}{\numberline {3.4}{\ignorespaces Simulated Ackermann platform, drawn to scale from the model definition.}}{27}{figure.caption.48}%
+\contentsline {figure}{\numberline {3.5}{\ignorespaces Coordinate-frame contract used by the composed RTAB-Map pipeline.}}{28}{figure.caption.53}%
+\contentsline {figure}{\numberline {3.6}{\ignorespaces The four realistic recordings as scenes.}}{30}{figure.caption.55}%
+\contentsline {figure}{\numberline {3.7}{\ignorespaces Plan of the U-shape realistic world.}}{32}{figure.caption.56}%
+\contentsline {figure}{\numberline {3.8}{\ignorespaces Plan of the I-shape realistic world.}}{33}{figure.caption.57}%
+\contentsline {figure}{\numberline {3.9}{\ignorespaces Dimensions of the mock AMR.}}{35}{figure.caption.64}%
+\contentsline {figure}{\numberline {3.10}{\ignorespaces Hardware components of the mock AMR.}}{36}{figure.caption.65}%
+\contentsline {figure}{\numberline {3.11}{\ignorespaces Dimensions of the AC-IMX390 camera family.}}{36}{figure.caption.66}%
+\contentsline {figure}{\numberline {3.12}{\ignorespaces The Neousys NRU-51V computing unit.}}{37}{figure.caption.68}%
+\contentsline {figure}{\numberline {3.13}{\ignorespaces Dimensions of the Neousys NRU-51V in millimetres.\relax }}{37}{figure.caption.69}%
 \addvspace {10\p@ }
 \contentsline {figure}{\numberline {4.1}{\ignorespaces Estimator comparison on every realistic recording, world frame.}}{49}{figure.caption.93}%
 \contentsline {figure}{\numberline {4.2}{\ignorespaces Visual estimates on the four realistic recordings.}}{52}{figure.caption.99}%
 \contentsline {figure}{\numberline {4.3}{\ignorespaces Local error against accumulated error, every visual run.}}{53}{figure.caption.100}%
 \contentsline {figure}{\numberline {4.4}{\ignorespaces Timelines, static I-layout recording.}}{55}{figure.caption.103}%
 \contentsline {figure}{\numberline {4.5}{\ignorespaces The two views the false loop closure joined.}}{56}{figure.caption.104}%
-\contentsline {figure}{\numberline {4.6}{\ignorespaces The front end paired within recording and loop-closer state.}}{56}{figure.caption.106}%
-\contentsline {figure}{\numberline {4.7}{\ignorespaces VINS-Fusion's excursion on the U traffic recording is feature starvation, and it repeats.}}{57}{figure.caption.109}%
+\contentsline {figure}{\numberline {4.6}{\ignorespaces The front end paired within recording and loop-closer state.}}{57}{figure.caption.106}%
+\contentsline {figure}{\numberline {4.7}{\ignorespaces VINS-Fusion's excursion on the U traffic recording is feature starvation, and it repeats.}}{58}{figure.caption.109}%
 \contentsline {figure}{\numberline {4.8}{\ignorespaces The one co-moving object in the traffic recordings, and what it costs.}}{58}{figure.caption.111}%
-\contentsline {figure}{\numberline {4.9}{\ignorespaces What the visual estimators' translation error is made of.}}{59}{figure.caption.114}%
+\contentsline {figure}{\numberline {4.9}{\ignorespaces What the visual estimators' translation error is made of.}}{60}{figure.caption.114}%
 \contentsline {figure}{\numberline {4.10}{\ignorespaces What each pipeline costs on the mapping recordings.}}{61}{figure.caption.119}%
-\contentsline {figure}{\numberline {4.11}{\ignorespaces Wheel+gyro dead reckoning against the tracker.}}{64}{figure.caption.130}%
+\contentsline {figure}{\numberline {4.11}{\ignorespaces Wheel+gyro dead reckoning against the tracker.}}{65}{figure.caption.130}%
 \contentsline {figure}{\numberline {4.12}{\ignorespaces Every real-robot run with patch 15, scored raw, with VINS-Fusion beside them.}}{67}{figure.caption.136}%
 \contentsline {figure}{\numberline {4.13}{\ignorespaces The front end paired within recording and loop-closer state, real robot.}}{68}{figure.caption.140}%
-\contentsline {figure}{\numberline {4.14}{\ignorespaces What the real-robot translation error is made of.}}{68}{figure.caption.141}%
+\contentsline {figure}{\numberline {4.14}{\ignorespaces What the real-robot translation error is made of.}}{69}{figure.caption.141}%
 \contentsline {figure}{\numberline {4.15}{\ignorespaces The real rig's drift charged by time and by distance.}}{70}{figure.caption.147}%
 \contentsline {figure}{\numberline {4.16}{\ignorespaces Dense-map evaluation of the tiny-warehouse map.}}{72}{figure.caption.153}%
 \contentsline {figure}{\numberline {4.17}{\ignorespaces Dense-map evaluation of the U-layout prior.}}{74}{figure.caption.157}%
 \contentsline {figure}{\numberline {4.18}{\ignorespaces Dense-map evaluation of the I-layout prior.}}{75}{figure.caption.158}%
 \contentsline {figure}{\numberline {4.19}{\ignorespaces Every navigation run, planar error against distance driven, by layout.}}{78}{figure.caption.170}%
-\contentsline {figure}{\numberline {4.20}{\ignorespaces U layout, figure-of-eight: the published pose against the truth and the prior.}}{79}{figure.caption.171}%
+\contentsline {figure}{\numberline {4.20}{\ignorespaces U layout, figure-of-eight: the published pose against the truth and the prior.}}{78}{figure.caption.171}%
 \contentsline {figure}{\numberline {4.21}{\ignorespaces I layout, figure-of-eight: the only run to cross a metre.}}{79}{figure.caption.172}%
-\contentsline {figure}{\numberline {4.22}{\ignorespaces U layout, square: the run that ends displaced.}}{80}{figure.caption.173}%
-\contentsline {figure}{\numberline {4.23}{\ignorespaces Heading error against ground truth, by layout.}}{82}{figure.caption.175}%
-\contentsline {figure}{\numberline {4.24}{\ignorespaces What RTAB-Map's place recognition proposes, and what its geometry does with it.}}{84}{figure.caption.182}%
-\contentsline {figure}{\numberline {4.25}{\ignorespaces U layout, straight: the shortest U route.}}{87}{figure.caption.188}%
-\contentsline {figure}{\numberline {4.26}{\ignorespaces I layout, straight: the weakest run of the six.}}{87}{figure.caption.189}%
-\contentsline {figure}{\numberline {4.27}{\ignorespaces I layout, square: a displaced but stable pose.}}{88}{figure.caption.190}%
+\contentsline {figure}{\numberline {4.22}{\ignorespaces U layout, square: the run that ends displaced.}}{79}{figure.caption.173}%
+\contentsline {figure}{\numberline {4.23}{\ignorespaces Heading error against ground truth, by layout.}}{81}{figure.caption.175}%
+\contentsline {figure}{\numberline {4.24}{\ignorespaces What RTAB-Map's place recognition proposes, and what its geometry does with it.}}{83}{figure.caption.182}%
+\contentsline {figure}{\numberline {4.25}{\ignorespaces U layout, straight: the shortest U route.}}{86}{figure.caption.188}%
+\contentsline {figure}{\numberline {4.26}{\ignorespaces I layout, straight: the weakest run of the six.}}{86}{figure.caption.189}%
+\contentsline {figure}{\numberline {4.27}{\ignorespaces I layout, square: a displaced but stable pose.}}{87}{figure.caption.190}%
 \addvspace {10\p@ }

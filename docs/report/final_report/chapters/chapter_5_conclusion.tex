@@ -150,17 +150,15 @@ recovers \SI{89.5}{\percent} of the surfaces it observed, and contains no blind
 cells and \SI{0.7}{\percent} proven false obstacles along an independently
 driven route (\cref{tab:map-geometry,tab:map-drivability}), passing all three
 map targets of \cref{tab:targets}; the drivability half of that result is
-dated, because its independent route is lost. The four closure-free maps of
-the realistic warehouse all fail the same targets, fixed before scoring:
-precision \SIrange{77.8}{84.8}{\percent}, observed recall
-\SIrange{74.9}{82.5}{\percent}, false obstacles \SIrange{3.8}{10.2}{\percent}
-against the static-twin probes (\cref{sec:map-realistic}). The false obstacles
-are not thickened shelving: they are phantoms laid during the inertial
+dated, because its independent route is lost. The two closure-free priors of
+the realistic warehouse, the maps part~B relocalises on, fail the same targets,
+fixed before scoring: precision \SIrange{77.8}{82.2}{\percent}, observed recall
+\SIrange{74.9}{77.1}{\percent}, false obstacles \SIrange{5.0}{10.2}{\percent}
+against the static-twin probes (\cref{sec:map-realistic}). Their poses are
+accurate, within \SIrange{0.13}{0.33}{\metre} rms, so the failure is grid
+construction: the false obstacles are phantoms laid during the inertial
 initialisation transient at the spawn and wall bands displaced from their true
-lines, and the current configuration makes the maps worse than the October one
-through three parameters with separable signatures, the lower detection rate
-costing views, the longer range laying wall phantoms, and the higher
-ground-height cut laying aisle obstacles on the I layout. On the large
+lines by uncorrected drift. On the large
 warehouse the attempt failed through tracking loss in repeated structure and
 its artefacts were not retained (\cref{sec:map-large}).
 
@@ -181,14 +179,11 @@ back end's first fix \SIrange{73}{76}{\degree} wrong until it is held back for
 
 What remains planned is goal-reaching. No goal was commanded in any run, so
 nothing yet speaks to planning, to recovery, or to the question the map scores
-raise but cannot settle --- whether a \SIrange{3.8}{10.2}{\percent}
+raise but cannot settle --- whether a \SIrange{5.0}{10.2}{\percent}
 false-obstacle rate blocks a route or merely lengthens it. Neither traffic
 world is measured, so relocalization in a dynamic warehouse is untested. Every
 cell is a single run of one configuration, so nothing here measures run-to-run
-spread and no comparison within \cref{tab:exp4-tracking} is evidence. Three
-configurations were recorded in all; the two earlier ones are retired, and part
-of their data was lost rather than retired, which cost the experiment an
-analysis of excursion mechanisms and its only measurement under traffic.
+spread and no comparison within \cref{tab:exp4-tracking} is evidence.
 
 \textbf{Against the targets.} \Cref{tab:targets-status} reads every result
 against the targets of \cref{tab:targets}.
@@ -206,18 +201,18 @@ Metric & Target & Simulation & Real robot & Status \\
 \midrule
 ATE & $\le\SI{0.05}{\metre}$ & best run \SI{0.14}{\metre}; VINS-Fusion
   \SIrange{0.22}{0.66}{}, ORB-SLAM3 \SIrange{0.14}{0.52}{\metre} in 11 of 16
-  runs & ORB-SLAM3 \SIrange{0.19}{0.45}{}, VINS-Fusion
-  \SIrange{0.37}{0.68}{\metre} & not met \\
+  runs & ORB-SLAM3 \SIrange{0.19}{0.48}{}, VINS-Fusion
+  \SIrange{0.37}{0.79}{\metre} & not met \\
 RPE, \SI{1}{\second} & $\le\SI{0.1}{\metre}$ & \SIrange{0.016}{0.070}{\metre}
   on jump-free pairs, every visual run; ORB-SLAM3 over all pairs
   \SIrange{0.27}{1.58}{\metre} & \SIrange{0.052}{0.090}{\metre}, every run &
   met, jump-free \\
 Map precision & $\ge\SI{90}{\percent}$ & tiny \SI{96.6}{\percent}; realistic
-  \SIrange{77.8}{84.8}{\percent} & --- & tiny only \\
+  \SIrange{77.8}{82.2}{\percent} & --- & tiny only \\
 Map completeness & $\ge\SI{85}{\percent}$ & tiny \SI{89.5}{\percent}; realistic
-  \SIrange{74.9}{82.5}{\percent} & --- & tiny only \\
+  \SIrange{74.9}{77.1}{\percent} & --- & tiny only \\
 False obstacles & $\le\SI{1}{\percent}$ & tiny \SI{0.7}{\percent}; realistic
-  \SIrange{3.8}{10.2}{\percent} & --- & tiny only \\
+  \SIrange{5.0}{10.2}{\percent} & --- & tiny only \\
 Availability & $\le\SI{10}{\percent}$ blind & \SIrange{1.3}{12.5}{\percent}; 5
   of 6 runs & --- & 5 of 6 \\
 Continuity & no jump $>\SI{1.0}{\metre}$ & 4 of 6 runs without a jump & --- &
@@ -287,8 +282,7 @@ in both front ends.
 robot down an aisle for tens of seconds rather than four, so that the one
 configuration shown to degrade both estimators is tested at the length a
 warehouse would impose. If the inertial prior stops absorbing it at that
-length, dynamic-object handling, dropped from this project
-(\cref{sec:deviations}), becomes worth reconsidering.
+length, dynamic-object handling becomes worth adding.
 
 \textbf{Excite the gravity estimate, and separate it from the layout.} Record
 the I layout with an opening manoeuvre that turns inside the first fifteen
@@ -310,10 +304,9 @@ speed; and build a first real-imagery prior for Experiment~2.
 improvement is a measured inertial noise model for the visual estimators:
 Experiment~1 shows the noise model is worth more than the estimator.
 
-\textbf{Start mapping after the inertial transient}, and reconsider the
-November configuration's range and ground-height parameters, which account
-for the realistic maps' false obstacles; score any map against a recording
-that did not build it.
+\textbf{Start mapping after the inertial transient}, which the data predict
+would remove the spawn phantoms behind the realistic maps' false obstacles,
+and score any map against a recording that did not build it.
 
 \textbf{Record every behaviour-changing switch in the run manifest}, refuse an
 output directory whose name disagrees with its dataset, repeat every

@@ -5,46 +5,20 @@
 \subsection{Realistic logistics layouts}
 \label{sec:realistic-worlds}
 
-\textbf{Status: \status{implemented} 6 October 2026; since the dataset
-decision of 6 November 2026 the simulation slots of Experiments~1, 3 and~4
-in \cref{chap:results} use these worlds and no other.} The earlier object
-arrangements (\cref{sec:environments-datasets}, retired with their recordings
-on 6 November 2026) were built as controlled stimuli: props distributed over
-the floor, props confined to the wall region, and props shuttling back and
-forth along fixed segments. None of them is laid
-out as a warehouse is laid out, and none of their dynamic props does anything a
-warehouse vehicle does. Two further worlds were therefore generated from the
-warehouse-design literature collected under \repo{docs/references/warehouse/},
-whose common prescription is a chain of zones---receiving, storage, picking,
-packing, dispatch---served by cross-aisles, with the fast-moving goods nearest
-the docks, bulk storage at the back or side, and offices and equipment charging
-out of the flow \cite{asean2019warehouse,mecalux2024layout}. The two
-canonical flow shapes of that literature are both provided:
-
-\begin{itemize}
-  \item \textbf{U-shape flow}, \repo{worlds/small_warehouse/small_warehouse_dynamic_realistic_nofloortexture.world}:
-    receiving and dispatch docks on the same (north) wall with the management
-    office between them, the fast pick faces nearest the docks, rack storage in
-    north--south aisles, picking and packing east, block storage west, and the
-    charging area, empty-pallet store and general office along the south wall.
-  \item \textbf{I-shape (through) flow}, \repo{..._realistic_nofloortexture_01.world}:
-    receiving docks on the north wall and dispatch docks on the south wall, rack
-    storage in the middle, the pick faces between storage and dispatch, packing
-    beside dispatch, block storage west and both offices on the east wall, so
-    that goods cross the building in one direction.
-\end{itemize}
-
-Both are written by \repo{script/make_realistic_world.py} (\texttt{--layout u}
-or \texttt{i}) from parametric tables and are never edited by hand. Everything
-that is not the object arrangement is held fixed: the same \SI{41.28}{\metre}
-shell, the same plain (\texttt{nofloortexture}) floor, lights, physics
-configuration (\cref{tab:physics-setup}) and robot spawn. The only change to
-the shell is a regenerated wall model carrying dock-door openings, since the
-stock wall's geometry is frozen in its mesh. The controlled factors of
-\cref{tab:controlled-factors} are therefore unchanged by the shell, and these
-two layouts are the only levels of the layout factor the report realises. As
-explained below, they also make scene dynamics a within-layout condition for
-the first time.
+Two warehouse worlds were generated from the warehouse-design literature, whose
+common prescription is a chain of zones --- receiving, storage, picking,
+packing, dispatch --- served by cross-aisles, with fast-moving goods nearest the
+docks and offices and charging out of the flow
+\cite{asean2019warehouse,mecalux2024layout}. Both canonical flow shapes are
+provided. In the \textbf{U-shape} layout receiving and dispatch share the north
+wall, with rack storage in north--south aisles behind them
+(\cref{fig:realistic-plan-u}); in the \textbf{I-shape} layout receiving is on
+the north wall and dispatch on the south, so goods cross the building in one
+direction (\cref{fig:realistic-plan-i}). Everything else is held fixed: the
+same \SI{41.28}{\metre} shell, the same featureless floor, lights, physics and
+robot spawn. Aisles are \SI{3.0}{\metre} between zones and \SI{2.8}{\metre}
+between rack rows, and open dock doors show a docked trailer rather than the
+sky. \Cref{tab:realistic-zones} lists what each zone holds.
 
 \begin{figure}[p]
   \centering
@@ -55,9 +29,8 @@ the first time.
   from and drop on (labels \texttt{R\_a}, \texttt{S1}\ldots\texttt{P4}); the
   coloured polylines are the four carrier routes; the dashed green lines are
   the routes of the four people on foot, with a dot at each place they stop and
-  an open circle where they start. The routes actually driven in this world are
-  those of \cref{fig:dataset-scenes}. The band above the north wall is the dock
-  yard with the two docked trailers.}
+  an open circle where they start. The routes actually driven are those of
+  \cref{fig:dataset-scenes}.}
   \label{fig:realistic-plan-u}
 \end{figure}
 
@@ -71,18 +44,6 @@ the first time.
   walls the office cannot lie between reception and dispatch.}
   \label{fig:realistic-plan-i}
 \end{figure}
-
-\paragraph{Zones and contents.} \Cref{tab:realistic-zones} lists what each
-zone holds. Aisles are \SI{3.0}{\metre} between zones and \SI{2.8}{\metre}
-between rack rows; pallet pitches are \SIrange{3.2}{4.0}{\metre}, widened from
-the \SI{2.4}{\metre} of a stock bay so that a loaded pallet jack has the
-\SI{2.6}{\metre} of swing room it needs to turn. The dock doors are
-\SI{3.6}{\metre} by \SI{4.5}{\metre} openings in the wall; a closed door is a
-roll-up panel in the wall thickness, an open door shows a docked
-\SI{13.6}{\metre} semi-trailer and a yard slab, so that a camera looking out
-through it sees a trailer interior and tarmac rather than the sky colour. The
-U-shape world has five doors on the north wall (two open), the I-shape five on
-the north and three on the south (three open in all).
 
 \begin{table}[htbp]
 \centering
@@ -124,166 +85,29 @@ Baked occupancy (\si{\percent} of cells) & & 20.7 & 19.1 \\
 \end{tabularx}
 \end{table}
 
-\paragraph{Traffic as jobs, not shuttles.} The dynamic props of the earlier
-family move back and forth along a segment. In the realistic worlds the moving
-objects are four pallet jacks on logistics jobs, driven by a second
-world-level Gazebo system, \repo{gz_kinematic_trajectory/LogisticsScheduler.cc}:
-a carrier drives to a load, takes it onto its forks (the load's pose relative to
-the carrier is captured at pick-up and held rigidly through every turn),
-carries it through the aisles, sets it down on a target slot and goes for the
-next. Two jacks move pallets between receiving, block storage and dispatch; two
-move totes between the pick faces and the packing desks. Each job is a
-six-move rotation over two loads and three slots that returns to its starting
-state, so it loops indefinitely and no drop ever lands on an occupied slot.
-Carriers move at \SIrange{1.2}{1.3}{\metre\per\second}, turn in place at
-\SI{1.5}{\radian\per\second}, spend \SIrange{4}{5}{\second} on each pick or
-drop, and carry the load \SI{1.3}{\metre} ahead of the body. Slots are entered
-head-on and left in reverse, as a real jack does; the first design spun the
-loaded jack on the spot and swung the pallet into the neighbouring loads. The
-mechanism is the same kinematic pose command used by the earlier dynamic props,
-so the fidelity caveat of \cref{sec:sim-fidelity} is unchanged: the vehicles
-cost no physics and offer no collision response if the robot drives into them.
+\paragraph{Traffic and people.} The moving objects are four pallet jacks on
+logistics jobs: each drives to a load, lifts it, carries it through the aisles
+at \SIrange{1.2}{1.3}{\metre\per\second} and sets it down on a target slot,
+in a rotation that loops indefinitely. Two move pallets between receiving,
+block storage and dispatch; two move totes between the pick faces and packing.
+The generator checks every leg and turn of every carrier, with its load,
+against every other object before a world is written. Each world also carries
+four walking people, two order pickers and two dock checkers
+\cite{mir2024eaton}, on scripted routes at \SIrange{1.1}{1.2}{\metre\per\second}.
+Vehicles and people are kinematic: they cost no physics, have no collision
+response, and the estimators see them only as unlabelled motion.
 
-Before a world is written the generator proves it: every static pair is at
-least \SI{0.25}{\metre} apart (rack runs excepted), every job's slot
-bookkeeping is simulated, and for every leg and every turn the swept box of the
-carrier plus its load is checked against every object not in that carrier's
-own job. Both worlds pass with every clearance positive, the tightest being
-\SI{0.10}{\metre} at a packing-desk turn in each. Carriers can still cross one
-another briefly at an aisle intersection; that is a visual overlap, not a path
-conflict, and it is accepted.
+\paragraph{Static twins.} Each layout has a static twin in which every object
+is static and the traffic removed, with nothing else changed. A world and its
+twin therefore share every footprint and differ only in whether the vehicles
+and people move, which makes scene dynamics a within-layout condition rather
+than a change of geometry.
 
-\paragraph{People on foot.} A warehouse floor also has people on it, and they
-are the dynamic objects a visual pipeline finds hardest: articulated,
-self-occluding and close to the camera. Each world therefore carries four
-walking people (added 9 October 2026), written as Gazebo \emph{actors}: the
-stock Fuel walking-person skin, packaged as
-\repo{models/aws_robomaker_warehouse_Person_01}, animated with a walk clip
-between stops and a stand clip at them, on a scripted closed route with one
-spline per leg so that legs stay straight in the aisles. The roles follow the
-same references as the layout and the Eaton case study
-\cite{mir2024eaton}: two order pickers, one per storage aisle, who walk the
-aisle, stop at bays for six seconds and turn at the ends; and two dock
-checkers who walk the lane between the staging rows and stop at loads---in the
-U-shape one at receiving and one at dispatch, in the I-shape one on each
-receiving group. Walking speed is \SIrange{1.1}{1.2}{\metre\per\second}, starts
-are staggered, and the number was kept small deliberately: four people on
-\SI{1704}{\metre\squared} with four vehicles is a working floor, not a crowd.
-People keep out of the vehicle lanes by construction. The generator sweeps a
-\SI{0.7}{\metre} person box along every leg and checks it against the statics
-(at least \SI{0.25}{\metre}), the carrier corridors and turn sweeps (no
-overlap) and the other people; the tightest clearances are
-\SI{0.59}{\metre} to a static and \SI{0.34}{\metre} to a carrier sweep. The
-pickers turn at the aisle mouths, which places them in view of a robot driving
-the cross-aisle. Actors have no collision geometry and no physics: nothing can
-bump into them, the occupancy bake does not see them, and the static twins
-omit them. One limitation matters for scoring: a scripted actor's animated
-pose is computed on the rendering side and is not written back to the entity
-state, so \repo{/world/default/pose/info} reports a person at its initial
-pose throughout. The script is deterministic, so the pose is instead
-evaluated from the world file and the simulation clock by
-\repo{script/people_script.py}, which the 2-D viewer uses to draw the people
-(linear between the \SI{2}{\metre} waypoints, within \SI{0.2}{\metre} of the
-rendered spline). The estimators see them only as unlabelled motion.
-
-\paragraph{Static twins.} For each layout a static world,
-\repo{worlds/small_warehouse/small_warehouse_static_realistic_nofloortexture.world}
-and its \repo{..._01.world} counterpart, is derived by \repo{script/make_static_world.py}: every object is marked static
-and the traffic plugin removed, with nothing else changed. This is the
-methodological point of the family. In the earlier worlds the static
-arrangement (\texttt{\_01}) and the dynamic arrangements (\texttt{\_00} to
-\texttt{\_02}) differ in geometry as well as in motion, so a static-versus-dynamic
-comparison on them is confounded by the arrangement. A realistic world and its
-twin share every footprint and differ only in whether four vehicles move.
-
-\paragraph{Occupancy truth and routes.} The baked grids
-(\cref{fig:realistic-maps}) rasterise the moving carriers and their loads at
-their $t=0$ pose, which is where the static twin holds them permanently. The
-closed dock doors appear as a one-cell line in the wall; the open ones are gaps
-onto the yard. The U-shape world keeps the main aisles A ($x\approx-11.2$~m)
-and B ($x=5.25$~m, the dock lane the robot spawns in) and the cross-aisles C
-and E drivable; the I-shape world fitted none of the routes recorded before it
-existed, so both layouts were driven again. The six recordings of the family,
-four for Experiments~1 and~3 and two longer mapping runs, are those of
-\cref{tab:dataset-registry}.
-
-\begin{figure}[htbp]
-  \centering
-  \begin{minipage}[t]{0.48\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{figures/warehouse_realistic_u.png}\\[0.4ex]
-    {\footnotesize (a) U-shape, \SI{20.7}{\percent} occupied}
-  \end{minipage}\hfill
-  \begin{minipage}[t]{0.48\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{figures/warehouse_realistic_i.png}\\[0.4ex]
-    {\footnotesize (b) I-shape, \SI{19.1}{\percent} occupied}
-  \end{minipage}
-  \caption[Baked occupancy truth of the two realistic worlds.]{Baked occupancy
-  truth of the two realistic worlds: \SI{42.2}{\metre} square at
-  \SI{0.05}{\metre} per cell, origin $(-21.1,-21.1)$~m. Carriers and loads are baked at their $t=0$
-  pose. Closed dock doors are the one-cell segments in the north (and, in~(b),
-  south) wall; open doors are the gaps.}
-  \label{fig:realistic-maps}
-\end{figure}
-
-\begin{queried}[Visual verification]
-The generator-side checks are complete, and the first Gazebo session on
-6 October 2026 found and fixed one defect the checks could not see (a jack
-setting its load down and then stopping on the neighbouring cell, because the
-drop command carried one angle for both the parked load and the approach
-heading). Three things remain to be confirmed by eye in the simulator rather
-than by the checker: that the loads ride on the fork side of the jack, the
-shading of the generated door, trailer and yard meshes, and the open/closed
-state of each door. Until then the worlds are \status{implemented} in geometry
-and \status{partial} in visual verification.
-\end{queried}
-
-\paragraph{Recordings in the family.} Six recordings were made in these
-worlds, all listed in \cref{tab:dataset-registry}. Four are the
-\repo{dataset_allsensor_realistic} set of Experiments~1 and~3: a static twin
-and a traffic recording in each layout, \SIrange{80}{125}{\second} of
-simulated time over \SIrange{103}{171}{\metre}. Two are longer mapping runs in
-the static twins, \repo{dataset_allsensor_realistic_map} (U) and
-\repo{dataset_allsensor_realistic_01_map} (I), which build the databases of
-Experiment~2 and carry the repeated runs that measure latency and resources in
+\paragraph{Recordings.} Six recordings were made in these worlds
+(\cref{tab:dataset-registry}): a static-twin and a traffic recording per layout
+for Experiment~1, \SIrange{80}{125}{\second} over
+\SIrange{103}{171}{\metre}, and one long mapping run per static twin,
+\SI{374}{\metre} and \SI{385}{\metre} at a median
+\SI{1.5}{\metre\per\second}, the project's design speed, which builds the
+priors of Experiment~2 and carries the repeated resource runs of
 Experiment~1.
-
-The mapping runs are the only recordings that reach the speed the project
-targets. Both drive a serpentine that enters every aisle
-(\cref{fig:scene-mapping-runs}), \SI{374.3}{\metre} over \SI{288.2}{\second}
-in the U layout and \SI{384.6}{\metre} over \SI{315.2}{\second} in the I
-layout, at a median \SI{1.49}{} and \SI{1.48}{\metre\per\second} against the
-\SI{1.5}{\metre\per\second} of \cref{sec:problem-scope}. The four shorter
-recordings run well below that. Both mapping runs start at the same spawn,
-$(5.25, 20.0)$~m in the dock lane, and both carry the proprioceptive topics,
-so the non-visual baseline of \cref{sec:proprio-method} could be computed on
-them as well.
-
-\begin{figure}[htbp]
-  \centering
-  \begin{minipage}[t]{0.48\textwidth}\centering
-    \includegraphics[width=\textwidth]{figures/scene_dataset_allsensor_realistic_map.png}\\[0.4ex]
-    {\footnotesize (a) U layout, \SI{374.3}{\metre}}
-  \end{minipage}\hfill
-  \begin{minipage}[t]{0.48\textwidth}\centering
-    \includegraphics[width=\textwidth]{figures/scene_dataset_allsensor_realistic_01_map.png}\\[0.4ex]
-    {\footnotesize (b) I layout, \SI{384.6}{\metre}}
-  \end{minipage}
-  \caption[The two mapping recordings as scenes.]{The two mapping recordings,
-  drawn with the conventions of \cref{fig:dataset-scenes}: obstacle footprints
-  at robot height over the featureless floor, with the
-  \repo{/ground_truth/odometry} route in blue from the green start to the red
-  end. Both routes enter every aisle, which is what a map build needs and what
-  the four shorter recordings do not do.}
-  \label{fig:scene-mapping-runs}
-\end{figure}
-
-\begin{queried}[Provenance]
-None of the six recordings carries a run manifest of its own: the world each
-was recorded in is known from the manifests of the replays made on it, not
-from the recording. Those manifests agree, and the object inventory each bag
-reports is consistent with the layout they name, but a recording whose world
-is attested only by later use is weaker evidence than one that records its own
-world. A manifest should be written at record time, not at replay time.
-\end{queried}

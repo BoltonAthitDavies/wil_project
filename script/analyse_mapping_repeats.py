@@ -154,7 +154,7 @@ def main():
          "configuration.]{Run-to-run spread over the three repeats of each configuration on the two mapping "
          "recordings, the only repeated runs in the simulation campaign; the same eighteen runs as "
          "\\cref{tab:mapping-resources}, scored for accuracy. Every run has its loop closer disabled, read from "
-         "\\repo{loop_closing.csv}. ``ATE'' is mean $\\pm$ SD over the three repeats and ``spread'' the largest "
+         "its own log. ``ATE'' is mean $\\pm$ SD over the three repeats and ``spread'' the largest "
          "difference between two of them; ``Max'' is the largest error after the initialisation transient, on the "
          "convention of the accuracy table of \\cref{sec:exp1-sim}. The three repeats of a configuration were run back to back "
          "rather than interleaved, so a drift across them is confounded with the laptop's thermal state "

@@ -150,7 +150,7 @@ def main():
     L = [r"\begin{table}[htbp]", r"\centering", r"\small",
          r"\caption[Realv7: the VINS-Fusion runs after the field-of-view repair.]{VINS-Fusion on the three "
          r"\repo{dataset_realv7} recordings with the configuration the real-rig diagnosis settled on: "
-         r"\repo{config/wil/stereo_imu.yaml} with \texttt{fov\_mask\_deg}~70, \texttt{estimate\_extrinsic}~0 "
+         r"the real-rig configuration with \texttt{fov\_mask\_deg}~70, \texttt{estimate\_extrinsic}~0 "
          r"and \texttt{estimate\_td}~0. ATE is planar after SE(2) alignment and RPE is translational over "
          r"\SI{1}{\second}, with the number of admissible pairs in parentheses --- \repo{realv6_000} has far "
          r"fewer because its truth is exported at \SI{1.7}{\hertz}, so its RPE rests on a sixth of the evidence "

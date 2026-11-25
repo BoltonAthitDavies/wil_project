@@ -239,7 +239,7 @@ def tex_mapping_resources(rows, path):
           "latency (ORB-SLAM3: tracking and local mapping; VINS-Fusion: feature tracking and back-end optimisation); "
           "throughput is processed frames per second of sensor time; "
           "``Kept'' is the processed fraction of the bag's stereo pairs; CPU is process time over wall time, in percent "
-          "of one core; RSS the peak resident set. The loop-closer state is read from \\repo{loop_closing.csv}.}\n")
+          "of one core; RSS the peak resident set. The loop-closer state is read from each run\'s own log.}\n")
         w("\\label{tab:mapping-resources}\n\\scriptsize\n\\resizebox{\\textwidth}{!}{%\n")
         w("\\begin{tabular}{lll r rr rrrr}\n\\toprule\nRecording & Estimator & LC & $n$ & Front-end [\\si{\\milli\\second}] & "
           "Back-end [\\si{\\milli\\second}] & Throughput [\\si{\\hertz}] & Kept [\\si{\\percent}] & CPU [\\si{\\percent}] & "

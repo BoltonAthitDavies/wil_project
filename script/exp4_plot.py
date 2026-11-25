@@ -60,6 +60,12 @@ EST_C = '#d95f02'
 GRID_C = '#34495e'
 
 
+
+# Per-run median error of the prior's own nodes within 3 m of the route, its
+# range over the six runs (tab:exp4-map-bound, exp2_mapquality_vs_localisation.py):
+# the like-for-like reference for the localised error.
+NODE_BAND = (0.09, 0.14)
+
 def world_footprints(world_path):
     """(polygons, wall bounds) in the world frame, from the collision meshes.
 
@@ -307,8 +313,14 @@ def summary(spec, out_dir, arm='gated', linear=False):
             ax.plot(dist, err, lw=2.2 if bad else 1.3, color=cols.get(shape, '#555'),
                     alpha=0.95 if bad else 0.85,
                     label=shape + (f' (over 1 m for {longest:.0f} s)' if bad else ''))
-        ax.axhline(0.40, color='#7f8c8d', ls='--', lw=1)
-        ax.axhline(0.10, color='#7f8c8d', ls=':', lw=1)
+        lo, hi = NODE_BAND
+        ax.axhspan(lo, hi, color='#7f8c8d', alpha=0.18, lw=0)
+        ax.text(0.01, hi, "prior's own node error near the route", transform=ax.get_yaxis_transform(),
+                ha='left', va='bottom', fontsize=8, color='#5d6d6e',
+                bbox=dict(facecolor='white', alpha=0.85, lw=0, pad=1))
+        allerr = np.concatenate([e for _, _, e, _ in panels[lay]])
+        print(f'  {lay}: {100 * np.mean(allerr <= hi):.0f} % of samples at or below {hi} m, '
+              f'{100 * np.mean(allerr <= 2 * hi):.0f} % within twice it')
         if linear:
             # The log axis stretches the sub-0.1 m dips (one sample of 0.008 m
             # reads as a deep trough); the linear one shows the error as metres.
@@ -322,12 +334,6 @@ def summary(spec, out_dir, arm='gated', linear=False):
         ax.grid(alpha=0.2, which='both', lw=0.5)
         ax.legend(fontsize=8, loc='upper right', framealpha=0.95)
     axes[0].set_ylabel('planar error against ground truth (m)' + ('' if linear else ' (log)'))
-    # Labelled on the left panel's left edge, clear of both legends.
-    axes[0].text(0.01, 0.40, "prior graph's own rms, upper end (part A)",
-                 transform=axes[0].get_yaxis_transform(), ha='left', va='bottom',
-                 fontsize=8, color='#7f8c8d')
-    axes[0].text(0.01, 0.10, "lower end", transform=axes[0].get_yaxis_transform(),
-                 ha='left', va='bottom', fontsize=8, color='#7f8c8d')
     fig.suptitle('Experiment 2, part B: error against distance driven, by layout', y=0.99)
     fig.tight_layout(rect=(0, 0, 1, 0.94))
     os.makedirs(out_dir, exist_ok=True)

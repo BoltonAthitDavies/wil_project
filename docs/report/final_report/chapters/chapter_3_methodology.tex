@@ -11,9 +11,7 @@
 This chapter describes how the project answers the problem set out in
 \cref{chap:introduction}: its requirements and scope, the system architecture,
 the front ends and back end as they were actually built, the simulation and real
-platforms, the two experiments that structure the evaluation, the metrics, and
-the points at which the implemented system departs from the method originally
-proposed.
+platforms, the two experiments that structure the evaluation, and the metrics.
 
 \textbf{Reporting cutoff.} Every implementation claim in this chapter describes
 the repository at 7 November 2026. Components are labelled
@@ -51,9 +49,8 @@ as four requirements.
     processor utilisation and the peak memory usage.
 \end{enumerate}
 \Cref{tab:targets} gives the numeric target each requirement is read against.
-The map targets were fixed in \repo{script/eval_realistic_maps.py} and the
-availability and continuity targets in \repo{script/exp4_protocol.yaml}, both
-before any map or relocalization run was scored.
+The map targets and the availability and continuity targets were fixed before
+any map or relocalization run was scored.
 
 \begin{table}[htbp]
 \centering
@@ -76,28 +73,19 @@ Pose continuity: jump between \SI{2}{\hertz} samples & $\le \SI{1.0}{\metre}$ & 
 \end{tabularx}
 \end{table}
 
-Two of these differ from the proposal. The proposal stated the ATE and RPE
-targets at a working speed of \SI{1.5}{\metre\per\second}, with the RPE target
-at \SI{1.5}{\metre}: a \SI{1.5}{\metre} error in one second at that speed is a
-\SI{100}{\percent} relative error and constrains nothing, so the target is
-tightened to \SI{0.1}{\metre}. The change was made after the trajectory results
-were known, and it can only cost the project passes: the filter on the visual
-systems' inertial noise model, and ORB-SLAM3 when its initialization frame step
-is counted, met the original figure and do not meet this one. \flag{The real recordings were
-driven at \SI{0.28}{\metre\per\second}, not \SI{1.5}{}, so the real-robot
-RPE is measured under an easier condition than the target assumes
-(\cref{sec:exp1-real}).} The proposal's localization requirement of
-\SI{0.1}{\metre} under scheduled illumination changes is not carried: no
-illumination experiment was run (\cref{sec:deviations}).
+The trajectory targets are stated at the working speed of
+\SI{1.5}{\metre\per\second}. The RPE target was fixed after the trajectory
+results were known, which can only cost the project passes: the filter on the
+visual systems' inertial noise model, and ORB-SLAM3 when its initialization
+frame step is counted, miss it. \flag{The real recordings were driven at
+\SI{0.28}{\metre\per\second}, not \SI{1.5}{}, so the real-robot RPE is
+measured under an easier condition than the target assumes
+(\cref{sec:exp1-real}).}
 
-\textbf{Site.} The real tests take place on the first floor of the Gensurv
-building, in a mock warehouse of roughly \SI{10}{\metre} by \SI{7}{\metre}
-divided into two operating zones, Zone~A and Zone~B, each about
-\SI{3}{\metre} square and joined by a walkway. The
-walkway carries a \SI{5}{\degree} slope. Goods are \SI{0.3}{\metre} cubes in
-stacks whose positions are changed between runs, and a light-control fixture
-sets the illumination to a schedule. A motion-capture system provides the
-ground-truth reference (\cref{sec:real-site}).
+\textbf{Site.} The real recordings are made on the first floor of the
+Gensurv building, along hand-driven routes with no scripted moving objects and
+unchanged lighting; an optical tracker following a marker on the robot
+provides a planar ground-truth reference (\cref{sec:real-site}).
 
 \textbf{Two domains.} Every experiment is defined once and run twice, in a
 Gazebo simulation of the warehouse and on the real robot. The simulation
@@ -107,28 +95,36 @@ is ultimately about. The two domains are never pooled.
 
 \textbf{What is excluded.} Path planning and motion control are outside the
 project: the pipeline delivers a pose and a map to Nav2, which plans and drives
-(\cref{fig:scope-architecture}). The proposal's objectives on low-light image
-enhancement, deep-learning detection of dynamic objects, and lane detection
-with lane tracking were replaced by the objectives of \cref{sec:objectives};
-\cref{sec:deviations} records each change and its reason.
+(\cref{fig:scope-architecture}).
 
 \section{System Architecture}
 \label{sec:architecture}
 
 \subsection{Data flow and rates}
 
-\Cref{fig:scope-architecture} shows the implemented system. Stereo images and
-inertial measurements enter the visual-inertial front end, ORB-SLAM3 or
-VINS-Fusion, at \SI{30}{\hertz} and \SI{200}{\hertz}. The front end's odometry
-feeds RTAB-Map, which receives stereo input at \SI{4}{\hertz}, localizes the
-robot against a prior map built once, and issues a correction at about
-\SI{1}{\hertz}. Every correction passes the correction gate, which rejects one
-inconsistent with the drift the odometry can have accumulated, and the pose
-gate, which holds the planner until a localization is trusted; the gated pose
-reaches Nav2 at \SI{20}{\hertz}. Planning and control are Nav2's and lie
-outside the project. On the simulated platform the wheel odometry is published
-at \SI{50}{\hertz} (\cref{tab:platform-geometry}). The two experiments of
-\cref{sec:experiments} each test one part of this flow:
+\Cref{fig:scope-architecture} shows the system. Stereo images and inertial
+measurements enter the visual-inertial front end, ORB-SLAM3 or VINS-Fusion,
+at \SI{30}{\hertz} and \SI{200}{\hertz}; either one supplies the odometry, and
+RTAB-Map is the one back end. A camera shim hands RTAB-Map the stereo pair at
+\SI{4}{\hertz}; RTAB-Map localises the robot against a prior map built once and
+issues a correction at about \SI{1}{\hertz}. Every correction passes the
+correction gate, which refuses one inconsistent with the drift the odometry can
+have accumulated, and the pose gate, which holds the planner until a
+localisation is trusted; the gated pose reaches Nav2 at \SI{20}{\hertz}.
+
+The system runs at three speeds on purpose. Estimation is fast: the front end
+must follow every camera frame and IMU sample or frames are dropped. Driving is
+steady: the controller and the correction gate run at \SI{20}{\hertz}.
+Remembering is slow: recognising a place is expensive and places do not change
+quickly, so RTAB-Map and the planner run at \SI{1}{\hertz}, the costmaps and
+pose gate at \SI{2}{\hertz}. The pose Nav2 reads therefore stacks two answers to
+where the robot is: the front end's smooth estimate, which drifts slowly, and
+RTAB-Map's latest correction, which is right but arrives only now and then. It
+moves smoothly between fixes and steps when a fix lands
+(\cref{sec:frames-contract}). ORB-SLAM3's own Atlas and loop closer remain
+active inside the front end and are evaluated as one of its switches in
+Experiment~1. The two experiments of \cref{sec:experiments} each test one part
+of this flow:
 
 \begin{table}[htbp]
 \centering
@@ -163,9 +159,8 @@ Component & Status & Scope of evidence \\
 \midrule
 \endhead
 Warehouse simulation and controlled worlds & \status{Implemented; verified} &
-The two realistic layouts and their static twins are generated by
-\repo{script/make_realistic_world.py} and \repo{make_static_world.py}, each
-with baked occupancy truth. \\
+The two realistic layouts and their static twins are generated by script,
+each with baked occupancy truth. \\
 ORB-SLAM3 ROS~2 stereo-inertial wrapper & \status{Implemented; verified in both
 domains} & Live topics, worker-thread tracking, TF and trajectory output. The
 fork carries fifteen patches, among them five out-of-bounds reads in the
@@ -182,7 +177,7 @@ and trajectory output. On the real rig it completes every recording only with
 the fisheye field of view masked at \SI{70}{\degree} and the stereo
 extrinsic held fixed (\cref{sec:exp1-real}). \\
 RTAB-Map construction and saved-map localisation & \status{Implemented;
-partially verified} & Five databases scored for geometry and drivability
+partially verified} & Three databases scored for geometry and drivability
 (\cref{sec:map-quality}). Localisation is \emph{known-start}: the run is seeded
 at the pose the prior was recorded from and corrected from there
 (\cref{sec:reloc-limits}). Two failure modes are closed and one is open. \\
@@ -208,95 +203,6 @@ measurement. \\
 \bottomrule
 \end{longtable}
 
-The repository state used for this draft is superproject commit
-\repo{32baaed876cabbddc19b0d89eb14a69bb6932d7e}. The checked-out submodules are
-VINS-Fusion \repo{247b640eee04ecf74fa64b42f3696a53ad040d5b}, RTAB-Map ROS
-\repo{b06adfa8cfd4434ca2a6b47c4dfd23e388372273}, the warehouse environment
-\repo{601c2fd3bf3bd6766602c719240e6f316941f9ac} and the ORB-SLAM3 core
-\repo{a639fa462d064587dff867335503362dde9fb20b}. Every run records the
-superproject commit in its manifest, so a result traces to the code that
-produced it.
-
-\subsection{The two navigation pipelines compared}
-\label{sec:pipelines-compared}
-
-The project compares two pipeline architectures built on that front end.
-
-\textbf{Pipeline~1: ORB-SLAM3 (Atlas multi-map system).} A
-tightly-coupled visual-inertial SLAM that performs both odometry and map
-construction through one graph. Lifelong mapping relies on ORB-SLAM3's Atlas
-framework: when tracking is lost because the environment changed, the system
-opens a new active map and keeps the old one as non-active; when the robot
-returns to a known area the maps are merged and joined by loop closure across
-maps. Its strength is high accuracy from tight image--IMU fusion, suited to
-areas with clear geometric features (\cref{fig:pipeline1}).
-
-\textbf{Pipeline~2: VINS + RTAB-Map (decoupled VIO and memory
-management).} A decoupled architecture that separates high-rate front-end
-odometry from long-term back-end memory management. The front end runs VINS
-sliding-window visual-inertial odometry, giving low-latency odometry that remains stable when the robot vibrates or
-drives the \SI{5}{\degree} slope. Lifelong mapping is handled by RTAB-Map, which
-holds its working memory at a constant size to bound computation time and moves
-old nodes to long-term memory on disk. Its strength is stable use of hardware
-resources: it prevents RAM exhaustion on a small processing board during long
-continuous operation (\cref{fig:pipeline2}).
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\textwidth]{figures/template/pipeline1_orb.png}
-  \caption[Pipeline~1: ORB-SLAM3, as proposed.]{Pipeline~1, ORB-SLAM3, as
-  proposed: stereo images and IMU are synchronised, tracked and passed to local
-  mapping, loop closing and the Atlas map. The diagram is the proposal's and
-  also shows a detector feeding the tracking stage and an EKF fusing the SLAM
-  pose with wheel feedback; neither is part of the reported system
-  (\cref{sec:deviations}).}
-  \label{fig:pipeline1}
-\end{figure}
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\textwidth]{figures/template/pipeline2_vins_rtab.png}
-  \caption[Pipeline~2: VINS-Fusion with RTAB-Map, as proposed.]{Pipeline~2,
-  VINS + RTAB-Map, as proposed: VINS tracking, initialisation and
-  sliding-window optimisation produce odometry, and RTAB-Map builds the map
-  from that odometry and the stereo images. As in \cref{fig:pipeline1}, the
-  detector input and the EKF fusion the diagram shows are not part of the
-  reported system.}
-  \label{fig:pipeline2}
-\end{figure}
-
-\begin{table}[htbp]
-\centering
-\caption{Design comparison of the two pipeline architectures, as proposed.}
-\label{tab:pipeline-comparison}
-\small
-\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.26\textwidth}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X}
-\toprule
-Aspect & Pipeline~1: ORB-SLAM3 & Pipeline~2: VINS + RTAB-Map \\
-\midrule
-System structure & tightly coupled (centralised) & decoupled (odometry separate
-  from back end) \\
-Odometry & ORB-SLAM3 tracking thread; tightly-coupled MAP estimation over
-  visual and IMU terms & VINS-Fusion local VIO; sliding-window optimisation \\
-Lifelong-mapping mechanism & Atlas multi-map system and map merging
-  ($\mathrm{Sim}(3)$) & RTAB-Map memory management (WM / LTM node transfer) \\
-Computation-time bound & grows with the number of keyframes and sub-maps in
-  Atlas & held at a constant $O(1)$ ceiling in working memory \\
-RAM / CPU use & grows with accumulated map size & bounded through the
-  processing-time threshold $T_{\max}$ \\
-Robustness to vibration & moderate to high; relies on ORB features and IMU
-  pre-integration & very high; online temporal and spatial calibration in VINS \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-In the implemented system the two are no longer alternatives with separate
-back ends. Either front end, ORB-SLAM3 or VINS-Fusion, supplies odometry, and
-RTAB-Map is the one back end that builds the prior map and relocalizes the
-robot in it (\cref{fig:scope-architecture}); ORB-SLAM3's own Atlas and loop
-closer remain active inside the front end and are evaluated as one of its
-switches in Experiment~1.
-
 \section{The Pipelines as Implemented}
 \label{sec:pipelines-implemented}
 
@@ -321,20 +227,19 @@ controlled feature-count or FAST-threshold sweep is complete.
 
 \begin{figure}[htbp]
   \centering
-  \resizebox{\textwidth}{!}{\input{figures/orb_pipeline_final}}
-  \caption[ORB-SLAM3 pipeline as implemented.]{ORB-SLAM3 pipeline as
-  implemented. Green is built by this project, grey is the pinned upstream
-  core. The wrapper pairs and queues the stereo images; the core extracts,
-  distributes and tracks features, maintains the local map and runs the loop
-  closer.}
+  \includegraphics[page=2,width=\textwidth]{figures/architecture/architecture.pdf}
+  \caption[ORB-SLAM3: three threads share one map.]{ORB-SLAM3: three threads
+  share one store of maps, the Atlas. Tracking (ORB-1 to ORB-4) must keep up
+  with the camera; local mapping (ORB-5, ORB-6) runs on every keyframe and loop
+  closing and merging (ORB-7, ORB-8) in the background, each taking as long as
+  it needs without holding tracking back. After \cite{campos2021}, Fig.~1.}
   \label{fig:orb-pipeline}
 \end{figure}
 
 \begin{table}[htbp]
 \centering
 \caption[ORB-SLAM3 configuration at the cutoff.]{ORB-SLAM3 configuration at the
-cutoff. Wrapper values are from \repo{orbslam3_ros2/src/}; extractor and IMU
-values from \repo{config/wil_sim/stereo_imu.yaml}. Noise densities are given in
+cutoff, wrapper and estimator settings. Noise densities are given in
 \cref{tab:imu-noise-assumed} and are not repeated here.}
 \label{tab:orb-params}
 \small
@@ -362,11 +267,7 @@ Image queue depth & 1 frame & older frame dropped, drop count logged \\
 
 The wrapper publishes \repo{/orbslam3/odometry}, \repo{/orbslam3/pose}, and TF
 after valid tracking. It writes the common 11-column trajectory format directly
-and flushes each row. Repository evidence is located in
-\repo{orbslam3_ros2/src/orbslam3_node.cpp},
-\repo{orbslam3_ros2/src/slam_wrapper.cpp},
-\repo{orbslam3_ros2/src/trajectory_writer.cpp}, and
-\repo{orbslam3_ros2/config/wil_sim/stereo_imu.yaml}.
+and flushes each row.
 
 \subsection{VINS-Fusion front end}
 \label{sec:vins-rtab-method}
@@ -385,20 +286,20 @@ of view beyond \SI{70}{\degree} (\cref{sec:exp1-real}).
 
 \begin{figure}[htbp]
   \centering
-  \resizebox{\textwidth}{!}{\input{figures/vins_pipeline_final}}
-  \caption[VINS-Fusion pipeline as implemented.]{VINS-Fusion pipeline as
-  implemented. The front end propagates existing tracks by pyramidal KLT and
-  detects new features with \texttt{goodFeaturesToTrack()} only to replenish
-  them; the sliding-window optimizer fuses them with the IMU, and the estimate
-  is written to \repo{vio.csv} and handed to RTAB-Map.}
+  \includegraphics[page=3,width=\textwidth]{figures/architecture/architecture.pdf}
+  \caption[VINS-Fusion: a sliding window over the last ten keyframes.]{VINS-Fusion:
+  the front end (VINS-1) follows points from frame to frame by KLT; the
+  estimator fits the last ten keyframes to every camera and IMU measurement at
+  once (VINS-4) and summarises what leaves the window as a prior (VINS-5).
+  Unlike ORB-SLAM3 there is no map to come back to, and the pose-graph stage
+  (VINS-7) is not in the project's fork. After \cite{qin2018vins}, Fig.~2.}
   \label{fig:vins-pipeline}
 \end{figure}
 
 \begin{table}[htbp]
 \centering
 \caption[VINS-Fusion simulation configuration at the cutoff.]{VINS-Fusion
-simulation configuration at the cutoff, from
-\repo{vins_fusion_ros2/config/wil_sim/stereo_imu.yaml}. Inertial noise densities
+simulation configuration at the cutoff. Inertial noise densities
 are in \cref{tab:imu-noise-assumed}.}
 \label{tab:vins-params}
 \small
@@ -425,24 +326,37 @@ IMU queue & \num{2000} & raised for the same reason \\
 \end{tabularx}
 \end{table}
 
-VINS writes the optimized state after each estimator update to \repo{vio.csv} and
-broadcasts \texttt{world~$\rightarrow$~body} using configurable frame names. The
-ROS \repo{output_path} parameter overrides the YAML path, recursively creates
-missing directories, and reports an explicit error if \repo{vio.csv} cannot be
-opened. Evidence is in \repo{vins_fusion_ros2/src/vins_estimator.cpp},
-\repo{vins_fusion_ros2/vins/src/featureTracker/feature_tracker.cpp}, and
-\repo{vins_fusion_ros2/vins/src/estimator/estimator.cpp}.
+VINS writes the optimized state after each estimator update in the common
+trajectory format and broadcasts \texttt{world~$\rightarrow$~body} using
+configurable frame names.
 
 \subsection{RTAB-Map mapping and localization back end}
 \label{sec:rtab-method}
 
-RTAB-Map receives front-end odometry through TF and stereo imagery through
-\repo{rtab_camera_shim.py}. The shim reconstructs \texttt{CameraInfo}, decompresses
+RTAB-Map does not measure motion itself: it takes the front end's pose and
+adds memory, remembering places, recognising them in two stages (visual words,
+then geometry) and building the grid Nav2 plans on (\cref{fig:rtab-pipeline}).
+In mapping mode it writes the prior database; in localisation mode it only
+reads it. It receives front-end odometry through TF and stereo imagery through the
+camera shim, which reconstructs \texttt{CameraInfo}, decompresses
 the pair, and publishes validated static camera transforms from the common
 simulation calibration. TF was selected over an odometry topic because adding
 high-rate odometry to multi-topic approximate synchronization starved the
 lower-rate images. The cost is that odometry covariance is not supplied to graph
 edge weighting.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[page=4,width=\textwidth]{figures/architecture/architecture.pdf}
+  \caption[RTAB-Map: a memory of places, and the map Nav2 plans on.]{RTAB-Map:
+  the camera shim (RTAB-1) and the front end's pose (RTAB-2) feed a node every
+  second (RTAB-3); place recognition proposes by visual words (RTAB-5),
+  verifies by geometry (RTAB-6) and optimises the graph (RTAB-7); the map is
+  assembled for Nav2 (RTAB-8) and every correction passes the correction gate
+  (RTAB-9). Memory management (RTAB-4) is off. Dashed amber boxes are written
+  for this project. After \cite{labbe2019}, Fig.~1.}
+  \label{fig:rtab-pipeline}
+\end{figure}
 
 The back end uses stereo SGBM (\repo{Stereo/DenseStrategy: 1}), height-based
 ground separation, ray tracing, spatial noise filtering, and odometry-derived
@@ -476,14 +390,9 @@ localization mode because the stored map is reused. Running the back end live
 beside its front end works with ORB-SLAM3, on this computer with active cooling,
 and every relocalization run of Experiment~2 is made that way. With VINS-Fusion
 it does not: VINS-Fusion diverged when co-run with RTAB-Map from a bag, and no
-successful co-run is recorded. Its recorded \repo{vio.csv} is replayed as
+successful co-run is recorded. Its recorded trajectory is replayed as
 \texttt{odom~$\rightarrow$~vio\_body} instead, which gives a deterministic
 back-end test but is not evidence of real-time co-execution.
-
-Evidence is in \repo{vslam_navigation/launch/rtabmap.launch.py},
-\repo{vslam_navigation/scripts/rtab_camera_shim.py},
-\repo{vslam_navigation/scripts/correction_gate.py}, and
-\repo{script/gt_tf_publisher.py}.
 
 \subsection{Navigation and relocalisation integration: the
 \repo{vslam_navigation} package}
@@ -516,8 +425,8 @@ The resulting chain has exactly one publisher per edge in both domains
 
 RTAB-Map's stereo pipeline requires a rectified image pair, both camera
 information messages and a static transform to the optical frames, and the
-recordings carry only compressed images. \repo{vslam_navigation/scripts/rtab_camera_shim.py}
-constructs the missing inputs from the same calibration files the estimators
+recordings carry only compressed images. The camera shim constructs the
+missing inputs from the same calibration files the estimators
 read, so a single calibration remains the source of truth. The two domains need
 different treatment:
 
@@ -566,7 +475,7 @@ one. Every localisation run made against a closure-free prior before
 
 \subsubsection{Gating the planner on the localisation}
 
-A supervisor, \repo{vslam_navigation/scripts/pose_gate.py}, holds the planner's
+A supervisor, the pose gate, holds the planner's
 lifecycle nodes inactive until three conditions hold together: an initialisation
 interval has elapsed, the correction between the map and odometry frames has
 moved less than a stated step over a number of consecutive samples, and the pose
@@ -645,9 +554,7 @@ which is a limitation of the instrument and not a property of the map
 \begin{table}[htbp]
 \centering
 \caption[Navigation parameters for the two platforms.]{Navigation parameters for
-the two platforms, with the quantity each is derived from. Values are those in
-\texttt{params/nav2\_sim.yaml} and \texttt{params/nav2\_real.yaml} at the
-reporting cutoff.}
+the two platforms, with the quantity each is derived from.}
 \label{tab:nav-params}
 \small
 \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.13\textwidth}>{\raggedright\arraybackslash}p{0.13\textwidth}>{\raggedright\arraybackslash}X}
@@ -692,8 +599,7 @@ and no run yet exists to show which failure matters more there.}
 The two domains differ structurally, not by tuning. The simulated robot's
 steering plugin consumes a velocity command directly, so the planner's output
 reaches it unchanged. The real rig accepts a speed and a steering angle on
-separate topics, so \repo{vslam_navigation/scripts/ackermann_bridge.py} inverts
-the bicycle model,
+separate topics, so a command bridge inverts the bicycle model,
 \begin{equation}
   \delta = \arctan\!\left(\frac{L\,\omega_z}{v_x}\right),
   \qquad |\delta| \le \delta_{\max},
@@ -754,8 +660,7 @@ prior that does contain closures.
 Relocalisation as implemented is \emph{known-start}, not arbitrary-start. The
 launch argument \repo{start_pose} defaults to \texttt{origin}, the dock the
 prior was recorded from, and the alternatives are the pose left in the database
-or six numbers given in the map frame
-(\repo{vslam_navigation/launch/localize_real.launch.py}). The run is therefore
+or six numbers given in the map frame. The run is therefore
 seeded with an approximate pose and corrected from it; nothing in the pipeline
 recovers a pose from no prior information, and no claim of arbitrary-start
 localisation is made anywhere in this report.
@@ -793,10 +698,9 @@ in the library.
 
 \begin{table}[htbp]
 \centering\small
-\caption{Relocalisation configuration adopted. Launch arguments are those of
+\caption[Relocalisation configuration adopted.]{Relocalisation configuration adopted. Launch arguments are those of
 \repo{vslam_navigation}; the parameter column names what each sets in RTAB-Map.
-Frozen for Experiment~2 in \repo{script/exp4_protocol.yaml} and recorded in
-every run's manifest.}
+Frozen for Experiment~2 and recorded with every run.}
 \label{tab:reloc-config}
 \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}X}
 \toprule
@@ -819,7 +723,7 @@ has been formed. \\
 
 \begin{table}[p]
 \centering\small
-\caption{Settings tried and rejected in reaching \cref{tab:reloc-config}. Four
+\caption[Relocalisation settings tried and rejected.]{Settings tried and rejected in reaching \cref{tab:reloc-config}. Four
 of the five acceptance controls available were either inert or destructive,
 which is why the adopted configuration departs from RTAB-Map's defaults in one
 parameter only.}
@@ -850,14 +754,8 @@ verification and nothing localises. The launch now refuses it and prints the
 \end{tabularx}
 \end{table}
 
-Each run of the sweep writes a manifest beside its data recording the settings
-it used, the full launch command, the git commit and the wall duration, and
-\repo{script/aisle_sweep.py --analyse} reads them into a single table, so a
-result cannot be attributed to the wrong configuration.
-\flag{An earlier revision of this chapter stated that the sweep had no scored
-summary and that its run directories recorded the estimator configuration but
-not the relocalisation parameters. That is no longer true and the statement is
-withdrawn.} Its one carried conclusion --- that run-to-run spread over identical
+Each run of the sweep records the settings it used beside its data, so a result
+cannot be attributed to the wrong configuration. Its one carried conclusion --- that run-to-run spread over identical
 settings is as wide as most differences between settings --- is used in
 \cref{sec:exp4-sim} to refuse comparisons.
 
@@ -868,60 +766,46 @@ settings is as wide as most differences between settings --- is used in
 \label{sec:compute-env}
 
 One machine produced every result in this report, in both domains: an MSI
-Katana GF66 11UG laptop. \Cref{tab:compute-environment} records it. Each entry
-was re-read from the running system rather than copied forward from the
-engineering log.
+Katana GF66 11UG laptop (\cref{tab:compute-environment}).
 
 \begin{table}[htbp]
 \centering
 \caption[Computing and software environment.]{Computing and software
-environment. A single laptop produced every result reported here; there is no
-second platform, so no entry below supports a cross-hardware comparison.}
+environment. A single laptop produced every result reported here, so no entry
+supports a cross-hardware comparison.}
 \label{tab:compute-environment}
 \small
-\setlength{\tabcolsep}{4pt}
-\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.20\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}X}
+\begin{tabular}{ll}
 \toprule
-Component & Version & Role \\
+Component & Version \\
 \midrule
-\multicolumn{3}{l}{\emph{Platform}} \\
-Computer & MSI Katana GF66 11UG & development laptop \\
-Operating system & Ubuntu 22.04.5 LTS & \\
-Middleware & ROS~2 Humble & \\
-CPU & Intel Core i7-11800H, 16 logical cores & \\
-Memory & \SI{15}{\giga\byte}, no swap & no swap, so memory pressure fails
-  outright rather than degrading \\
-GPU & NVIDIA RTX~3070 Laptop & ORB-SLAM3's optional GPU front end \\
-\midrule
-\multicolumn{3}{l}{\emph{Build toolchain}} \\
-GCC & 11.4.0 & \\
-CMake & 3.22.1 & \\
-OpenCV (system) & 4.5.4 & links both estimators \\
-Pangolin & 0.9.1 & ORB-SLAM3 built out of tree \\
-\midrule
-\multicolumn{3}{l}{\emph{Mapping back end}} \\
-\repo{ros-humble-rtabmap} & 0.23.7 & apt core library \\
-RTAB-Map ROS wrappers & project checkout & only packages through
-  \repo{rtabmap_slam} are built \\
+Computer & MSI Katana GF66 11UG \\
+CPU & Intel Core i7-11800H, 16 logical cores \\
+Memory & \SI{15}{\giga\byte}, no swap \\
+GPU & NVIDIA RTX~3070 Laptop \\
+Operating system, middleware & Ubuntu 22.04.5 LTS, ROS~2 Humble \\
+OpenCV & 4.5.4 \\
+RTAB-Map & 0.23.7 \\
 \bottomrule
-\end{tabularx}
+\end{tabular}
 \end{table}
 
-The proposed comparison between the NRU-51V on the robot and this laptop has
-not been instrumented or executed, so every timing, throughput and CPU figure
-in \cref{chap:results} describes this machine alone and none supports a
-hardware comparison. The laptop throttles near \SI{90}{\celsius} after
-consecutive runs, which changes latency and frame reception but, where it was
-measured, not accuracy (\cref{sec:exp1-real}).
+No estimator runs on the NRU-51V, so every timing, throughput and CPU figure in \cref{chap:results}
+describes this machine alone. The laptop throttles near \SI{90}{\celsius}
+after consecutive runs, which changes latency and frame reception but, where it
+was measured, not accuracy (\cref{sec:exp1-real}).
 
 \subsection{Simulated sensor rig and platform}
+
 The simulated Ackermann robot carries two ideal pinhole cameras and an IMU on a
-forward mast, and is driven through a front-steering, rear-driven four-wheel
-chassis. \Cref{fig:ackermann-robot} gives its dimensioned plan and elevation, and
-\cref{tab:sim-sensor-rig,tab:platform-geometry} list the sensor and platform
-constants. Every value in the figure and both tables is read from
-\repo{aws-robomaker-small-warehouse-world/models/ackermann_robot/model.sdf}, so
-the drawing is to scale rather than illustrative.
+forward mast, on a front-steering, rear-driven four-wheel chassis
+(\cref{fig:ackermann-robot}, \cref{tab:sim-sensor-rig}). Every value is read
+from the robot's model definition, so the drawing is to scale. The chassis
+has a wheel base and track of \SI{0.42}{\metre}, a wheel radius of
+\SI{0.0585}{\metre} and a steering limit of $\pm\SI{0.6109}{\radian}$; the
+real platform's wheel base is \SI{0.60}{\metre}, so the simulated car turns
+about a \SI{0.64}{\metre} radius and the real one about \SI{1.75}{\metre}, and
+the planner is configured separately for each (\cref{sec:nav-integration}).
 
 \begin{figure}[htbp]
   \centering
@@ -929,20 +813,18 @@ the drawing is to scale rather than illustrative.
   \caption[Simulated Ackermann platform, drawn to scale from the model definition.]{Simulated Ackermann platform, drawn to scale from the model
   definition. Distances are in metres relative to \texttt{base\_footprint}. The
   stereo pair is mounted asymmetrically: \texttt{cam1} sits on the vehicle
-  centreline and \texttt{cam0} is offset \SI{0.0936}{\metre} to its left, so the
-  optical centre of the pair is not the chassis centreline. The wheel base and
-  track are equal at \SI{0.42}{\metre}, which is what makes the rear-wheel
-  differential a poor yaw-rate estimator (\cref{sec:proprio-method}).}
+  centreline and \texttt{cam0} is offset \SI{0.0936}{\metre} to its left. The
+  wheel base and track are equal at \SI{0.42}{\metre}, which is what makes the
+  rear-wheel differential a poor yaw-rate estimator (\cref{sec:proprio-method}).}
   \label{fig:ackermann-robot}
 \end{figure}
 
 \begin{table}[htbp]
 \centering
-\caption[Simulated sensor configuration.]{Simulated sensor configuration. Intrinsics are analytic rather than
-calibrated: the simulator renders an exact pinhole camera, so $f_x=f_y$ follow
-from the image width and the horizontal field of view and the distortion
-coefficients are identically zero. The stereo baseline was independently checked
-from positive disparity in a recorded bag rather than taken from the model alone.}
+\caption[Simulated sensor configuration.]{Simulated sensor configuration. The
+simulator renders an exact pinhole camera, so $f_x=f_y$ follow from the image
+width and the field of view and the distortion is zero. The stereo baseline was
+checked from disparity in a recorded bag.}
 \label{tab:sim-sensor-rig}
 \small
 \resizebox{\textwidth}{!}{%
@@ -965,320 +847,79 @@ Stereo baseline & \multicolumn{2}{l}{\SI{0.0936}{\metre}} & -- \\
 \end{tabular}}
 \end{table}
 
-The fixed camera rotation converts the ROS body convention (forward, left, up) to
-the optical convention (right, down, forward). The VINS simulation configuration
-fixes the extrinsics (\repo{estimate_extrinsic: 0}) and disables temporal-offset
-estimation (\repo{estimate_td: 0}); the assumed inertial noise model is given in
-\cref{tab:imu-noise-assumed}, and the same values are mapped to the ORB-SLAM3
-configuration.
-
-\begin{table}[htbp]
-\centering
-\caption[Inertial noise: configured against measured.]{Inertial
-noise parameters supplied to the visual-inertial estimators, beside the values
-measured from the four recordings in \cref{tab:proprio-noise}. The configured
-values are inherited estimator defaults, not measurements of this simulated
-IMU.}
-\label{tab:imu-noise-assumed}
-\small
-\begin{tabular}{llll}
-\toprule
-Parameter & Configured (VINS, ORB) & Measured from the recordings & Units \\
-\midrule
-\texttt{acc\_n} & 0.02 & 0.015--0.024 &
-  m\,s$^{-2}/\sqrt{\mathrm{Hz}}$ \\
-\texttt{gyr\_n} & 0.002 & \flag{0.00030--0.00036} &
-  rad\,s$^{-1}/\sqrt{\mathrm{Hz}}$ \\
-\texttt{acc\_w} & 0.001 & not measurable & m\,s$^{-3}/\sqrt{\mathrm{Hz}}$ \\
-\texttt{gyr\_w} & 0.0001 & not measurable &
-  rad\,s$^{-2}/\sqrt{\mathrm{Hz}}$ \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{queried}[Queried]
-The configured gyroscope noise density is \num{2e-3} whereas the stationary
-windows of the four recordings give \numrange{3.0e-4}{3.6e-4}, so the
-configured value is five to seven times too large. The configured accelerometer
-density of 0.02 sits inside the measured spread, but that spread is itself wide,
-\numrange{0.015}{0.024} across four recordings of the same simulated sensor.
-Both estimators therefore run on an inertial noise model that does not describe
-this IMU closely. The bias random walks cannot be checked at all: the longest
-stationary interval in any recording is \SI{2.16}{\second} and an
-Allan-variance estimate needs minutes. This discrepancy is not incidental: by
-the design decision of \cref{sec:proprio-method} the EKF baseline is run on
-these same configured values, so the comparison between the proprioceptive and
-visual families is made at a shared handicap rather than at each family's best.
-\end{queried}
-
-\begin{queried}[Queried]
-The accelerometer characterisation is not stable across recordings of the same
-simulated sensor. The $x$ bias ranges from \SI{0.013}{} to
-\SI{0.079}{\metre\per\second\squared} and the $x$ scale from 1.017 to 1.095
-over the four recordings, while the gyroscope $z$ scale agrees to within
-\num{0.0007} over the same four. Because the stationary window is between
-\SI{1.14}{} and \SI{2.16}{\second} in every case, part of that spread is
-estimator variance rather than a property of the sensor, and the accelerometer
-terms should not be quoted as calibrated constants.
-\end{queried}
-
-\begin{table}[htbp]
-\centering
-\caption[Platform geometry and drivetrain limits.]{Platform geometry and drivetrain limits used by the wheel-odometry and
-EKF baselines. \texttt{AckermannSteering} exposes no noise parameter, so the
-simulated encoders and odometry are noise free at source.}
-\label{tab:platform-geometry}
-\small
-\begin{tabular}{llll}
-\toprule
-Quantity & Symbol & Value & Source field \\
-\midrule
-Wheel base (front to rear axle) & $L$ & \SI{0.42}{\metre} & \texttt{wheel\_base} \\
-Track (wheel separation) & $B$ & \SI{0.42}{\metre} & \texttt{wheel\_separation} \\
-Kingpin width & -- & \SI{0.42}{\metre} & \texttt{kingpin\_width} \\
-Wheel radius & $r$ & \SI{0.0585}{\metre} & \texttt{wheel\_radius} \\
-Wheel width & -- & \SI{0.065}{\metre} & wheel \texttt{<length>} \\
-Steering limit & $\delta_{\max}$ & $\pm\SI{0.6109}{\radian}$ & \texttt{steering\_limit} \\
-Chassis mass & -- & \SI{10.1}{\kilogram} & \texttt{base\_footprint} \texttt{<mass>} \\
-Maximum speed & -- & \SI{10}{\metre\per\second} & \texttt{max\_velocity} \\
-Maximum acceleration & -- & \SI{3}{\metre\per\second\squared} & \texttt{max\_acceleration} \\
-Odometry publish rate & -- & \SI{50}{\hertz} & \texttt{odom\_publish\_frequency} \\
-Joint-state publish rate & -- & \SI{1}{\kilo\hertz} & measured from bag \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-The real platform's wheel base is \SI{0.60}{\metre}
-(\cref{sec:real-platform}) against the simulated \SI{0.42}{\metre}, and the two
-are not interchangeable. Under each platform's own steering limit the simulated
-car turns about a \SI{0.64}{\metre} radius at \texttt{base\_link} and the real
-one about \SI{1.75}{\metre}, so a route that fits the simulated robot need not
-fit the real one and the planner is configured separately for each
-(\cref{sec:nav-integration}). The real rig also publishes no steering
-measurement, so the bicycle model cannot be formed on it
-(\cref{sec:proprio-method}).
+Both visual estimators run with the extrinsics fixed and temporal-offset
+estimation off, on the inertial noise model of \cref{tab:imu-noise-assumed}.
 
 \subsection{Simulation fidelity and its limits}
 \label{sec:sim-fidelity}
-Every simulation result in this report rests on how faithfully the simulator
-reproduces the sensors and the contact physics. This subsection states what is
-modelled, what is idealised, and in which direction each idealisation biases the
-comparison between the visual and proprioceptive estimators.
 
-\paragraph{Inertial measurement.} \Cref{tab:imu-noise-assumed} reports the noise
-measured from the recorded stream and queries it, because no recording contains
-a stationary interval long enough for a sound estimate: the longest is
-\SI{2.16}{\second}. That query can be closed without a new recording, because
-the noise is \emph{declared} in the robot model rather than emergent, so the
-simulator's own configuration is the ground truth the measurement was trying to
-recover.
+Every simulation result rests on how faithfully the simulator reproduces the
+sensors and the contact physics; this subsection states what is idealised and
+in which direction each idealisation biases the comparison.
 
-\Cref{tab:injected-noise} collects what the simulator actually injects, together
-with the measured values and the EuRoC reference. The measured gyroscope range
-brackets the declared value, which corroborates both. The measured accelerometer
-range does not: it is four to six times the declared figure, and that
-discrepancy is the estimator's rather than the sensor's, because the residual on
-the driving axis carries real longitudinal acceleration that a window of two
-seconds cannot separate from noise. Prefer the declared values wherever a number
-is needed.
+\paragraph{Inertial noise.} The IMU noise is declared in the robot model, so
+the simulator's own configuration is the ground truth that a measurement from
+the recordings tries to recover (\cref{tab:imu-noise-assumed}). The simulated
+IMU is about twice as noisy as the EuRoC reference on both channels, so it is
+not an optimistic sensor. The visual estimators are not told that noise: both
+run on inherited defaults, five to six times the injected densities and 58
+times the injected gyroscope bias walk, which is standard practice in
+visual-inertial odometry but is not a description of this IMU. The measured
+accelerometer density is four to six times the injected one because the
+two-second stationary windows cannot separate noise from the robot's own
+acceleration, and the bias walks cannot be measured at all; the declared values
+are therefore the ones to use. The EKF baseline runs on the same configured
+values (\cref{sec:proprio-method}), so the two families are compared at a
+shared handicap. The IMU's orientation field carries no noise at
+all and is never consumed.
 
 \begin{table}[htbp]
 \centering
-\caption[Noise injected by the simulator.]{Noise injected by the simulator,
-from the \repo{<imu>} and \repo{<camera>} sensor blocks of the robot model.
-Densities are per-sample $\sigma$ divided by $\sqrt{f_s}$ at \SI{200}{\hertz},
-in the channel's own units per $\sqrt{\si{\hertz}}$. ``Measured'' is the range
-over the four recordings of \cref{tab:proprio-noise}. The EuRoC column is the
-ADIS16448 of that benchmark, on which both visual estimators were published.}
-\label{tab:injected-noise}
+\caption[Inertial noise: injected, measured and configured.]{Inertial noise
+injected by the simulator, measured from the four recordings of
+\cref{tab:proprio-noise}, and configured in both visual estimators, beside the
+EuRoC benchmark's ADIS16448. Densities are per $\sqrt{\si{\hertz}}$ at
+\SI{200}{\hertz}; the injected bias walks are the Gauss--Markov driving
+densities $\sigma_b\sqrt{2/\tau}$ of the model's bias terms
+($\tau=\SI{1000}{\second}$ gyroscope, \SI{300}{\second} accelerometer).}
+\label{tab:imu-noise-assumed}
 \small
 \setlength{\tabcolsep}{4pt}
-\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}X llll}
+\begin{tabular}{lllll}
 \toprule
-Channel (units of $\sigma$) & Declared $\sigma$ & Density & Measured & EuRoC \\
+Parameter & Injected & Measured & Configured (ratio) & EuRoC \\
 \midrule
-Gyroscope, per axis (\si{\radian\per\second}) & \num{0.0048} & \num{3.394e-4} &
-  \numrange{3.0e-4}{3.6e-4} & \num{1.70e-4} \\
-Accelerometer, per axis (\si{\metre\per\second\squared}) & \num{0.0566} &
-  \num{4.002e-3} & \flag{\numrange{1.5e-2}{2.4e-2}} & \num{2.00e-3} \\
-Camera, per pixel (normalised intensity) & \num{0.005} & --- & not measured & --- \\
-\midrule
-\multicolumn{5}{l}{\emph{Bias, first-order Gauss--Markov: $\sigma_b$ and
-  correlation time $\tau$}} \\
-Gyroscope bias (\si{\radian\per\second}) & \num{3.8785e-5} &
-  $\tau=\SI{1000}{\second}$ & not measurable & --- \\
-Accelerometer bias (\si{\metre\per\second\squared}) & \num{0.006} &
-  $\tau=\SI{300}{\second}$ & not measurable & --- \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-Two readings follow. The simulated IMU is \emph{twice as noisy} as the EuRoC
-reference on both channels, so it is not an optimistic sensor. The camera, at
-about \num{1.3} grey levels out of \num{255} and with no distortion terms, is
-much cleaner than any real one. Both bias correlation times exceed the
-\SIrange{80}{125}{\second} length of the four shorter recordings, so within a
-run the bias behaves as a slowly varying constant and its instability is never
-exercised; only the two mapping runs, at \SIrange{288}{315}{\second}, approach
-the accelerometer's \SI{300}{\second} correlation time.
-
-Three further effects are absent: chassis vibration, which on a real platform is
-frequently the dominant error; scale-factor, cross-axis and $g$-sensitivity
-errors; and temperature drift. Finally, the message's \repo{orientation} field
-carries no noise block at all and is therefore ground truth; no estimator in
-this project consumes it, and none should
-(\cref{sec:proprio-method}).
-
-\paragraph{Wheel encoders.} \repo{JointStatePublisher} reports the true solver
-angle. Slip consequently appears as a \emph{discrepancy} rather than an error:
-the joint angle stays true, so encoder-integrated distance over-reads whenever
-traction breaks, which is exactly a real encoder's behaviour. What is idealised
-is resolution. A physical 1024\,CPR encoder quantises to \SI{6.1e-3}{\radian},
-setting a floor on low-speed velocity estimation that the simulation does not
-have. \repo{script/encoder_sim.py} exists to impose that floor downstream and
-has not been applied to any result in this report.
-
-\paragraph{Physics engine and solver.} \Cref{tab:physics-setup} records the
-simulation's physics configuration, which is identical across all 28 world
-files. Two entries deserve comment because they are easy to misread.
-
-The \repo{<physics>} element declares \repo{type="ignored"}. That is not a
-misconfiguration: in Gazebo Fortress the engine is selected by the physics system
-plugin, not by that attribute, and the attribute is disregarded. No world passes
-an \repo{<engine>} parameter to the plugin, so the engine is Fortress's default,
-\repo{dartsim}. This matters for the friction discussion below, and it is the
-reason \repo{slip1} and \repo{slip2} have no effect.
-
-No solver block is declared anywhere: no iteration count, no SOR parameter, no
-constraint-force mixing or error-reduction terms. Every one of those therefore
-takes the engine default. A \SI{1}{\milli\second} step is a fine integration
-step for a \SI{1.5}{\metre\per\second} ground vehicle, but the untuned contact
-solver is the part of this setup least able to support a quantitative claim about
-contact behaviour.
-
-\begin{table}[htbp]
-\centering
-\caption[Gazebo physics configuration.]{Gazebo physics configuration, identical
-in all 28 world files. Entries marked ``engine default'' are not declared
-anywhere in the project and are therefore whatever \repo{dartsim} chooses.}
-\label{tab:physics-setup}
-\small
-\setlength{\tabcolsep}{4pt}
-\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.24\textwidth}>{\raggedright\arraybackslash}p{0.22\textwidth}>{\raggedright\arraybackslash}X}
-\toprule
-Setting & Value & Note \\
-\midrule
-Engine & \repo{dartsim} & Fortress default; no world sets \repo{<engine>} \\
-\repo{<physics type>} & \repo{"ignored"} & disregarded in Fortress; the plugin
-  selects the engine \\
-\repo{max_step_size} & \SI{1}{\milli\second} & \SI{1}{\kilo\hertz} integration \\
-\repo{real_time_factor} & 1 & no deliberate slow-down \\
-\repo{real_time_update_rate} & engine default & not declared \\
-Solver type and iterations & engine default & no \repo{<solver>} block anywhere \\
-CFM / ERP & engine default & no \repo{<constraints>} block anywhere \\
-Gravity & \SI{-9.8}{\metre\per\second\squared} & against ORB-SLAM3's hard-coded
-  \num{9.81}, a \SI{0.1}{\percent} difference \\
-\repo{slip1}, \repo{slip2} & 0 on all grounds & \flag{an ODE feature;
-  \repo{dartsim} does not implement it, so inert at any value} \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-Achieved real-time factor was not logged during recording, so the table states
-the requested factor rather than the realised one; the simulator in fact ran
-below real time, which is why a recording's ground-truth span is shorter than
-its wall-clock duration (\cref{tab:dataset-registry}). Replay rate, which is
-logged, is a separate control and is \num{1.0} for every run in this report.
-
-\paragraph{Contact friction, and why the encoder is flattered.} The wheels
-declare $\mu=1$, $\mu_2=1$ and every ground model declares $\mu=100$, $\mu_2=50$.
-Both sets sit inside \repo{<friction><ode>} elements, which is where SDF places
-them irrespective of engine, and \repo{dartsim} consumes them
-(\cref{tab:physics-setup}). How it combines two differing coefficients is not
-established here, so the effective value is not asserted; what is measured is the
-outcome in \cref{tab:measured-slip}.
-
-\begin{table}[htbp]
-\centering
-\caption[Measured wheel slip on the four recordings.]{Measured wheel slip on
-the four recordings of Experiment~1. The ratio is encoder-integrated distance
-over true path length: above one is slip, below one is a rolling-radius error
-and cannot be slip. Measured by \repo{script/check_slip.py}.}
-\label{tab:measured-slip}
-\small
-\begin{tabular}{lrrrl}
-\toprule
-Recording & Encoder [\si{\metre}] & Truth [\si{\metre}] & Ratio & Reading \\
-\midrule
-\repo{realistic_000} & 171.36 & 171.35 & 1.0001 & no measurable slip \\
-\repo{realistic_001} & 132.56 & 133.04 & 0.9964 & radius error, not slip \\
-\repo{realistic_002} & 102.81 & 102.68 & 1.0012 & slip, \SI{+0.12}{\percent} \\
-\repo{realistic_003} & 157.82 & 158.01 & 0.9988 & radius error, not slip \\
+\texttt{gyr\_n} [rad\,s$^{-1}/\sqrt{\mathrm{Hz}}$] & \num{3.39e-4} &
+  \numrange{3.0e-4}{3.6e-4} & \num{2e-3} (\num{5.9}$\times$) & \num{1.70e-4} \\
+\texttt{acc\_n} [m\,s$^{-2}/\sqrt{\mathrm{Hz}}$] & \num{4.00e-3} &
+  \flag{\numrange{1.5e-2}{2.4e-2}} & \num{2e-2} (\num{5.0}$\times$) & \num{2.00e-3} \\
+\texttt{gyr\_w} [rad\,s$^{-2}/\sqrt{\mathrm{Hz}}$] & \num{1.74e-6} &
+  not measurable & \num{1e-4} (\flag{\num{58}$\times$}) & -- \\
+\texttt{acc\_w} [m\,s$^{-3}/\sqrt{\mathrm{Hz}}$] & \num{4.90e-4} &
+  not measurable & \num{1e-3} (\num{2.0}$\times$) & -- \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Slip is below \SI{0.4}{\percent} everywhere and on two recordings the encoder
-under-reads, which cannot be slip. Against a wheel-odometry final drift of
-\SIrange{2.2}{5.9}{\percent} of route length, slip is therefore not the dominant
-error; the yaw-rate geometry is (\cref{sec:results-proprio}).
+\paragraph{Camera, chassis and physics.} The camera, at about 1.3 grey levels
+of noise in 255 and with no distortion, is much cleaner than any real one;
+chassis vibration, IMU scale-factor and cross-axis errors and temperature drift
+are absent. The physics engine is Gazebo Fortress's default, \repo{dartsim},
+at a \SI{1}{\milli\second} step with every solver parameter at its default;
+the declared slip parameters are an ODE feature that \repo{dartsim} ignores.
+The wheel encoders report the true joint angle, so slip would appear as an
+over-read, but measured slip is below \SI{0.4}{\percent} on all four
+recordings, against a wheel-odometry drift of \SIrange{2.2}{5.9}{\percent} of
+route length; encoder quantisation is not modelled.
 
 \begin{queried}[Threat to validity]
-This is a bias with a known direction. The EKF baseline of
-\cref{sec:results-proprio} is evaluated on a floor where the wheels effectively
-cannot slip and with an encoder of unlimited resolution, which is dead
-reckoning's best case. Both idealisations favour the proprioceptive estimators
-over the visual ones, and neither has been relaxed. Any conclusion that a
-wheel-plus-IMU filter matches or beats the visual pipelines should be read as
-holding \emph{under these conditions}, not as a general result.
-\repo{script/make_slippery_floor.py} generates ground models at a chosen
-friction coefficient so that traction can be made an experimental factor, and
-\repo{script/encoder_sim.py} imposes a realistic quantisation floor. Neither has
-been used in any result reported here.
-\end{queried}
-
-\paragraph{Noise models supplied to the estimators.} The visual estimators are
-not told the truth about the IMU, as \cref{tab:configured-vs-injected} shows.
-
-\begin{table}[htbp]
-\centering
-\caption[Configured against injected inertial noise.]{What the visual
-estimators are configured to expect, against what the simulator injects. Both
-estimators use identical values. Inflating noise above datasheet figures is
-standard practice in visual-inertial odometry and the configuration records that
-intent; the ratios are given so the size of the margin is visible. Since
-6 November 2026 the EKF baseline is run on the same configured values, so that
-the two estimator families share one inertial model (\cref{sec:proprio-method}).}
-\label{tab:configured-vs-injected}
-\small
-\begin{tabularx}{\textwidth}{llll>{\raggedright\arraybackslash}X}
-\toprule
-Parameter & Configured & Injected & Ratio & Quantity \\
-\midrule
-\repo{gyr_n} & \num{0.002}  & \num{3.394e-4} & \num{5.9}$\times$ &
-  gyroscope noise density \\
-\repo{acc_n} & \num{0.02}   & \num{4.002e-3} & \num{5.0}$\times$ &
-  accelerometer noise density \\
-\repo{gyr_w} & \num{0.0001} & \num{1.735e-6} & \flag{\num{58}$\times$} &
-  gyroscope bias random walk \\
-\repo{acc_w} & \num{0.001}  & \num{4.899e-4} & \num{2.0}$\times$ &
-  accelerometer bias random walk \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-The injected bias random walks are the Gauss--Markov driving densities
-$\sigma_b\sqrt{2/\tau}$ implied by \cref{tab:injected-noise}.
-
-\begin{queried}[Retired evidence for the inflated setting]
-The inflated configuration is retained for every result in this report, on the
-strength of an experiment that is no longer part of the reported campaign: in
-September 2026 both estimators were re-run on configurations carrying the true
-injected densities, and although accuracy improved wherever a run completed,
-three of ten runs diverged outright where the inflated configuration diverged in
-none. That evidence was recorded on recordings retired on 6 November 2026, so it
-is reported here as the reason for a setting rather than as a result, and the
-comparison has not been repeated on the current recordings.
+This is a bias with a known direction. The non-visual baselines of
+\cref{sec:results-proprio} run on a floor where the wheels effectively cannot
+slip and with an encoder of unlimited resolution, which is dead reckoning's
+best case. Both idealisations favour the proprioceptive estimators over the
+visual ones, and neither has been relaxed, so any conclusion that a
+wheel-plus-IMU filter matches the visual pipelines holds \emph{under these
+conditions}, not in general.
 \end{queried}
 
 \subsection{Coordinate-frame contract}
@@ -1288,38 +929,16 @@ comparison has not been repeated on the current recordings.
 \subsection{Simulation environments and controlled factors}
 \label{sec:environments-datasets}
 
-Three simulated worlds carry every result in this report, all generated from
-the AWS RoboMaker small-warehouse model and all held in one directory,
-\repo{aws-robomaker-small-warehouse-world/worlds/small_warehouse/}:
-
-\begin{itemize}
-\item \repo{small_warehouse_static_tinymap.world}, the original small-warehouse
-      shell at its native size. It is the world
-      \repo{map/map_tiny/map_tiny.db} was built in and scored against, and the
-      only world small enough that one recording covers it.
-\item \repo{small_warehouse_dynamic_realistic_nofloortexture.world} and its
-      static twin \repo{small_warehouse_static_realistic_nofloortexture.world},
-      the \textbf{U-shape} logistics layout.
-\item \repo{small_warehouse_dynamic_realistic_nofloortexture_01.world} and its
-      static twin \repo{..._01.world}, the \textbf{I-shape} layout.
-\end{itemize}
-
-The two realistic layouts are the subject of \cref{sec:realistic-worlds},
-which gives their zones, traffic model and baked occupancy truth. They are
-generated by \repo{script/make_realistic_world.py} and
-\repo{script/make_static_world.py} and are never hand-edited. The committed
-\texttt{.world} file, not the generator, is the recorded environment: the
-generator still reproduces the U world exactly, but it no longer reproduces
-the I world, so every object count in this report is read from the world file
-(\cref{tab:realistic-zones}).
-
-Earlier work used three further arrangements of the rescaled warehouse, with
-scripted props moving on fixed segments, and a textured \texttt{bayline} floor
-variant. Those worlds still exist in the same directory, but the 6 November
-2026 dataset decision removed every recording made in them, so no result in
-this report comes from them and no claim rests on the textured floor. Every
-recording in use is on the featureless floor, which is the harder condition
-for a visual front end and the one the real site resembles.
+Three simulated worlds carry every result in this report, all derived from the
+AWS RoboMaker small-warehouse model: the original tiny warehouse, in which the
+tiny map was built and scored, and the U-shape and I-shape logistics layouts of
+\cref{sec:realistic-worlds}, each with a static twin. The layouts are generated
+by script and never hand-edited; the committed world file, not the generator,
+is the recorded environment, and every object count is read from it. Worlds
+used earlier, with props shuttling on fixed segments and a textured floor, are
+not the source of any result here: every recording in use is on the featureless
+floor, the harder condition for a visual front end and the one the real site
+resembles.
 
 \Cref{tab:controlled-factors} states which experimental factors the simulator
 can vary, which levels the recordings in use actually realise, and which are
@@ -1390,46 +1009,25 @@ Compute platform & one laptop & held constant; no hardware comparison is
 \subsection{Dataset registry}
 \label{sec:dataset-registry}
 
-The dataset set was fixed on 6 November 2026 and the report draws every result
-from the eleven recordings of \cref{tab:dataset-registry}. Earlier recordings
-remain on the storage drive but are used by nothing in this report: the five
-\repo{allsensor} and \repo{static_nofloortexture} bags of the first simulation
-campaign, and the \repo{realv2} to \repo{realv5} real recordings, which were
-deleted when the drive was rebuilt. Results computed from them were moved to
-\repo{trash/output/} on the same day and are cited nowhere.
+The report draws every result from the eleven recordings of
+\cref{tab:dataset-registry}.
 
-All recordings live on an internal partition mounted at
-\repo{/media/ambushee/New Volume/wil_rescue/}, to which every bag was copied by
-\repo{rsync} on 3 November 2026 after the removable drive that had held them
-began to fail; that drive is retired as a source. The workspace tree
-\repo{dataset/} keeps only what is in active use. Ground truth is held
-separately under \repo{dataset/gt/<recording>/}: for the simulation recordings
-a copy of the bag's own \repo{/ground_truth/odometry} resampled to the scoring
-convention, and for the real recordings the optical tracker's planar export.
-Integrity was checked by opening each SQLite store and counting rows against
-the count its \repo{metadata.yaml} declares rather than by trusting the
-metadata, because the two faults seen on the old drive, a truncated store and a
-stub file, both leave the metadata intact; all eleven pass.
+Every bag was checked by counting the rows of its store against the count its
+metadata declares; all eleven pass. Ground truth is held separately: for the
+simulation recordings, the bag's own \repo{/ground_truth/odometry}; for the
+real recordings, the optical tracker's planar export.
 
 \begin{table}[htbp]
 \centering
-\caption[Dataset registry: the eleven recordings in use.]{Dataset registry at
-the reporting cutoff: the eleven recordings every result in this report is
-drawn from. Span is the ground-truth time span for the simulation recordings,
-which is shorter than the rosbag wall-clock duration because the simulator ran
-below real time, and the rosbag duration for the real recordings. Route is the
-ground-truth path length, from the simulator odometry or the tracker export;
-for \repo{realv6_000} it is computed from the cleaned export, without the one
-sample at \SI{184.3}{\second} that jumps \SI{5.23}{\metre} and back, which
-would add about \SI{10}{\metre} (\SI{37.3}{\metre} raw). That export runs at
-about \SI{1.7}{\hertz}, with gaps of up to \SI{2.4}{\second}, and fails the
-\SI{1.0}{\second} gap rule of \cref{sec:method-trajectory}, so its row is a
-diagnostic. Role names the experiment and, for Experiment~2, the part.
-``Prop.'' marks the proprioceptive group
-(\repo{/model/ackermann_robot_001/joint_state} and \repo{.../odometry}) in
-simulation and the wheel-speed and steering feedback on the real rig. Stereo
-pairs are \repo{cam0} messages; inertial messages are \repo{/imu} in simulation
-and \repo{/hwt101ct_yaw_publisher} on the real rig.}
+\caption[Dataset registry: the eleven recordings in use.]{Dataset registry:
+the eleven recordings every result is drawn from. Span is the ground-truth time
+span in simulation (shorter than the bag's wall-clock duration, because the
+simulator ran below real time) and the bag duration on the real robot; route
+is the ground-truth path length. The \repo{realv6_000} tracker export runs at
+\SI{1.7}{\hertz} and fails the gap rule of \cref{sec:method-trajectory}, so
+its row is a diagnostic, and its route excludes one off-path sample. ``Prop.''
+is the proprioceptive group: wheel joint states and odometry in simulation,
+wheel-speed and steering feedback on the real rig.}
 \label{tab:dataset-registry}
 \scriptsize
 \setlength{\tabcolsep}{4pt}
@@ -1456,29 +1054,14 @@ Recording & Role & Layout & Span [\si{\second}] & Route [\si{\metre}] &
 \end{tabular}}
 \end{table}
 
-\paragraph{What the real recordings carry, and what they do not.} The real rig
-publishes no wheel odometry in metric units and no joint states. In place of
-them each bag carries \repo{/feedback/velocity} and \repo{/feedback/steering}
-at \SI{50}{\hertz} as \texttt{std\_msgs/Float64}: the velocity is in a firmware
-unit whose scale is not documented, and the steering is a command echo that
-takes two values on every recording, so it carries no steering angle. The
-consequence for the non-visual baseline is worked out in
-\cref{sec:proprio-method}. The inertial stream is a RealSense IMU at
-\SI{200}{\hertz} on the inherited topic name \repo{/hwt101ct_yaw_publisher};
-despite the name, the device is not a WitMotion HWT101CT. Its orientation field is an identity quaternion and must never be consumed as
-an attitude measurement.
-
-\paragraph{Ground truth and clocks.} The simulation recordings carry
-\repo{/ground_truth/odometry} at \SI{50}{\hertz} from the simulator, which is
-the pose of the robot model's origin and is moved to the body point the
-estimators report before any comparison (\cref{sec:method-trajectory}). The
-real recordings have no onboard reference: an optical tracker exports a planar
-position at \SIrange{1.7}{6}{\hertz} on its own clock, so the offset between
-tracker and robot is estimated per recording by cross-correlating the tracker's
-speed with the wheel-speed feedback. The \repo{realv7} exports are the first
-that pass every validity rule of \cref{sec:method-trajectory}; the
-\repo{realv6} export runs at \SI{1.7}{\hertz} and fails them, which is why its
-values are reported as diagnostics.
+\paragraph{What the real recordings carry.} The real rig publishes no wheel
+odometry in metric units and no joint states: its wheel-speed feedback is in an
+undocumented firmware unit and its steering feedback is a two-valued command
+echo, so it carries no steering angle (\cref{sec:proprio-method}). The inertial
+stream is a RealSense IMU at \SI{200}{\hertz} on the inherited topic name
+\repo{/hwt101ct_yaw_publisher}; its orientation field is an identity
+quaternion and is never consumed. The tracker's clock is aligned to the robot's
+per recording (\cref{sec:method-trajectory}).
 
 \section{Real Platform}
 \label{sec:real-platform}
@@ -1607,14 +1190,13 @@ every estimator runs on the development laptop (\cref{sec:compute-env}) (\cref{f
 Device / sensor & Model / specification & Role in the system \\
 \midrule
 Edge processing unit & Neousys NRU-51V (NVIDIA Jetson Xavier NX, 21~TOPS) &
-  records the sensor data; intended on-board target for the pipeline \\
+  records the sensor data \\
 Stereo camera module & AC-IMX390-H190 (Sony IMX390 sensor) & records
   \SI{186}{\degree} stereo imagery for feature extraction \\
-Inertial sensor (IMU) & 6-DoF industrial IMU (\SIrange{100}{200}{\hertz}) &
-  measures acceleration and angular rate to support pose estimation (VIO) \\
-Mobile testbed & AMR platform (speed \SI{1.5}{\metre\per\second}, slope
-  \SI{5}{\degree}) & robot base for online navigation tests in the mock
-  environment \\
+Inertial sensor (IMU) & RealSense IMU (\SI{200}{\hertz}) & measures
+  acceleration and angular rate for the visual-inertial estimators \\
+Mobile testbed & Ackermann AMR platform, wheel base \SI{0.60}{\metre} &
+  robot base on which the real recordings are made \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -1700,50 +1282,19 @@ until that lever arm is measured
 \subsection{Test site and experimental variables}
 \label{sec:real-site}
 
-\textbf{Spatial layout.} The test area is divided into two operating zones,
-Zone~A and Zone~B, separated by and connected through a walkway (each zone
-about \SI{3}{\metre} square, walkway \SI{1.25}{\metre} wide). The division reproduces the traffic pattern of a
-warehouse AMR that shuttles continuously between a pick-up and a drop-off
-point. The robot's linear speed is limited to $v_{\max} =
-\SI{1.5}{\metre\per\second}$ throughout.
+\textbf{Site and routes.} The four real recordings were made on the first
+floor of the Gensurv building, an open hall whose structure lies
+\SIrange{8}{28}{\metre} from the robot, along hand-driven routes of
+\SIrange{22}{37}{\metre} at about \SI{0.28}{\metre\per\second}, the robot
+standing still for about a fifth of the time. No moving object was scripted
+and the lighting was not varied, so the real recordings answer the
+static-scene question only.
 
-\textbf{Ground truth by motion capture.} Evaluating SLAM error (ATE and RPE)
-needs a reference accurate to millimetres. A motion-capture camera system is
-installed around the test area and tracks reflective markers placed at the
-robot's centre of mass at a rate above \SI{100}{\hertz}.
-
-\textbf{Coordinate-frame alignment.} The SLAM pose $P_{\mathrm{slam}}$ is
-expressed in the local odometry frame fixed at start-up, whereas the
-motion-capture pose $P_{\mathrm{gt}}$ is expressed in the room's global frame.
-Before errors are computed the two trajectories are aligned by a rigid-body
-transformation; the alignment actually used for every result in this report,
-and its treatment of scale, is defined in \cref{sec:method-trajectory}.
-
-\textbf{Dynamic-environment variable.} Each time the robot completes a zone
-transfer (for example arrives in Zone~B from Zone~A), the operator randomly
-re-positions and re-counts the stacks of goods in the opposite zone before the
-robot returns. This forces the SLAM system to face a scene that no longer
-matches its map (map obsolescence), to test whether ORB-SLAM3's Atlas or
-RTAB-Map's memory management can resolve the conflicting spatial evidence
-without tracking loss.
-
-\textbf{Illumination variable.} Data are collected along the same route at
-three times of day representing different light levels and directions:
-morning (08:00), oblique natural light casting shadows across the test area;
-midday (12:00), maximum brightness, with possible high contrast or
-over-exposure in places; and evening (18:00), low light relying mainly on the
-building's artificial lighting, with raised image noise. The variable tests
-both the camera hardware (Sony IMX390 HDR) and the robustness of the two SLAM
-frameworks in keeping enough inlier features for odometry under variable light.
-
-\textbf{Real-dataset status.} The four real recordings in use are listed in
-\cref{tab:dataset-registry}: \repo{dataset_realv6_000} and
-\repo{dataset_realv7_000} to \repo{_002}, each with inertial data at
-\SI{200}{\hertz} and a planar optical-tracker reference
-(\cref{sec:exp1-real}). Varied illumination is still absent, so the
-illumination variable of this section is unexercised, and the real slots of
-Experiments~2 and~4 remain planned for want of annotated frames and a surveyed
-reference grid.
+\textbf{Ground truth.} An optical tracker follows a marker on the robot and
+exports its planar position, without heading, on its own clock: at
+\SIrange{5}{6}{\hertz} on the \repo{realv7} recordings and \SI{1.7}{\hertz} on
+\repo{realv6_000}. Alignment, the clock offset and the treatment of the
+unmeasured marker lever arm are defined in \cref{sec:method-trajectory}.
 
 \section{The Two Experiments}
 \label{sec:experiments}
@@ -1776,30 +1327,17 @@ consistency measures NEES and $k\sigma$ coverage.
 and the number of wheel corrections equals the number of wheel-odometry
 messages.
 
-Three non-visual estimators are implemented in
-\repo{script/proprio_estimator.py} to supply the dead-reckoning floor: wheel
-odometry, IMU dead reckoning, and an extended Kalman filter fusing the two.
-They consume only proprioceptive topics and no images.
-
-\subsubsection{Implementation form and why it is offline}
-
-All three read the recorded bag directly and are deterministic functions of it.
-Run as live ROS nodes they would instead depend on replay rate, QoS delivery and
-CPU contention, none of which is a property of the estimator being compared. The
-cost is a stated asymmetry: the visual figures they are compared against were
-produced by live runs, so any timing-induced error is present on one side of the
-comparison only.
+Three non-visual estimators supply the dead-reckoning floor: wheel odometry, IMU
+dead reckoning, and an extended Kalman filter fusing the two. They read the
+recorded bag directly and are deterministic functions of it, which keeps replay
+rate and CPU contention out of the comparison; the visual figures they are
+compared against come from live runs, an asymmetry stated here once.
 
 \subsubsection{Sensor model derived from data}
 
-Every covariance field in the source bags is identically zero: of the
-\num{25112} inertial messages in \repo{dataset_allsensor_realistic_000}, none
-carries a non-zero orientation, angular-velocity or linear-acceleration
-covariance. Gazebo Fortress does not populate them and
-\texttt{AckermannSteering} exposes no noise parameter, so the noise model is
-measured rather than read, by a \repo{calibrate} pass that writes
-\repo{sensor_noise.yaml} per recording. \Cref{tab:proprio-noise} gives the
-result for the four recordings of Experiment~1.
+Every covariance field in the source bags is zero, so the noise model is
+measured rather than read: a calibration pass fits each sensor against the
+recording's own ground truth (\cref{tab:proprio-noise}).
 
 \begin{table}[htbp]
 \centering
@@ -1842,27 +1380,13 @@ Window & static duration & 1.90 & 2.16 & 1.40 & 1.14 & \si{\second} \\
 \end{tabular}}
 \end{table}
 
-Two consequences follow directly. Wheel \emph{speed} is essentially unbiased on
-all four recordings, scale \numrange{0.9966}{1.0012}, so distance travelled is
-not the error source. And the rear-wheel differential is a far worse yaw-rate
-estimator than the steering-angle bicycle model, residuals of
-\SIrange{0.19}{0.25}{\radian\per\second} against
-\SIrange{0.059}{0.077}{\radian\per\second}, because the track and the wheel base
-are both \SI{0.42}{\metre} and a solid rear axle slips through every turn. The
-bicycle model is selected automatically and was chosen on all four.
-
-\subsubsection{The orientation field must not be used}
-
-\texttt{sensor\_msgs/Imu.orientation} in these bags is not an estimate. Measured
-over \repo{dataset_allsensor_realistic_000} it equals ground-truth yaw plus
-exactly \SI{90}{\degree}, with a residual standard deviation of
-\SI{0.001}{\degree} and no drift at all across \SI{125.6}{\second}: the plugin
-publishes the true orientation from the simulator's entity-component manager.
-Consuming it would give a dead-reckoning estimator a perfect attitude reference
-that no real IMU has, and its output would measure ground truth. All three
-estimators therefore integrate \texttt{angular\_velocity.z} instead, which
-drifts honestly, by \SI{3.66}{\degree} over the same recording. Each run records
-\repo{imu_orientation_used=NO} in its metadata so the exclusion is auditable.
+Wheel speed is essentially unbiased, scale \numrange{0.9966}{1.0012}, and the
+steering-angle bicycle model is a far better yaw-rate estimator than the
+rear-wheel differential (\SIrange{0.059}{0.077}{} against
+\SIrange{0.19}{0.25}{\radian\per\second}), so it is used on all four. The
+IMU's orientation field is not an estimate --- it equals ground-truth yaw plus
+exactly \SI{90}{\degree} --- so it is never consumed: every estimator integrates
+the gyroscope instead, and each run records that it did not use the field.
 
 \subsubsection{Estimator definitions}
 
@@ -1893,19 +1417,13 @@ EKF wheel + IMU & both of the above & $[p_x,p_y,\theta,v,b_\omega]$ & wheel spee
 \end{tabularx}
 \end{table}
 
-\paragraph{Which noise model the baseline runs on.} By the design decision of
-6 November 2026 the EKF reported as the baseline does \emph{not} use the
-measured inertial noise of \cref{tab:proprio-noise}. Its three inertial terms
-are the values both visual configurations declare, gyroscope density
-\num{0.002}, accelerometer density \num{0.02} and gyroscope bias walk
-\num{1e-4}, converted to a per-sample $\sigma$ at \SI{200}{\hertz} by
-\repo{script/make_vslam_noise_yaml.py}. The reason is that the proprioceptive
-and visual families must run on the same hand-set inertial model before their
-accuracies can be compared at all; the configured gyroscope density is five to
-seven times the measured one, and a filter given the measured value would be
-competing against visual systems that were not. The measured-noise filter is
-run beside it as a diagnostic row. Biases and both wheel $\sigma$ have no visual
-counterpart and stay measured in both.
+\paragraph{Which noise model the baseline runs on.} The EKF reported as the
+baseline runs on the inertial noise both visual configurations declare
+(gyroscope density \num{0.002}, accelerometer density \num{0.02}, bias walk
+\num{1e-4}), not on the measured values of \cref{tab:proprio-noise}, so that
+the two families are compared on the same hand-set inertial model; the
+configured gyroscope density is five to seven times the measured one. A
+measured-noise filter is run beside it as a diagnostic row.
 
 \subsubsection{EKF formulation}
 \label{sec:ekf-formulation}
@@ -2014,8 +1532,7 @@ bags do carry is a firmware-unit speed feedback and a gyroscope
   \label{eq:real-deadreckon}
 \end{equation}
 with $b$ the gyroscope bias measured over the stationary head of each recording
-and $k$ the unknown speed scale. \repo{script/real_wheel_baseline.py} fits $k$,
-the gyroscope axis and its sign on one recording by minimising the planar ATE
+and $k$ the unknown speed scale. The baseline fits $k$, the gyroscope axis and its sign on one recording by minimising the planar ATE
 after rigid $SE(2)$ alignment, then holds all three on the others: the fit
 recording's score is a calibration and only the held recordings are results.
 Because no yaw-rate observation exists, there is no bias state to correct and
@@ -2031,34 +1548,18 @@ baseline and the visual pipelines is weaker than its simulated counterpart.
 \end{queried}
 
 
-\textbf{Process, visual estimators.} Accuracy and compute are measured on different
-recordings, because they need different designs.
-
-\emph{Accuracy} is measured on the four \repo{dataset_allsensor_realistic}
-recordings, one run per cell. The factors are the estimator, the feature
-extractor (CPU or GPU) and the loop closer (active or disabled), each replayed
-at rate 1.0 from the bag with the node live, which is the deployment condition.
-The loop-closer state is read from each run's own log rather than from its
-name, because a run can be launched with the closer enabled and have it
-disabled by configuration.
-
-\emph{Latency and resources} are measured only on the two mapping recordings,
-each configuration run three times, so that a mean and a spread exist. One run
-per cell cannot support an uncertainty, and the accuracy recordings are too
-short to separate a steady state from the initialisation transient.
-
-\textbf{Evaluation metrics, visual estimators.} ATE and rotational RMSE after rigid alignment,
-RPE at $\Delta = \SI{1}{\second}$ (all pairs and jump-free), tracking-loss and
-reset events, retained input fraction, throughput, process CPU and peak memory,
-and per-module latency against the inter-frame budget.
-
-\textbf{Validity rule, visual estimators.} A trajectory containing steps that imply more than
-\SI{10}{\metre\per\second} is not read as ordinary drift; an indoor error above
-\SI{50}{\metre} is divergence. A timing comparison between two
-configurations is admissible only when their runs are interleaved from a cool
-start, because the laptop throttles at \SI{90}{\celsius} and a block of
-consecutive runs in one configuration confounds the configuration with the
-thermal state.
+\textbf{Visual estimators.} Accuracy is measured on the four
+\repo{dataset_allsensor_realistic} recordings, one run per cell, with the
+estimator, the feature extractor (CPU or GPU) and the loop closer (active or
+disabled) as factors, each replayed live at rate 1.0. Latency and resources are
+measured on the two mapping recordings, three runs per configuration, so that a
+spread exists. Metrics are ATE and rotational error after rigid alignment, RPE
+at \SI{1}{\second} (all pairs and jump-free), tracking-loss and reset events,
+retained input, CPU, peak memory and per-module latency. A step implying more
+than \SI{10}{\metre\per\second} is a jump, not drift; an indoor error above
+\SI{50}{\metre} is divergence; and a timing comparison is admissible only when
+its runs are interleaved from a cool start, because the laptop throttles at
+\SI{90}{\celsius}.
 
 \subsection{Experiment 2: Visual-inertial odometry on a prior map}
 \label{sec:exp2-method}
@@ -2087,35 +1588,15 @@ counts.
 metric is read, and a drivability figure computed against the run that built
 the map is a self-consistency check, not a result.
 
-RTAB-Map grids are placed in the Gazebo world using one fixed rigid
-world-to-map transform measured by \repo{script/fit_map_pose.py}. It is
-constant for a database; the live \texttt{map~$\rightarrow$~odom} drift
-correction is not reused for map placement. On a warehouse of parallel aisles
-the placement search has a rival \SI{180}{\degree} away that can score higher
-than the true pose, so a fit is accepted only after its overlay is read, and
-the tool takes a \repo{--yaw-near} hint for the basin the spawn implies.
-
-\repo{script/validate_map.py} rasterises world collision geometry and evaluates
-occupied cells at a stated tolerance. It reports occupied-cell precision,
-whole-world and observed-region recall, false obstacles under the true
-$0.83\times0.50$~m footprint, unmapped footprint poses, and clearance. Graph
-evaluation records neighbour, global-closure, local-space, and gravity links.
-Localisation additionally requires time to first fix, accepted and rejected
-matches, database checksums before and after read-only operation, pose
-continuity, and known-world bounds. Finite covariance or a localisation status
-message alone does not establish correctness.
-
-A database is always probed with a recording that did not build it, because the
-build route is drivable on its own map by construction: the camera cleared the
-cells the robot passed through, so a self-probe measures the route and not the
-map. The five databases evaluated are \repo{map/map_tiny/map_tiny.db} against
-\repo{small_warehouse/small_warehouse_static_tinymap.world}, and the four
-realistic-warehouse databases, one per layout under each of two build
-configurations, against the static twin of their layout and probed with
-\repo{dataset_allsensor_realistic_000} and \repo{_001}
-(\cref{sec:map-quality}). The tiny map's own independent probe recording is
-lost, so its drivability figure cannot be regenerated.
-
+The placement is one fixed rigid world-to-map transform per database, fitted
+to the world's walls and obstacles and never taken from the live
+\texttt{map~$\rightarrow$~odom} correction. On parallel aisles the fit has a
+rival \SI{180}{\degree} away that can score higher, so a placement is accepted
+only after its overlay is read. A database is always probed with a recording
+that did not build it, because the build route is drivable on its own map by
+construction. Three databases are evaluated: the tiny-warehouse map, and the two
+realistic-warehouse priors part~B relocalizes on, each probed with the static
+twin of its layout (\cref{sec:map-quality}).
 
 \subsubsection{Part B: relocalization on the prior map}
 \label{sec:nav-eval-method}
@@ -2127,9 +1608,8 @@ part~A, so that map quality and localization refer to the same artefact:
 read-only fix against it, and \texttt{navigate\_sim} adds the planner, the
 localization gate and the command interface. The simulator is driven live
 rather than replayed, because the published pose depends on the control loop.
-In the runs reported the robot is driven by the operator along fixed routes;
-\repo{script/exp4_navigate.py} provides that mode and the planner-driven one,
-and records the same data either way.
+In the runs reported the robot is driven by the operator along fixed routes,
+and the same data are recorded in the planner-driven mode.
 
 \textbf{Evaluation metrics.} Error is the planar distance between the
 lever-arm-corrected ground truth and the published transform from
@@ -2144,7 +1624,7 @@ and the RTAB-Map place-recognition proposals, acceptances and rejections are
 recorded beside them.
 
 \textbf{Validity rule.} The availability and continuity thresholds and the goal
-set were fixed in \repo{script/exp4_protocol.yaml} before the first run. A run
+set were fixed before the first run. A run
 that loses localization is reported, not excluded. Samples before the first
 accepted fix are excluded, because before it the transform is the seed and not
 an estimate.
@@ -2160,283 +1640,43 @@ remain planned.
 
 \subsection{Trajectory evaluation}
 \label{sec:method-trajectory}
-\input{chapters/fragments/m3_traj_eval}
+Estimate and reference are associated over their common interval, with the
+reference interpolated at the estimator's timestamps. A rigid Umeyama $SE(3)$
+fit with scale fixed at one maps the estimate onto the reference --- fixed scale
+is right for stereo-inertial estimators and preserves any scale error --- and a
+planar estimate is fitted by a turn about the vertical only. ATE is the RMSE of
+the aligned positions; rotational error is the geodesic angle after the same
+fit. Relative pose error over a fixed interval $\Delta$ uses
+\begin{equation}
+  E_i = \left(Q_i^{-1}Q_{i+k}\right)^{-1}\left(P_i^{-1}P_{i+k}\right),
+  \label{eq:rpe}
+\end{equation}
+with $P$ the estimate and $Q$ the reference; translational RPE is
+$\lVert\operatorname{trans}(E_i)\rVert$ and rotational RPE the geodesic angle
+of $\operatorname{rot}(E_i)$.
 
-\paragraph{A frame repair, written and then retired.}
-\label{sec:method-realv7-repair}
-While the cause of the tilted \repo{realv7} estimates was being found, the
-scorer was given two options that repaired the symptom without using the
-truth: \texttt{--join-imu-init} rotates the poses written before the inertial
-initialisation by the rotation measured at the initialisation frame, and
-\texttt{--level-plane} levels each map's fitted plane. They are recorded here
-because every \repo{realv7} figure published before 11 November 2026 depended
-on them, and because a repair applied at scoring time is a threat to validity
-that a reader is entitled to see named. They are not used for any result in
-\cref{chap:results}: the defect was traced to two pieces of upstream
-behaviour and fixed in the fork (\cref{tab:real-rig}), and the runs reported
-there are scored raw.
+\paragraph{Planar reference.} The real recordings carry an optical-tracker
+reference that is planar, has no heading, runs on its own clock and follows a
+marker rather than the camera. Alignment is therefore the rigid $SE(2)$ case
+of the fit above, ATE is evaluated in the plane at the tracker's samples, and
+RPE is translational only. The clock offset is estimated by cross-correlating
+the tracker's speed with the bag's wheel-speed feedback, independent of both
+estimators, and accepted only when the peak is sharp. The marker lever arm is
+unmeasured, so every real-robot result is labelled provisional. A run is
+\emph{completed} when it shuts down gracefully with no reset or jump and at
+least \SI{80}{\percent} of tracker samples matched, \emph{partial} when it
+recovers from a reset or falls short on coverage, and \emph{failed} on
+divergence, a reset storm, coverage below \SI{20}{\percent}, or a vertical
+range above \SI{1}{\metre} on a floor run (a rule added after a run that
+satisfied every earlier one while climbing \SI{22}{\metre}).
 
-\paragraph{Planar reference (added after the cutoff).} The real recordings
-of \cref{sec:dataset-registry} carry an optical-tracker reference that differs
-from the simulator's in three ways, and \repo{script/eval_real_gt.py} handles
-each explicitly. It is planar and has no heading, so alignment is the rigid
-$SE(2)$ case of the fit above with scale fixed at one, ATE is evaluated in the
-plane at the tracker's own samples, and RPE is translational only. Its clock
-is not the robot's: the offset is estimated by cross-correlating the tracker's
-speed with the bag's wheel-speed feedback, which is independent of both
-estimators, and is accepted only when the correlation peak is sharp
-($r \ge 0.9$ and at least $0.05$ above any peak more than \SI{1}{\second}
-away); the ATE is re-evaluated at $\pm 0.1$ and $\pm\SI{0.2}{\second}$ so that
-its sensitivity to the offset is visible. And the tracker follows a marker, not
-the camera origin: the body-fixed lever arm must be supplied, every result is
-labelled provisional until it is measured, and a least-squares fit of the arm
-is reported as a diagnostic but never applied, because it would absorb
-estimator error. A run is \emph{completed} when it shuts down gracefully with
-no reset, no jump and at least \SI{80}{\percent} of the tracker samples
-matched; \emph{partial} when it recovers from a reset or falls short on
-coverage; and \emph{failed} on divergence, a reset storm, coverage below
-\SI{20}{\percent}, or a vertical range above \SI{1}{\metre} on a floor run.
-The last rule was added on 20 October 2026 after \repo{dataset_realv3_000},
-on which VINS-Fusion satisfied every earlier rule while climbing
-\SI{22}{\metre}; it is stated here as a post hoc addition.
-
-\subsection{Computational performance}
-Both estimator processes write per-frame \repo{performance.csv} files. These
-record processing time, delivery and backlog counters, tracking or solver state,
-initialization and reset evidence, pose and keyframe accounting, cumulative
-process CPU time, monotonic wall time, and resident memory. VINS additionally
-records feature-front-end and estimator-back-end stages; ORB-SLAM3 records its
-tracking front end, local mapping, place recognition, loop closure, map merging,
-and global bundle-adjustment events. CPU utilization and throughput can therefore
-be derived over explicit wall-time intervals. The measurements are process-local
-and exclude Gazebo, rosbag, RViz and RTAB-Map.
-Synchronized whole-system monitoring and the repeated Jetson/laptop matrix
-remain \status{planned}. Module timings from asynchronous stages are reported as
-separate distributions and are not added as if they formed one serial critical
-path.
-
-\subsection{Collection protocol, validity and stored artifacts}
+\subsection{Computational performance and provenance}
 \label{sec:collection-validity}
-The sensor source, estimator and viewer start as separate processes; launch
-files do not automatically play bags. Configurations under comparison run
-separately on the same recording, at a replay rate that permits comparable
-input consumption. Competing estimators are not run simultaneously in
-a scientific A/B comparison.
-
-The common trajectory file has no header and uses:
-\begin{center}
-\texttt{t\_ns, px, py, pz, qw, qx, qy, qz, vx, vy, vz}
-\end{center}
-Timestamps are integer nanoseconds from the source header and quaternion order is
-$w,x,y,z$. ORB-SLAM3 writes this representation directly; VINS writes the state
-after nonlinear optimization. Simulation truth is extracted to the same shape by
-\repo{script/extract_gt.py}.
-
-\begin{table}[htbp]
-\centering
-\caption{Principal stored artifacts.}
-\label{tab:stored-artifacts}
-\small
-\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.42\textwidth}X}
-\toprule
-Artifact & Purpose \\
-\midrule
-\repo{<run>/vio.csv} & Estimator trajectory and velocity \\
-\repo{<run>/ground_truth.csv} & Simulation reference trajectory, when available \\
-\repo{<run>/run_metadata.csv} & Resolved configuration and supplied provenance \\
-\repo{<run>/performance.csv} & Per-frame timing, state, delivery, CPU, and memory \\
-\repo{<run>/frontend.csv} and \repo{<run>/backend.csv} & VINS feature-tracking,
-estimator-stage, solver, and state-window diagnostics \\
-\repo{<run>/tracking_frontend.csv} & ORB-SLAM3 tracking-stage timing and feature counts \\
-\repo{<run>/local_mapping.csv} & ORB-SLAM3 keyframe insertion, map-point, and local-BA diagnostics \\
-\repo{<run>/loop_closing.csv} & Place-recognition, loop, merge, and global-correction events \\
-\repo{<run>/run_summary.csv} & Graceful-shutdown validity and robustness totals \\
-\repo{<run>/events.csv} & VINS initialization, reset-cause, and shutdown events \\
-\repo{map/*.db} or \repo{<run>/rtabmap.db} & Persistent RTAB-Map graph and signatures \\
-\repo{output/compare/<domain>/<experiment>/} & Derived figures and summaries \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-The current analysis code requires at least ten overlapping samples. Scientific
-acceptance additionally requires the same input interval, successful
-initialization, comparable pose and frame counts, and no unexplained sensor
-starvation. Steps implying over \SI{10}{\metre\per\second} are tracking jumps; an
-indoor estimate with error beyond \SI{50}{\metre} is divergence rather than
-ordinary inaccuracy. Without real-data ground truth, path length and mean speed
-are plausibility diagnostics, not accuracy measurements.
-
-The estimator now records resolved local configuration and optional experiment,
-dataset, world, replay-rate, command, and note fields in
-\repo{run_metadata.csv}. It does not automatically determine bag health,
-repository revisions, complete dependency versions, external-process state, or
-the analyst's exclusion decision. Empty optional fields therefore remain
-incomplete provenance. Historical folders created before this instrumentation
-remain preliminary unless their provenance is recoverable from logs and
-engineering records.
-
-\subsection{Reproducibility controls}
-\label{sec:reproducibility-deviations}
-The following controls govern future experiments and acceptance of historical
-results:
-\begin{enumerate}
-  \item Record absolute bag and exact \texttt{.world} file, treatment,
-    configuration, commands, clock and replay rate, hardware, dependencies, and
-    relevant repository commits.
-  \item Use a unique output directory and retain failed runs with failure labels.
-  \item Run paired treatments independently on the same sensor data and compare
-    only their common valid interval.
-  \item Record inputs, outputs, initialization, dropped frames, resets, tracking
-    loss, warnings, and exclusion reasons.
-  \item Validate camera order, transport, timestamps, metric scale, and every
-    rigid transform before analysis.
-  \item Inspect representative map overlays before aggregate scores.
-  \item Repeat nondeterministic RTAB-Map processing and report valid-run count;
-    do not interpret differences within run-to-run variation as algorithmic.
-  \item Keep estimator, back end, environment dynamics, floor texture,
-    domain, and hardware separate unless their interaction is the declared factor.
-  \item Record every switch that changes estimator behaviour in the run manifest,
-    not only those the launch file exposes. Loop-closing and global-bundle-adjustment
-    state are currently absent from \repo{run_metadata.csv}, so two ORB-SLAM3 runs
-    of the same dataset in opposite configurations produce manifests that differ
-    only in identifier and timestamp.
-  \item Repeat every configuration of a nondeterministic estimator at least three
-    times and report median and spread. ORB-SLAM3 is multi-threaded and its
-    run-to-run variation on identical input is presently unmeasured, which places
-    a floor on the differences that can be attributed to any factor.
-\end{enumerate}
-
-\section{Planned Versus Implemented}
-\label{sec:deviations}
-Material deviations from the originally proposed method are given in
-\cref{tab:deviations}. They are differences between the proposal and the system
-that exists, not failures: each is recorded so that no proposal capability is
-read into the implemented pipeline.
-
-% See tab:limitations: a tabularx inside a table float cannot break, and this
-% one is 266 pt taller than the text block, so it overprinted the bottom margin
-% and lost its last three rows and bottom rule. longtable breaks and repeats
-% the header, with the manual's "(Continue)" caption on each later page.
-\begingroup\small
-\begin{longtable}{>{\raggedright\arraybackslash}p{0.17\textwidth}
-                  >{\raggedright\arraybackslash}p{0.25\textwidth}
-                  >{\raggedright\arraybackslash}p{0.325\textwidth}
-                  >{\raggedright\arraybackslash}p{0.135\textwidth}}
-\caption[Planned-versus-implemented deviations at the reporting cutoff.]{Planned-versus-implemented deviations at the reporting cutoff. ``Added''
-marks work not present in the original proposal.}
-\label{tab:deviations}\\
-\toprule
-Component & Proposed & Implemented & Status \\
-\midrule
-\endfirsthead
-\caption[]{Planned-versus-implemented deviations at the reporting cutoff.
-(Continue)}\\
-\toprule
-Component & Proposed & Implemented & Status \\
-\midrule
-\endhead
-Objectives & five: lifelong VIO mapping, low-light enhancement, dynamic-object
-  detection, lane tracking, an integrated \SI{0.1}{\metre} system under
-  changing light & five testable objectives on what was built and evaluated
-  (\cref{sec:objectives}); the original list and the status of each item are
-  in \cref{tab:objective-status} & replaced \\
-Experiments & four: estimator comparison, offline detector performance, dense
-  map, navigation & two: estimator comparison (Experiment~1), and the prior map
-  with relocalization on it (Experiment~2, the former map and navigation
-  experiments joined) & replaced \\
-Dynamic-object handling & YOLO26 detection, masking the detector's boxes out of
-  the estimator & dropped. Experiment~1 found that physically simulated
-  traffic neither broke tracking nor drove the global error, whose large
-  failures are the loop closer's, and that its one dangerous case, a vehicle
-  leading the robot, raised the per-second error two- to eightfold for four
-  seconds and left under \SI{0.1}{\metre} in the accumulated error
-  (\cref{sec:results-validity}); the masking arm that would have consumed the
-  detector was never run. \flag{The finding holds at the simulated traffic
-  density, whose realism is assumed and not measured, and has no real-robot
-  counterpart.} & dropped \\
-Trajectory targets & ATE $\le\SI{0.05}{\metre}$ and RPE over \SI{1}{\second}
-  $\le\SI{1.5}{\metre}$, at \SI{1.5}{\metre\per\second} & ATE unchanged; RPE
-  tightened to $\le\SI{0.1}{\metre}$ after the results were known
-  (\cref{sec:problem-scope}); real recordings driven at
-  \SI{0.28}{\metre\per\second} & revised \\
-Illumination & experiment under scheduled light changes & not run; no recording
-  varies the illumination & not run \\
-Computing platform & pipeline on the NRU-51V on board & every run on the MSI
-  Katana GF66 11UG development laptop; the NRU-51V records data only
-  (\cref{sec:compute-env}) & deviation \\
-Inertial initialisation & stock ORB-SLAM3 & two fork switches disable the
-  low-motion map discard and allow the initialisation to be attempted with a
-  queued backlog; active in the real-rig configuration, and the real-robot
-  results of \cref{sec:exp1-real} are obtained with them on & deviation \\
-Estimator coupling & shared output representation & two independent estimators,
-  not one fused estimator & deviation \\
-RTAB-Map correction & integrated back end & separate process consuming external
-  TF odometry; correction never injected into estimator state & deviation \\
-Real-robot evaluation & metric accuracy against ground truth & planar accuracy
-  against an optical tracker on four recordings, provisional until the
-  marker-to-IMU lever arm is measured & partial \\
-Metric infrastructure & resource, throughput, uncertainty, manifests &
-  implemented; latency and resources measured over repeated runs on the two
-  simulated mapping recordings and on one real recording & implemented \\
-Relocalisation and merging & robust arbitrary-start localisation, aliasing
-  rejection, extend-mode validation, front-end global optimisation,
-  multi-session merging & partially verified relocalisation only & planned \\
-Navigation integration & not proposed & \repo{vslam_navigation}: one entry
-  point per task per domain for mapping, relocalisation and planner bring-up,
-  with a localisation gate and, on the real rig, a bicycle-model command bridge
-  (\cref{sec:nav-integration}); planning itself stays outside the evaluated
-  scope & added \\
-Non-visual baseline & not proposed & wheel, IMU and EKF estimators in simulation
-  with a data-derived noise model, and wheel-plus-gyroscope dead reckoning on
-  the real robot (\cref{sec:proprio-method}) & added \\
-Covariance consistency & not proposed & NEES and $\sigma$-coverage testing for the
-  non-visual estimators & added \\
-GPU feature extraction & not proposed & ORB-SLAM3 extractor and stereo matcher
-  on the GPU, selected by configuration & added \\
-\bottomrule
-\end{longtable}
-\endgroup
-
-These deviations define the actual system at the reporting cutoff. Chapter~4
-reports only measurements satisfying the validity rules above; failed, excluded
-and retracted runs are kept in a clearly labelled diagnostic record.
-
-\begin{table}[htbp]
-\centering
-\caption[The proposal's original objectives against the work reported.]{The
-proposal's original objectives, replaced by those of \cref{sec:objectives},
-against the work reported here.}
-\label{tab:objective-status}
-\small
-\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.44\textwidth}>{\raggedright\arraybackslash}X}
-\toprule
-Original objective & Status at the cutoff \\
-\midrule
-1. Visual-inertial odometry with lifelong mapping & \status{partial}: two VIO
-  front ends implemented; RTAB-Map mapping and read-only relocalization
-  implemented and evaluated; multi-session merging unverified \\
-2. Low-light image enhancement with EnlightenGAN & \status{not pursued}: no
-  implementation in the repository \\
-3. Dynamic-object perception by deep-learning detection & \status{dropped}:
-  traffic is evaluated directly in Experiment~1 instead; reason in
-  \cref{tab:deviations} \\
-4. Lane detection with PolyNET and PID lane tracking & \status{not pursued}: no
-  implementation in the repository \\
-5. Integrated system with a 2-D cost map and localization error below
-  \SI{10}{\centi\metre} under differing illumination & \status{partial}: the
-  pipeline serves a 2-D grid to Nav2 and is relocalized in it live in
-  simulation at a median \SIrange{0.13}{0.21}{\metre}; illumination has not
-  been varied in any recording \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-The principal evidence comprises \repo{README.md}; the four
-\repo{MEMORY_CLAUDE/README.md} engineering records; the ORB-SLAM3 integration
-record; \path{docs/report/project_limitations_and_map_benefits.md}; the
-source, launch, and configuration files cited in this chapter; and
-\repo{script/vio_metrics.py}, \repo{script/extract_gt.py},
-\repo{script/fit_map_pose.py}, and
-\repo{script/validate_map.py}. These project artifacts establish local
-implementation. They do not replace primary literature citations for the
-scientific origin of the algorithms.
+Both estimators write per-frame timing, delivery and backlog counters, tracking
+state, reset evidence, cumulative CPU time and resident memory, so CPU use and
+throughput are derived over explicit wall-time intervals; the measurements are
+process-local and exclude the simulator, the bag player and RTAB-Map. Module
+timings from asynchronous stages are reported as separate distributions, not
+summed into one critical path. Every run writes its trajectory, its resolved
+configuration and its event logs to its own directory, and the configurations
+under comparison run separately on the same recording, never at the same time.

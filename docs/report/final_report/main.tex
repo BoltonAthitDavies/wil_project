@@ -44,6 +44,8 @@
 \usepackage[nottoc,notbib]{tocbibind}
 \usepackage{pdfpages}
 \PassOptionsToPackage{hyphens}{url}\usepackage{url}
+\usepackage{xurl}% a URL may break after any character, so it never stretches a line
+\urlstyle{same}% URLs in the text font: narrower than typewriter, and as the manual sets them
 \usepackage{hyperref}
 \def\UrlBreaks{\do\-\do\/\do\.\do\_\do\?\do\=}
 \usepackage[nameinlink,noabbrev]{cleveref}
@@ -213,7 +215,7 @@
 %   \figsource{Campos et al., 2021}  ->  (Source : Campos et al., 2021)
 % The manual requires a reproduced item to carry BOTH a citation number and
 % this line; the citation stays in the caption, the attribution goes here.
-\newcommand{\figsource}[1]{\par\vspace{-0.4em}{\centering\small (Source : #1)\par}}
+\newcommand{\figsource}[1]{\par\vspace{3pt}{\centering\small (Source : #1)\par}}
 
 % ---------------------------------------------------------------- \repo
 % Repository paths, identifiers and commit hashes in typewriter, breakable at

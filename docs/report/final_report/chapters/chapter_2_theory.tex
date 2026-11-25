@@ -37,8 +37,8 @@ and reduce that time and waste.
   \centering
   \includegraphics[width=0.8\textwidth]{figures/template/lean_wastes.png}
   \caption[The eight principal wastes of lean manufacturing.]{The eight
-  principal wastes of lean manufacturing.}
-  \figsource{\flag{teachme-biz.com, no reference entry yet}}
+  principal wastes of lean manufacturing~\cite{teachme2021}.}
+  \figsource{Teachme Biz, 2021}
   \label{fig:lean-wastes}
 \end{figure}
 
@@ -58,8 +58,8 @@ environment changes the AGV cannot adapt immediately.
   \caption[Three warehouse robots with different navigation technologies.]{Three warehouse robots with different navigation technologies: the
   orange robot uses QR-code navigation, the pallet truck in the centre uses SLAM
   navigation without floor infrastructure, and the white robot uses
-  magnetic-tape guidance.}
-  \figsource{\flag{www.linkedin.com, no reference entry yet}}
+  magnetic-tape guidance~\cite{rahman_agvamr}.}
+  \figsource{Rahman, n.d.}
   \label{fig:agv-navigation}
 \end{figure}
 
@@ -303,8 +303,7 @@ timestamps disagree, an important cause of VIO failure when the robot moves fast
 or turns. VINS adds the time offset as a state variable estimated jointly in the
 back-end optimisation, computing the temporal shift of the image frames against
 the IMU angular rate. The pipeline can thereby compensate the latency of the
-AC-IMX390-H190 image stream on the processing board precisely, keeping tracking
-consistent even when the robot vibrates on the \SI{5}{\degree} warehouse slope.
+AC-IMX390-H190 image stream on the processing board.
 
 \subsection{RTAB-Map back end and memory management}
 \label{sec:theory-rtab}

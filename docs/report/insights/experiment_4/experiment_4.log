@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  25 NOV 2026 15:30
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.9.16)  25 NOV 2026 18:03
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -744,7 +744,13 @@ File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 (/usr/share/texlive/texmf-dist/tex/latex/microtype/mt-msb.cfg
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 )
-LaTeX Font Info:    Trying to load font information for T1+pcr on input line 37
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10.95> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 34.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <8> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 34.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <6> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 34.
+LaTeX Font Info:    Trying to load font information for T1+pcr on input line 45
 .
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1pcr.fd
@@ -754,119 +760,106 @@ Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `pcr' (encoding: T1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
-LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10.95> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 37.
-LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <8> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 37.
-LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <6> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 37.
- [1
-
-{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
 LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 7
-5.
+0.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ts1ptm.fd
 File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
-) [2]
+) [1
+
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 192.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 134.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <7.4> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 192.
-<fig/exp4_error_vs_distance.png, id=39, 903.375pt x 346.896pt>
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 134.
+<fig/exp4_error_vs_distance.png, id=30, 903.375pt x 346.896pt>
 File: fig/exp4_error_vs_distance.png Graphic file (type png)
 <use fig/exp4_error_vs_distance.png>
-Package pdftex.def Info: fig/exp4_error_vs_distance.png  used on input line 211
+Package pdftex.def Info: fig/exp4_error_vs_distance.png  used on input line 153
 .
 (pdftex.def)             Requested size: 455.24411pt x 174.8185pt.
-<fig/exp4_path_U_static_P3_circuit_5.png, id=45, 975.645pt x 476.982pt>
+<fig/exp4_path_U_static_P3_circuit_5.png, id=38, 975.645pt x 476.982pt>
 File: fig/exp4_path_U_static_P3_circuit_5.png Graphic file (type png)
 <use fig/exp4_path_U_static_P3_circuit_5.png>
 Package pdftex.def Info: fig/exp4_path_U_static_P3_circuit_5.png  used on input
- line 250.
+ line 192.
 (pdftex.def)             Requested size: 455.24411pt x 222.56581pt.
-<fig/exp4_path_I_static_P3_circuit_5.png, id=48, 975.645pt x 476.982pt>
+<fig/exp4_path_I_static_P3_circuit_5.png, id=41, 975.645pt x 476.982pt>
 File: fig/exp4_path_I_static_P3_circuit_5.png Graphic file (type png)
 <use fig/exp4_path_I_static_P3_circuit_5.png>
 Package pdftex.def Info: fig/exp4_path_I_static_P3_circuit_5.png  used on input
- line 269.
+ line 211.
 (pdftex.def)             Requested size: 455.24411pt x 222.56581pt.
 
-Underfull \hbox (badness 2460) in paragraph at lines 278--278
+Underfull \hbox (badness 2460) in paragraph at lines 220--220
 []\T1/ptm/b/n/10 (+20) Figure 4.3: |\T1/pcr/m/n/10 I_static\T1/ptm/m/n/10 (+20)
  , figure-of-eight, [][]: me-dian [][] but the only run of the six to
  []
 
 
-Underfull \hbox (badness 2027) in paragraph at lines 278--278
+Underfull \hbox (badness 2027) in paragraph at lines 220--220
 \T1/ptm/m/n/10 (+20) cross a me-tre, for [][] and peak-ing at [][]. It runs on 
 the sec-ond lay-out and its own prior
  []
 
-<fig/exp4_path_U_static_P2_return_5.png, id=53, 975.645pt x 476.982pt>
+<fig/exp4_path_U_static_P2_return_5.png, id=46, 975.645pt x 476.982pt>
 File: fig/exp4_path_U_static_P2_return_5.png Graphic file (type png)
 <use fig/exp4_path_U_static_P2_return_5.png>
 Package pdftex.def Info: fig/exp4_path_U_static_P2_return_5.png  used on input 
-line 284.
+line 226.
 (pdftex.def)             Requested size: 455.24411pt x 222.56581pt.
-[3] [4 <./fig/exp4_error_vs_distance.png>] [5 <./fig/exp4_path_U_static_P3_circ
-uit_5.png> <./fig/exp4_path_I_static_P3_circuit_5.png>] [6 <./fig/exp4_path_U_s
+[2] [3 <./fig/exp4_error_vs_distance.png>] [4 <./fig/exp4_path_U_static_P3_circ
+uit_5.png> <./fig/exp4_path_I_static_P3_circuit_5.png>] [5 <./fig/exp4_path_U_s
 tatic_P2_return_5.png>]
-<fig/exp4_heading.png, id=85, 903.375pt x 332.442pt>
+<fig/exp4_heading.png, id=84, 903.375pt x 332.442pt>
 File: fig/exp4_heading.png Graphic file (type png)
 <use fig/exp4_heading.png>
-Package pdftex.def Info: fig/exp4_heading.png  used on input line 347.
+Package pdftex.def Info: fig/exp4_heading.png  used on input line 288.
 (pdftex.def)             Requested size: 455.24411pt x 167.5344pt.
- [7
+ [6
 
  <./fig/exp4_heading.png>]
-(../../final_report/tables/exp2_map_bound.tex) [8]
-<fig/exp4_rtabmap_gating.png, id=115, 903.375pt x 332.442pt>
+(../../final_report/tables/exp2_map_bound.tex) [7]
+<fig/exp4_rtabmap_gating.png, id=114, 903.375pt x 332.442pt>
 File: fig/exp4_rtabmap_gating.png Graphic file (type png)
 <use fig/exp4_rtabmap_gating.png>
-Package pdftex.def Info: fig/exp4_rtabmap_gating.png  used on input line 497.
+Package pdftex.def Info: fig/exp4_rtabmap_gating.png  used on input line 417.
 (pdftex.def)             Requested size: 455.24411pt x 167.5344pt.
- [9]
-Overfull \hbox (30.414pt too wide) in paragraph at lines 529--542
-\T1/ptm/m/n/10.95 (-20) in-stant, is the pose an un-gated sys-tem would have pu
-b-lished (\T1/pcr/m/n/10.95 script/exp4_gate_counterfactual.py\T1/ptm/m/n/10.95
- (-20) ).
- []
-
-[10 <./fig/exp4_rtabmap_gating.png>] [11]
-<fig/exp4_path_U_static_P1_transit_5.png, id=142, 975.645pt x 476.982pt>
+ [8] [9 <./fig/exp4_rtabmap_gating.png>]
+<fig/exp4_path_U_static_P1_transit_5.png, id=133, 975.645pt x 476.982pt>
 File: fig/exp4_path_U_static_P1_transit_5.png Graphic file (type png)
 <use fig/exp4_path_U_static_P1_transit_5.png>
 Package pdftex.def Info: fig/exp4_path_U_static_P1_transit_5.png  used on input
- line 651.
+ line 570.
 (pdftex.def)             Requested size: 418.82375pt x 204.75618pt.
-<fig/exp4_path_I_static_P1_transit_5.png, id=143, 975.645pt x 476.982pt>
+<fig/exp4_path_I_static_P1_transit_5.png, id=134, 975.645pt x 476.982pt>
 File: fig/exp4_path_I_static_P1_transit_5.png Graphic file (type png)
 <use fig/exp4_path_I_static_P1_transit_5.png>
 Package pdftex.def Info: fig/exp4_path_I_static_P1_transit_5.png  used on input
- line 664.
+ line 583.
 (pdftex.def)             Requested size: 418.82375pt x 204.75618pt.
-<fig/exp4_path_I_static_P2_return_5.png, id=144, 975.645pt x 476.982pt>
+<fig/exp4_path_I_static_P2_return_5.png, id=135, 975.645pt x 476.982pt>
 File: fig/exp4_path_I_static_P2_return_5.png Graphic file (type png)
 <use fig/exp4_path_I_static_P2_return_5.png>
 Package pdftex.def Info: fig/exp4_path_I_static_P2_return_5.png  used on input 
-line 678.
+line 597.
 (pdftex.def)             Requested size: 418.82375pt x 204.75618pt.
- [12] [13 <./fig/exp4_path_U_static_P1_transit_5.png> <./fig/exp4_path_I_static
-_P1_transit_5.png>] [14 <./fig/exp4_path_I_static_P2_return_5.png>] [15
+ [10] [11 <./fig/exp4_path_U_static_P1_transit_5.png> <./fig/exp4_path_I_static
+_P1_transit_5.png>] [12 <./fig/exp4_path_I_static_P2_return_5.png>]
+[13
 
 ] (./experiment_4.aux)
 Package rerunfilecheck Info: File `experiment_4.out' has not changed.
 (rerunfilecheck)             Checksum: A66F9E3E0D23906C31CD2EF333A92797;286.
  ) 
 Here is how much of TeX's memory you used:
- 20632 strings out of 480171
- 391983 string characters out of 5894489
- 700728 words of memory out of 5000000
+ 20622 strings out of 480171
+ 391885 string characters out of 5894489
+ 698728 words of memory out of 5000000
  37840 multiletter control sequences out of 15000+600000
- 543621 words of font info for 381 fonts, out of 8000000 for 9000
+ 543235 words of font info for 376 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
- 76i,11n,82p,1009b,882s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 76i,11n,82p,1009b,877s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
 e/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texm
 f-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/
@@ -875,10 +868,10 @@ type1/urw/courier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/sym
 bol/usyr.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></
 usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texli
 ve/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on experiment_4.pdf (15 pages, 1392126 bytes).
+Output written on experiment_4.pdf (13 pages, 1380323 bytes).
 PDF statistics:
- 221 PDF objects out of 1000 (max. 8388607)
- 158 compressed objects within 2 object streams
- 50 named destinations out of 1000 (max. 500000)
+ 214 PDF objects out of 1000 (max. 8388607)
+ 152 compressed objects within 2 object streams
+ 48 named destinations out of 1000 (max. 500000)
  80966 words of extra memory for PDF output out of 89155 (max. 10000000)
 

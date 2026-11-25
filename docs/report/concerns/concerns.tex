@@ -275,7 +275,7 @@
 
 \noindent
 Every passage the final report marks as \flag{queried}, and the status of each
-of its eight result slots, collected into one list. 86 items, from
+of its eight result slots, collected into one list. 56 items, from
 the final report.
 
 \medskip
@@ -310,12 +310,10 @@ here on the author's behalf.]} \clearpage
 \section*{Chapter 3 --- Methodology}
 
 \subsection*{Problem, Requirements and Scope}
-\noindent\textbf{1.}\quad \flag{The real recordings were
-driven at \SI{0.28}{\metre\per\second}, not \SI{1.5}{}, so the real-robot
-RPE is measured under an easier condition than the target assumes
-(\reportref{sec:exp1-real}).} The proposal's localization requirement of
-\SI{0.1}{\metre} under scheduled illumination changes is not carried: no
-illumination experiment was run (\reportref{sec:deviations}).
+\noindent\textbf{1.}\quad \flag{The real recordings were driven at
+\SI{0.28}{\metre\per\second}, not \SI{1.5}{}, so the real-robot RPE is
+measured under an easier condition than the target assumes
+(\reportref{sec:exp1-real}).}
 
 \medskip
 
@@ -338,111 +336,34 @@ metres per second and whose scale is known only at a single operating point
 ( \flag{the speed scale is provisional; \reportref{sec:real-platform}} ).
 
 \medskip
-\noindent\textbf{6.}\quad Each run of the sweep writes a manifest beside its data recording the settings
-it used, the full launch command, the git commit and the wall duration, and
-\repo{script/aisle_sweep.py --analyse} reads them into a single table, so a
-result cannot be attributed to the wrong configuration. \flag{An earlier revision of this chapter stated that the sweep had no scored
-summary and that its run directories recorded the estimator configuration but
-not the relocalisation parameters. That is no longer true and the statement is
-withdrawn.} Its one carried conclusion --- that run-to-run spread over identical
-settings is as wide as most differences between settings --- is used in
-\reportref{sec:exp4-sim} to refuse comparisons.
-
-\medskip
-
-\subsection*{Simulation Platform: Simulated sensor rig and platform}
-\noindent\textbf{7.}\quad \emph{table row:} \texttt{gyr\_n} \textbar{} 0.002 \textbar{} \flag{0.00030--0.00036} \textbar{} rad\,s$^{-1}/\sqrt{\mathrm{Hz}}$
-
-\medskip
-\noindent\textbf{8.\ \flag{[Queried]}}\quad The configured gyroscope noise density is \num{2e-3} whereas the stationary
-windows of the four recordings give \numrange{3.0e-4}{3.6e-4}, so the
-configured value is five to seven times too large. The configured accelerometer
-density of 0.02 sits inside the measured spread, but that spread is itself wide,
-\numrange{0.015}{0.024} across four recordings of the same simulated sensor.
-Both estimators therefore run on an inertial noise model that does not describe
-this IMU closely. The bias random walks cannot be checked at all: the longest
-stationary interval in any recording is \SI{2.16}{\second} and an
-Allan-variance estimate needs minutes. This discrepancy is not incidental: by
-the design decision of \reportref{sec:proprio-method} the EKF baseline is run on
-these same configured values, so the comparison between the proprioceptive and
-visual families is made at a shared handicap rather than at each family's best.
-
-\medskip
-\noindent\textbf{9.\ \flag{[Queried]}}\quad The accelerometer characterisation is not stable across recordings of the same
-simulated sensor. The $x$ bias ranges from \SI{0.013}{} to
-\SI{0.079}{\metre\per\second\squared} and the $x$ scale from 1.017 to 1.095
-over the four recordings, while the gyroscope $z$ scale agrees to within
-\num{0.0007} over the same four. Because the stationary window is between
-\SI{1.14}{} and \SI{2.16}{\second} in every case, part of that spread is
-estimator variance rather than a property of the sensor, and the accelerometer
-terms should not be quoted as calibrated constants.
-
-\medskip
 
 \subsection*{Simulation Platform: Simulation fidelity and its limits}
-\noindent\textbf{10.}\quad \emph{table row:} Accelerometer, per axis (\si{\metre\per\second\squared}) \textbar{} \num{0.0566} \textbar{} \num{4.002e-3} \textbar{} \flag{\numrange{1.5e-2}{2.4e-2}} \textbar{} \num{2.00e-3}
+\noindent\textbf{6.}\quad \emph{table row:} \texttt{acc\_n} [m\,s$^{-2}/\sqrt{\mathrm{Hz}}$] \textbar{} \num{4.00e-3} \textbar{} \flag{\numrange{1.5e-2}{2.4e-2}} \textbar{} \num{2e-2} (\num{5.0}$\times$) \textbar{} \num{2.00e-3}
 
 \medskip
-\noindent\textbf{11.}\quad \emph{table row:} \repo{slip1}, \repo{slip2} \textbar{} 0 on all grounds \textbar{} \flag{an ODE feature;
-  \repo{dartsim} does not implement it, so inert at any value}
+\noindent\textbf{7.}\quad \emph{table row:} \texttt{gyr\_w} [rad\,s$^{-2}/\sqrt{\mathrm{Hz}}$] \textbar{} \num{1.74e-6} \textbar{} not measurable \textbar{} \num{1e-4} (\flag{\num{58}$\times$}) \textbar{} --
 
 \medskip
-\noindent\textbf{12.\ \flag{[Threat to validity]}}\quad This is a bias with a known direction. The EKF baseline of
-\reportref{sec:results-proprio} is evaluated on a floor where the wheels effectively
-cannot slip and with an encoder of unlimited resolution, which is dead
-reckoning's best case. Both idealisations favour the proprioceptive estimators
-over the visual ones, and neither has been relaxed. Any conclusion that a
-wheel-plus-IMU filter matches or beats the visual pipelines should be read as
-holding \emph{under these conditions}, not as a general result.
-\repo{script/make_slippery_floor.py} generates ground models at a chosen
-friction coefficient so that traction can be made an experimental factor, and
-\repo{script/encoder_sim.py} imposes a realistic quantisation floor. Neither has
-been used in any result reported here.
-
-\medskip
-\noindent\textbf{13.}\quad \emph{table row:} \repo{gyr_w} \textbar{} \num{0.0001} \textbar{} \num{1.735e-6} \textbar{} \flag{\num{58}$\times$} \textbar{} gyroscope bias random walk
-
-\medskip
-\noindent\textbf{14.\ \flag{[Retired evidence for the inflated setting]}}\quad The inflated configuration is retained for every result in this report, on the
-strength of an experiment that is no longer part of the reported campaign: in
-September 2026 both estimators were re-run on configurations carrying the true
-injected densities, and although accuracy improved wherever a run completed,
-three of ten runs diverged outright where the inflated configuration diverged in
-none. That evidence was recorded on recordings retired on 6 November 2026, so it
-is reported here as the reason for a setting rather than as a result, and the
-comparison has not been repeated on the current recordings.
+\noindent\textbf{8.\ \flag{[Threat to validity]}}\quad This is a bias with a known direction. The non-visual baselines of
+\reportref{sec:results-proprio} run on a floor where the wheels effectively cannot
+slip and with an encoder of unlimited resolution, which is dead reckoning's
+best case. Both idealisations favour the proprioceptive estimators over the
+visual ones, and neither has been relaxed, so any conclusion that a
+wheel-plus-IMU filter matches the visual pipelines holds \emph{under these
+conditions}, not in general.
 
 \medskip
 
 \subsection*{Simulation Platform: Realistic logistics layouts}
-\noindent\textbf{15.}\quad \flag{The generator reproduces the U world exactly but no longer
+\noindent\textbf{9.}\quad \flag{The generator reproduces the U world exactly but no longer
 reproduces the I world: it would now emit eight dock-line items instead of
 thirteen and two more clutter instances. The committed world file is the
 recorded environment and is the source of these counts.}
 
 \medskip
-\noindent\textbf{16.\ \flag{[Visual verification]}}\quad The generator-side checks are complete, and the first Gazebo session on
-6 October 2026 found and fixed one defect the checks could not see (a jack
-setting its load down and then stopping on the neighbouring cell, because the
-drop command carried one angle for both the parked load and the approach
-heading). Three things remain to be confirmed by eye in the simulator rather
-than by the checker: that the loads ride on the fork side of the jack, the
-shading of the generated door, trailer and yard meshes, and the open/closed
-state of each door. Until then the worlds are \status{implemented} in geometry
-and \status{partial} in visual verification.
-
-\medskip
-\noindent\textbf{17.\ \flag{[Provenance]}}\quad None of the six recordings carries a run manifest of its own: the world each
-was recorded in is known from the manifests of the replays made on it, not
-from the recording. Those manifests agree, and the object inventory each bag
-reports is consistent with the layout they name, but a recording whose world
-is attested only by later use is weaker evidence than one that records its own
-world. A manifest should be written at record time, not at replay time.
-
-\medskip
 
 \subsection*{Real Platform: AMR mobile robot testbed}
-\noindent\textbf{18.}\quad The
+\noindent\textbf{10.}\quad The
 drivetrain is a rear brushless motor (Flipsky 6384) through a BLDC drive with
 a Dynamixel RX-64 steering servo, a GigaDevice GD32407V microcontroller on a CAN
 link to the NRU-51V, an LM2596 regulator from a lithium-polymer pack, and a
@@ -454,7 +375,7 @@ here follows the hardware and should be confirmed by the author.}
 \medskip
 
 \subsection*{Real Platform: Sensors and computing unit}
-\noindent\textbf{19.\ \flag{[Attribution of reproduced vendor material]}}\quad \reportref{fig:camera-dimensions,fig:nru51v-photo,fig:nru51v-dimensions} and
+\noindent\textbf{11.\ \flag{[Attribution of reproduced vendor material]}}\quad \reportref{fig:camera-dimensions,fig:nru51v-photo,fig:nru51v-dimensions} and
 \reportref{tab:camera-spec,tab:hardware-spec} reproduce manufacturer drawings,
 photographs and specifications for the AC-IMX390-H190 camera and the Neousys
 NRU-51V. The faculty manual requires every reproduced table and figure to carry
@@ -467,48 +388,34 @@ taken from these items; they are descriptive.
 \medskip
 
 \subsection*{Real Platform: Real sensor rig and calibration limits}
-\noindent\textbf{20.}\quad \emph{table row:} Second-camera intrinsics \textbar{} reuse of the first camera \textbar{} \flag{approximation}
+\noindent\textbf{12.}\quad \emph{table row:} Second-camera intrinsics \textbar{} reuse of the first camera \textbar{} \flag{approximation}
 
 \medskip
-\noindent\textbf{21.}\quad \emph{table row:} Marker-to-IMU lever arm \textbar{} not measured \textbar{} \flag{placeholder; bounds every real
+\noindent\textbf{13.}\quad \emph{table row:} Marker-to-IMU lever arm \textbar{} not measured \textbar{} \flag{placeholder; bounds every real
   accuracy figure}
 
 \medskip
 
 \subsection*{The Two Experiments: Experiment 1: Estimator comparison against a non-visual baseline}
-\noindent\textbf{22.}\quad \emph{table row:} accelerometer $x$ scale \textbar{} 1.0321 \textbar{} \flag{1.0954} \textbar{} 1.0172 \textbar{} 1.0339 \textbar{} --
+\noindent\textbf{14.}\quad \emph{table row:} accelerometer $x$ scale \textbar{} 1.0321 \textbar{} \flag{1.0954} \textbar{} 1.0172 \textbar{} 1.0339 \textbar{} --
 
 \medskip
-\noindent\textbf{23.}\quad \emph{table row:} accelerometer $x$ bias \textbar{} 0.038 \textbar{} 0.013 \textbar{} 0.013 \textbar{} \flag{0.079} \textbar{} \si{\metre\per\second\squared}
+\noindent\textbf{15.}\quad \emph{table row:} accelerometer $x$ bias \textbar{} 0.038 \textbar{} 0.013 \textbar{} 0.013 \textbar{} \flag{0.079} \textbar{} \si{\metre\per\second\squared}
 
 \medskip
-\noindent\textbf{24.}\quad \emph{table row:} yaw-rate scale, bicycle \textbar{} 1.0245 \textbar{} \flag{0.9321} \textbar{} 1.0070 \textbar{} 1.0171 \textbar{} --
+\noindent\textbf{16.}\quad \emph{table row:} yaw-rate scale, bicycle \textbar{} 1.0245 \textbar{} \flag{0.9321} \textbar{} 1.0070 \textbar{} 1.0171 \textbar{} --
 
 \medskip
-\noindent\textbf{25.}\quad \moved{$\sigma_b$, the bias random walk, is
+\noindent\textbf{17.}\quad \moved{$\sigma_b$, the bias random walk, is
 assumed rather than measured: the longest stationary window in any recording is
 \SI{2.16}{\second} and an Allan-variance estimate needs minutes.}
 
 \medskip
-\noindent\textbf{26.\ \flag{[One tuned constant]}}\quad The real baseline has a parameter fitted against the same tracker it is scored
+\noindent\textbf{18.\ \flag{[One tuned constant]}}\quad The real baseline has a parameter fitted against the same tracker it is scored
 on, albeit on a different recording. A measured scale, from the wheel
 circumference and the gear ratio or from a tape-measured straight run, would
 remove the objection; until then the real-domain comparison between this
 baseline and the visual pipelines is weaker than its simulated counterpart.
-
-\medskip
-
-\subsection*{Planned Versus Implemented}
-\noindent\textbf{27.}\quad \emph{table row:} Dynamic-object handling \textbar{} YOLO26 detection, masking the detector's boxes out of
-  the estimator \textbar{} dropped. Experiment~1 found that physically simulated
-  traffic neither broke tracking nor drove the global error, whose large
-  failures are the loop closer's, and that its one dangerous case, a vehicle
-  leading the robot, raised the per-second error two- to eightfold for four
-  seconds and left under \SI{0.1}{\metre} in the accumulated error
-  (\reportref{sec:results-validity}); the masking arm that would have consumed the
-  detector was never run. \flag{The finding holds at the simulated traffic
-  density, whose realism is assumed and not measured, and has no real-robot
-  counterpart.} \textbar{} dropped
 
 \medskip
 
@@ -540,237 +447,103 @@ the same recordings are scored below, where the same pattern recurs.
   shift every pair agrees on against one they do not.}
 
 \medskip
-\noindent\textbf{4.}\quad \flag{The low-feature seconds are \SIrange{8}{20}{\percent}
-of each run and carry about that share of its error growth, so this is the
-cause of VINS-Fusion's excursions and not of its ATE.}
+\noindent\textbf{4.}\quad The episodes are places, the untextured perimeter wall, and
+its one excursion on \repo{realistic_002} (\SI{0.05}{} to \SI{0.61}{\metre}
+between \SI{17}{} and \SI{24}{\second}) is one of them, reproduced by a second
+run to within \SI{6}{\milli\metre} (\reportref{fig:exp1-vins-starvation}). \flag{The low-feature seconds are \SIrange{8}{20}{\percent} of each run and
+carry about that share of its error growth, so they cause VINS-Fusion's
+excursions and not its ATE.} ORB-SLAM3 passes the same wall in under a second
+on its inertial prediction, with no step.
 
 \medskip
-\noindent\textbf{5.}\quad \flag{One robust
-relationship is left out of the claims because it has no mechanism: frames
-with more extracted features carry fewer tracked map points, in all sixteen
-runs, and the obvious explanation --- that feature-rich views are new scene
---- failed its test.}
-
-\medskip
-\noindent\textbf{6.}\quad \flag{One
+\noindent\textbf{5.}\quad \flag{One
   repeat on one recording: it establishes that the excursion belongs to the
   recording and not to the run, and no more.}
 
 \medskip
-\noindent\textbf{7.}\quad \flag{The hypothesis this project is
-named for is therefore supported in one configuration, a vehicle leading the
-robot, as a strong local effect on both estimators and a small accumulated
-one, over four seconds of a 117-second recording; "movers degrade the
-estimate" as a general statement is not what these recordings show.}
+\noindent\textbf{6.}\quad \flag{The hypothesis
+this project is named for is therefore supported in one configuration, a
+vehicle leading the robot, as a strong local and small accumulated effect over
+four seconds of a 117-second recording; ``movers degrade the estimate'' as a
+general statement is not what these recordings show.}
 
 \medskip
-\noindent\textbf{8.}\quad The jack had been in view, moving, for the nine seconds
+\noindent\textbf{7.}\quad The jack had been in view, moving, for the nine seconds
   before the band --- \SIrange{6}{20}{\metre} away and small in the image ---
   with no effect; the cost begins when it is close enough to fill the view. \flag{One episode on one recording: it shows what happens when a
   vehicle leads the robot and how large the effect is, not how often a
   warehouse puts the robot in that situation.}
 
 \medskip
-\noindent\textbf{9.}\quad \flag{The per-axis split is a poor second witness and is not quoted as
-one: a step of about \SI{90}{\degree} decomposes into Euler angles according
-to the axis it falls on, so pitch holds \SIrange{12.74}{17.02}{\degree} in
-every run while yaw and roll range from \SI{1.93}{} to \SI{26.16}{\degree}.}
+\noindent\textbf{8.}\quad \flag{Excitation is confounded with layout, two routes
+against two routes, and on \repo{realistic_001} a comparable tilt does not
+convert into drift ($r = \num{-0.49}$), so the mechanism is shown on one
+recording, not established.} Scale is not a factor: ORB-SLAM3's
+\SIrange{1.7}{5.4}{\percent} path excess is the pre-initialisation spike and
+frame jitter, and its local scale over each second is
+\numrange{0.997}{0.999}.
 
 \medskip
-\noindent\textbf{10.}\quad VINS-Fusion carries a
-smaller signature of the same kind: over its four runs the median of the
-per-run pitch and roll RMS is \SI{1.05}{} and \SI{1.33}{\degree} against
-\SI{0.24}{\degree} in yaw; \flag{whether that is a residual gravity error or the rigid fit absorbing a
-tilt has not been separated, and it is reported as an observation.}
+\noindent\textbf{9.}\quad \flag{Three repeats per configuration on one laptop,
+  not interleaved, so the bars measure repeatability inside a session and not
+  the thermal state between sessions.}
 
 \medskip
-\noindent\textbf{11.}\quad Both of the latter do turn, but at \SI{24.98}{} and
-\SI{20.90}{\second}, five to nine seconds after the last refinement is
-available, because the dedicated scale-and-gravity refinement the method
-offers as the remedy for this case is reached only on the monocular path in
-the implementation used here; on the stereo-inertial path the gravity
-direction receives no further estimate after the second bundle adjustment. \flag{Excitation is confounded with layout: the two recordings with yaw in the
-window are the U-shape worlds and the two without are the I-shape worlds, so
-these are two routes against two routes and not sixteen independent samples.
-The comparison that would separate them is a recording on the I layout whose
-opening manoeuvre turns inside the first fifteen seconds, which does not yet
-exist.}
+\noindent\textbf{10.\ \flag{[Confound: run order]}}\quad The GPU and CPU repeats were made in
+separate sessions on a laptop that throttles at \SI{90}{\celsius}, and on the
+I recording the GPU front end's advantage reverses (\SI{52}{} against
+\SI{44}{\milli\second}, \SI{75}{} against \SI{91}{\percent} of frames kept).
+The U-recording figures are the ones to quote until the runs are repeated
+interleaved from a cool start.
 
 \medskip
-\noindent\textbf{12.}\quad \flag{The panel shows that timing and
-  nothing more: on the four recordings that exist, yaw inside the window is a
-  property of the layout, so this coincides with the gravity error rather than
-  being shown to cause it.} (b) the published map rotation at the first
-  refinement, which keeps the prior on the IMU biases, against the second,
-  which drops it, paired within each of the sixteen runs; colours as in (a).
-
-\medskip
-\noindent\textbf{13.}\quad \flag{The same regression on the closure-free runs of
-\repo{realistic_001}, whose pitch and roll error is comparable at \SI{2.77}{}
-and \SI{3.71}{\degree}, gives $r = \num{-0.49}$ and \num{-0.50} and a vertical
-error of only \SIrange{0.28}{0.33}{\metre}. A tilt therefore does not convert
-into drift at a rate that holds across routes, and the two must not be
-pooled.}
-
-\medskip
-\noindent\textbf{14.}\quad The two families occupy opposite
-  corners --- ORB-SLAM3 holds four times the memory for less than half the
-  processor time --- and ORB-SLAM3's two front ends sit together on both
-  axes, so the extractor is not what separates the pipelines here. \flag{Three repeats per configuration on one laptop, and the runs were not
-  interleaved, so the bars measure repeatability inside a session and not the
-  thermal state between sessions.}
-
-\medskip
-\noindent\textbf{15.\ \flag{[Confound: run order]}}\quad The six GPU runs were made consecutively
-from 21:04 to 22:04 and the six CPU runs from 23:27 to 00:18, so the
-I-recording GPU repeats were the fourth to sixth GPU runs of a session on a
-laptop that throttles at \SI{90}{\celsius}; the front-end record notes that
-timing comparisons need a cool-start, interleaved order. The six VINS-Fusion
-runs are a separate session of 7 November and are not a control for that
-state. The U-recording figures are the ones to quote until the I recording is
-repeated interleaved.
-
-\medskip
-\noindent\textbf{16.\ \flag{[Resolved: \repo{realistic_002/loopclosing_gpu}]}}\quad Earlier on 6 November this run was reported as closure-free from its
-\repo{loop_closing.csv} and queried. Its manifest shows the real cause: it was
-launched on the \repo{realistic_003} bag with \repo{realistic_002}'s output
-path, so it was scored against the wrong truth (\SI{4.94}{\metre},
-\SI{48.9}{\degree}, 139\,\% of the recording's frames processed). It is set
-aside, not deleted; the configuration was re-run on the right bag the same
-evening and every table here carries that run.
-
-\medskip
-\noindent\textbf{17.\ \flag{[Open: the false closure is diagnosed, not fixed]}}\quad The \SI{14}{\metre} correction and the \SI{17.7}{\metre} separation of the
-joined keyframes identify the \repo{realistic_001} closure as false, both
-front ends agree, and the matched pair has now been inspected
-(\reportref{fig:exp1-false-closure}): the same repeated asset from opposite sides
-of the building. The two guards that would catch it (a covisibility-consistency
-window, or a maximum correction against the inertial drift bound) are
-untested. Until one is, the finding is a diagnosis, not a fix.
+\noindent\textbf{11.\ \flag{[Open: the false closure is diagnosed, not fixed]}}\quad Both front ends accept the same false closure on \repo{realistic_001}, and the
+matched pair is the same repeated asset from opposite sides of the building
+(\reportref{fig:exp1-false-closure}). The guards that would catch it, a
+covisibility-consistency window or a maximum correction against the inertial
+drift bound, are untested.
 
 \medskip
 
 \subsection*{Experiment 1: Estimator Comparison Against a Non-Visual Baseline: Real robot}
-\noindent\textbf{18.}\quad \slotstatus{partial}{Four real recordings with an independent planar reference
-(\repo{dataset_realv6_000}, \repo{dataset_realv7_000} to \repo{_002}). A
-non-visual baseline exists: wheel+gyro dead reckoning with the feedback speed
-scaled by a factor fitted once against the tracker on \repo{realv7_000} and
-held on the other three. The visual arm is ORB-SLAM3 in four configurations on
-each recording, sixteen runs, all made with the fork's patch-15
-initialisation switches and scored with no repair applied; they give
-\SIrange{0.404}{0.480}{\metre} on \repo{realv6_000},
-\SIrange{0.255}{0.267}{} on \repo{realv7_000}, \SIrange{0.434}{0.445}{} on
-\repo{_001} and \SIrange{0.192}{0.211}{} on \repo{_002}. Across the held
-recordings the baseline and ORB-SLAM3 are in the same accuracy class, the
-baseline leading on one, tying on one and losing the third. The EKF of the simulation
-slot cannot be formed, because the rig publishes no steering measurement;
-VINS-Fusion completes all three \repo{realv7} recordings once the fisheye
-field of view is masked at \SI{70}{\degree} and the stereo extrinsic frozen,
-at \SIrange{0.374}{0.676}{\metre}, behind both other families. Latency and
-resources are measured on every reported run and repeated three times per
-configuration on \repo{realv6_000}. The two domains are also compared as
-inputs: the real recordings carry more image gradient and more corners per
-megapixel than the simulated ones and starve neither estimator, and the
-\numrange{4}{11} times worse per-metre drift is \num{1.9} times per second of
-operation once the robot's \num{5.8} times longer inertial integration per
-metre is accounted for. Every accuracy value is provisional until
-the marker-to-IMU lever arm is measured.}
+\noindent\textbf{12.}\quad \slotstatus{partial}{Four real recordings with an independent planar reference
+(\repo{dataset_realv6_000}, \repo{dataset_realv7_000} to \repo{_002}).
+ORB-SLAM3 tracks every recording in four configurations at
+\SIrange{0.19}{0.48}{\metre} planar ATE, the configurations of a recording
+agreeing to \SI{0.02}{\metre}. Wheel+gyro dead reckoning, with one speed
+constant fitted on \repo{realv7_000} and held, is in the same accuracy class.
+VINS-Fusion completes every recording at \SIrange{0.37}{0.79}{\metre} once the
+fisheye field of view is masked at \SI{70}{\degree} and the stereo extrinsic
+frozen. The EKF cannot be formed, because the rig publishes no steering
+measurement. Every accuracy value is provisional until the marker-to-IMU lever
+arm is measured.}
 
 \medskip
-\noindent\textbf{19.\ \flag{[Open: the realv6 scale]}}\quad On \repo{realv6_000} the path-length ratio gives $k=0.43$ where the three
-\repo{realv7} bags give $0.32$ to $0.33$, yet the held $k=0.325$ scores a path
-ratio of 1.04 on the matched samples. The export is at \SI{1.7}{\hertz} and
-fails the validity rules, and the recording predates \repo{realv7} by three
-days; whether the firmware unit changed or the sparse export misstates the
-path length is not decided, and the \repo{realv6} row is a diagnostic.
+\noindent\textbf{13.}\quad \flag{Every estimator on every \repo{realv7} run sits
+\SIrange{0.2}{0.4}{\metre} ahead of the tracker marker along the direction of
+travel while the wheel+gyro baseline, aligned with the same offset, does not;
+a diagnostic lever-arm fit would take the ORB-SLAM3 figures to
+\SIrange{0.12}{0.21}{\metre}. It is not used: measuring the arm on the rig is
+the largest remaining correction to every real-robot figure.}
 
 \medskip
-\noindent\textbf{20.}\quad \flag{VINS-Fusion's failure on this recording was read as a delivery defect;
-that reading is withdrawn. The root cause is the fisheye field of view
-described under the \repo{realv7} results below. The counters below are kept
-because they are what the defect looked like from the outside.} The node received 3\,187 of 6\,601
-frames but used 6\,498 of the 43\,494 IMU messages it received, reset 217 times
-on \repo{imu_gap}, and stopped after \SI{19}{\second}; behind that defect the
-configuration still fixes a gravity norm of \num{9.2642} against the
-\SI{9.878}{\metre\per\second\squared} this IMU reads at rest.
+\noindent\textbf{14.}\quad The simulation's
+memory trade does not transfer: on the robot VINS-Fusion holds
+\SIrange{1.08}{1.11}{\gibi\byte} against ORB-SLAM3's
+\SIrange{1.16}{1.48}{\gibi\byte} while still using more cores. \flag{One of six loop-closing repeats on \repo{realv6} accepted a single
+closure with a \SI{36.4}{\metre} correction and finished \SI{10.7}{\metre}
+off: no loop-closing figure on the robot is safe from the closer.}
 
 \medskip
-\noindent\textbf{21.}\quad \flag{One run per
-configuration per recording, and the marker-to-IMU lever arm is unmeasured.
-With the time offset settled, every estimator on every \repo{realv7} run
-sits \SIrange{0.2}{0.4}{\metre} ahead of the tracker marker along the
-direction of travel, and the wheel+gyro baseline, aligned with the identical
-offset, does not: the scorer's diagnostic lever-arm fit reads \SI{0.31}{},
-\SI{0.40}{} and \SI{0.23}{\metre} on the three recordings, consistent to
-\SI{0.02}{\metre} within each, and would take the ORB-SLAM3 figures to
-\SIrange{0.12}{0.21}{\metre}. That fit is not used; measuring the arm on
-the rig is the single largest remaining correction to every real-rig
-accuracy figure.}
+\noindent\textbf{15.}\quad \flag{One run per cell. What the figure supports is the
+  pattern across the six pairs, not any single line.}
 
 \medskip
-\noindent\textbf{22.}\quad \flag{Measured on the recordings, that
-\SI{9.5}{\percent} is black: mean intensity \num{6.5} against
-\numrange{103}{120} elsewhere, because it lies outside the lens image circle,
-and no corner is ever detected in it. The polynomial's failure is therefore real
-but inert, and what the mask actually discards is the
-\SI{26}{\percent} of the corners an ORB detector finds in the image, those
-between \SI{70}{\degree} and the edge of the image circle, which do carry
-image. The divide-by-depth growth is the
-operative mechanism; the non-monotonic polynomial is a calibration defect to fix,
-not the cause of the divergence.} Second,
-\texttt{estimate\_extrinsic} was left at 1, which lets the optimiser refine
-the stereo baseline online and, on this rig, consume it; setting it to 0 holds
-the calibrated baseline fixed.
+\noindent\textbf{16.}\quad \flag{The real ATE carries the unmeasured lever arm;
+the RPE does not, since a constant offset cancels in a displacement.}
 
 \medskip
-\noindent\textbf{23.}\quad \flag{Two earlier explanations are withdrawn.} A previous revision attributed
-the failure to delivery and configuration --- a stale gravity norm of
-\num{9.2642} against the \SI{9.886}{\metre\per\second\squared} this IMU
-reads at rest, and \SIrange{40}{45}{\percent} frame reception.
-
-\medskip
-\noindent\textbf{24.}\quad \flag{Why VINS-Fusion's resident set is
-\num{2.3} times its simulation value is not established; in-process JPEG
-decoding of the compressed real recordings is a candidate, not a finding.} ORB-SLAM3's repeats agree to within \SI{4}{\percent} on back-end latency, CPU
-and memory.
-
-\medskip
-\noindent\textbf{25.}\quad \flag{On the same \repo{realv6} repeats, scored as diagnostics,
-the closure-free configurations repeat their ATE to
-\SIrange{0.02}{0.03}{\metre}, while one of the six loop-closing runs accepted a
-single closure with a \SI{36.4}{\metre} correction and finished at
-\SI{10.7}{\metre}: the loop closer decides on the robot as it does on the I
-layout in simulation, and no loop-closing figure on the robot is safe from it.}
-
-\medskip
-\noindent\textbf{26.}\quad \flag{One run per cell. What the figure
-  supports is the pattern across the six pairs, not any single line.}
-
-\medskip
-\noindent\textbf{27.\ \flag{[Sparse reference]}}\quad The tracker ran at \SI{1.7}{\hertz} rather than its nominal \SI{7}{\hertz} on
-\repo{realv6}, and
-the validity rules were written for the faster export. Either the export has to
-be re-captured at full rate or a rule for sparse references has to be written
-before any value from this recording is quoted outside a diagnostic.
-
-\medskip
-\noindent\textbf{28.}\quad \flag{Sampled frames, twelve per recording, so the image statistics
-  are indicative of the recording and not of every frame in it.}
-
-\medskip
-\noindent\textbf{29.}\quad \flag{One thing does get worse: ORB-SLAM3 converts
-\SI{17.6}{\percent} of its extracted features into tracked map points on the
-rig against \SI{31.3}{\percent} in simulation. Twice the supply, half the
-conversion --- a matching and triangulation question, not a detection one, and
-one this report does not answer.}
-
-\medskip
-\noindent\textbf{30.}\quad \flag{The real-rig ATE carries the
-unmeasured lever arm and should not be read on its own; the relative-pose rows
-are immune to it, since a constant offset cancels in a displacement.}
-
-\medskip
-\noindent\textbf{31.}\quad \flag{One run per
+\noindent\textbf{17.}\quad \flag{One run per
   configuration per recording on the real side; the comparison is between the
   medians of two populations and not a paired test, so it supports the size of
   the difference and not a per-configuration one.}
@@ -778,114 +551,64 @@ are immune to it, since a constant offset cancels in a displacement.}
 \medskip
 
 \subsection*{Experiment 2: Visual-Inertial Odometry on a Prior Map: Simulation}
-\noindent\textbf{32.}\quad \slotstatus{partial}{Five databases are scored for geometry and drivability:
-the tiny warehouse, which passes, and four realistic-warehouse maps --- two
-mapping recordings, one per layout, each built closure-free under two
-back-end configurations, A and B --- all of which fail the quality
-criterion fixed before scoring. The tiny map's independent drivability
-reference remains lost.}
+\noindent\textbf{18.}\quad \slotstatus{partial}{The tiny-warehouse map passes every map target. The two
+realistic-warehouse maps that part~B relocalises on fail them, although their
+poses are accurate: the failure is in how the occupancy grid is built. The
+tiny map's independent drivability reference is lost, and the large-warehouse
+attempt is unauditable.}
 
 \medskip
-\noindent\textbf{33.\ \flag{[Queried: reproducibility of the drivability half]}}\quad The geometry result is fully reproducible: both \repo{map/map_tiny.db} and the
-world file are present. The drivability result is not. Its reference run,
-\repo{dataset_static_tiny_repeat}, is absent from \repo{dataset/} and from the
-removable drive, and the only surviving recording of this warehouse is the one
-that built the map, which would answer a weaker question
-(\reportref{sec:map-drivability}). The database additionally stores an empty parameter
-set, so the configuration that produced it is not recoverable from the file, and
-the RTAB-Map engineering record's claim that the node stamps match no dataset is
-contradicted by the pose agreement reported above. The drivability figures should
-therefore be read as a dated measurement rather than a standing result, and should
-not be carried into the major report until an independent route has been recorded
-and retained.
+\noindent\textbf{19.}\quad \flag{The independent route is lost, so the
+drivability half is a dated measurement, and that route was one loop of a wide
+aisle, so \SI{0.7}{\percent} is a floor, not a worst case.}
 
 \medskip
-\noindent\textbf{34.}\quad The failure was attributed there to the front end under repeated
-structure, not to the mapping back end. \flag{No database, run directory or figure for this attempt is registered in
-the repository at the cutoff, so the result is reported on the strength of the
-progress record and cannot be audited. A database identified from its contents
-as this attempt (18 nodes, \SI{37}{\metre} along one aisle, poses leaving the
-floor, placeable in no large world) was found among the unregistered
-databases on 22 October 2026 and deleted with them on 6 November, unscored.
-The attempt must be repeated with its artifacts retained before it is carried
-into any conclusion.}
+\noindent\textbf{20.}\quad Both are inside the
+\SI{0.25}{\metre} tolerance at which the grids were scored, so a grid built from
+perfect poses would have been scored the same way: the precision and
+false-obstacle losses are produced where the grid is built from the depth image
+--- the sensor range, the ground-height threshold and the ray tracing of
+\reportref{sec:map-eval-method} --- and that is where a fix has to be looked for. \flag{The I-layout graph reaches \SI{2.59}{\metre} at its worst node against
+\SI{0.29}{\metre} on the U layout, a local excursion the rms hides; and a graph
+is scored at its nodes, one every few metres, so a pose error that appears and
+is corrected between two nodes is not seen here.}
 
 \medskip
-\noindent\textbf{35.\ \flag{[Queried: front end of the realistic builds]}}\quad RTAB-Map took its pose from TF, so the odometry came from whichever front end
-was running; none of the four databases records which, and the build Bs
-were made during the latency sessions of Experiment~1, whose load on the front
-end is not recorded either. The precision loss cannot be placed on the front
-end against the back end, nor the November drop on parameters against session,
-until the build manifest names both.
-
-\medskip
-\noindent\textbf{36.}\quad \slotstatus{partial}{Six live runs of 15 November 2026, in the two static
+\noindent\textbf{21.}\quad \slotstatus{partial}{Six live runs of 15 November 2026, in the two static
 worlds, measure the localisation against ground truth over hand-driven routes
 of \SIrange{21}{148}{\metre}. Neither traffic world is measured, so
 nothing here speaks to a dynamic warehouse. No goal was commanded in any of the
 six either, so the goal-reaching measures of the reporting rules below are
 still unused and that half of the experiment remains \status{planned}. The protocol, goal set and
-success criteria are now fixed in code (\repo{script/exp4_protocol.yaml},
-generated by \repo{script/exp4_goals.py}), which is what the previous revision
-of this document recorded as missing. Mechanisms are analysed separately in
-\path{insights/experiment_4_insight/}.}
+success criteria are fixed before the first run.}
 
 \medskip
-\noindent\textbf{37.}\quad The ground truth
-reports the model origin and every estimate reports the camera/IMU body, so the
-\SI{0.338}{\metre} lever arm is applied to the ground truth before the fit and
-before any comparison, and never to recorded data. \flag{Two corrections belong on the record here.} First, an earlier revision
-fitted the transform against uncorrected ground truth and reported the resulting
-\SI{0.337}{\metre} residual as confirmation that the fit was right, on the
-grounds that it equalled the lever arm.
-
-\medskip
-\noindent\textbf{38.}\quad \paragraph{Reporting rules, goal-reaching.} \flag{Fixed before any run exists,
+\noindent\textbf{22.}\quad \paragraph{Reporting rules, goal-reaching.} \flag{Fixed before any run exists,
 so that the result cannot be chosen after the fact, and left unchanged here.} A
 goal counts as reached when the base frame is within \SI{1.0}{\metre} and
-\SI{30}{\degree} of it and the planner reports success
-(\texttt{goal\_tolerance\_m} and \texttt{goal\_tolerance\_deg} in
-\repo{script/exp4_protocol.yaml}).
+\SI{30}{\degree} of it and the planner reports success.
 
 \medskip
-\noindent\textbf{39.}\quad \flag{A previous revision of this
-paragraph quoted \SI{0.25}{\metre} and \SI{10}{\degree} as the goal
-tolerance and a \SI{30}{\second} recovery limit. Neither matches the protocol
-file this paragraph claims to be reporting: its tolerances are \SI{1.0}{\metre}
-and \SI{30}{\degree}, which is also what \repo{script/exp4_score.py} prints,
-and it encodes no recovery limit at all. The protocol itself has not been
-edited since it was committed on 12 November; the error was in this prose, and
-in the stricter direction, so the rules in force are looser than the slot
-claimed. No goal-reaching result has been scored yet, so nothing reported
-depended on it.}
-
-\medskip
-\noindent\textbf{40.}\quad \paragraph{Reporting rules, pose tracking.} \flag{Defined after these data
+\noindent\textbf{23.}\quad \paragraph{Reporting rules, pose tracking.} \flag{Defined after these data
 existed, and reported as the weaker claim it is.} Error is the planar distance
 between the published \texttt{map}~$\rightarrow$~\texttt{base\_link} transform,
 sampled at \SI{2}{\hertz}, and the lever-arm-corrected ground truth
 interpolated to the same instants.
 
 \medskip
-\noindent\textbf{41.}\quad \flag{Which runs these are, and which were retired.} The slot reports one
-configuration throughout: \repo{correction_gate.py} enabled with a position
-threshold of \SI{1.5}{\metre}, recorded on 15 November 2026.
+\noindent\textbf{24.}\quad \flag{One configuration throughout.} The slot reports the correction gate
+enabled with a position threshold of
+\SI{1.5}{\metre}, recorded on 15 November 2026.
 
 \medskip
-\noindent\textbf{42.}\quad Both
-are retired to \path{trash/} rather than reported beside their replacement. \flag{The \texttt{rep} index in the recording directories is a configuration
+\noindent\textbf{25.}\quad The gate refuses a correction
+larger than the front end's own drift since the last accepted fix, which is
+what stops a repeated rack face being matched at the wrong aisle. \flag{The \texttt{rep} index in the recording directories is a configuration
 index and not a repeat index, so none of these runs are replicates of one
-another and nothing here measures run-to-run spread.} The gate threshold is
-printed as its own column by \repo{script/exp4_score.py} so that two tunings
-cannot sit in one table looking alike.
+another and nothing here measures run-to-run spread.}
 
 \medskip
-\noindent\textbf{43.}\quad \flag{Two recordings were lost rather than retired.} A run in the U traffic
-world, and later the three U-layout runs of the ungated configuration, were
-overwritten on 15 November and their ground truth is unrecoverable.
-
-\medskip
-\noindent\textbf{44.}\quad \flag{Splitting the panels exposes a pattern the single axis hid.} All six
+\noindent\textbf{26.}\quad \flag{Splitting the panels exposes a pattern the single axis hid.} All six
   runs begin within \SIrange{0.108}{0.137}{\metre} of truth, but every
   I-layout run then climbs to five to eleven times that before a fix pulls it
   back --- \SI{0.519}{}, \SI{0.765}{} and \SI{1.229}{\metre}, each peaking
@@ -893,60 +616,34 @@ overwritten on 15 November and their ground truth is unrecoverable.
   exceeds twice its starting error.
 
 \medskip
-\noindent\textbf{45.}\quad \flag{That bias is not uniform, which matters for what can be concluded from
-it.} Only the I-layout straight is genuinely one-signed, with every sample
-negative; the figure-of-eight is negative in \SI{75}{\percent} of its samples
-and the square in \SI{56}{\percent}, crossing zero repeatedly.
+\noindent\textbf{27.}\quad \flag{That bias is not uniform, and the reason is where it enters.} Only the
+I-layout straight is genuinely one-signed, with every sample negative; the
+figure-of-eight is negative in \SI{75}{\percent} of its samples and the square
+in \SI{56}{\percent}, crossing zero repeatedly.
 
 \medskip
-\noindent\textbf{46.}\quad \flag{The previous revision drew a stronger conclusion from the same data ---
-that the offset was route-dependent, \SIrange{0.32}{0.59}{\metre} on a single
-aisle against \SIrange{0.02}{0.14}{\metre} over the building, and matched
-Part~A's half-metre wall displacement. That pattern was the frame error,
-which is larger on a straight run where the heading barely changes. It does not
-survive the correction and is withdrawn.}
-
-\medskip
-\noindent\textbf{47.}\quad \flag{This is the clearest effect of the configuration, and the one claim the
-slot can make about it.} An earlier configuration, reported in a previous
-revision and now retired, put two runs over a metre for \SI{36}{} and
-\SI{23.5}{\second} and as far as \SI{6.80}{\metre}, with the published pose
-cutting diagonally through three shelf rows.
-
-\medskip
-\noindent\textbf{48.}\quad Its correction neither
-translates nor turns across the stretch --- yaw and $x$ hold at
-\SI{-3.40}{\degree} and \SI{-10.17}{\metre} throughout --- which is what a
-\emph{refused} correction looks like rather than a wrong one: the gate declined
-to move the pose and it coasted on odometry until a fix was accepted again. \flag{A previous revision distinguished two excursion mechanisms, one
-rotational and one translational, from two events in the retired
-configuration. Those recordings no longer exist and the distinction is
-withdrawn; one event cannot re-establish it.}
-
-\medskip
-\noindent\textbf{49.}\quad \flag{It does not follow
-that the word count is uninformative, and an earlier revision of this paragraph
-overstated it.} Among the rejections the zero-support and some-support groups
+\noindent\textbf{28.}\quad \flag{It does not follow
+that the word count is uninformative.} Among the rejections the zero-support and some-support groups
 do differ in word count --- medians of \num{56} and \num{106} --- but their
 ranges overlap across \numrange{24}{165}, and the rank correlation of
 \num{0.24} is measured only where the inlier count is already truncated to
 \numrange{0}{19} of the \num{20} needed, which attenuates it by construction.
 
 \medskip
-\noindent\textbf{50.}\quad \flag{This is a replay of logged corrections, not a run with the gate switched
+\noindent\textbf{29.}\quad \flag{This is a replay of logged corrections, not a run with the gate switched
 off.} The ungated configuration's own recordings were lost (above), and a robot
 steered by Nav2 on a wrong pose would have driven differently; these routes were
 hand-driven, so the path is the same either way.
 
 \medskip
-\noindent\textbf{51.}\quad Planar error rises with the ground-truth yaw rate
+\noindent\textbf{30.}\quad Planar error rises with the ground-truth yaw rate
 in all six runs ($\rho$ \numrange{0.09}{0.76}, sign test $p = \num{0.031}$). \flag{It cannot be attributed to turning.} Yaw rate and speed are confounded in
 every run ($\rho$ \numrange{0.34}{0.91}), so the measurement cannot separate
 turning from simply moving, and part of the effect is the timebase recorded
 below.
 
 \medskip
-\noindent\textbf{52.}\quad \flag{Some of the reported error is timebase, and the slot cannot say how
+\noindent\textbf{31.}\quad \flag{Some of the reported error is timebase, and the slot cannot say how
 much.} Fitting a constant time offset between each estimate and the ground
 truth returns offsets of \emph{opposite sign}: the published pose matches best
 when shifted \SIrange{-0.04}{-0.12}{\second}, the front end's own trajectory
@@ -954,7 +651,7 @@ when shifted \SIrange{+0.20}{+0.26}{\second}, on the same runs against the same
 truth.
 
 \medskip
-\noindent\textbf{53.}\quad \paragraph{Insight: over these distances the prior supplies a datum, not
+\noindent\textbf{32.}\quad \paragraph{Insight: over these distances the prior supplies a datum, not
 accuracy.} \flag{This narrows the objective stated above, and is the claim the
 data support.} Unaided ORB-SLAM3, rigidly aligned onto ground truth, drifts by a
 median of \SIrange{0.013}{0.307}{\metre} over these \SIrange{21}{148}{\metre}
@@ -962,7 +659,7 @@ routes, never exceeds \SI{0.64}{\metre} at any instant, and ends each run
 between \SI{0.02}{\metre} and \SI{0.42}{\metre} from truth.
 
 \medskip
-\noindent\textbf{54.}\quad \flag{The ordering is suggestive and is not a measurement.} Six runs, one per
+\noindent\textbf{33.}\quad \flag{The ordering is suggestive and is not a measurement.} Six runs, one per
 cell, on hand-driven routes that differ in shape as well as length, so route
 length is confounded with layout and with everything else that differs between
 cells; and a previous configuration of this same slot produced the opposite
@@ -971,7 +668,7 @@ split.
 \medskip
 
 \subsection*{Experiment 2: Visual-Inertial Odometry on a Prior Map: Real robot}
-\noindent\textbf{55.}\quad \slotstatus{planned}{No RTAB-Map database has been built from real imagery, no
+\noindent\textbf{34.}\quad \slotstatus{planned}{No RTAB-Map database has been built from real imagery, no
 reference geometry of the site exists to score one against, and so no
 relocalization on the real robot can be scored either.}
 

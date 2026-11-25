@@ -368,7 +368,7 @@ def write_baseline_table(rows):
           "Aligned ATE is RMSE after a rigid $SE(3)$ fit with scale fixed; RPE is translational, at "
           "$\\Delta=\\SI{1}{\\second}$ over pairs that do not span a jump; ``Jumps'' counts steps above "
           "\\SI{10}{\\metre\\per\\second}; ``Kept'' is the fraction of the bag's stereo pairs the estimator processed (frames lost before the node's own queue count as lost). "
-          "Loop-closer state is read from \\repo{loop_closing.csv}, not from the run name. Static and dynamic rows of "
+          "Loop-closer state is read from each run\'s own log, not from the run name. Static and dynamic rows of "
           "one layout share a world geometry and differ in traffic only. "
           "``Max'' is the largest single position error the run reaches \\emph{after} its initialisation transient --- the same cut the onset analysis of \\cref{tab:realistic-timelines-baseline} makes, after the last jump inside the first \\SI{15}{\\second} --- on the same alignment as the ATE column, and records the excursion that the RMSE averages away. Every ORB-SLAM3 run peaks at \\SIrange{2.44}{2.57}{\\second} on the gravity re-alignment that ends its inertial initialisation, at \\SIrange{1.09}{4.66}{\\metre}, median \\SI{3.46}{\\metre}; that peak is excluded here because it measures the initialisation and not the driving. ``ATE/path'' is the aligned ATE as a percentage of the ground-truth path length, so that runs over routes of different length can be compared; it is a ratio, not a sub-sequence drift rate. "
           "\\textbf{Bold} marks the lowest ATE, the lowest Max and the lowest jump-free RPE among the five arms of a recording; "

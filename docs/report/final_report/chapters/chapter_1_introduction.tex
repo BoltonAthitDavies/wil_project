@@ -1,8 +1,6 @@
 % Chapter 1 is an English rendering of บทที่ 1 บทนำ in the faculty template
 % (docs/MyThesisInfo/final_report.pdf, pp. 1-3).  The objectives and scope are
-% those the project was proposed with; which of them the implemented system
-% addresses is recorded in Chapter 3 (section 3.1 and table 3.x, deviations),
-% not rewritten here.
+% those of the current plan.
 % The contents groups the chapters under a CHAPTER line; it is written from
 % here rather than main.tex because \include emits its aux pointer immediately.
 \addtocontents{toc}{\protect\vspace{6pt}\protect\noindent\protect\textbf{CHAPTER}\par}
@@ -44,10 +42,8 @@ consumes. Each part is evaluated in a Gazebo simulation of a warehouse, with
 and without moving traffic, and on the real robot.
 
 Replacing an active sensor (LiDAR) with a passive one (a camera) may also make
-the system sensitive to indoor lighting. The original plan designed an
-experiment around scheduled light changes; that experiment was not carried out
-within the reporting period, and the change is recorded with the other
-deviations from the proposal in \cref{sec:deviations}.
+the system sensitive to indoor lighting; lighting is held constant in every
+recording of this project.
 
 \section{Objectives}
 \label{sec:objectives}
@@ -79,11 +75,6 @@ deviations from the proposal in \cref{sec:deviations}.
   \item Evaluate relocalization in the prior map: compare the localized pose
     with ground truth while the robot drives through a mapped warehouse.
 \end{enumerate}
-
-These objectives replace the five of the original proposal, which included
-low-light image enhancement, deep-learning detection and masking of dynamic
-objects, and lane detection with lane tracking. \Cref{sec:deviations} records
-each change and the reason for it.
 
 \section{Expected Benefits}
 \label{sec:benefits}
@@ -135,16 +126,17 @@ each change and the reason for it.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\textwidth]{figures/system_architecture_final.png}
+  \includegraphics[page=1,width=\textwidth]{figures/architecture/architecture.pdf}
   \caption[System architecture and the scope of the project.]{System
-  architecture and the scope of the project. The yellow block is this
-  project: the visual-inertial front end (ORB-SLAM3 or VINS-Fusion) and
-  localization on the prior map (RTAB-Map, behind the correction gate and the
-  pose gate). The green block is Nav2's planning and the red block its control
-  chain down to the Ackermann drive; both consume the pose and the map and are
-  outside the scope. Rates are those of the implemented system: images
-  \SI{30}{\hertz}, RTAB-Map input \SI{4}{\hertz} and corrections
-  \SI{1}{\hertz}, gated pose \SI{20}{\hertz}, control \SI{20}{\hertz}.}
+  architecture and the scope of the project, from camera pixels to wheel
+  commands. Perception and localisation is this project: the visual-inertial
+  front end (ORB-SLAM3 or VINS-Fusion, one per run) and localisation on the
+  prior map (RTAB-Map behind the camera shim, the correction gate and the pose
+  gate). Planning and control are Nav2's and consume the pose and the map; they
+  are outside the scope. Line colour is the kind of data: red images, amber
+  IMU, purple robot pose, dark blue map, blue path and commands, green wheels.
+  Dashed amber boxes are written for this project. The real rig runs the same
+  graph with fisheye cameras and an optical tracker as ground truth.}
   \label{fig:scope-architecture}
   \label{fig:system-architecture}
 \end{figure}
@@ -152,8 +144,7 @@ each change and the reason for it.
 \section{Work Plan}
 \label{sec:workplan}
 
-\Cref{tab:gantt} reproduces the project work plan of the proposal. Task
-numbering follows the original plan, which has no item~5.
+\Cref{tab:gantt} gives the project work plan.
 
 \begin{table}[htbp]
 \centering
@@ -169,9 +160,7 @@ Task & Jun & Jul & Aug & Sep & Oct & Nov & Dec \\
 \midrule
 1. Study the concepts and theory of vision-based navigation
   & \gc & \gc & & & & & \\
-2. Search and analyse information on visual SLAM algorithms, low-light image
-  enhancement (EnlightenGAN), object detection (YOLO26) and lane tracking
-  (PolyNET)
+2. Search and analyse information on visual SLAM algorithms
   & \gc & \gc & & & & & \\
 3. Design the structure and software pipeline that joins the hardware and
   software systems
@@ -179,19 +168,17 @@ Task & Jun & Jul & Aug & Sep & Oct & Nov & Dec \\
 4. Specify and connect the AC-IMX390-H190 camera sensors with the NRU-51V edge
   computing unit on the mobile robot
   & & \gc & \gc & & & & \\
-6. Integrate all subsystems under the AMR navigation framework
+5. Integrate all subsystems under the AMR navigation framework
   & & & \gc & \gc & & & \\
-7. Prepare the mock warehouse area (Zone~A and Zone~B) with a \SI{5}{\degree}
-  slope and arrange mock goods to create a dynamic environment
-  & & & \gc & \gc & & & \\
-8. Run the integrated system experiment (live test) with the robot moving at
-  \SI{1.5}{\metre\per\second} under scheduled changes in lighting
+6. Prepare the real test area in the Gensurv building
   & & & & \gc & \gc & & \\
-9. Collect the test data and evaluate system performance on the defined
-  metrics: trajectory error (ATE, RPE), system latency, and detection accuracy
-  (IoU, mAP)
+7. Run the integrated system experiment (live test) with the robot moving at
+  \SI{1.5}{\metre\per\second}, in simulation and in the real world
+  & & & & \gc & \gc & & \\
+8. Collect the test data and evaluate system performance on the defined
+  metrics: trajectory error (ATE, RPE) and system latency
   & & & & & \gc & \gc & \\
-10. Summarise the work, discuss the results and produce the complete
+9. Summarise the work, discuss the results and produce the complete
   engineering project report
   & & & & & & \gc & \gc \\
 \bottomrule

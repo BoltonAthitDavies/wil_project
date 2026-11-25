@@ -14,8 +14,7 @@ the front ends and back end as they were actually built, the simulation and real
 platforms, the two experiments that structure the evaluation, and the metrics.
 
 \textbf{Reporting cutoff.} Every implementation claim in this chapter describes
-the system as used for the reported runs, the last of which were made on
-15 November 2026. Components are labelled
+the system as used for the reported runs. Components are labelled
 \status{implemented}, \status{partial}, \status{blocked} or \status{planned};
 nothing planned is described in the present tense as though it existed.
 
@@ -936,7 +935,7 @@ conditions}, not in general.
 Standalone VINS-Fusion publishes \texttt{world~$\rightarrow$~body}. Standalone
 ORB-SLAM3 publishes an estimator-specific world frame. For RTAB-Map integration,
 both publish \texttt{odom~$\rightarrow$~vio\_body}; a measured static transform
-connects \texttt{vio\_body~$\rightarrow$~base\_footprint} by
+connects \texttt{vio\_body} to \texttt{base\_footprint} by
 $(-0.338,0,-0.192)$~m. RTAB-Map then publishes the external correction
 \texttt{map~$\rightarrow$~odom} (\cref{fig:frame-chain}).
 
@@ -1263,8 +1262,7 @@ Stationary $\lVert a\rVert$ & \SI{9.8858}{\metre\per\second\squared} & measured
   at rest on this rig \\
 Inertial noise (ORB-SLAM3) & \texttt{NoiseGyro} 0.1, \texttt{NoiseAcc} 1.0 &
   ten times the simulated values, by experiment \\
-Inertial initialization (ORB-SLAM3) & \texttt{LocalMapping.resetOnLowMotion}
-  0, \texttt{LocalMapping.initWithBacklog} 1 & fork patch 15; both differ from
+Inertial initialization (ORB-SLAM3) & \texttt{LocalMapping.}\linebreak\texttt{resetOnLowMotion}~0,\newline \texttt{LocalMapping.}\linebreak\texttt{initWithBacklog}~1 & fork patch 15; both differ from
   upstream, which discards a map whose keyframes move less than
   \SI{2}{\centi\metre} in the ten seconds after initialization and retries the
   initialization only with an empty keyframe queue. A robot that stands still
